@@ -50,12 +50,16 @@ public class ProposicaoJSON implements Serializable {
 	private Long idReuniao;
 	
 	private Usuario responsavel;
+	
+	private boolean responsavelNaoDefinido;
 
 	private List<ComentarioJSON> listaComentario = new ArrayList<ComentarioJSON>();
 
 	private List<EncaminhamentoProposicaoJSON> listaEncaminhamentoProposicao = new ArrayList<EncaminhamentoProposicaoJSON>();
 
 	private Posicionamento posicionamento;
+	
+	private boolean posicionamentoNaoDefinido;
 
 	private List<TagJSON> tags;
 	
@@ -96,8 +100,10 @@ public class ProposicaoJSON implements Serializable {
 		this.listaComentario=listaComentario;
 		this.listaEncaminhamentoProposicao = listaEncaminhamentoProposicao;
 		this.posicionamento=posicionamento;
+		this.posicionamentoNaoDefinido=posicionamento==null?true:false;
 		this.tags=tags;
 		this.responsavel=responsavel;
+		this.responsavelNaoDefinido=responsavel==null?true:false;
 		this.proposicoesFilha=proposicoesFilha;
 		this.elaboracoesNormativas=elaboracoesNormativas;
 	}
@@ -300,5 +306,21 @@ public class ProposicaoJSON implements Serializable {
 	public void setElaboracoesNormativas(
 			Set<ElaboracaoNormativa> elaboracoesNormativas) {
 		this.elaboracoesNormativas = elaboracoesNormativas;
+	}
+
+	public boolean isResponsavelNaoDefinido() {
+		return responsavelNaoDefinido;
+	}
+
+	public void setResponsavelNaoDefinido(boolean responsavelNaoDefinido) {
+		this.responsavelNaoDefinido = responsavelNaoDefinido;
+	}
+
+	public boolean isPosicionamentoNaoDefinido() {
+		return posicionamentoNaoDefinido;
+	}
+
+	public void setPosicionamentoNaoDefinido(boolean posicionamentoNaoDefinido) {
+		this.posicionamentoNaoDefinido = posicionamentoNaoDefinido;
 	}
 }
