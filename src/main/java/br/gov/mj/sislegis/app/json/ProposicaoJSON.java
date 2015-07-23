@@ -50,6 +50,8 @@ public class ProposicaoJSON implements Serializable {
 	private Long idReuniao;
 	
 	private Usuario responsavel;
+	
+	private Boolean responsavelNaoDefinido;
 
 	private List<ComentarioJSON> listaComentario = new ArrayList<ComentarioJSON>();
 
@@ -98,6 +100,7 @@ public class ProposicaoJSON implements Serializable {
 		this.posicionamento=posicionamento;
 		this.tags=tags;
 		this.responsavel=responsavel;
+		this.responsavelNaoDefinido = (this.responsavel == null);
 		this.proposicoesFilha=proposicoesFilha;
 		this.elaboracoesNormativas=elaboracoesNormativas;
 	}
@@ -117,6 +120,14 @@ public class ProposicaoJSON implements Serializable {
 		this.comissao=comissao;
 	}
 
+	public Boolean isResponsavelNaoDefinido(){
+		return this.responsavelNaoDefinido;
+	}
+	
+	public void setResponsavelNaoDefinido(Boolean responsavelNaoDefinido){
+		this.responsavelNaoDefinido = responsavelNaoDefinido;
+	}
+	
 	public String getComissao() {
 		return comissao;
 	}

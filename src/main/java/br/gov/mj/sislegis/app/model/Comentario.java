@@ -35,7 +35,7 @@ public class Comentario implements AbstractEntity {
 	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 
-	@Column
+	@Column(length=8000)
 	private String descricao;
 
 	@ManyToOne(fetch = FetchType.EAGER)
