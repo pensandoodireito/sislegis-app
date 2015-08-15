@@ -21,9 +21,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import br.gov.mj.sislegis.app.enumerated.Origem;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.autoria.Autoria;
 
 @Entity
 @XmlRootElement
@@ -51,6 +52,9 @@ public class Proposicao implements AbstractEntity {
 
 	@Column
 	private String autor;
+	
+	@Transient
+	private Autoria autoria;
 
 	@Enumerated(EnumType.STRING)
 	@Column
@@ -184,6 +188,14 @@ public class Proposicao implements AbstractEntity {
 
 	public void setAutor(String autor) {
 		this.autor = autor;
+	}
+
+	public Autoria getAutoria() {
+		return autoria;
+	}
+
+	public void setAutoria(Autoria autoria) {
+		this.autoria = autoria;
 	}
 
 	public String getComissao() {
