@@ -21,6 +21,7 @@ import br.gov.mj.sislegis.app.json.ComentarioJSON;
 import br.gov.mj.sislegis.app.json.EncaminhamentoProposicaoJSON;
 import br.gov.mj.sislegis.app.json.ProposicaoJSON;
 import br.gov.mj.sislegis.app.json.TagJSON;
+import br.gov.mj.sislegis.app.model.Posicionamento;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
@@ -36,6 +37,7 @@ import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
+import br.gov.mj.sislegis.app.service.PosicionamentoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.ReuniaoProposicaoService;
 import br.gov.mj.sislegis.app.service.ReuniaoService;
@@ -75,6 +77,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	
 	@Inject
 	private TagService tagService;
+	
+	@Inject
+	private PosicionamentoService posicionamentoService;
 	
 
 	@PersistenceContext
@@ -206,8 +211,25 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public List<ProposicaoJSON> consultar(String sigla, String autor, String ementa, String origem, String isFavorita, Integer offset, Integer limit) {
+	public List<ProposicaoJSON> consultar(String posicionamento, String sigla, String autor, String ementa, String origem, String isFavorita, Integer offset, Integer limit) {
 		StringBuilder query = new StringBuilder("SELECT p FROM Proposicao p WHERE 1=1");
+		Posicionamento posicionamentoObj = null;
+
+		if(Objects.nonNull(posicionamento) && !posicionamento.equals("")){
+			if("-1".equals(posicionamento)){
+				query.append(" AND p.posicionamento is null");
+			}else{
+				try {
+					posicionamentoObj= posicionamentoService.findById(Long.parseLong(posicionamento));
+					
+					query.append(" AND p.posicionamento=:posicionamento");
+				} catch (NumberFormatException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		
 		if(Objects.nonNull(sigla) && !sigla.equals("")){
 			query.append(" AND upper(CONCAT(p.tipo,' ',p.numero,'/',p.ano)) like upper(:sigla)");
 		}
@@ -225,7 +247,11 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 		
 		TypedQuery<Proposicao> findByIdQuery = getEntityManager().createQuery(query.toString(),	Proposicao.class);
-		
+		if(Objects.nonNull(posicionamento) && !posicionamento.equals("")){
+			if(!"-1".equals(posicionamento)){
+				findByIdQuery.setParameter("posicionamento",posicionamentoObj);
+			}
+		}
 		if(Objects.nonNull(sigla) && !sigla.equals("")){
 			findByIdQuery.setParameter("sigla", "%"+sigla+"%");
 		}
@@ -464,3 +490,4 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		return findByIdQuery.getResultList();
 	}
 }
+
