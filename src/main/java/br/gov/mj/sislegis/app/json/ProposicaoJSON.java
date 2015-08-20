@@ -103,7 +103,7 @@ public class ProposicaoJSON implements Serializable {
 		this.posicionamentoNaoDefinido=posicionamento==null?true:false;
 		this.tags=tags;
 		this.responsavel=responsavel;
-		this.responsavelNaoDefinido=responsavel==null?true:false;
+		this.responsavelNaoDefinido = (this.responsavel == null);
 		this.proposicoesFilha=proposicoesFilha;
 		this.elaboracoesNormativas=elaboracoesNormativas;
 	}
