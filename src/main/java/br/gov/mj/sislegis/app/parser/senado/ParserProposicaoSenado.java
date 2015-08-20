@@ -87,7 +87,7 @@ class ProposicaoSenadoDTO {
 	}
 
 	private String converterAutorUnico() {
-		if (Objects.isNull(autores) || autores.size() == 0) {
+		if (Objects.isNull(autores) || autores.isEmpty()) {
 			return null;
 
 		} else {
