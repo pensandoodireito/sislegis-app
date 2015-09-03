@@ -2,5 +2,7 @@
 .classpath
 .project
 .settings
+.iml
+.idea
 prepros.cfg
 db.backup.gz
