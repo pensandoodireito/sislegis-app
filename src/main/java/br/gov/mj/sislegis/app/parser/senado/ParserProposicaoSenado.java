@@ -7,6 +7,11 @@ import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 public class ParserProposicaoSenado {
 	
@@ -41,6 +46,9 @@ public class ParserProposicaoSenado {
 	private static void config(XStream xstream) {
 		xstream.alias("DetalheMateria", DetalheMateria.class);
 		xstream.alias("Materia", Proposicao.class);
+		//Conversao de tipos Autoria e Autor
+		xstream.alias("Autoria", Autoria.class);
+		xstream.alias("Autor", Autor.class);
 		
 		xstream.aliasField("Materias", DetalheMateria.class, "proposicoes");
 		
@@ -49,9 +57,53 @@ public class ParserProposicaoSenado {
 		xstream.aliasField("Numero", Proposicao.class, "numero");
 		xstream.aliasField("Ano", Proposicao.class, "ano");
 		xstream.aliasField("Ementa", Proposicao.class, "ementa");
+		//Forcar o tratamento de autoria como string
+		xstream.aliasField("Autoria", Proposicao.class, "autor");
+		xstream.registerLocalConverter(Proposicao.class, "autor", new AuthorConverter());
+		
 	}
 }
 
+class AuthorConverter implements Converter {
+
+	@Override
+	public boolean canConvert(Class type) {
+		return String.class.equals(type);
+	}
+
+	@Override
+	public void marshal(Object source, HierarchicalStreamWriter writer,
+			MarshallingContext context) {
+		// Desnecessario, somente parseia XML->Objetos
+		
+	}
+	@Override
+	public Object unmarshal(HierarchicalStreamReader reader,
+			UnmarshallingContext context) {
+		if ("Autoria".equals(reader.getNodeName())) {
+			Autoria au = (Autoria) context
+					.convertAnother(reader, Autoria.class);
+			if (au != null && au.Autor != null && au.Autor.Nome != null) {
+				return au.Autor.Nome;
+			} else {
+				return "";
+			}
+
+		}
+		return reader.getValue();
+	}
+}
+/* wrapper para o nó /Autoria/Autor
+ */
+class Autor {
+	String Nome;
+}
+/* wrapper para o nó /Autoria
+ */
+class Autoria{
+	Autor Autor;
+	
+}
 class DetalheMateria {
 
 	protected List<Proposicao> proposicoes;
