@@ -56,7 +56,7 @@ public class ElaboracaoNormativaEndpoint {
 	
 
 	@POST
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(ElaboracaoNormativa entity) {
 		elaboracaoNormativaService.salvar(entity);
 		return Response.created(
@@ -73,14 +73,14 @@ public class ElaboracaoNormativaEndpoint {
 
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response findById(@PathParam("id") Long id) {
 		ElaboracaoNormativa elaboracaoNormativa = elaboracaoNormativaService.buscaElaboracaoNormativaPorId(id);
 		return Response.ok(elaboracaoNormativa).build();
 	}
 	
 	@GET
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<ElaboracaoNormativa> listAll(
 			@QueryParam("start") Integer startPosition,
 			@QueryParam("max") Integer maxResult) {
@@ -89,7 +89,7 @@ public class ElaboracaoNormativaEndpoint {
 	
 	@GET
 	@Path("/searchElaboracaoNormativa")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<ElaboracaoNormativa> searchElaboracaoNormativa(
 			@QueryParam("numero") String numero,
 			@QueryParam("ano") String ano,
@@ -122,7 +122,7 @@ public class ElaboracaoNormativaEndpoint {
 	@Path("/exportarDadosParaExcel/{ano}/{numero}/{listaOrigensSelecionadosDropdown}/{listaCoAutoresSelecionadosDropdown}"
 			+ "/{listaTagsSelecionadosDropdown}/{ementa}/{statusSidof}/{objeto}/{distribuicao}/{parecerista}/{tipo}"
 			+ "/{subTipo}/{elaboracaoNormativaNorma}/{elaboracaoNormativaSituacao}/{nup}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response exportarDadosParaExcel(@PathParam("ano") String ano, 
 			@PathParam("numero") String numero,
 			@PathParam("listaOrigensSelecionadosDropdown") String listaOrigensSelecionadosDropdown,
@@ -257,7 +257,7 @@ public class ElaboracaoNormativaEndpoint {
 	
 	@GET
 	@Path("/tipos")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<ComboJSON<ElaboracaoNormativaTipo>> tipos() {
 		List<ComboJSON<ElaboracaoNormativaTipo>> lista = new ArrayList<ComboJSON<ElaboracaoNormativaTipo>>();
 		for(ElaboracaoNormativaTipo elaboracaoNormativaTipo:ElaboracaoNormativaTipo.values()){
@@ -268,7 +268,7 @@ public class ElaboracaoNormativaEndpoint {
 	
 	@GET
 	@Path("/subTipos")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<ComboJSON<ElaboracaoNormativaSubTipo>> subTipos() {
 		List<ComboJSON<ElaboracaoNormativaSubTipo>> lista = new ArrayList<ComboJSON<ElaboracaoNormativaSubTipo>>();
 		for(ElaboracaoNormativaSubTipo elaboracaoNormativaSubTipo:ElaboracaoNormativaSubTipo.values()){
@@ -279,7 +279,7 @@ public class ElaboracaoNormativaEndpoint {
 
 	@GET
 	@Path("/identificacoes")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<ComboJSON<ElaboracaoNormativaObjeto>> identificacoes() {
 		List<ComboJSON<ElaboracaoNormativaObjeto>> lista = new ArrayList<ComboJSON<ElaboracaoNormativaObjeto>>();
 		for(ElaboracaoNormativaObjeto elaboracaoNormativaIdentificacao:ElaboracaoNormativaObjeto.values()){
@@ -291,7 +291,7 @@ public class ElaboracaoNormativaEndpoint {
 	
 	@GET
 	@Path("/normas")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<ComboJSON<ElaboracaoNormativaNorma>> normas() {
 		List<ComboJSON<ElaboracaoNormativaNorma>> lista = new ArrayList<ComboJSON<ElaboracaoNormativaNorma>>();
 		for(ElaboracaoNormativaNorma elaboracaoNormativaNorma:ElaboracaoNormativaNorma.values()){
@@ -303,7 +303,7 @@ public class ElaboracaoNormativaEndpoint {
 	
 	@GET
 	@Path("/situacoes")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<ComboJSON<ElaboracaoNormativaSituacao>> situacoes() {
 		List<ComboJSON<ElaboracaoNormativaSituacao>> lista = new ArrayList<ComboJSON<ElaboracaoNormativaSituacao>>();
 		for(ElaboracaoNormativaSituacao elaboracaoNormativaSituacao:ElaboracaoNormativaSituacao.values()){
@@ -329,7 +329,7 @@ public class ElaboracaoNormativaEndpoint {
 	
 	@GET
 	@Path("/buscarPorSufixo")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<ElaboracaoNormativa> buscarPorSufixo(@QueryParam("sufixo")String sufixo) {
 		return elaboracaoNormativaService.buscarPorSufixo(sufixo);
 	}

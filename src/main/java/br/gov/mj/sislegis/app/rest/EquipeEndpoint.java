@@ -1,6 +1,5 @@
 package br.gov.mj.sislegis.app.rest;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.Stateless;
@@ -15,11 +14,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import br.gov.mj.sislegis.app.model.Equipe;
-import br.gov.mj.sislegis.app.model.EquipeUsuario;
 import br.gov.mj.sislegis.app.service.EquipeService;
 import br.gov.mj.sislegis.app.service.Service;
 
@@ -36,7 +35,7 @@ public class EquipeEndpoint {
 	private EquipeService equipeService;
 
 	@POST
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(Equipe entity) {
 		equipeService.salvarEquipe(entity);
 		return Response.created(
@@ -53,7 +52,7 @@ public class EquipeEndpoint {
 
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response findById(@PathParam("id") Long id) {
 		Equipe equipe = service.findById(id);
 /*		List<EquipeUsuario> lista = new ArrayList<EquipeUsuario>(equipe.getListaEquipeUsuario());
@@ -66,7 +65,7 @@ public class EquipeEndpoint {
 	}
 
 	@GET
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<Equipe> listAll(@QueryParam("start") Integer startPosition,
 			@QueryParam("max") Integer maxResult) {
 		return service.listAll();
@@ -74,7 +73,7 @@ public class EquipeEndpoint {
 
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response update(Equipe entity) {
 		try {
 			entity = equipeService.salvarEquipe(entity);

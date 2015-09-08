@@ -13,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
@@ -26,7 +27,7 @@ public class AreaConsultadaEndpoint
 	private Service<AreaConsultada> service;
 
 	@POST
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(AreaConsultada entity) {
 		service.save(entity);
 		return Response.created(UriBuilder.fromResource(AreaConsultadaEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
@@ -41,27 +42,27 @@ public class AreaConsultadaEndpoint
 
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response findById(@PathParam("id") Long id) {
 		return Response.ok(service.findById(id)).build();
 	}
 
 	@GET
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<AreaConsultada> listAll(@QueryParam("start") Integer startPosition, @QueryParam("max") Integer maxResult) {
 		return service.listAll();
 	}
 
 	@GET
 	@Path("/find{descricao:.*}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response findByDescricao(@QueryParam("descricao") String descricao) {
 		return Response.ok(service.findByProperty("descricao", descricao, "ASC")).build();
 	}
 
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response update(AreaConsultada entity) {
 		try {
 			entity = service.save(entity);

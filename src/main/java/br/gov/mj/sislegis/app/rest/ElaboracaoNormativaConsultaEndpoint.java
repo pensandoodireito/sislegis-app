@@ -2,18 +2,20 @@ package br.gov.mj.sislegis.app.rest;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.OptimisticLockException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
-import br.gov.mj.sislegis.app.model.AreaConsultada;
 import br.gov.mj.sislegis.app.model.ElaboracaoNormativaConsulta;
 import br.gov.mj.sislegis.app.service.Service;
 
@@ -26,7 +28,7 @@ public class ElaboracaoNormativaConsultaEndpoint
    private Service<ElaboracaoNormativaConsulta> service;
 
 	@POST
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(ElaboracaoNormativaConsulta entity) {
 		service.save(entity);
 		return Response.created(UriBuilder.fromResource(ElaboracaoNormativaConsultaEndpoint.class)
@@ -42,27 +44,27 @@ public class ElaboracaoNormativaConsultaEndpoint
 
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response findById(@PathParam("id") Long id) {
 		return Response.ok(service.findById(id)).build();
 	}
 
 	@GET
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<ElaboracaoNormativaConsulta> listAll(@QueryParam("start") Integer startPosition, @QueryParam("max") Integer maxResult) {
 		return service.listAll();
 	}
 
 	@GET
 	@Path("/find{descricao:.*}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response findByDescricao(@QueryParam("descricao") String descricao) {
 		return Response.ok(service.findByProperty("descricao", descricao, "ASC")).build();
 	}
 
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response update(ElaboracaoNormativaConsulta entity) {
 		try {
 			entity = service.save(entity);

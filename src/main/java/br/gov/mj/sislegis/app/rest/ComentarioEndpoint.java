@@ -13,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
@@ -31,7 +32,7 @@ public class ComentarioEndpoint {
 	private ComentarioService comentarioService;
 
 	@POST
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(ComentarioJSON entity) {
 		
 		comentarioService.salvarComentario(entity);
@@ -49,7 +50,7 @@ public class ComentarioEndpoint {
 
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response findById(@PathParam("id") Long id) {
 		Comentario entity = comentarioService.findById(id);
 		if (entity == null) {
@@ -60,14 +61,14 @@ public class ComentarioEndpoint {
 
 	@GET
 	@Path("/proposicao/{id:[0-9][0-9]*}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<ComentarioJSON> findByProposicao(@PathParam("id") Long id) {
 		final List<ComentarioJSON> results = comentarioService.findByProposicao(id);
 		return results;
 	}
 
 	@GET
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<Comentario> listAll(@QueryParam("start") Integer startPosition,
 			@QueryParam("max") Integer maxResult) {
 		final List<Comentario> results = comentarioService.listAll();
@@ -76,7 +77,7 @@ public class ComentarioEndpoint {
 
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response update(ComentarioJSON entity) {
 		try {
 			comentarioService.salvarComentario(entity);

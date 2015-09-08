@@ -18,6 +18,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
@@ -43,7 +44,7 @@ public class ProposicaoEndpoint {
 
 	@GET
 	@Path("/proposicoesPautaCamara")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<Proposicao> buscarProposicoesPautaCamara(@QueryParam("idComissao")Long idComissao, 
 			@QueryParam("data")Date data) throws Exception {
 		
@@ -60,7 +61,7 @@ public class ProposicaoEndpoint {
 
 	@GET
 	@Path("/proposicoesPautaSenado")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<Proposicao> buscarProposicoesPautaSenado(@QueryParam("siglaComissao")String siglaComissao, 
 			@QueryParam("data")Date data) throws Exception {
 		
@@ -77,21 +78,21 @@ public class ProposicaoEndpoint {
 
 	@GET
 	@Path("/detalharProposicaoCamaraWS")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Proposicao detalharProposicaoCamaraWS(@QueryParam("id") Long id) throws Exception {
 		return proposicaoService.detalharProposicaoCamaraWS(id);
 	}
 
 	@GET
 	@Path("/detalharProposicaoSenadoWS")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Proposicao detalharProposicaoSenadoWS(@QueryParam("id") Long id) throws Exception {
 		return proposicaoService.detalharProposicaoSenadoWS(id);
 	}
 	
 	@POST
 	@Path("/salvarProposicoes")
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response salvarProposicoes(List<Proposicao> listaProposicoesSelecionados){
 		try{
 			proposicaoService.salvarListaProposicao(listaProposicoesSelecionados);
@@ -103,7 +104,7 @@ public class ProposicaoEndpoint {
 	}
 	
 	@POST
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(Proposicao entity) {
 		service.save(entity);
 		return Response.created(
@@ -126,13 +127,13 @@ public class ProposicaoEndpoint {
 
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response findById(@PathParam("id") Long id) {
 		return Response.ok(proposicaoService.buscarPorId(id)).build();
 	}
 
 	@GET
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<ProposicaoJSON> listAll() {
 		List<ProposicaoJSON> results = proposicaoService.listarTodos();
 		return results;
@@ -140,7 +141,7 @@ public class ProposicaoEndpoint {
 
 	@GET
 	@Path("/consultar")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<ProposicaoJSON> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor, 
 			@QueryParam("sigla") String sigla, @QueryParam("origem") String origem, @QueryParam("isFavorita") String isFavorita, 
 			@QueryParam("limit") Integer limit, @QueryParam("offset") Integer offset) {
@@ -150,7 +151,7 @@ public class ProposicaoEndpoint {
 	
 	@GET
 	@Path("/buscarPorSufixo")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<ProposicaoJSON> buscarPorSufixo(@QueryParam("sufixo")String sufixo) {
 		List<Proposicao> proposicoes = proposicaoService.buscarPorSufixo(sufixo);
 		List<ProposicaoJSON> proposicaoJsonList = new ArrayList<ProposicaoJSON>();
@@ -170,7 +171,7 @@ public class ProposicaoEndpoint {
 
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response update(ProposicaoJSON entity) {
 		proposicaoService.atualizarProposicaoJSON(entity);
 		return Response.noContent().build();

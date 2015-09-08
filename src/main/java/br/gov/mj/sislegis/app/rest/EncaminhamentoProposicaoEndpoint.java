@@ -1,6 +1,5 @@
 package br.gov.mj.sislegis.app.rest;
 
-import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -15,12 +14,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import br.gov.mj.sislegis.app.json.EncaminhamentoProposicaoJSON;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
-import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
 import br.gov.mj.sislegis.app.service.UsuarioService;
 
@@ -34,7 +33,7 @@ public class EncaminhamentoProposicaoEndpoint {
 	private UsuarioService usuarioService;
 	
 	@POST
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(EncaminhamentoProposicao entity, @HeaderParam("Referer") String referer) {
 		EncaminhamentoProposicao savedEntity = service.salvarEncaminhamentoProposicao(entity, referer);
 		
@@ -52,13 +51,13 @@ public class EncaminhamentoProposicaoEndpoint {
 
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response findById(@PathParam("id") Long id) {
 		return Response.ok(service.findById(id)).build();
 	}
 
 	@GET
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<EncaminhamentoProposicao> listAll(
 			@QueryParam("start") Integer startPosition,
 			@QueryParam("max") Integer maxResult) {
@@ -67,7 +66,7 @@ public class EncaminhamentoProposicaoEndpoint {
 
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response update(EncaminhamentoProposicao entity, @HeaderParam("Referer") String referer) {
 		try {
 			entity = service.salvarEncaminhamentoProposicao(entity, referer);
@@ -81,7 +80,7 @@ public class EncaminhamentoProposicaoEndpoint {
 
 	@GET
 	@Path("/proposicao/{id:[0-9][0-9]*}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<EncaminhamentoProposicaoJSON> findByProposicao(@PathParam("id") Long id) {
 		final List<EncaminhamentoProposicaoJSON> results = service.findByProposicao(id);
 		return results;

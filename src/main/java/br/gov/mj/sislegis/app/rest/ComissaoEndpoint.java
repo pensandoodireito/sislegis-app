@@ -13,11 +13,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import br.gov.mj.sislegis.app.model.Comissao;
-import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.Service;
 
@@ -34,7 +34,7 @@ public class ComissaoEndpoint {
 	private Service<Comissao> service;
 
 	@POST
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(Comissao entity) {
 		service.save(entity);
 		return Response.created(
@@ -51,27 +51,27 @@ public class ComissaoEndpoint {
 
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response findById(@PathParam("id") Long id) {
 		Comissao entity = comissaoService.findById(id);
 		return Response.ok(entity).build();
 	}
 	@GET
 	@Path("/comissoesCamara")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<Comissao> listarComissoesCamara() throws Exception {
 		return comissaoService.listarComissoesCamara();
 	}
 
 	@GET
 	@Path("/comissoesSenado")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<Comissao> listarComissoesSenado() throws Exception {
 		return comissaoService.listarComissoesSenado();
 	}
 	
 	@GET
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<Comissao> listAll(@QueryParam("start") Integer startPosition,
 			@QueryParam("max") Integer maxResult) {
 		final List<Comissao> results = service.listAll();
@@ -81,7 +81,7 @@ public class ComissaoEndpoint {
 	
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response update(Comissao entity) {
 		try {
 			entity = comissaoService.save(entity);

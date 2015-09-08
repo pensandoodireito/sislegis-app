@@ -2,7 +2,6 @@ package br.gov.mj.sislegis.app.rest;
 
 import java.util.List;
 
-import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.OptimisticLockException;
 import javax.ws.rs.Consumes;
@@ -14,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
@@ -30,7 +30,7 @@ public class EncaminhamentoEndpoint {
 	private Service<Encaminhamento> service;
 
 	@POST
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(Encaminhamento entity) {
 		service.save(entity);
 		return Response.created(
@@ -47,13 +47,13 @@ public class EncaminhamentoEndpoint {
 
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response findById(@PathParam("id") Long id) {
 		return Response.ok(service.findById(id)).build();
 	}
 
 	@GET
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<Encaminhamento> listAll(
 			@QueryParam("start") Integer startPosition,
 			@QueryParam("max") Integer maxResult) {
@@ -62,7 +62,7 @@ public class EncaminhamentoEndpoint {
 
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response update(Encaminhamento entity) {
 		try {
 			entity = service.save(entity);

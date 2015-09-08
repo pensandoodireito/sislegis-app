@@ -12,6 +12,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
@@ -26,7 +27,7 @@ public class ReuniaoProposicaoEndpoint {
 	
 	
 	@POST
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(ReuniaoProposicao entity) {
 		service.save(entity);
 		return Response.created(
@@ -43,21 +44,21 @@ public class ReuniaoProposicaoEndpoint {
 
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response findById(@PathParam("id") Long id) {
 		// FIXME: fazer parecido com o deleteById pois é uma tabela associativa
 		return Response.ok(service.findById(id)).build();
 	}
 
 	@GET
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<ReuniaoProposicao> listAll() {
 		return service.listAll();
 	}
 
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response update(ReuniaoProposicao entity) {
 		try {
 			entity = service.save(entity);

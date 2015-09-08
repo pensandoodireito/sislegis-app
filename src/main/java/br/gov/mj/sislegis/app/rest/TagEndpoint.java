@@ -14,6 +14,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
@@ -30,7 +31,7 @@ public class TagEndpoint {
 	private TagService tagService;
 	
 	@POST
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(Tag entity) {
 		
 		tagService.save(entity);
@@ -48,7 +49,7 @@ public class TagEndpoint {
 
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response findById(@PathParam("id") Long id) {
 		Tag entity = tagService.findById(id);
 		if (entity == null) {
@@ -60,21 +61,21 @@ public class TagEndpoint {
 
 	@GET
 	@Path("/listarTodos")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<TagJSON> listAll() {
 		return tagService.listarTodasTags();
 	}
 	
 	@GET
 	@Path("/buscarPorSufixo")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<TagJSON> buscarPorSufixo(@QueryParam("sufixo")String sufixo) {
 		return tagService.buscaPorSufixo(sufixo);
 	}
 
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response update(Tag entity) {
 		try {
 			tagService.save(entity);
@@ -88,7 +89,7 @@ public class TagEndpoint {
 	
 	@GET
 	@Path("/listAllDropdownMultiple")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<DropdownMultiselectStringJSON> listAllDropdownMultiple() {
 		final List<TagJSON> results = tagService.listarTodasTags();
 		List<DropdownMultiselectStringJSON> listaDropdownMultiselectJSON = new ArrayList<DropdownMultiselectStringJSON>();

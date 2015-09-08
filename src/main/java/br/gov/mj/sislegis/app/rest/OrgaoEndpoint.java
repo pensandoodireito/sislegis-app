@@ -14,9 +14,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriBuilder;
 
 import br.gov.mj.sislegis.app.json.DropdownMultiselectJSON;
 import br.gov.mj.sislegis.app.model.Orgao;
@@ -28,7 +29,7 @@ public class OrgaoEndpoint {
 	private OrgaoService orgaoService;
 
 	@POST
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(Orgao entity) {
 		
 		orgaoService.save(entity);
@@ -46,7 +47,7 @@ public class OrgaoEndpoint {
 
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response findById(@PathParam("id") Long id) {
 		Orgao entity = orgaoService.findById(id);
 		if (entity == null) {
@@ -57,13 +58,13 @@ public class OrgaoEndpoint {
 
 	@GET
 	@Path("/find{nome:.*}")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response findByDescricao(@QueryParam("nome") String nome) {
 		return Response.ok(orgaoService.findByProperty("nome", nome, "ASC")).build();
 	}
 
 	@GET
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<Orgao> listAll(@QueryParam("start") Integer startPosition,
 			@QueryParam("max") Integer maxResult) {
 		final List<Orgao> results = orgaoService.listAll();
@@ -72,7 +73,7 @@ public class OrgaoEndpoint {
 	
 	@GET
 	@Path("/listAllDropdownMultiple")
-	@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<DropdownMultiselectJSON> listAllDropdownMultiple() {
 		final List<Orgao> results = orgaoService.listAll();
 		List<DropdownMultiselectJSON> listaDropdownMultiselectJSON = new ArrayList<DropdownMultiselectJSON>();
@@ -87,7 +88,7 @@ public class OrgaoEndpoint {
 
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
-	@Consumes("application/json")
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response update(Orgao entity) {
 		try {
 			orgaoService.save(entity);
