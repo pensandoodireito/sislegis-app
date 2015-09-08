@@ -45,7 +45,6 @@ import br.gov.mj.sislegis.app.model.TagElaboracaoNormativa;
 import br.gov.mj.sislegis.app.model.TagElaboracaoNormativaPK;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.seiws.RetornoConsultaProcedimento;
-import br.gov.mj.sislegis.app.seiws.SeiService;
 import br.gov.mj.sislegis.app.seiws.SeiServiceLocator;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.AreaConsultadaService;

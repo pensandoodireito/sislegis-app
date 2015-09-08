@@ -7,8 +7,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import br.gov.mj.sislegis.app.model.AbstractEntity;
-
 @Entity
 @XmlRootElement
 public class StatusSidof implements AbstractEntity {

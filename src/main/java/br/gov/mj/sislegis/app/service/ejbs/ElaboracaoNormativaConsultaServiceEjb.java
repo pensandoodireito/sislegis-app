@@ -11,7 +11,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import br.gov.mj.sislegis.app.model.ElaboracaoNormativaCoAutores;
-import br.gov.mj.sislegis.app.model.ElaboracaoNormativaCoAutoresPK;
 import br.gov.mj.sislegis.app.model.ElaboracaoNormativaConsulta;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ElaboracaoNormativaConsultaService;

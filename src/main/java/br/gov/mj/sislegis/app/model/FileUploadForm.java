@@ -1,6 +1,7 @@
 package br.gov.mj.sislegis.app.model;
 
 import javax.ws.rs.FormParam;
+
 import org.jboss.resteasy.annotations.providers.multipart.PartType;
 
 //http://www.mkyong.com/webservices/jax-rs/file-upload-example-in-resteasy/

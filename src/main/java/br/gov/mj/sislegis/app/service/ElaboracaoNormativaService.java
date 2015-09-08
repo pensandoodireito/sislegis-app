@@ -6,7 +6,6 @@ import java.util.Map;
 import javax.ejb.Local;
 
 import br.gov.mj.sislegis.app.model.ElaboracaoNormativa;
-import br.gov.mj.sislegis.app.model.Proposicao;
 
 @Local
 public interface ElaboracaoNormativaService extends Service<ElaboracaoNormativa> {

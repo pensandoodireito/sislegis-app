@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 import javax.persistence.Embeddable;
 
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-
 @Embeddable
 public class EquipeUsuarioPK implements Serializable {
 	

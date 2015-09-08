@@ -13,7 +13,6 @@ import javax.persistence.criteria.Root;
 
 import br.gov.mj.sislegis.app.model.ElaboracaoNormativaCoAutores;
 import br.gov.mj.sislegis.app.model.ElaboracaoNormativaCoAutoresPK;
-import br.gov.mj.sislegis.app.model.TagElaboracaoNormativa;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ElaboracaoNormativaCoAutoresService;
 

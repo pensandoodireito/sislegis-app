@@ -1,8 +1,5 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -10,7 +7,6 @@ import javax.persistence.PersistenceContext;
 
 import br.gov.mj.sislegis.app.model.Equipe;
 import br.gov.mj.sislegis.app.model.EquipeUsuario;
-import br.gov.mj.sislegis.app.model.EquipeUsuarioPK;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.EquipeService;
