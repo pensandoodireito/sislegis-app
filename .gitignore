@@ -4,3 +4,5 @@
 .settings
 prepros.cfg
 db.backup.gz
+*.iml
+.idea
