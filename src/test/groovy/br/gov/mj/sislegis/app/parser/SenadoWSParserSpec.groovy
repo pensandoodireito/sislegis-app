@@ -1,35 +1,74 @@
 package br.gov.mj.sislegis.app.parser
 
+import br.gov.mj.sislegis.app.parser.senado.ParserComissoesSenado
+import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado
+import br.gov.mj.sislegis.app.parser.senado.ParserPlenarioSenado
 import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado
-import org.junit.Assert
 import spock.lang.Specification
 
 class SenadoWSParserSpec extends Specification{
 
-    def "deve garantir que o autor da proposicao retornada nao e nulo"(){
-
-        def parserProposicaoSenado = new ParserProposicaoSenado()
+    def "ParserPlenarioSenado - deve retornar um numero minimo de proposicoes, dada uma data inicial"(){
 
         given:
-        Long idProposicao = 24257L
+        def parserPlenarioSenado = new ParserPlenarioSenado()
+        def datIni = "20140801"
+        def proposicoes
 
         when:
-        proposicaoSenado = parserProposicaoSenado.getProposicao(idProposicao)
+        proposicoes = parserPlenarioSenado.getProposicoes(datIni)
 
         then:
-        Assert.assertNotNull("Autor nulo", proposicaoSenado.getAutor())
+        proposicoes.size() >= 28
 
     }
 
-    def "length of Spock's and his friends' names"() {
+    def "ParserComissoesSenado - deve retornar um numero minimo de comissoes"(){
+
+        given:
+        def parserComissoesSenado = new ParserComissoesSenado()
+        def comissoes
+
+        when:
+        comissoes = parserComissoesSenado.getComissoes()
+
+        then:
+        comissoes.size() >= 115
+
+    }
+
+    def "ParserPautaSenado - deve retornar um numero minimo de proposicoes, dada uma data inicial e uma comissao"(){
+
+        given:
+        def parserPautaSenado = new ParserPautaSenado()
+        def proposicoes
+        def siglaComissao = "CDH"
+        def datIni = "20150801"
+
+        when:
+        proposicoes = parserPautaSenado.getProposicoes(siglaComissao, datIni)
+
+        then:
+        proposicoes.size() >= 136
+
+    }
+
+    def "ParserProposicaoSenado - conferir os nomes dos autores, dados os ids das proposicoes"(){
+
+        given:
+        def parserProposicaoSenado = new ParserProposicaoSenado()
+        def proposicaoSenado = parserProposicaoSenado.getProposicao(id)
+
         expect:
-        name.size() == length
+        proposicaoSenado.getAutor() == nome
 
         where:
-        name     | length
-        "Spock"  | 4
-        "Kirk"   | 4
-        "Scotty" | 6
+        id        | nome
+        24257L    | "Alencastro Guimarães"
+        24258L    | "Attílio Vivacqua"
+        24259L    | "Carlos Saboya"
+        24260L    | "Caiado de Castro"
+
     }
 
 }
