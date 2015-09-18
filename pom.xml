@@ -169,6 +169,13 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- HTTP-Builder extension for groovy -->
+    <dependency>
+      <groupId>org.codehaus.groovy.modules.http-builder</groupId>
+      <artifactId>http-builder</artifactId>
+      <version>0.7.1</version>
+    </dependency>
+
   </dependencies>
 
   <build>
