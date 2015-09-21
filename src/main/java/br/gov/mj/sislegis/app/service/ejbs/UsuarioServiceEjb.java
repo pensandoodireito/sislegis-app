@@ -13,39 +13,59 @@ import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.UsuarioService;
 
 @Stateless
-public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implements UsuarioService {
-	
+public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long>
+		implements UsuarioService {
+
 	@PersistenceContext
-    private EntityManager em;
-	
+	private EntityManager em;
+
 	public UsuarioServiceEjb() {
 		super(Usuario.class);
 	}
-	
+
 	@Override
 	protected EntityManager getEntityManager() {
 		return em;
 	}
 
 	@Override
+	public Usuario findByEmail(String email) {
+		TypedQuery<Usuario> findByIdQuery = em
+				.createQuery(
+						"SELECT u FROM Usuario u WHERE upper(u.email) like upper(:email) ORDER BY u.email ASC",
+						Usuario.class);
+		findByIdQuery.setParameter("email", email);
+
+		try {
+			return findByIdQuery.getSingleResult();
+		} catch (javax.persistence.NoResultException e) {
+			//no execption just return null
+			return null;
+		}
+
+	}
+
+	@Override
 	public List<Usuario> findByNome(String nome) {
-		TypedQuery<Usuario> findByIdQuery = em.createQuery("SELECT u FROM Usuario u WHERE upper(u.nome) like upper(:nome) ORDER BY u.nome ASC",
-				Usuario.class);
-		findByIdQuery.setParameter("nome", "%"+nome+"%");
+		TypedQuery<Usuario> findByIdQuery = em
+				.createQuery(
+						"SELECT u FROM Usuario u WHERE upper(u.nome) like upper(:nome) ORDER BY u.nome ASC",
+						Usuario.class);
+		findByIdQuery.setParameter("nome", "%" + nome + "%");
 		return findByIdQuery.getResultList();
 	}
 
 	@Override
 	public List<Usuario> findByIdEquipe(Long idEquipe) {
 		// TODO Auto-generated method stub
-		
+
 		Query query = em.createNativeQuery("SELECT u.* FROM Usuario u "
 				+ " inner join equipe_usuario eu on u.id = eu.usuario_id "
 				+ " inner join Equipe e on e.id = eu.equipe_id "
 				+ "	WHERE e.id = :idEquipe ORDER BY u.nome ASC", Usuario.class);
 		query.setParameter("idEquipe", idEquipe);
 		List<Usuario> usuarios = query.getResultList();
-		
+
 		return usuarios;
 	}
 
