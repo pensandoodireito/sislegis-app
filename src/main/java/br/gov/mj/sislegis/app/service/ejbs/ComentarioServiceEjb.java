@@ -72,7 +72,14 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long>
 	}
 
 	@Override
-	public void salvarComentario(ComentarioJSON comentarioJSON, Usuario autor) {
+	public void salvarComentario(ComentarioJSON comentarioJSON, Usuario autor) throws IllegalAccessException {
+		if(comentarioJSON.getId()!=null){
+			if(comentarioJSON.getAutor()!=null){
+				if(!comentarioJSON.getAutor().equals(autor)){
+					throw new IllegalAccessException("Somente autor do comentário pode alterá-lo.");
+				}
+			}
+		}
 		Comentario comentario = populaEntidadeComentario(comentarioJSON, autor);
 		save(comentario);
 
@@ -82,7 +89,6 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long>
 		Comentario comentario = new Comentario();
 		Proposicao proposicao = new Proposicao();
 		proposicao.setId(comentarioJSON.getIdProposicao());
-		comentario.setAutor(comentarioJSON.getAutor());
 		comentario.setDataCriacao(comentarioJSON.getDataCriacao());
 		comentario.setId(comentarioJSON.getId());
 		comentario.setDescricao(comentarioJSON.getDescricao());

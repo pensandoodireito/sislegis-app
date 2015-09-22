@@ -67,7 +67,10 @@ public class ComentarioEndpoint {
 			Usuario user = controleUsuarioAutenticado
 					.carregaUsuarioAutenticado(authorization);
 			comentarioService.salvarComentario(entity, user);
-		} catch (IOException e) {
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.FORBIDDEN).build();
+		}  catch (IOException e) {
 			// TODO O que fazer???
 			e.printStackTrace();
 			return Response.status(Response.Status.BAD_REQUEST).build();
@@ -126,6 +129,9 @@ public class ComentarioEndpoint {
 		} catch (OptimisticLockException e) {
 			return Response.status(Response.Status.CONFLICT)
 					.entity(e.getEntity()).build();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.FORBIDDEN).build();
 		} catch (IOException e) {
 			// TODO O que fazer???
 			e.printStackTrace();
