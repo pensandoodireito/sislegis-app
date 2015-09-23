@@ -66,7 +66,7 @@ public class ParserPlenarioSenado {
 		xstream.aliasField("NumeroMateria", Proposicao.class, "numero");
 		xstream.aliasField("AnoMateria", Proposicao.class, "ano");
 		xstream.aliasField("Ementa", Proposicao.class, "ementa");
-		
+		xstream.aliasField("SequenciaOrdem", Proposicao.class, "seqOrdemPauta");
 	}
 	
 }
