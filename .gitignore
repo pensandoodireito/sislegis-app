@@ -4,3 +4,5 @@
 .settings
 prepros.cfg
 db.backup.gz
+
+src/main/java/br/gov/mj/sislegis/app/rest/authentication/KeyCloakGenerated.java

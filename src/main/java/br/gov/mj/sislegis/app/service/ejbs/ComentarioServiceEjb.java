@@ -12,6 +12,7 @@ import javax.persistence.TypedQuery;
 import br.gov.mj.sislegis.app.json.ComentarioJSON;
 import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 
@@ -21,7 +22,7 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long>
 
 	@PersistenceContext
 	private EntityManager em;
-	
+
 	public ComentarioServiceEjb() {
 		super(Comentario.class);
 	}
@@ -42,15 +43,14 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long>
 		findByIdQuery.setParameter("entityId", id);
 		final List<Comentario> results = findByIdQuery.getResultList();
 		for (Comentario comentario : results) {
-			lista.add(new ComentarioJSON(
-					comentario.getId(), comentario.getDescricao(),
-					comentario.getAutor(), comentario.getDataCriacao(),
-					comentario.getProposicao().getId()));
+			lista.add(new ComentarioJSON(comentario.getId(), comentario
+					.getDescricao(), comentario.getAutor(), comentario
+					.getDataCriacao(), comentario.getProposicao().getId()));
 
 		}
 		return lista;
 	}
-	
+
 	public ComentarioJSON findByIdJSON(Long id) {
 		TypedQuery<Comentario> findByIdQuery = em
 				.createQuery(
@@ -61,32 +61,39 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long>
 		findByIdQuery.setParameter("entityId", id);
 		List<Comentario> lista = findByIdQuery.getResultList();
 		Comentario comentario = null;
-		if(!Objects.isNull(lista) && !lista.isEmpty()){
+		if (!Objects.isNull(lista) && !lista.isEmpty()) {
 			comentario = lista.get(0);
 		}
-		Long idProposicao = Objects.isNull(comentario.getProposicao()) ? null : comentario.getProposicao().getId();
-		return new ComentarioJSON(
-				comentario.getId(), comentario.getDescricao(),
-				comentario.getAutor(), comentario.getDataCriacao(),
-				idProposicao);
+		Long idProposicao = Objects.isNull(comentario.getProposicao()) ? null
+				: comentario.getProposicao().getId();
+		return new ComentarioJSON(comentario.getId(),
+				comentario.getDescricao(), comentario.getAutor(),
+				comentario.getDataCriacao(), idProposicao);
 	}
 
 	@Override
-	public void salvarComentario(ComentarioJSON comentarioJSON) {
-		Comentario comentario = populaEntidadeComentario(comentarioJSON);
+	public void salvarComentario(ComentarioJSON comentarioJSON, Usuario autor) throws IllegalAccessException {
+		if(comentarioJSON.getId()!=null){
+			if(comentarioJSON.getAutor()!=null){
+				if(!comentarioJSON.getAutor().equals(autor)){
+					throw new IllegalAccessException("Somente autor do comentário pode alterá-lo.");
+				}
+			}
+		}
+		Comentario comentario = populaEntidadeComentario(comentarioJSON, autor);
 		save(comentario);
-		
+
 	}
 
-	private Comentario populaEntidadeComentario(ComentarioJSON comentarioJSON) {
+	private Comentario populaEntidadeComentario(ComentarioJSON comentarioJSON, Usuario autor) {
 		Comentario comentario = new Comentario();
 		Proposicao proposicao = new Proposicao();
 		proposicao.setId(comentarioJSON.getIdProposicao());
-		comentario.setAutor(comentarioJSON.getAutor());
 		comentario.setDataCriacao(comentarioJSON.getDataCriacao());
 		comentario.setId(comentarioJSON.getId());
 		comentario.setDescricao(comentarioJSON.getDescricao());
 		comentario.setProposicao(proposicao);
+		comentario.setAutor(autor);
 		return comentario;
 	}
 }
