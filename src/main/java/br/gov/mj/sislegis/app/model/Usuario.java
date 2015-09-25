@@ -27,7 +27,7 @@ public class Usuario implements AbstractEntity {
 	@Column
 	private String nome;
 
-	@Column
+	@Column(unique=true)
 	private String email;
 	
 	
