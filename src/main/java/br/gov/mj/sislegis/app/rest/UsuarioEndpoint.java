@@ -67,6 +67,12 @@ public class UsuarioEndpoint {
 	public Response findByNome(@QueryParam("nome") String nome) {
 		return Response.ok(service.findByNome(nome)).build();
 	}
+	@GET
+	@Path("/ldapSearch{nome:.*}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response findByNomeOnLDAP(@QueryParam("nome") String nome) {
+		return Response.ok(service.findByNomeOnLDAP(nome)).build();
+	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)

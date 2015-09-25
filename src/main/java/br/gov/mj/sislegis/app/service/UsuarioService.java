@@ -15,4 +15,6 @@ public interface UsuarioService extends Service<Usuario> {
 
 	Usuario findByEmail(String email);
 
+	List<Usuario>  findByNomeOnLDAP(String nome);
+
 }
