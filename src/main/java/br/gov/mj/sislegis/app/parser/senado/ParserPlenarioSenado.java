@@ -3,6 +3,8 @@ package br.gov.mj.sislegis.app.parser.senado;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
@@ -31,7 +33,7 @@ public class ParserPlenarioSenado {
 		
 		String wsURLPlenario = "http://legis.senado.leg.br/dadosabertos/plenario/agenda/mes/"+datIni;
 		URL url = new URL(wsURLPlenario);
-		
+		Logger.getLogger("br.gov.mj.sislegis").log(Level.FINE, "Buscando dados da sessão do plenario");
 		xstreamSessao.fromXML(url, agendaPlenario);
 		
 		List<Sessao> sessoes = agendaPlenario.getSessoes();
