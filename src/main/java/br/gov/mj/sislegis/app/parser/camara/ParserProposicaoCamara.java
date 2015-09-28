@@ -1,7 +1,5 @@
 package br.gov.mj.sislegis.app.parser.camara;
 
-import java.io.InputStream;
-
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.parser.ParserFetcher;

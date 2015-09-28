@@ -1,6 +1,5 @@
 package br.gov.mj.sislegis.app.parser.camara;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 

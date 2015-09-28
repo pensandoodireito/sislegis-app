@@ -1,6 +1,5 @@
 package br.gov.mj.sislegis.app.parser.senado;
 
-import java.io.InputStream;
 import java.util.List;
 
 import br.gov.mj.sislegis.app.model.Comissao;
