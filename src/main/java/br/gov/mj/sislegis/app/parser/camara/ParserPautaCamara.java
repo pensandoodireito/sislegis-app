@@ -1,11 +1,12 @@
 package br.gov.mj.sislegis.app.parser.camara;
 
-import java.net.URL;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.parser.ParserFetcher;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -19,15 +20,11 @@ public class ParserPautaCamara {
 		String datIni = "20140702";
 		String datFim = "20140702";
 
-		System.out.println(parser.getProposicoes(idComissao, datIni, datFim)
-				.toString());
+		System.out.println(parser.getProposicoes(idComissao, datIni, datFim).toString());
 	}
 
-	public List<Proposicao> getProposicoes(Long idComissao, String datIni,
-			String datFim) throws Exception {
-		String wsURL = "http://www.camara.gov.br/SitCamaraWS/Orgaos.asmx/ObterPauta?IDOrgao="
-				+ idComissao + "&datIni=" + datIni + "&datFim=" + datFim;
-		URL url = new URL(wsURL);
+	public List<Proposicao> getProposicoes(Long idComissao, String datIni, String datFim) throws Exception {
+		String wsURL = new StringBuilder("http://www.camara.gov.br/SitCamaraWS/Orgaos.asmx/ObterPauta?IDOrgao=").append(idComissao).append("&datIni=").append(datIni).append("&datFim=").append(datFim).toString();
 
 		XStream xstream = new XStream();
 		xstream.ignoreUnknownElements();
@@ -36,9 +33,8 @@ public class ParserPautaCamara {
 
 		config(xstream);
 
-		xstream.fromXML(url, pauta);
-
 		List<Proposicao> proposicoes = new ArrayList<Proposicao>();
+		ParserFetcher.fetchXStream(wsURL, xstream, pauta);
 
 		for (ReuniaoBean reuniao : pauta.getReunioes()) {
 			// adiciona dados da comissao
@@ -47,14 +43,12 @@ public class ParserPautaCamara {
 				proposicao.setSeqOrdemPauta(seqOrdemPauta++);
 				proposicao.setComissao(pauta.getOrgao());
 				proposicao.setOrigem(Origem.CAMARA);
-				proposicao.setLinkProposicao("http://www.camara.gov.br/proposicoesWeb/fichadetramitacao?idProposicao="+proposicao.getIdProposicao());
-				proposicao.setLinkPauta("http://www.camara.leg.br/internet/ordemdodia/ordemDetalheReuniaoCom.asp?codReuniao="+reuniao.getCodReuniao());
+				proposicao.setLinkProposicao("http://www.camara.gov.br/proposicoesWeb/fichadetramitacao?idProposicao=" + proposicao.getIdProposicao());
+				proposicao.setLinkPauta("http://www.camara.leg.br/internet/ordemdodia/ordemDetalheReuniaoCom.asp?codReuniao=" + reuniao.getCodReuniao());
 			}
-			
+
 			proposicoes.addAll(reuniao.getProposicoes());
 		}
-		
-		
 
 		return proposicoes;
 	}
@@ -96,7 +90,7 @@ class ReuniaoBean {
 	protected Integer getCodReuniao() {
 		return codReuniao;
 	}
-	
+
 	protected List<Proposicao> getProposicoes() {
 		return proposicoes;
 	}
