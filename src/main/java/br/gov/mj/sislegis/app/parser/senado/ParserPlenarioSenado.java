@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.parser.ParserFetcher;
+import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -22,7 +23,7 @@ public class ParserPlenarioSenado {
 	}
 
 	public List<Proposicao> getProposicoes(String datIni) throws Exception {
-		Logger.getLogger("br.gov.mj.sislegis").log(Level.FINE, "Buscando dados da sessão do plenario");
+		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "Buscando dados da sessão do plenario");
 		List<Proposicao> proposicoes = new ArrayList<Proposicao>();
 
 		XStream xstreamSessao = new XStream();

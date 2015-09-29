@@ -15,6 +15,7 @@ public class ParserComissoesCamara {
 	}
 
 	public List<Comissao> getComissoes() throws Exception {
+		System.out.println("ADASDFSADFASDF");
 		String wsURL = "http://www.camara.gov.br/SitCamaraWS/Orgaos.asmx/ObterOrgaos";
 
 		XStream xstream = new XStream();
