@@ -3,7 +3,6 @@ package br.gov.mj.sislegis.app.parser.senado;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.parser.ParserFetcher;
 
@@ -17,6 +16,7 @@ public class ParserPautaSenado {
 		// TODO: Informação que vem do filtro
 		String siglaComissao = "CDH";
 		String datIni = "20141201";
+		System.out.println(parser.getReunioes(siglaComissao, datIni).toString());
 		System.out.println(parser.getProposicoes(siglaComissao, datIni).toString());
 	}
 
@@ -40,9 +40,9 @@ public class ParserPautaSenado {
 		return proposicoes;
 	}
 
-	private List<ReuniaoBean> getReunioes(String siglaComissao, String datIni) throws Exception {
+	public List<ReuniaoBean> getReunioes(String siglaComissao, String datIni) throws Exception {
 		String wsURL = "http://legis.senado.leg.br/dadosabertos/agenda/" + datIni + "?colegiado=" + siglaComissao;
-
+		
 		XStream xstreamAgenda = new XStream();
 		xstreamAgenda.ignoreUnknownElements();
 
@@ -57,6 +57,12 @@ public class ParserPautaSenado {
 	private void configAgenda(XStream xstream) {
 		xstream.alias("Reunioes", ListaReunioes.class);
 		xstream.alias("Reuniao", ReuniaoBean.class);
+		xstream.aliasField("Hora", ReuniaoBean.class, "hora");
+		xstream.aliasField("Data", ReuniaoBean.class, "data");
+		xstream.aliasField("Tipo", ReuniaoBean.class, "tipo");
+		xstream.aliasField("Situacao", ReuniaoBean.class, "situacao");
+		xstream.aliasField("TituloDaReuniao", ReuniaoBean.class, "titulo");
+		
 
 		xstream.addImplicitCollection(ListaReunioes.class, "reunioes");
 
@@ -96,64 +102,6 @@ class ListaReunioes {
 
 	protected List<ReuniaoBean> getReunioes() {
 		return reunioes;
-	}
-}
-
-class ReuniaoBean {
-	private static final String MATERIA = "MATE";
-	protected Integer codigo;
-	protected List<ComissaoBean> comissoes = new ArrayList<ComissaoBean>();
-	protected List<ParteBean> partes = new ArrayList<ParteBean>();
-
-	protected Integer getCodigo() {
-		return codigo;
-	}
-
-	protected List<ParteBean> getPartes() {
-		return partes;
-	}
-
-	protected List<ComissaoBean> getComissoes() {
-		return comissoes;
-	}
-
-	protected List<Proposicao> getProposicoes() {
-		List<Proposicao> materias = new ArrayList<Proposicao>();
-
-		for (ParteBean parteBean : this.getPartes()) {
-			List<ItemBean> itens = parteBean.getItens();
-			List<EventoBean> eventos = parteBean.getEventos(); // tipicamente
-																// aparece em
-																// audiencias
-																// publicas
-
-			for (ItemBean itemBean : itens) {
-				// Não adicionamos por exemplo, os requerimentos, pois não são
-				// tratados como proposições
-				if (itemBean.tipo.equalsIgnoreCase(MATERIA)) {
-					Proposicao prop = itemBean.getProposicao();
-					prop.setComissao(comissoes.get(0).getSigla() + " - " + comissoes.get(0).getNome());
-					prop.setOrigem(Origem.SENADO);
-					prop.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate=" + prop.getIdProposicao());
-					prop.setLinkPauta("http://legis.senado.leg.br/comissoes/reuniao?reuniao=" + getCodigo());
-					materias.add(prop);
-				}
-			}
-
-			for (EventoBean eventoBean : eventos) {
-				List<Proposicao> proposicoes = eventoBean.getProposicoes();
-
-				for (Proposicao prop : proposicoes) {
-					prop.setComissao(comissoes.get(0).getSigla() + " - " + comissoes.get(0).getNome());
-					prop.setOrigem(Origem.SENADO);
-					prop.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate=" + prop.getIdProposicao());
-					prop.setLinkPauta("http://legis.senado.leg.br/comissoes/reuniao?reuniao=" + getCodigo());
-					materias.add(prop);
-				}
-			}
-		}
-
-		return materias;
 	}
 }
 
