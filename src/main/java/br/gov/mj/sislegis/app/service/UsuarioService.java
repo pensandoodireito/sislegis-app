@@ -19,5 +19,7 @@ public interface UsuarioService extends Service<Usuario> {
 	List<Usuario> findByNomeOnLDAP(String nome);
 
 	List<Usuario> listUsuariosSeguidoresDeComissao(AgendaComissao agenda);
+	
+	Usuario loadComAgendasSeguidas(Long id);
 
 }

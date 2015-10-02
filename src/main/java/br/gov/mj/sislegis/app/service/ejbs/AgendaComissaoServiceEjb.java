@@ -2,11 +2,13 @@ package br.gov.mj.sislegis.app.service.ejbs;
 
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.AsyncResult;
@@ -19,7 +21,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.Sessao;
@@ -55,10 +56,23 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 
 	@Override
 	public AgendaComissao getAgenda(String comissao) {
+		return getAgenda(comissao, false);
+	}
+
+	@Override
+	public AgendaComissao getAgenda(String comissao, boolean forceload) {
+
 		try {
-			return findByProperty("comissao", comissao);
+			AgendaComissao agenda = findByProperty("comissao", comissao);
+			if (forceload) {
+				findByProperty("comissao", comissao).getSessoes().size();
+			}
+			return agenda;
+		} catch (javax.persistence.NoResultException e) {
+			return null;
 		} catch (Exception e) {
-			e.printStackTrace();
+
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Falhou ao buscar agenda", e);
 			return null;
 		}
 
@@ -98,6 +112,39 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 				"Timeout na execução da atualização de agenda " + timer.getInfo());
 	}
 
+	@Override
+	public void unfollowComissao(String comissao, Usuario user) {
+		AgendaComissao agenda = getAgenda(comissao);
+		if (agenda == null) {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).warning(
+					"Tentativa de remover notificacoes de comissao nao seguida");
+			return;
+		}
+		user = usuarioService.loadComAgendasSeguidas(user.getId());
+		user.removeAgendaSeguida(agenda);
+		usuarioService.save(user);
+	}
+
+	@Override
+	public void followComissao(String comissao, Usuario user) {
+		AgendaComissao agenda = getAgenda(comissao);
+		if (agenda == null) {
+			agenda = new AgendaComissao(comissao, getNextMonday());
+			agenda = save(agenda);
+		}
+		user = usuarioService.loadComAgendasSeguidas(user.getId());
+		if (user.getAgendasSeguidas().contains(agenda)) {
+			return;
+		}
+		user.addAgendaSeguida(agenda);
+		usuarioService.save(user);
+	}
+
+	private Date getNextMonday() {
+
+		return new Date();
+	}
+
 	@Schedule(minute = "*/3", hour = "*", persistent = false, info = "Atualiza status pautas")
 	public void atualizaStatusAgendas() {
 		Set<AgendaComissao> atualizadas = new HashSet<AgendaComissao>();
@@ -106,17 +153,12 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 		try {
 			String semanaDo = "20150928";
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-			List<Comissao> comissoesCamara = comissaoService.listarComissoesCamara();
-			for (Iterator<Comissao> iterator = comissoesCamara.iterator(); iterator.hasNext();) {
-				Comissao comissao = (Comissao) iterator.next();
-				String sigla = comissao.getSigla().trim();
-				AgendaComissao agenda = getAgenda(sigla);
-				if (agenda == null) {
-					agenda = new AgendaComissao(sigla, sdf.parse(semanaDo));
-					agenda = save(agenda);
-				}
-
-				List<ReuniaoBean> reunioes = parserSenado.getReunioes(sigla, semanaDo);
+			List<AgendaComissao> comissoesCamara = listAgendasSeguidas();
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Há " + comissoesCamara.size() + " comissões seguidas");
+			for (Iterator<AgendaComissao> iterator = comissoesCamara.iterator(); iterator.hasNext();) {
+				AgendaComissao agenda = iterator.next();
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Atualizando " + agenda.getComissao());
+				List<ReuniaoBean> reunioes = parserSenado.getReunioes(agenda.getComissao(), semanaDo);
 
 				for (Iterator<ReuniaoBean> iterator2 = reunioes.iterator(); iterator2.hasNext();) {
 					ReuniaoBean reuniaoBean = (ReuniaoBean) iterator2.next();
@@ -127,6 +169,8 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 						atualizadas.add(agenda);
 					} else {
 						if (changeDetectpr.compare(sessaoWS, sessaoDb) != 0) {
+							Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info(
+									"Mudança detectada em " + agenda.getComissao());
 							sessaoDb.popula(sessaoWS);
 							agenda.addSessao(sessaoDb);
 							atualizadas.add(agenda);
@@ -163,4 +207,5 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 
 		return new AsyncResult<String>(status);
 	}
+
 }

@@ -1,5 +1,6 @@
 package br.gov.mj.sislegis.app.rest;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -18,6 +19,8 @@ import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.AgendaComissaoService;
+import br.gov.mj.sislegis.app.service.ComissaoService;
+import br.gov.mj.sislegis.app.service.UsuarioService;
 
 /**
  * 
@@ -27,23 +30,38 @@ public class AgendaComissaoEndpoint {
 
 	@Inject
 	private AgendaComissaoService service;
+
 	@Inject
 	private UsuarioAutenticadoBean controleUsuarioAutenticado;
+	@Inject
+	private UsuarioService usuarioService;
 
 	@POST
-	@Path("/follow/{comissao:[A-Z]*}")
+	@Path("/{comissao:[A-Z]*}")
 	public Response follow(@PathParam("comissao") String comissao, @HeaderParam("Authorization") String authorization) {
-		System.out.println("Follow " + comissao);
-		System.out.println(service.listAgendasSeguidas());
+		try {
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+			service.followComissao(comissao, user);
+			return Response.noContent().build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
 
-		return Response.noContent().build();
 	}
 
 	@DELETE
-	@Path("/{id:[0-9][0-9]*}")
-	public Response unfollow(@PathParam("id") Long id, @HeaderParam("Authorization") String authorization) {
-		service.deleteById(id);
-		return Response.noContent().build();
+	@Path("/{comissao:[A-Z]*}")
+	public Response unfollow(@PathParam("comissao") String comissao, @HeaderParam("Authorization") String authorization) {
+		try {
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+			service.unfollowComissao(comissao, user);
+			return Response.noContent().build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
+
 	}
 
 	@GET
@@ -60,22 +78,38 @@ public class AgendaComissaoEndpoint {
 		try {
 			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
 
-			AgendaComissao agenda = service.getAgenda(comissao);
-			boolean seguindo = user.getAgendasSeguidas().contains(agenda);
-			DetalhesAgendaComissao detalhes = new DetalhesAgendaComissao(agenda, seguindo);
-			return Response.created(
-					UriBuilder.fromResource(AgendaComissaoEndpoint.class).path(String.valueOf(agenda.getId())).build())
-					.build();
+			AgendaComissao agenda = service.getAgenda(comissao.trim(), true);
+			if (agenda == null) {
+				return Response.noContent().build();
+			} else {
+				user = usuarioService.loadComAgendasSeguidas(user.getId());
+				boolean seguindo = user.getAgendasSeguidas().contains(agenda);
+				DetalhesAgendaComissao detalhes = new DetalhesAgendaComissao(agenda, seguindo);
+				return Response.ok(detalhes).build();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		}
 	}
 
-	class DetalhesAgendaComissao {
+	class DetalhesAgendaComissao implements Serializable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -5000997074521269387L;
+
 		public DetalhesAgendaComissao(AgendaComissao agenda2, boolean seguindo) {
 			this.agenda = agenda2;
 			this.seguindo = seguindo;
+		}
+
+		public AgendaComissao getAgenda() {
+			return agenda;
+		}
+
+		public boolean isSeguindo() {
+			return seguindo;
 		}
 
 		AgendaComissao agenda;

@@ -12,10 +12,16 @@ public interface AgendaComissaoService extends Service<AgendaComissao> {
 
 	AgendaComissao getAgenda(String comissao);
 
+	AgendaComissao getAgenda(String comissao, boolean loadSessoes);
+
 	void atualizaStatusAgendas();
 
 	List<Usuario> listSeguidoresAgenda(AgendaComissao agenda);
 
 	List<AgendaComissao> listAgendasSeguidas();
+
+	void followComissao(String comissao, Usuario user);
+
+	void unfollowComissao(String comissao, Usuario user);
 
 }

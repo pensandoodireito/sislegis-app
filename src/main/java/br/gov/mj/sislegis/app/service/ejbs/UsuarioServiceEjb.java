@@ -50,7 +50,8 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 		findByIdQuery.setParameter("email", email);
 
 		try {
-			return findByIdQuery.getSingleResult();
+			Usuario user = findByIdQuery.getSingleResult();
+			return user;
 		} catch (javax.persistence.NoResultException e) {
 			// no execption just return null
 			return null;
@@ -61,7 +62,7 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 	@Override
 	public List<Usuario> listUsuariosSeguidoresDeComissao(AgendaComissao agenda) {
 		TypedQuery<Usuario> findByIdQuery = em.createQuery(
-				"SELECT u FROM Usuario u join u.agendasSeguidas agendas where agendas.agendasseguidas_id=:idAgenda", Usuario.class);
+				"SELECT u FROM Usuario u join u.agendasSeguidas agendas where agendas.id=:idAgenda", Usuario.class);
 
 		findByIdQuery.setParameter("idAgenda", agenda.getId());
 		return findByIdQuery.getResultList();
@@ -109,14 +110,14 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 	 * 
 	 * </pre>
 	 */
-//	@Resource(lookup = "java:global/federation/ldap/mjldap")
+	// @Resource(lookup = "java:global/federation/ldap/mjldap")
 	private javax.naming.directory.InitialDirContext ldapContext;
 
 	@Override
 	public List<Usuario> findByNomeOnLDAP(String nome) {
 		List<Usuario> usuarios = new ArrayList<Usuario>();
 		try {
-			ldapContext= (InitialDirContext) InitialContext.doLookup("java:global/federation/ldap/mjldap");
+			ldapContext = (InitialDirContext) InitialContext.doLookup("java:global/federation/ldap/mjldap");
 
 			NamingEnumeration<SearchResult> results = ldapContext.search("OU=SISLEGIS", "(&(objectclass=person)(cn="
 					+ nome + "*))", controls);
@@ -136,6 +137,13 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 			// TODO checar quais excecoes notificamos
 		}
 		return usuarios;
+	}
+
+	@Override
+	public Usuario loadComAgendasSeguidas(Long id) {
+		Usuario user = findById(id);
+		user.getAgendasSeguidas().size();
+		return user;
 	}
 
 }
