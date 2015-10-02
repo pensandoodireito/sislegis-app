@@ -155,18 +155,19 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 		try {
 			String semanaDo = "20150928";
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-			List<AgendaComissao> comissoesCamara = listAgendasSeguidas();
-			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Há " + comissoesCamara.size() + " comissões seguidas");
-			for (Iterator<AgendaComissao> iterator = comissoesCamara.iterator(); iterator.hasNext();) {
+			List<AgendaComissao> comissoesSenado = listAgendasSeguidas();
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Há " + comissoesSenado.size() + " comissões seguidas");
+			for (Iterator<AgendaComissao> iterator = comissoesSenado.iterator(); iterator.hasNext();) {
 				AgendaComissao agenda = iterator.next();
-				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Atualizando " + agenda.getComissao());
 				List<ReuniaoBean> reunioes = parserSenado.getReunioes(agenda.getComissao(), semanaDo);
-
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info(
+						"Atualizando " + agenda.getComissao() + " há " + reunioes.size() + " reunioes");
 				for (Iterator<ReuniaoBean> iterator2 = reunioes.iterator(); iterator2.hasNext();) {
 					ReuniaoBean reuniaoBean = (ReuniaoBean) iterator2.next();
 					Sessao sessaoWS = reuniaoBean.getSessao();
 					Sessao sessaoDb = agenda.getSessao(sessaoWS.getIdentificadorExterno());
 					if (sessaoDb == null) {
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Sessão nao existia.");
 						agenda.addSessao(sessaoWS);
 						atualizadas.add(agenda);
 					} else {
