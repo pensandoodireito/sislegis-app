@@ -15,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import br.gov.mj.sislegis.app.model.Casa;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
@@ -37,11 +38,12 @@ public class AgendaComissaoEndpoint {
 	private UsuarioService usuarioService;
 
 	@POST
-	@Path("/{comissao:[A-Z]*}")
-	public Response follow(@PathParam("comissao") String comissao, @HeaderParam("Authorization") String authorization) {
+	@Path("/{casa:[A-Z]*}/{comissao:[A-Z]*}")
+	public Response follow(@PathParam("casa") String casa, @PathParam("comissao") String comissao,
+			@HeaderParam("Authorization") String authorization) {
 		try {
 			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
-			service.followComissao(comissao, user);
+			service.followComissao(Casa.valueOf(casa), comissao, user);
 			return Response.noContent().build();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -51,11 +53,12 @@ public class AgendaComissaoEndpoint {
 	}
 
 	@DELETE
-	@Path("/{comissao:[A-Z]*}")
-	public Response unfollow(@PathParam("comissao") String comissao, @HeaderParam("Authorization") String authorization) {
+	@Path("/{casa:[A-Z]*}/{comissao:[A-Z]*}")
+	public Response unfollow(@PathParam("casa") String casa, @PathParam("comissao") String comissao,
+			@HeaderParam("Authorization") String authorization) {
 		try {
 			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
-			service.unfollowComissao(comissao, user);
+			service.unfollowComissao(Casa.valueOf(casa), comissao, user);
 			return Response.noContent().build();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -78,14 +81,14 @@ public class AgendaComissaoEndpoint {
 	}
 
 	@GET
-	@Path("/{comissao:[A-Z]*}")
+	@Path("/{casa:[A-Z]*}/{comissao:[A-Z]*}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getAgendaComissao(@PathParam("comissao") String comissao,
+	public Response getAgendaComissao(@PathParam("casa") String casa, @PathParam("comissao") String comissao,
 			@HeaderParam("Authorization") String authorization) throws Exception {
 		try {
 			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
 
-			AgendaComissao agenda = service.getAgenda(comissao.trim(), true);
+			AgendaComissao agenda = service.getAgenda(Casa.valueOf(casa), comissao.trim(), true);
 			if (agenda == null) {
 				return Response.noContent().build();
 			} else {

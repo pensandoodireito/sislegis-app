@@ -23,6 +23,7 @@ import javax.persistence.PersistenceContext;
 
 import org.apache.commons.mail.EmailException;
 
+import br.gov.mj.sislegis.app.model.Casa;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.Sessao;
@@ -57,17 +58,18 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 	}
 
 	@Override
-	public AgendaComissao getAgenda(String comissao) {
-		return getAgenda(comissao, false);
+	public AgendaComissao getAgenda(Casa casa, String comissao) {
+		return getAgenda(casa, comissao, false);
 	}
 
 	@Override
-	public AgendaComissao getAgenda(String comissao, boolean forceload) {
+	public AgendaComissao getAgenda(Casa casa, String comissao, boolean forceload) {
 
 		try {
-			AgendaComissao agenda = findByProperty("comissao", comissao);
+			AgendaComissao agenda = (AgendaComissao) em.createNamedQuery("getByCasaComissao")
+					.setParameter("casa", casa.name()).getSingleResult();
 			if (forceload) {
-				findByProperty("comissao", comissao).getSessoes().size();
+				agenda.getSessoes().size();
 			}
 			return agenda;
 		} catch (javax.persistence.NoResultException e) {
@@ -115,8 +117,8 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 	}
 
 	@Override
-	public void unfollowComissao(String comissao, Usuario user) {
-		AgendaComissao agenda = getAgenda(comissao);
+	public void unfollowComissao(Casa casa, String comissao, Usuario user) {
+		AgendaComissao agenda = getAgenda(casa, comissao);
 		if (agenda == null) {
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).warning(
 					"Tentativa de remover notificacoes de comissao nao seguida");
@@ -128,10 +130,10 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 	}
 
 	@Override
-	public void followComissao(String comissao, Usuario user) {
-		AgendaComissao agenda = getAgenda(comissao);
+	public void followComissao(Casa casa, String comissao, Usuario user) {
+		AgendaComissao agenda = getAgenda(casa, comissao);
 		if (agenda == null) {
-			agenda = new AgendaComissao(comissao, getNextMonday());
+			agenda = new AgendaComissao(casa, comissao, getNextMonday());
 			agenda = save(agenda);
 		}
 		user = usuarioService.loadComAgendasSeguidas(user.getId());
@@ -151,9 +153,9 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 	public void atualizaStatusAgendas() {
 		Set<AgendaComissao> atualizadas = new HashSet<AgendaComissao>();
 
-		ParserPautaSenado parserSenado = new ParserPautaSenado();
 		try {
 			String semanaDo = "20150928";
+			ParserPautaSenado parserSenado = new ParserPautaSenado();
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 			List<AgendaComissao> comissoesSenado = listAgendasSeguidas();
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Há " + comissoesSenado.size() + " comissões seguidas");

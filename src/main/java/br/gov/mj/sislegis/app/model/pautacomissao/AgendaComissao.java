@@ -9,19 +9,27 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 
 import br.gov.mj.sislegis.app.model.AbstractEntity;
+import br.gov.mj.sislegis.app.model.Casa;
 import br.gov.mj.sislegis.app.model.Usuario;
 
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "comissao", "casa" }))
 //@formatter:off
 @NamedNativeQueries({
     @NamedNativeQuery(
@@ -35,6 +43,12 @@ import br.gov.mj.sislegis.app.model.Usuario;
                         "FROM Usuario a where a.id in (select usuario_id from Usuario_Agendas where agendasseguidas_id=:idAgenda)",
                         resultClass=Usuario.class
     )
+})
+@NamedQueries({
+	@NamedQuery(
+				name="getByCasaComissao", 
+				query= "SELECT ag FROM AgendaComissao ag where ag.comissao=:comissao and ag.casa=:casa"
+			)
 })
 //@formatter:on
 public class AgendaComissao implements Serializable, AbstractEntity {
@@ -59,8 +73,12 @@ public class AgendaComissao implements Serializable, AbstractEntity {
 		return ultimaAtualizacao;
 	}
 
-	@Column(unique = true)
+	@Column
 	private String comissao;
+
+	@Column
+	@Enumerated(EnumType.STRING)
+	private Casa casa;
 
 	@OneToMany(targetEntity = br.gov.mj.sislegis.app.model.pautacomissao.Sessao.class, cascade = { CascadeType.ALL }, orphanRemoval = true, mappedBy = "agenda")
 	private Set<Sessao> sessoes = new HashSet<Sessao>();
@@ -69,11 +87,16 @@ public class AgendaComissao implements Serializable, AbstractEntity {
 		return sessoes;
 	}
 
+	public Casa getCasa() {
+		return casa;
+	}
+
 	public AgendaComissao() {
 
 	}
 
-	public AgendaComissao(String comissao, Date date) {
+	public AgendaComissao(Casa casa, String comissao, Date date) {
+		this.casa = casa;
 		this.comissao = comissao;
 		this.dataReferencia = date;
 	}
