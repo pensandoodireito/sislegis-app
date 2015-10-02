@@ -66,8 +66,15 @@ public class AgendaComissaoEndpoint {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<AgendaComissao> listAll() throws Exception {
-		return service.listAll();
+	public Response listAll(@HeaderParam("Authorization") String authorization) throws Exception {
+		try {
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+			user = usuarioService.loadComAgendasSeguidas(user.getId());
+			return Response.ok(user.getAgendasSeguidas()).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
 	}
 
 	@GET

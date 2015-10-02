@@ -21,6 +21,8 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.apache.commons.mail.EmailException;
+
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.Sessao;
@@ -198,12 +200,19 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 			for (Iterator<Usuario> iterator = seguidores.iterator(); iterator.hasNext();) {
 				Usuario usuario = (Usuario) iterator.next();
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).warning("Notificando " + usuario.getEmail());
+				try {
+					SislegisUtil
+							.sendEmail(usuario.getEmail(), usuario.getNome(), "Detectada mudança na pauta da comissão "
+									+ agenda.getComissao(), "Veja as mudanças aqui :");
+				} catch (EmailException e) {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
+							"Erro ao enviar email para " + usuario.getEmail(), e);
+				}
 			}
 		} else {
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).warning(
 					"Nenhum usuário seguindo a agenda " + agenda.getComissao());
 		}
-		// SislegisUtil.sendEmail(toMail, toName, subject, body);
 
 		return new AsyncResult<String>(status);
 	}
