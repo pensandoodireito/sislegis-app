@@ -171,4 +171,9 @@ public class AgendaComissao implements Serializable, AbstractEntity {
 
 	}
 
+	public void setDataReferencia(Date time) {
+		dataReferencia = time;
+		sessoes.clear();
+	}
+
 }

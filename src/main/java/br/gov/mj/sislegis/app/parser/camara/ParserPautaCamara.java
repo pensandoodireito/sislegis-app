@@ -2,7 +2,6 @@ package br.gov.mj.sislegis.app.parser.camara;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
@@ -15,11 +14,6 @@ public class ParserPautaCamara {
 
 	public static void main(String[] args) throws Exception {
 		ParserPautaCamara parser = new ParserPautaCamara();
-		List<OrgaoCamara> orgaosCamara = parser.listOrgaos();
-		for (Iterator iterator = orgaosCamara.iterator(); iterator.hasNext();) {
-			OrgaoCamara orgaoCamara = (OrgaoCamara) iterator.next();
-			System.out.println(orgaoCamara.sigla + " " + orgaoCamara.id);
-		}
 
 		// TODO: Informação que vem do filtro
 		Long idComissao = 2003L;
@@ -27,31 +21,6 @@ public class ParserPautaCamara {
 		String datFim = "20140702";
 
 		System.out.println(parser.getProposicoes(idComissao, datIni, datFim).toString());
-	}
-
-	public List<OrgaoCamara> listOrgaos() throws IOException {
-		String wsURL = new StringBuilder("http://www.camara.gov.br/SitCamaraWS/Orgaos.asmx/ObterOrgaos").toString();
-		XStream xstream = new XStream();
-		xstream.ignoreUnknownElements();
-		OrgaosBean pauta = new OrgaosBean();
-
-		xstream.alias("orgaos", OrgaosBean.class);
-		xstream.alias("orgao", OrgaoCamara.class);
-
-		// Utilizamos o implicit quando os filhos já tem os dados que queremos
-		// buscar. Ou seja, não tem um pai e vários filhos do mesmo tipo.
-		xstream.addImplicitCollection(OrgaosBean.class, "orgaos");
-		xstream.aliasAttribute(OrgaoCamara.class, "id", "id");
-		xstream.aliasAttribute(OrgaoCamara.class, "idTipodeOrgao", "idTipodeOrgao");
-		xstream.aliasAttribute(OrgaoCamara.class, "descricao", "descricao");
-		xstream.aliasAttribute(OrgaoCamara.class, "sigla", "sigla");
-		// xstream.aliasAttribute(PautaBean.class, "dataInicial",
-		// "dataInicial");
-		// xstream.aliasAttribute(PautaBean.class, "dataFinal", "dataFinal");
-
-		ParserFetcher.fetchXStream(wsURL, xstream, pauta);
-		return pauta.orgaos;
-
 	}
 
 	public List<ReuniaoBeanCamara> getReunioes(Long idComissao, String datIni, String datFim) throws IOException {
