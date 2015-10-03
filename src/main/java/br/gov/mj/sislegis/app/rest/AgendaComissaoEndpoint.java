@@ -1,7 +1,6 @@
 package br.gov.mj.sislegis.app.rest;
 
 import java.io.Serializable;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.ws.rs.DELETE;
@@ -13,14 +12,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 
 import br.gov.mj.sislegis.app.model.Casa;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.AgendaComissaoService;
-import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.UsuarioService;
 
 /**
@@ -38,7 +35,7 @@ public class AgendaComissaoEndpoint {
 	private UsuarioService usuarioService;
 
 	@POST
-	@Path("/{casa:[A-Z]*}/{comissao:[A-Z]*}")
+	@Path("/{casa}/{comissao:[A-Z]*}")
 	public Response follow(@PathParam("casa") String casa, @PathParam("comissao") String comissao,
 			@HeaderParam("Authorization") String authorization) {
 		try {
@@ -53,7 +50,7 @@ public class AgendaComissaoEndpoint {
 	}
 
 	@DELETE
-	@Path("/{casa:[A-Z]*}/{comissao:[A-Z]*}")
+	@Path("/{casa}/{comissao:[A-Z]*}")
 	public Response unfollow(@PathParam("casa") String casa, @PathParam("comissao") String comissao,
 			@HeaderParam("Authorization") String authorization) {
 		try {
@@ -67,12 +64,15 @@ public class AgendaComissaoEndpoint {
 
 	}
 
+	
+
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response listAll(@HeaderParam("Authorization") String authorization) throws Exception {
 		try {
 			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
 			user = usuarioService.loadComAgendasSeguidas(user.getId());
+			
 			return Response.ok(user.getAgendasSeguidas()).build();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -81,7 +81,7 @@ public class AgendaComissaoEndpoint {
 	}
 
 	@GET
-	@Path("/{casa:[A-Z]*}/{comissao:[A-Z]*}")
+	@Path("/{casa}/{comissao:[A-Z]*}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getAgendaComissao(@PathParam("casa") String casa, @PathParam("comissao") String comissao,
 			@HeaderParam("Authorization") String authorization) throws Exception {

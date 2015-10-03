@@ -23,6 +23,9 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
+import javax.xml.bind.annotation.XmlElement;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import br.gov.mj.sislegis.app.model.AbstractEntity;
 import br.gov.mj.sislegis.app.model.Casa;
@@ -83,6 +86,7 @@ public class AgendaComissao implements Serializable, AbstractEntity {
 	@OneToMany(targetEntity = br.gov.mj.sislegis.app.model.pautacomissao.Sessao.class, cascade = { CascadeType.ALL }, orphanRemoval = true, mappedBy = "agenda")
 	private Set<Sessao> sessoes = new HashSet<Sessao>();
 
+	@JsonIgnore
 	public Set<Sessao> getSessoes() {
 		return sessoes;
 	}
@@ -101,6 +105,7 @@ public class AgendaComissao implements Serializable, AbstractEntity {
 		this.dataReferencia = date;
 	}
 
+	@JsonIgnore
 	public Long getId() {
 		return id;
 	}

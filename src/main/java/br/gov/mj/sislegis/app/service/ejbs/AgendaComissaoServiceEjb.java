@@ -66,8 +66,10 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 	public AgendaComissao getAgenda(Casa casa, String comissao, boolean forceload) {
 
 		try {
-			AgendaComissao agenda = (AgendaComissao) em.createNamedQuery("getByCasaComissao")
-					.setParameter("casa", casa.name()).getSingleResult();
+			AgendaComissao agenda = (AgendaComissao) 
+					em.createNamedQuery("getByCasaComissao")
+					.setParameter("casa", casa)
+					.setParameter("comissao", comissao).getSingleResult();
 			if (forceload) {
 				agenda.getSessoes().size();
 			}
