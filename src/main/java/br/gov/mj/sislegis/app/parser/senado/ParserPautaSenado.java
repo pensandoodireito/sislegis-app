@@ -28,10 +28,10 @@ public class ParserPautaSenado {
 
 		configReuniao(xstreamReuniao);
 
-		for (ReuniaoBean bean : getReunioes(siglaComissao, datIni)) {
+		for (ReuniaoBeanSenado bean : getReunioes(siglaComissao, datIni)) {
 
 			String wsURLReuniao = "http://legis.senado.leg.br/dadosabertos/reuniao/" + bean.getCodigo();
-			ReuniaoBean reuniao = new ReuniaoBean();
+			ReuniaoBeanSenado reuniao = new ReuniaoBeanSenado();
 			ParserFetcher.fetchXStream(wsURLReuniao, xstreamReuniao, reuniao);
 
 			proposicoes.addAll(reuniao.getProposicoes());
@@ -40,7 +40,7 @@ public class ParserPautaSenado {
 		return proposicoes;
 	}
 
-	public List<ReuniaoBean> getReunioes(String siglaComissao, String datIni) throws Exception {
+	public List<ReuniaoBeanSenado> getReunioes(String siglaComissao, String datIni) throws Exception {
 		String wsURL = "http://legis.senado.leg.br/dadosabertos/agenda/" + datIni + "?colegiado=" + siglaComissao;
 		
 		XStream xstreamAgenda = new XStream();
@@ -56,30 +56,30 @@ public class ParserPautaSenado {
 
 	private void configAgenda(XStream xstream) {
 		xstream.alias("Reunioes", ListaReunioes.class);
-		xstream.alias("Reuniao", ReuniaoBean.class);
-		xstream.aliasField("Hora", ReuniaoBean.class, "hora");
-		xstream.aliasField("Data", ReuniaoBean.class, "data");
-		xstream.aliasField("Tipo", ReuniaoBean.class, "tipo");
-		xstream.aliasField("Situacao", ReuniaoBean.class, "situacao");
-		xstream.aliasField("TituloDaReuniao", ReuniaoBean.class, "titulo");
+		xstream.alias("Reuniao", ReuniaoBeanSenado.class);
+		xstream.aliasField("Hora", ReuniaoBeanSenado.class, "hora");
+		xstream.aliasField("Data", ReuniaoBeanSenado.class, "data");
+		xstream.aliasField("Tipo", ReuniaoBeanSenado.class, "tipo");
+		xstream.aliasField("Situacao", ReuniaoBeanSenado.class, "situacao");
+		xstream.aliasField("TituloDaReuniao", ReuniaoBeanSenado.class, "titulo");
 		
 
 		xstream.addImplicitCollection(ListaReunioes.class, "reunioes");
 
-		xstream.aliasField("Codigo", ReuniaoBean.class, "codigo");
+		xstream.aliasField("Codigo", ReuniaoBeanSenado.class, "codigo");
 	}
 
 	private void configReuniao(XStream xstream) {
-		xstream.alias("Reuniao", ReuniaoBean.class);
+		xstream.alias("Reuniao", ReuniaoBeanSenado.class);
 		xstream.alias("Comissao", ComissaoBean.class);
 		xstream.alias("Parte", ParteBean.class);
 		xstream.alias("Item", ItemBean.class);
 		xstream.alias("Evento", EventoBean.class);
 		xstream.alias("Materia", Proposicao.class);
 
-		xstream.aliasField("Partes", ReuniaoBean.class, "partes");
-		xstream.aliasField("Comissoes", ReuniaoBean.class, "comissoes");
-		xstream.aliasField("Codigo", ReuniaoBean.class, "codigo");
+		xstream.aliasField("Partes", ReuniaoBeanSenado.class, "partes");
+		xstream.aliasField("Comissoes", ReuniaoBeanSenado.class, "comissoes");
+		xstream.aliasField("Codigo", ReuniaoBeanSenado.class, "codigo");
 		xstream.aliasField("Sigla", ComissaoBean.class, "sigla");
 		xstream.aliasField("Nome", ComissaoBean.class, "nome");
 		xstream.aliasField("Itens", ParteBean.class, "itens");
@@ -98,9 +98,9 @@ public class ParserPautaSenado {
 }
 
 class ListaReunioes {
-	protected List<ReuniaoBean> reunioes = new ArrayList<ReuniaoBean>();
+	protected List<ReuniaoBeanSenado> reunioes = new ArrayList<ReuniaoBeanSenado>();
 
-	protected List<ReuniaoBean> getReunioes() {
+	protected List<ReuniaoBeanSenado> getReunioes() {
 		return reunioes;
 	}
 }

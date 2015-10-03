@@ -1,6 +1,8 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
@@ -27,8 +29,10 @@ import br.gov.mj.sislegis.app.model.Casa;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.Sessao;
+import br.gov.mj.sislegis.app.parser.ReuniaoBean;
+import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
 import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
-import br.gov.mj.sislegis.app.parser.senado.ReuniaoBean;
+import br.gov.mj.sislegis.app.parser.senado.ReuniaoBeanSenado;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.AgendaComissaoService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
@@ -66,10 +70,8 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 	public AgendaComissao getAgenda(Casa casa, String comissao, boolean forceload) {
 
 		try {
-			AgendaComissao agenda = (AgendaComissao) 
-					em.createNamedQuery("getByCasaComissao")
-					.setParameter("casa", casa)
-					.setParameter("comissao", comissao).getSingleResult();
+			AgendaComissao agenda = (AgendaComissao) em.createNamedQuery("getByCasaComissao")
+					.setParameter("casa", casa).setParameter("comissao", comissao).getSingleResult();
 			if (forceload) {
 				agenda.getSessoes().size();
 			}
@@ -146,26 +148,52 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 		usuarioService.save(user);
 	}
 
-	private Date getNextMonday() {
+	/**
+	 * Busca a próxima segunda feira
+	 * */
 
-		return new Date();
+	private Calendar getNextMonday() {
+
+		return getNextMondayAfter(Calendar.getInstance());
+	}
+
+	private Calendar getNextMondayAfter(Calendar date1) {
+
+		while (date1.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+			date1.add(Calendar.DATE, 1);
+		}
+		return date1;
 	}
 
 	@Schedule(minute = "*/3", hour = "*", persistent = false, info = "Atualiza status pautas")
 	public void atualizaStatusAgendas() {
 		Set<AgendaComissao> atualizadas = new HashSet<AgendaComissao>();
-
+		Calendar nextMonday = getNextMonday();
+		Calendar weekEnd = Calendar.getInstance();
+		weekEnd.setTime(nextMonday.getTime());
+		weekEnd.add(Calendar.DATE, 6);// Até o domingo
 		try {
-			String semanaDo = "20150928";
+			SimpleDateFormat dataFormatter = new SimpleDateFormat("yyyyMMdd");
+			String semanaDo = dataFormatter.format(nextMonday.getTime());
+			String semanaAte = dataFormatter.format(weekEnd.getTime());
 			ParserPautaSenado parserSenado = new ParserPautaSenado();
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-			List<AgendaComissao> comissoesSenado = listAgendasSeguidas();
-			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Há " + comissoesSenado.size() + " comissões seguidas");
-			for (Iterator<AgendaComissao> iterator = comissoesSenado.iterator(); iterator.hasNext();) {
+
+			ParserPautaCamara parserCamara = new ParserPautaCamara();
+
+			List<AgendaComissao> comissoes = listAgendasSeguidas();
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Há " + comissoes.size() + " comissões seguidas");
+			for (Iterator<AgendaComissao> iterator = comissoes.iterator(); iterator.hasNext();) {
 				AgendaComissao agenda = iterator.next();
-				List<ReuniaoBean> reunioes = parserSenado.getReunioes(agenda.getComissao(), semanaDo);
+				List<Sessao> sessoesReuniao = null;
+				List<ReuniaoBean> reunioes = new ArrayList<ReuniaoBean>();
+				if (Casa.CAMARA.equals(agenda.getCasa())) {
+					reunioes.addAll(parserCamara.getReunioes(agenda.getComissao(), semanaDo, semanaAte));
+				} else {
+					reunioes.addAll(parserSenado.getReunioes(agenda.getComissao(), semanaDo));
+				}
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info(
 						"Atualizando " + agenda.getComissao() + " há " + reunioes.size() + " reunioes");
+
 				for (Iterator<ReuniaoBean> iterator2 = reunioes.iterator(); iterator2.hasNext();) {
 					ReuniaoBean reuniaoBean = (ReuniaoBean) iterator2.next();
 					Sessao sessaoWS = reuniaoBean.getSessao();
@@ -182,6 +210,7 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 							agenda.addSessao(sessaoDb);
 							atualizadas.add(agenda);
 						}
+
 					}
 				}
 				agenda.setConsultada();

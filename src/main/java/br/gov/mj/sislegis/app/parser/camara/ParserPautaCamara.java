@@ -1,6 +1,8 @@
 package br.gov.mj.sislegis.app.parser.camara;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
@@ -13,6 +15,11 @@ public class ParserPautaCamara {
 
 	public static void main(String[] args) throws Exception {
 		ParserPautaCamara parser = new ParserPautaCamara();
+		List<OrgaoCamara> orgaosCamara = parser.listOrgaos();
+		for (Iterator iterator = orgaosCamara.iterator(); iterator.hasNext();) {
+			OrgaoCamara orgaoCamara = (OrgaoCamara) iterator.next();
+			System.out.println(orgaoCamara.sigla + " " + orgaoCamara.id);
+		}
 
 		// TODO: Informação que vem do filtro
 		Long idComissao = 2003L;
@@ -22,8 +29,38 @@ public class ParserPautaCamara {
 		System.out.println(parser.getProposicoes(idComissao, datIni, datFim).toString());
 	}
 
-	public List<Proposicao> getProposicoes(Long idComissao, String datIni, String datFim) throws Exception {
-		String wsURL = new StringBuilder("http://www.camara.gov.br/SitCamaraWS/Orgaos.asmx/ObterPauta?IDOrgao=").append(idComissao).append("&datIni=").append(datIni).append("&datFim=").append(datFim).toString();
+	public List<OrgaoCamara> listOrgaos() throws IOException {
+		String wsURL = new StringBuilder("http://www.camara.gov.br/SitCamaraWS/Orgaos.asmx/ObterOrgaos").toString();
+		XStream xstream = new XStream();
+		xstream.ignoreUnknownElements();
+		OrgaosBean pauta = new OrgaosBean();
+
+		xstream.alias("orgaos", OrgaosBean.class);
+		xstream.alias("orgao", OrgaoCamara.class);
+
+		// Utilizamos o implicit quando os filhos já tem os dados que queremos
+		// buscar. Ou seja, não tem um pai e vários filhos do mesmo tipo.
+		xstream.addImplicitCollection(OrgaosBean.class, "orgaos");
+		xstream.aliasAttribute(OrgaoCamara.class, "id", "id");
+		xstream.aliasAttribute(OrgaoCamara.class, "idTipodeOrgao", "idTipodeOrgao");
+		xstream.aliasAttribute(OrgaoCamara.class, "descricao", "descricao");
+		xstream.aliasAttribute(OrgaoCamara.class, "sigla", "sigla");
+		// xstream.aliasAttribute(PautaBean.class, "dataInicial",
+		// "dataInicial");
+		// xstream.aliasAttribute(PautaBean.class, "dataFinal", "dataFinal");
+
+		ParserFetcher.fetchXStream(wsURL, xstream, pauta);
+		return pauta.orgaos;
+
+	}
+
+	public List<ReuniaoBeanCamara> getReunioes(Long idComissao, String datIni, String datFim) throws IOException {
+		return getPauta(idComissao, datIni, datFim).getReunioes();
+	}
+
+	public PautaBean getPauta(Long idComissao, String datIni, String datFim) throws IOException {
+		String wsURL = new StringBuilder("http://www.camara.gov.br/SitCamaraWS/Orgaos.asmx/ObterPauta?IDOrgao=")
+				.append(idComissao).append("&datIni=").append(datIni).append("&datFim=").append(datFim).toString();
 
 		XStream xstream = new XStream();
 		xstream.ignoreUnknownElements();
@@ -32,18 +69,25 @@ public class ParserPautaCamara {
 
 		config(xstream);
 
-		List<Proposicao> proposicoes = new ArrayList<Proposicao>();
 		ParserFetcher.fetchXStream(wsURL, xstream, pauta);
+		return pauta;
+	}
 
-		for (ReuniaoBean reuniao : pauta.getReunioes()) {
+	public List<Proposicao> getProposicoes(Long idComissao, String datIni, String datFim) throws Exception {
+		List<Proposicao> proposicoes = new ArrayList<Proposicao>();
+		PautaBean pauta = getPauta(idComissao, datIni, datFim);
+		for (ReuniaoBeanCamara reuniao : pauta.getReunioes()) {
 			// adiciona dados da comissao
 			int seqOrdemPauta = 1;
 			for (Proposicao proposicao : reuniao.getProposicoes()) {
 				proposicao.setSeqOrdemPauta(seqOrdemPauta++);
 				proposicao.setComissao(pauta.getOrgao());
 				proposicao.setOrigem(Origem.CAMARA);
-				proposicao.setLinkProposicao("http://www.camara.gov.br/proposicoesWeb/fichadetramitacao?idProposicao=" + proposicao.getIdProposicao());
-				proposicao.setLinkPauta("http://www.camara.leg.br/internet/ordemdodia/ordemDetalheReuniaoCom.asp?codReuniao=" + reuniao.getCodReuniao());
+				proposicao.setLinkProposicao("http://www.camara.gov.br/proposicoesWeb/fichadetramitacao?idProposicao="
+						+ proposicao.getIdProposicao());
+				proposicao
+						.setLinkPauta("http://www.camara.leg.br/internet/ordemdodia/ordemDetalheReuniaoCom.asp?codReuniao="
+								+ reuniao.getCodigo().toString());
 			}
 
 			proposicoes.addAll(reuniao.getProposicoes());
@@ -54,7 +98,7 @@ public class ParserPautaCamara {
 
 	private void config(XStream xstream) {
 		xstream.alias("pauta", PautaBean.class);
-		xstream.alias("reuniao", ReuniaoBean.class);
+		xstream.alias("reuniao", ReuniaoBeanCamara.class);
 		xstream.alias("proposicao", Proposicao.class);
 
 		// Utilizamos o implicit quando os filhos já tem os dados que queremos
@@ -63,7 +107,20 @@ public class ParserPautaCamara {
 		xstream.aliasAttribute(PautaBean.class, "orgao", "orgao");
 		xstream.aliasAttribute(PautaBean.class, "dataInicial", "dataInicial");
 		xstream.aliasAttribute(PautaBean.class, "dataFinal", "dataFinal");
+
+		xstream.aliasField("horario", ReuniaoBeanCamara.class, "hora");
+		xstream.aliasField("data", ReuniaoBeanCamara.class, "data");
+		xstream.aliasField("codReuniao", ReuniaoBeanCamara.class, "codigo");
+		xstream.aliasField("tipo", ReuniaoBeanCamara.class, "tipo");
+		xstream.aliasField("estado", ReuniaoBeanCamara.class, "situacao");
+		xstream.aliasField("tituloReuniao", ReuniaoBeanCamara.class, "titulo");
 	}
+}
+
+class OrgaosBean {
+
+	protected List<OrgaoCamara> orgaos = new ArrayList<OrgaoCamara>();
+
 }
 
 class PautaBean {
@@ -71,26 +128,13 @@ class PautaBean {
 	protected String dataInicial;
 	protected String dataFinal;
 
-	protected List<ReuniaoBean> reunioes = new ArrayList<ReuniaoBean>();
+	protected List<ReuniaoBeanCamara> reunioes = new ArrayList<ReuniaoBeanCamara>();
 
-	protected List<ReuniaoBean> getReunioes() {
+	protected List<ReuniaoBeanCamara> getReunioes() {
 		return reunioes;
 	}
 
 	protected String getOrgao() {
 		return orgao;
-	}
-}
-
-class ReuniaoBean {
-	protected Integer codReuniao;
-	protected List<Proposicao> proposicoes = new ArrayList<Proposicao>();
-
-	protected Integer getCodReuniao() {
-		return codReuniao;
-	}
-
-	protected List<Proposicao> getProposicoes() {
-		return proposicoes;
 	}
 }

@@ -7,50 +7,18 @@ import java.util.List;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
-import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.Sessao;
 import br.gov.mj.sislegis.app.model.pautacomissao.SituacaoSessao;
 
-public class ReuniaoBean {
+public class ReuniaoBeanSenado extends br.gov.mj.sislegis.app.parser.ReuniaoBean {
 	private static final String MATERIA = "MATE";
-	protected Integer codigo;
-	protected String titulo;
-	protected String data;
-	protected String hora;
 
 	public static String getMateria() {
 		return MATERIA;
 	}
 
-	public String getTitulo() {
-		return titulo;
-	}
-
-	public String getData() {
-		return data;
-	}
-
-	public String getHora() {
-		return hora;
-	}
-
-	public String getSituacao() {
-		return situacao;
-	}
-
-	public String getTipo() {
-		return tipo;
-	}
-
-	protected String situacao;
-	protected String tipo;
-
 	protected List<ComissaoBean> comissoes = new ArrayList<ComissaoBean>();
 	protected List<ParteBean> partes = new ArrayList<ParteBean>();
-
-	protected Integer getCodigo() {
-		return codigo;
-	}
 
 	protected List<ParteBean> getPartes() {
 		return partes;
@@ -107,7 +75,7 @@ public class ReuniaoBean {
 		return titulo + ":" + tipo + " " + situacao + "@" + data + " " + hora;
 	}
 
-	enum Situacao {
+	protected enum Situacao {
 		Realizada, Agendada, Cancelada
 	};
 
@@ -117,7 +85,6 @@ public class ReuniaoBean {
 		try {
 			sessao.setData(sdf.parse(data + " " + hora));
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		sessao.setIdentificadorExterno(getCodigo().toString());
