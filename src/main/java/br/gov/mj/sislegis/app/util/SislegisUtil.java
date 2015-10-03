@@ -38,4 +38,6 @@ public class SislegisUtil {
 		}
 		return lista;
 	}
+
+	public static final String SISLEGIS_LOGGER = "sislegis";
 }
