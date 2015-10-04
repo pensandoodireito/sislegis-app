@@ -12,10 +12,18 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 @Entity
+@NamedQueries({
+	@NamedQuery(
+				name="getByIdExterno", 
+				query= "SELECT s FROM Sessao s where s.identificadorExterno=:identificadorExterno"
+			)
+})
 public class Sessao implements Serializable {
 	private static final long serialVersionUID = 1L;
 	@Column

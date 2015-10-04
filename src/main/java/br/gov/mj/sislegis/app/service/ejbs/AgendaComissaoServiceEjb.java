@@ -1,5 +1,6 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -7,6 +8,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
@@ -91,6 +93,15 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 		return seguidas;
 	}
 
+	private Sessao getSessao(String identificadorExterno) {
+		List<Sessao> sessoes = em.createNamedQuery("getByIdExterno", Sessao.class)
+				.setParameter(":identificadorExterno", identificadorExterno).getResultList();
+		if (sessoes.size() > 0) {
+			return sessoes.get(0);
+		}
+		return null;
+	}
+
 	public List<Usuario> listSeguidoresAgenda(AgendaComissao agenda) {
 		List<Usuario> seguidas = em.createNamedQuery("getSeguidoresAgenda", Usuario.class)
 				.setParameter(":idAgenda", agenda.getId()).getResultList();
@@ -107,7 +118,6 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 						return 0;
 					}
 				}
-
 			}
 			return 1;
 		}
@@ -189,18 +199,19 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 
 			List<AgendaComissao> agendasSeguidas = listAgendasSeguidas();
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Há " + agendasSeguidas.size() + " comissões seguidas");
-			for (Iterator<AgendaComissao> iterator = agendasSeguidas.iterator(); iterator.hasNext();) {
-				AgendaComissao agenda = iterator.next();
+			for (Iterator<AgendaComissao> iteratorAgendas = agendasSeguidas.iterator(); iteratorAgendas.hasNext();) {
+				AgendaComissao agenda = iteratorAgendas.next();
+				agenda = getAgenda(agenda.getCasa(), agenda.getComissao(), true);
 				if (!agenda.getDataReferencia().equals(nextMonday.getTime())) {
 					agenda.setDataReferencia(nextMonday.getTime());
 				}
-				List<Sessao> sessoesReuniao = null;
+
 				List<ReuniaoBean> reunioes = new ArrayList<ReuniaoBean>();
 				if (Casa.CAMARA.equals(agenda.getCasa())) {
 					Comissao comissaoCamara = getComissaoCamara(agenda.getComissao(), comissoesCamara);
 					if (comissaoCamara == null) {
 						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).severe(
-								"Não foi possíve carregar o id da comissao " + agenda.getComissao());
+								"Não foi possível carregar o id da comissao " + agenda.getComissao());
 						continue;
 					}
 					reunioes.addAll(parserCamara.getReunioes(comissaoCamara.getId(), semanaDo, semanaAte));
@@ -210,12 +221,12 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info(
 						"Atualizando " + agenda.getComissao() + " há " + reunioes.size() + " reunioes");
 
-				for (Iterator<ReuniaoBean> iterator2 = reunioes.iterator(); iterator2.hasNext();) {
-					ReuniaoBean reuniaoBean = (ReuniaoBean) iterator2.next();
+				for (Iterator<ReuniaoBean> iteratorReunioes = reunioes.iterator(); iteratorReunioes.hasNext();) {
+					ReuniaoBean reuniaoBean = (ReuniaoBean) iteratorReunioes.next();
 					Sessao sessaoWS = reuniaoBean.getSessao();
-					Sessao sessaoDb = agenda.getSessao(sessaoWS.getIdentificadorExterno());
+					Sessao sessaoDb = getSessao(sessaoWS.getIdentificadorExterno());// agenda.getSessao(sessaoWS.getIdentificadorExterno());
 					if (sessaoDb == null) {
-						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Sessão nao existia.");
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Sessão não existia.");
 						agenda.addSessao(sessaoWS);
 					} else {
 						if (changeDetectpr.compare(sessaoWS, sessaoDb) != 0) {
@@ -244,40 +255,53 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 
 	// TODO mudar de List para HashMap
 	private Comissao getComissaoCamara(String comissao, List<Comissao> comissoesCamara) {
-		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Procurando " + comissao);
+		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Procurando '" + comissao + "'");
 		for (Iterator iterator = comissoesCamara.iterator(); iterator.hasNext();) {
 			Comissao comissaoCamara = (Comissao) iterator.next();
-			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("comissaoCamara " + comissaoCamara.getSigla());
-			if (comissaoCamara.getSigla().equals(comissao)) {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("comissaoCamara '" + comissaoCamara.getSigla() + "'");
+			if (comissaoCamara.getSigla().trim().equals(comissao)) {
 				return comissaoCamara;
 			}
 		}
 		return null;
 	}
 
+	/**
+	 * Envia email notificando da alteração de pauta para todos os seguidores de
+	 * uma comissão
+	 * 
+	 * @param agenda
+	 * @return
+	 */
 	@Asynchronous
 	public Future<String> notifyUsuariosPautaMudou(AgendaComissao agenda) {
 		String status = "";
+		ResourceBundle res = ResourceBundle.getBundle("messages");
+		String assunto = MessageFormat.format(res.getString("email.mudanca_pauta.assunto"), agenda.getComissao());
+
 		List<Usuario> seguidores = usuarioService.listUsuariosSeguidoresDeComissao(agenda);
 		if (seguidores != null && !seguidores.isEmpty()) {
 			for (Iterator<Usuario> iterator = seguidores.iterator(); iterator.hasNext();) {
 				Usuario usuario = (Usuario) iterator.next();
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).warning("Notificando " + usuario.getEmail());
+
+				String body = MessageFormat.format(res.getString("email.mudanca_pauta.body"), usuario.getNome(),
+						agenda.getComissao());
+
 				try {
-					SislegisUtil
-							.sendEmail(usuario.getEmail(), usuario.getNome(), "Detectada mudança na pauta da comissão "
-									+ agenda.getComissao(), "Veja as mudanças aqui :");
+					SislegisUtil.sendEmail(usuario.getEmail(), usuario.getNome(), assunto, body);
 				} catch (EmailException e) {
 					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
 							"Erro ao enviar email para " + usuario.getEmail(), e);
 				}
 			}
+			status = "OK+";
 		} else {
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).warning(
 					"Nenhum usuário seguindo a agenda " + agenda.getComissao());
+			status = "OK";
 		}
 
 		return new AsyncResult<String>(status);
 	}
-
 }
