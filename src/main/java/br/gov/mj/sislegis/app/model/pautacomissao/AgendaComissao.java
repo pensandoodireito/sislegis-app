@@ -83,7 +83,8 @@ public class AgendaComissao implements Serializable, AbstractEntity {
 	@Enumerated(EnumType.STRING)
 	private Casa casa;
 
-	@OneToMany(targetEntity = br.gov.mj.sislegis.app.model.pautacomissao.Sessao.class, cascade = { CascadeType.ALL }, orphanRemoval = true, mappedBy = "agenda")
+	@OneToMany(targetEntity = br.gov.mj.sislegis.app.model.pautacomissao.Sessao.class, cascade = { CascadeType.PERSIST,
+			CascadeType.MERGE, CascadeType.REMOVE }, orphanRemoval = true, mappedBy = "agenda")
 	private Set<Sessao> sessoes = new HashSet<Sessao>();
 
 	@JsonIgnore

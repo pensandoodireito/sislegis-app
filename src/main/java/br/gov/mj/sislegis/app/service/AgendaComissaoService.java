@@ -8,6 +8,12 @@ import br.gov.mj.sislegis.app.model.Casa;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 
+/**
+ * Servico para gerenciar Agendas de comissões seguidas
+ * 
+ * @author rafaelcoutinho
+ *
+ */
 @Local
 public interface AgendaComissaoService extends Service<AgendaComissao> {
 

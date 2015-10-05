@@ -18,12 +18,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 @Entity
-@NamedQueries({
-	@NamedQuery(
-				name="getByIdExterno", 
-				query= "SELECT s FROM Sessao s where s.identificadorExterno=:identificadorExterno"
-			)
-})
+@NamedQueries({ @NamedQuery(name = "getByIdExterno", query = "SELECT s FROM Sessao s where s.identificadorExterno=:idExterno") })
 public class Sessao implements Serializable {
 	private static final long serialVersionUID = 1L;
 	@Column
@@ -37,7 +32,7 @@ public class Sessao implements Serializable {
 	private SituacaoSessao situacao;
 
 	@ManyToOne
-	@JoinColumn(name = "agenda_id", nullable = false)
+	@JoinColumn(name = "agenda_id", referencedColumnName = "id", nullable = false)
 	private AgendaComissao agenda;
 
 	@Column

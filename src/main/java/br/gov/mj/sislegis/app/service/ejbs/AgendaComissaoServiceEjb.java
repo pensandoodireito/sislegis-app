@@ -40,6 +40,12 @@ import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.UsuarioService;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
+/**
+ * Implementa o gerenciamento de agendas de comissoes seguidas
+ * 
+ * @author sislegis
+ *
+ */
 @Singleton
 public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao, Long> implements
 		AgendaComissaoService {
@@ -93,18 +99,9 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 		return seguidas;
 	}
 
-	private Sessao getSessao(String identificadorExterno) {
-		List<Sessao> sessoes = em.createNamedQuery("getByIdExterno", Sessao.class)
-				.setParameter(":identificadorExterno", identificadorExterno).getResultList();
-		if (sessoes.size() > 0) {
-			return sessoes.get(0);
-		}
-		return null;
-	}
-
 	public List<Usuario> listSeguidoresAgenda(AgendaComissao agenda) {
 		List<Usuario> seguidas = em.createNamedQuery("getSeguidoresAgenda", Usuario.class)
-				.setParameter(":idAgenda", agenda.getId()).getResultList();
+				.setParameter("idAgenda", agenda.getId()).getResultList();
 		return seguidas;
 	}
 
@@ -171,17 +168,21 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 		while (date1.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
 			date1.add(Calendar.DATE, 1);
 		}
+		date1.set(Calendar.HOUR_OF_DAY, 0);
+		date1.set(Calendar.MINUTE, 0);
+		date1.set(Calendar.SECOND, 0);
+		date1.set(Calendar.MILLISECOND, 0);
 		return date1;
 	}
 
 	/**
 	 * Tarefa principara para monitoramento de pautas da camara e senado.<br>
-	 * . Primeiro ela carrega quais pautas estão sendo seguidas. E então checa
-	 * por alterações nessas pautas.<br>
+	 * Primeiro ela carrega quais pautas estão sendo seguidas. E então checa por
+	 * alterações nessas pautas.<br>
 	 * Se é a 1a vez que essa agenda está sendo seguida, ou houver mudança de
 	 * semana, nenhum email é enviado.
 	 */
-	@Schedule(minute = "*/3", hour = "*", persistent = false, info = "Atualiza status pautas")
+	@Schedule(minute = "*", hour = "*", persistent = false, info = "Atualiza status pautas")
 	public void atualizaStatusAgendas() {
 		Set<AgendaComissao> atualizadas = new HashSet<AgendaComissao>();
 		Calendar nextMonday = getNextMonday();
@@ -201,7 +202,8 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Há " + agendasSeguidas.size() + " comissões seguidas");
 			for (Iterator<AgendaComissao> iteratorAgendas = agendasSeguidas.iterator(); iteratorAgendas.hasNext();) {
 				AgendaComissao agenda = iteratorAgendas.next();
-				agenda = getAgenda(agenda.getCasa(), agenda.getComissao(), true);
+				Set<Sessao> sessoes = agenda.getSessoes();
+
 				if (!agenda.getDataReferencia().equals(nextMonday.getTime())) {
 					agenda.setDataReferencia(nextMonday.getTime());
 				}
@@ -223,10 +225,24 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 
 				for (Iterator<ReuniaoBean> iteratorReunioes = reunioes.iterator(); iteratorReunioes.hasNext();) {
 					ReuniaoBean reuniaoBean = (ReuniaoBean) iteratorReunioes.next();
+
 					Sessao sessaoWS = reuniaoBean.getSessao();
-					Sessao sessaoDb = getSessao(sessaoWS.getIdentificadorExterno());// agenda.getSessao(sessaoWS.getIdentificadorExterno());
+					Sessao sessaoDb = null;
+
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine(
+							" procurarndo '" + sessaoWS.getIdentificadorExterno() + "' " + agenda.getSessoes().size()
+									+ " " + sessoes.size());
+					for (Iterator<Sessao> iterator = sessoes.iterator(); iterator.hasNext();) {
+						Sessao sess = (Sessao) iterator.next();
+
+						if (sess.getIdentificadorExterno().equals(sessaoWS.getIdentificadorExterno())) {
+							sessaoDb = sess;
+							break;
+						}
+					}
+
 					if (sessaoDb == null) {
-						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Sessão não existia.");
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Sessão não existia.");
 						agenda.addSessao(sessaoWS);
 					} else {
 						if (changeDetectpr.compare(sessaoWS, sessaoDb) != 0) {
@@ -256,7 +272,7 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 	// TODO mudar de List para HashMap
 	private Comissao getComissaoCamara(String comissao, List<Comissao> comissoesCamara) {
 		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Procurando '" + comissao + "'");
-		for (Iterator iterator = comissoesCamara.iterator(); iterator.hasNext();) {
+		for (Iterator<Comissao> iterator = comissoesCamara.iterator(); iterator.hasNext();) {
 			Comissao comissaoCamara = (Comissao) iterator.next();
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("comissaoCamara '" + comissaoCamara.getSigla() + "'");
 			if (comissaoCamara.getSigla().trim().equals(comissao)) {
