@@ -181,6 +181,14 @@
 				<groupId>org.wildfly.plugins</groupId>
 				<artifactId>wildfly-maven-plugin</artifactId>
 				<version>${version.wildfly.maven.plugin}</version>
+				<executions>
+					<execution>
+						<phase>install</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<!-- Compiler plugin enforces Java 1.6 compatibility and activates annotation 
 				processors -->
@@ -213,7 +221,9 @@
 
 								<echo
 									file="src/main/java/br/gov/mj/sislegis/app/rest/authentication/KeyCloakGenerated.java">
-									package	br.gov.mj.sislegis.app.rest.authentication;${line.separator}class KeyCloakGenerated{${line.separator}static String conf="
+									package
+									br.gov.mj.sislegis.app.rest.authentication;${line.separator}class
+									KeyCloakGenerated{${line.separator}static String conf="
 								</echo>
 								<echo append="true" message="${keycloakconf}"
 									file="src/main/java/br/gov/mj/sislegis/app/rest/authentication/KeyCloakGenerated.java" />

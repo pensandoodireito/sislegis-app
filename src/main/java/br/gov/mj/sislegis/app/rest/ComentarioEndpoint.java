@@ -51,7 +51,7 @@ public class ComentarioEndpoint {
 	private UsuarioService usuarioService;
 
 	@Inject
-	UsuarioAutenticadoBean controleUsuarioAutenticado;
+	private UsuarioAutenticadoBean controleUsuarioAutenticado;
 
 	public ComentarioEndpoint() {
 		super();

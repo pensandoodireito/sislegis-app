@@ -17,7 +17,7 @@ public class ParserProposicaoSenado {
 
 	public static void main(String[] args) throws Exception {
 		ParserProposicaoSenado parser = new ParserProposicaoSenado();
-		Long idProposicao = 24257L; // TODO: Informação que vem do filtro
+		Long idProposicao = 24257L; //Informação que vem do filtro
 		System.out.println(parser.getProposicao(idProposicao).toString());
 	}
 

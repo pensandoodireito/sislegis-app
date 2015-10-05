@@ -43,7 +43,8 @@ public class ParserPlenarioSenado {
 					// TODO: qual comissao?
 					proposicao.setComissao("PLEN");
 					proposicao.setOrigem(Origem.SENADO);
-					proposicao.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate=" + proposicao.getIdProposicao());
+					proposicao.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate="
+							+ proposicao.getIdProposicao());
 					// TODO: qual link da pauta?
 					// //proposicao.setLinkPauta("http://legis.senado.leg.br/comissoes/reuniao?reuniao="+getCodigo());
 				}

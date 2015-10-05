@@ -1,23 +1,28 @@
 package br.gov.mj.sislegis.app.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 
 @Entity
 @XmlRootElement
 public class Usuario implements AbstractEntity {
 
 	private static final long serialVersionUID = -8092650497855683601L;
-	
-	
+
 	public Usuario() {
-		// TODO Auto-generated constructor stub
 	}
-	
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -27,10 +32,25 @@ public class Usuario implements AbstractEntity {
 	@Column
 	private String nome;
 
-	@Column(unique=true)
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(name = "Usuario_Agendas")
+	private Set<AgendaComissao> agendasSeguidas = new HashSet<AgendaComissao>();
+
+	public Set<AgendaComissao> getAgendasSeguidas() {
+		return agendasSeguidas;
+	}
+
+	public void addAgendaSeguida(AgendaComissao ag) {
+		agendasSeguidas.add(ag);
+	}
+
+	public void removeAgendaSeguida(AgendaComissao ag) {
+		agendasSeguidas.remove(ag);
+	}
+
+	@Column(unique = true)
 	private String email;
-	
-	
+
 	public Long getId() {
 		return this.id;
 	}
@@ -38,7 +58,7 @@ public class Usuario implements AbstractEntity {
 	public void setId(final Long id) {
 		this.id = id;
 	}
-	
+
 	public String getNome() {
 		return nome;
 	}

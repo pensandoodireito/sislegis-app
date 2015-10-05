@@ -9,6 +9,8 @@ import javax.ejb.ConcurrencyManagement;
 import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
+import javax.ejb.Timeout;
+import javax.ejb.Timer;
 
 import br.gov.mj.sislegis.app.service.EJBDataCacher;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
@@ -17,9 +19,14 @@ import br.gov.mj.sislegis.app.util.SislegisUtil;
 @Singleton
 public class EJBDataCacherImpl implements EJBDataCacher {
 
-	@Schedule(hour = "00", minute = "00", second = "00")
+	@Schedule(hour = "00", minute = "00", second = "00", persistent = false)
 	public void dailyJob() {
 		this.evictAll();
+	}
+
+	@Timeout
+	public void timeout(Timer timer) {
+		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).warning("Timeout na execução da limpeza do cache");
 	}
 
 	private ConcurrentHashMap<String, Object> refDataCache = null;
@@ -38,7 +45,8 @@ public class EJBDataCacherImpl implements EJBDataCacher {
 	public boolean isEntityCached(String dataKey) {
 		boolean isCached = refDataCache.containsKey(dataKey);
 		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.FINE)) {
-			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "Cache " + dataKey + " " + (isCached ? "Hit" : "Miss"));
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+					"Cache " + dataKey + " " + (isCached ? "Hit" : "Miss"));
 		}
 		return refDataCache.containsKey(dataKey);
 	}
