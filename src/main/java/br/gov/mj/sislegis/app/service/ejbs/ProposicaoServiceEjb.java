@@ -1,6 +1,8 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -8,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -28,11 +32,12 @@ import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
 import br.gov.mj.sislegis.app.model.Tag;
 import br.gov.mj.sislegis.app.model.TagProposicao;
 import br.gov.mj.sislegis.app.model.TagProposicaoPK;
+import br.gov.mj.sislegis.app.parser.TipoProposicao;
 import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
 import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
 import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserPlenarioSenado;
-import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
+import br.gov.mj.sislegis.app.parser.senado.proposicao.ParserProposicaoSenado;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
@@ -124,11 +129,41 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
+	public int salvarProposicaoIndependente(Proposicao proposicaoFromBusca) {
+		// Agora vamos salvar/associar as proposições na reunião
+		try {
+			Proposicao proposicao = buscarPorIdProposicao(proposicaoFromBusca.getIdProposicao());
+
+			// Caso a proposição não exista, salvamos ela e associamos a
+			// reunião
+			if (Objects.isNull(proposicao)) {
+				if (proposicaoFromBusca.getOrigem().equals(Origem.CAMARA)) {
+					proposicao = detalharProposicaoCamaraWS(Long.valueOf(proposicaoFromBusca.getIdProposicao()));
+				} else if (proposicaoFromBusca.getOrigem().equals(Origem.SENADO)) {
+					proposicao = detalharProposicaoSenadoWS(Long.valueOf(proposicaoFromBusca.getIdProposicao()));
+				}
+
+				save(proposicao);
+				return 1;
+			}
+			return 0;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return -1;
+		}
+
+	}
+
+	@Override
 	public void salvarListaProposicao(List<Proposicao> listaProposicao) {
 		Reuniao reuniao = null;
 
 		if (!listaProposicao.isEmpty()) {
-			Proposicao proposicao = listaProposicao.get(0); // uma forma de obter a data da reuniao é através do objeto proposicao
+			Proposicao proposicao = listaProposicao.get(0); // uma forma de
+															// obter a data da
+															// reuniao é através
+															// do objeto
+															// proposicao
 			reuniao = reuniaoService.buscaReuniaoPorData(proposicao.getReuniao().getData());
 
 			// Caso a reunião não exista, salva pela primeira vez
@@ -159,7 +194,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 					reuniaoProposicaoService.save(rp);
 				} else { // proposição já existe
-					ReuniaoProposicao reuniaoProposicao = reuniaoProposicaoService.findById(reuniao.getId(), proposicao.getId());
+					ReuniaoProposicao reuniaoProposicao = reuniaoProposicaoService.findById(reuniao.getId(),
+							proposicao.getId());
 
 					// Se a proposição não existe na reunião, associamos ela
 					if (reuniaoProposicao == null) {
@@ -176,7 +212,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 	}
 
-	private ReuniaoProposicao getReuniaoProposicao(Reuniao reuniao, Proposicao proposicaoFromBusca, Proposicao proposicao) {
+	private ReuniaoProposicao getReuniaoProposicao(Reuniao reuniao, Proposicao proposicaoFromBusca,
+			Proposicao proposicao) {
 		ReuniaoProposicao rp = new ReuniaoProposicao();
 		ReuniaoProposicaoPK reuniaoProposicaoPK = new ReuniaoProposicaoPK();
 		reuniaoProposicaoPK.setIdReuniao(reuniao.getId());
@@ -209,7 +246,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public List<ProposicaoJSON> consultar(String sigla, String autor, String ementa, String origem, String isFavorita, Integer offset, Integer limit) {
+	public List<ProposicaoJSON> consultar(String sigla, String autor, String ementa, String origem, String isFavorita,
+			Integer offset, Integer limit) {
 		StringBuilder query = new StringBuilder("SELECT p FROM Proposicao p WHERE 1=1");
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			query.append(" AND upper(CONCAT(p.tipo,' ',p.numero,'/',p.ano)) like upper(:sigla)");
@@ -258,8 +296,15 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	public ProposicaoJSON populaProposicaoJSON(Proposicao proposicao) {
-		ProposicaoJSON proposicaoJSON = new ProposicaoJSON(proposicao.getId(), proposicao.getIdProposicao(), proposicao.getTipo(), proposicao.getAno(), proposicao.getNumero(), proposicao.getAutor(), proposicao.getEmenta(), proposicao.getOrigem(), proposicao.getSigla(), proposicao.getComissao(), proposicao.getSeqOrdemPauta(), proposicao.getLinkProposicao(), proposicao.getLinkPauta(), proposicao.getResultadoASPAR(), proposicao.isFavorita(), proposicao.getReuniao() == null ? null : proposicao
-				.getReuniao().getId(), comentarioService.findByProposicao(proposicao.getId()), encaminhamentoProposicaoService.findByProposicao(proposicao.getId()), proposicao.getPosicionamento(), tagService.populaListaTagsProposicaoJSON(proposicao.getTags()), proposicao.getResponsavel(), populaProposicoesFilhasJSON(proposicao.getProposicoesFilha()), proposicao.getElaboracoesNormativas());
+		ProposicaoJSON proposicaoJSON = new ProposicaoJSON(proposicao.getId(), proposicao.getIdProposicao(),
+				proposicao.getTipo(), proposicao.getAno(), proposicao.getNumero(), proposicao.getAutor(),
+				proposicao.getEmenta(), proposicao.getOrigem(), proposicao.getSigla(), proposicao.getComissao(),
+				proposicao.getSeqOrdemPauta(), proposicao.getLinkProposicao(), proposicao.getLinkPauta(),
+				proposicao.getResultadoASPAR(), proposicao.isFavorita(), proposicao.getReuniao() == null ? null
+						: proposicao.getReuniao().getId(), comentarioService.findByProposicao(proposicao.getId()),
+				encaminhamentoProposicaoService.findByProposicao(proposicao.getId()), proposicao.getPosicionamento(),
+				tagService.populaListaTagsProposicaoJSON(proposicao.getTags()), proposicao.getResponsavel(),
+				populaProposicoesFilhasJSON(proposicao.getProposicoesFilha()), proposicao.getElaboracoesNormativas());
 
 		return proposicaoJSON;
 	}
@@ -337,7 +382,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	private void processaExclusaoTagProposicao(ProposicaoJSON proposicaoJSON) {
 		if (!Objects.isNull(proposicaoJSON.getId())) {
-			Query query = em.createNativeQuery("SELECT tp.* FROM TagProposicao tp WHERE tp.proposicao_id = :idProposicao", TagProposicao.class);
+			Query query = em.createNativeQuery(
+					"SELECT tp.* FROM TagProposicao tp WHERE tp.proposicao_id = :idProposicao", TagProposicao.class);
 			query.setParameter("idProposicao", proposicaoJSON.getId());
 			List<TagProposicao> listaTagsProposicao = query.getResultList();
 
@@ -346,7 +392,11 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 					if (tagJSON.getText().equals(tagProposicao.getTag().getTag()))
 						continue c;
 				}
-				em.createNativeQuery("delete FROM TagProposicao tp WHERE " + "tp.proposicao_id = :idProposicao " + "and tp.tag_id = :tag", TagProposicao.class).setParameter("idProposicao", tagProposicao.getProposicao().getId()).setParameter("tag", tagProposicao.getTag()).executeUpdate();
+				em.createNativeQuery(
+						"delete FROM TagProposicao tp WHERE " + "tp.proposicao_id = :idProposicao "
+								+ "and tp.tag_id = :tag", TagProposicao.class)
+						.setParameter("idProposicao", tagProposicao.getProposicao().getId())
+						.setParameter("tag", tagProposicao.getTag()).executeUpdate();
 			}
 		}
 	}
@@ -410,7 +460,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	@Override
 	public Proposicao buscarPorIdProposicao(Integer idProposicao) {
-		TypedQuery<Proposicao> findByIdQuery = em.createQuery("SELECT p FROM Proposicao p WHERE p.idProposicao = :idProposicao", Proposicao.class);
+		TypedQuery<Proposicao> findByIdQuery = em.createQuery(
+				"SELECT p FROM Proposicao p WHERE p.idProposicao = :idProposicao", Proposicao.class);
 		findByIdQuery.setParameter("idProposicao", idProposicao);
 		final List<Proposicao> results = findByIdQuery.getResultList();
 		if (!Objects.isNull(results) && !results.isEmpty()) {
@@ -439,8 +490,41 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	@Override
 	public List<Proposicao> buscarPorSufixo(String sufixo) {
-		TypedQuery<Proposicao> findByIdQuery = getEntityManager().createQuery("SELECT p FROM Proposicao p WHERE upper(CONCAT(p.tipo,' ',p.numero,'/',p.ano)) like upper(:sigla)", Proposicao.class);
+		TypedQuery<Proposicao> findByIdQuery = getEntityManager().createQuery(
+				"SELECT p FROM Proposicao p WHERE upper(CONCAT(p.tipo,' ',p.numero,'/',p.ano)) like upper(:sigla)",
+				Proposicao.class);
 		findByIdQuery.setParameter("sigla", "%" + sufixo + "%");
 		return findByIdQuery.getResultList();
+	}
+
+	@Override
+	public Collection<Proposicao> buscaProposicaoIndependentePor(Origem origem, String tipo, Integer numero, Integer ano)
+			throws IOException {
+		switch (origem) {
+		case CAMARA:
+			return parserProposicaoCamara.searchProposicao(tipo, numero, ano);
+		case SENADO:
+			return parserProposicaoSenado.searchProposicao(tipo, numero, ano);
+
+		default:
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Origem não informada");
+			throw new IllegalArgumentException("Origem não informada");
+		}
+
+	}
+
+	@Override
+	public Collection<TipoProposicao> listTipos(Origem origem) throws IOException {
+		switch (origem) {
+		case CAMARA:
+			return parserProposicaoCamara.listaTipos();
+		case SENADO:
+			return parserProposicaoSenado.listaTipos();
+
+		default:
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Origem não informada");
+			throw new IllegalArgumentException("Origem não informada");
+		}
+
 	}
 }
