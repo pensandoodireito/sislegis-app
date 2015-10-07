@@ -1,5 +1,6 @@
 package br.gov.mj.sislegis.app.rest;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -19,6 +20,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import br.gov.mj.sislegis.app.model.Tarefa;
+import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.Service;
 import br.gov.mj.sislegis.app.service.TarefaService;
 
@@ -30,6 +33,9 @@ public class TarefaEndpoint {
 	
 	@Inject
 	private TarefaService tarefaService;
+
+	@Inject
+	private UsuarioAutenticadoBean controleUsuarioAutenticado;
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -62,12 +68,23 @@ public class TarefaEndpoint {
 		
 		return service.listAll();
 	}
-	
+
 	@GET
 	@Path("/usuario")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Tarefa> buscarPorUsuario(@QueryParam("idUsuario") Long idUsuario) {
-		return tarefaService.buscarPorUsuario(idUsuario);
+	public List<Tarefa> buscarPorUsuario(@HeaderParam("Authorization") String authorization) {
+
+		try {
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+			List<Tarefa> tarefas = tarefaService.buscarPorUsuario(user.getId());
+			return tarefas;
+
+		} catch (IOException e) {
+			// TODO O que fazer???
+			e.printStackTrace();
+			return null;
+		}
+
 	}
 
 	@PUT
