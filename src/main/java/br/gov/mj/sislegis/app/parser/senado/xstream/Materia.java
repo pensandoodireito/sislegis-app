@@ -1,4 +1,4 @@
-package br.gov.mj.sislegis.app.parser.senado.proposicao;
+package br.gov.mj.sislegis.app.parser.senado.xstream;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
@@ -7,7 +7,7 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 @XStreamAlias("Materia")
-class Materia {
+public class Materia {
 	@XStreamAlias("IdentificacaoMateria")
 	IdentificacaoMateria IdentificacaoMateria;
 	@XStreamAlias("DadosBasicosMateria")

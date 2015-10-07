@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.parser.senado.ParserPlenarioSenado;
-import br.gov.mj.sislegis.app.parser.senado.proposicao.ParserProposicaoSenado;
+import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
 
 public class TestSenadoWSParser {
 

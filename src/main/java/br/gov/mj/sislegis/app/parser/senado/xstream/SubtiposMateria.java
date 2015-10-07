@@ -1,4 +1,4 @@
-package br.gov.mj.sislegis.app.parser.senado.proposicao;
+package br.gov.mj.sislegis.app.parser.senado.xstream;
 
 import java.util.List;
 

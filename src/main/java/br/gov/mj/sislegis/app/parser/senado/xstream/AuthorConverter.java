@@ -1,4 +1,4 @@
-package br.gov.mj.sislegis.app.parser.senado.proposicao;
+package br.gov.mj.sislegis.app.parser.senado.xstream;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -6,7 +6,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-class AuthorConverter implements Converter {
+public class AuthorConverter implements Converter {
 
 	@Override
 	public boolean canConvert(Class type) {

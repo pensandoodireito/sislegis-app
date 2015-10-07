@@ -11,20 +11,15 @@ import java.util.logging.Logger;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
-import br.gov.mj.sislegis.app.parser.CollectionLazyConverter;
 import br.gov.mj.sislegis.app.parser.ParserFetcher;
 import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
+import br.gov.mj.sislegis.app.parser.camara.xstream.ListProposicaoLazy;
+import br.gov.mj.sislegis.app.parser.camara.xstream.ListaSigla;
+import br.gov.mj.sislegis.app.parser.camara.xstream.Proposicoes;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 public class ParserProposicaoCamara implements ProposicaoSearcher {
 
@@ -63,24 +58,8 @@ public class ParserProposicaoCamara implements ProposicaoSearcher {
 		xstream.ignoreUnknownElements();
 
 		Proposicoes proposicoes = new Proposicoes();
-		xstream.processAnnotations(Proposicoes.class);
-		xstream.processAnnotations(Autor.class);
-		xstream.processAnnotations(OrgaoNumerador.class);
-		xstream.alias("tipoProposicao", TipoProposicao.class);
-
-		xstream.aliasField("ano", Proposicao.class, "ano");
-		xstream.aliasField("id", Proposicao.class, "idProposicao");
-
-		xstream.aliasField("numero", Proposicao.class, "numero");
-		xstream.aliasField("nome", Proposicao.class, "sigla");
-		xstream.aliasField("txtEmenta", Proposicao.class, "ementa");
-		xstream.aliasField("tipoProposicao", Proposicao.class, "tipo");
-		xstream.registerLocalConverter(Proposicao.class, "tipo", new TipoConverter());
-		xstream.aliasField("autor1", Proposicao.class, "autor");
-		xstream.registerLocalConverter(Proposicao.class, "autor", new AuthorConverter());
-
-		xstream.aliasField("orgaoNumerador", Proposicao.class, "comissao");
-		xstream.registerLocalConverter(Proposicao.class, "comissao", new ComissaoConverter());
+		Proposicoes.configXstream(xstream);
+		
 
 		Collection<Proposicao> listProposicao = new ArrayList<Proposicao>();
 		try {
@@ -142,146 +121,4 @@ public class ParserProposicaoCamara implements ProposicaoSearcher {
 
 		return list.getSiglas();
 	}
-}
-
-class ListaSigla {
-	protected List<TipoProposicao> siglas;
-
-	protected List<TipoProposicao> getSiglas() {
-		return siglas;
-	}
-}
-
-@XStreamAlias("siglas")
-class TiposProposicao {
-	@XStreamImplicit(itemFieldName = "sigla")
-	List<TipoProposicao> sigla = new ArrayList<TipoProposicao>();
-
-	protected List<TipoProposicao> getSiglas() {
-		return sigla;
-	}
-}
-
-@XStreamAlias("proposicoes")
-class Proposicoes {
-	@XStreamImplicit(itemFieldName = "proposicao")
-	List<Proposicao> proposicoes = new ArrayList<Proposicao>();
-
-	protected List<Proposicao> getProposicoes() {
-		return proposicoes;
-	}
-}
-
-@XStreamAlias("autor1")
-class Autor {
-	String txtNomeAutor;
-	String idecadastro;
-	String codPartido;
-	String txtSiglaPartido;
-	String txtSiglaUF;
-}
-
-class TipoConverter implements Converter {
-
-	@Override
-	public boolean canConvert(Class type) {
-		return String.class.equals(type);
-	}
-
-	@Override
-	public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
-		// Desnecessario, somente parseia XML->Objetos
-
-	}
-
-	@Override
-	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-		if ("tipoProposicao".equals(reader.getNodeName())) {
-			TipoProposicao au = (TipoProposicao) context.convertAnother(reader, TipoProposicao.class);
-			if (au != null && au.getNome() != null && au.getNome() != null) {
-				return au.getNome();
-			} else {
-				return "";
-			}
-
-		}
-		return reader.getValue();
-	}
-}
-
-class AuthorConverter implements Converter {
-
-	@Override
-	public boolean canConvert(Class type) {
-		return String.class.equals(type);
-	}
-
-	@Override
-	public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
-		// Desnecessario, somente parseia XML->Objetos
-
-	}
-
-	@Override
-	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-		if ("autor1".equals(reader.getNodeName())) {
-			Autor au = (Autor) context.convertAnother(reader, Autor.class);
-			if (au != null && au.txtNomeAutor != null && au.txtNomeAutor != null) {
-				return au.txtNomeAutor;
-			} else {
-				return "";
-			}
-
-		}
-		return reader.getValue();
-	}
-}
-
-class OrgaoNumerador {
-	String sigla;
-	String nome;
-}
-
-class ComissaoConverter implements Converter {
-
-	@Override
-	public boolean canConvert(Class type) {
-		return String.class.equals(type);
-	}
-
-	@Override
-	public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
-		// Desnecessario, somente parseia XML->Objetos
-
-	}
-
-	@Override
-	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-		if ("orgaoNumerador".equals(reader.getNodeName())) {
-			OrgaoNumerador au = (OrgaoNumerador) context.convertAnother(reader, OrgaoNumerador.class);
-			if (au != null && au.sigla != null && au.sigla != null) {
-				return au.sigla;
-			} else {
-				return "";
-			}
-
-		}
-		return reader.getValue();
-	}
-}
-
-class ListProposicaoLazy extends CollectionLazyConverter<Proposicao, Proposicao> {
-
-	public ListProposicaoLazy(List<Proposicao> materias) {
-		super(materias);
-	}
-
-	@Override
-	protected Proposicao convertKtoE(Proposicao proposicao) {
-		proposicao.setOrigem(Origem.CAMARA);
-		proposicao.setLinkProposicao("http://www.camara.gov.br/proposicoesWeb/fichadetramitacao?idProposicao="
-				+ proposicao.getIdProposicao());
-		return proposicao;
-	}
-
 }

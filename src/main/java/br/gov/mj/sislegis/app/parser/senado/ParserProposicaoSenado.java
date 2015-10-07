@@ -1,19 +1,21 @@
-package br.gov.mj.sislegis.app.parser.senado.proposicao;
+package br.gov.mj.sislegis.app.parser.senado;
 
 import java.io.IOException;
-import java.util.AbstractCollection;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
-import br.gov.mj.sislegis.app.parser.CollectionLazyConverter;
 import br.gov.mj.sislegis.app.parser.ParserFetcher;
 import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
+import br.gov.mj.sislegis.app.parser.senado.xstream.DetalheMateria;
+import br.gov.mj.sislegis.app.parser.senado.xstream.ListMateriaClass;
+import br.gov.mj.sislegis.app.parser.senado.xstream.ListaSubtiposMateria;
+import br.gov.mj.sislegis.app.parser.senado.xstream.Materia;
+import br.gov.mj.sislegis.app.parser.senado.xstream.PesquisaBasicaMateria;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 import com.thoughtworks.xstream.XStream;
@@ -36,37 +38,20 @@ public class ParserProposicaoSenado implements ProposicaoSearcher {
 
 		DetalheMateria detalheMateria = new DetalheMateria();
 
-		config(xstream);
+		DetalheMateria.configXstream(xstream);
 		ParserFetcher.fetchXStream(wsURL, xstream, detalheMateria);
 
 		Proposicao proposicao = new Proposicao();
 
-		proposicao = detalheMateria.getProposicoes().isEmpty() ? proposicao : detalheMateria.getProposicoes().get(0);
+		proposicao = detalheMateria.getProposicao();
+		if (proposicao == null) {
+			proposicao = new Proposicao();
+		}
 		proposicao.setOrigem(Origem.SENADO);
 		proposicao.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate="
 				+ proposicao.getIdProposicao());
 
 		return proposicao;
-	}
-
-	private static void config(XStream xstream) {
-		xstream.alias("DetalheMateria", DetalheMateria.class);
-		xstream.alias("Materia", Proposicao.class);
-		// Conversao de tipos Autoria e Autor
-		xstream.alias("Autoria", Autoria.class);
-		xstream.alias("Autor", Autor.class);
-
-		xstream.aliasField("Materias", DetalheMateria.class, "proposicoes");
-
-		xstream.aliasField("Codigo", Proposicao.class, "idProposicao");
-		xstream.aliasField("Subtipo", Proposicao.class, "tipo");
-		xstream.aliasField("Numero", Proposicao.class, "numero");
-		xstream.aliasField("Ano", Proposicao.class, "ano");
-		xstream.aliasField("Ementa", Proposicao.class, "ementa");
-		// Forcar o tratamento de autoria como string
-		xstream.aliasField("Autoria", Proposicao.class, "autor");
-		xstream.registerLocalConverter(Proposicao.class, "autor", new AuthorConverter());
-
 	}
 
 	@Override
@@ -80,7 +65,7 @@ public class ParserProposicaoSenado implements ProposicaoSearcher {
 		ListaSubtiposMateria.configXstream(xstream);
 
 		ParserFetcher.fetchXStream(wsUrl, xstream, list);
-		return list.SubtiposMateria.subtipos;
+		return list.getTiposProposicao();
 	}
 
 	/**
@@ -109,24 +94,11 @@ public class ParserProposicaoSenado implements ProposicaoSearcher {
 
 		ParserFetcher.fetchXStream(wsURL.toString(), xstream, pesquisaMateria);
 		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
-				"Descricao do data set retornado:  '" + pesquisaMateria.descricaoDataSet + "'");
+				"Descricao do data set retornado:  '" + pesquisaMateria.getDescricaoResposta() + "'");
 
-		List<Materia> listMaterias = pesquisaMateria.materias.materias;
+		List<Materia> listMaterias = pesquisaMateria.getMaterias();
 		Collection<Proposicao> listProposicao = new ListMateriaClass(listMaterias);
 
 		return listProposicao;
 	}
-}
-
-class ListMateriaClass extends CollectionLazyConverter<Proposicao, Materia> {
-
-	public ListMateriaClass(List<Materia> materias) {
-		super(materias);
-	}
-
-	@Override
-	protected Proposicao convertKtoE(Materia next) {
-		return next.toProposicao();
-	}
-
 }

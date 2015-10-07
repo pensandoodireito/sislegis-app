@@ -37,7 +37,7 @@ import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
 import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
 import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserPlenarioSenado;
-import br.gov.mj.sislegis.app.parser.senado.proposicao.ParserProposicaoSenado;
+import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
