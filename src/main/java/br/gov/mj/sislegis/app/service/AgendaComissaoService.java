@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.ejb.Local;
 
-import br.gov.mj.sislegis.app.model.Casa;
+import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 
@@ -17,9 +17,9 @@ import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 @Local
 public interface AgendaComissaoService extends Service<AgendaComissao> {
 
-	AgendaComissao getAgenda(Casa casa, String comissao);
+	AgendaComissao getAgenda(Origem casa, String comissao);
 
-	AgendaComissao getAgenda(Casa casa, String comissao, boolean loadSessoes);
+	AgendaComissao getAgenda(Origem casa, String comissao, boolean loadSessoes);
 
 	void atualizaStatusAgendas();
 
@@ -27,8 +27,8 @@ public interface AgendaComissaoService extends Service<AgendaComissao> {
 
 	List<AgendaComissao> listAgendasSeguidas();
 
-	void followComissao(Casa casa, String comissao, Usuario user);
+	void followComissao(Origem casa, String comissao, Usuario user);
 
-	void unfollowComissao(Casa casa, String comissao, Usuario user);
+	void unfollowComissao(Origem casa, String comissao, Usuario user);
 
 }

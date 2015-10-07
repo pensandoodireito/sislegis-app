@@ -13,7 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import br.gov.mj.sislegis.app.model.Casa;
+import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
@@ -40,7 +40,7 @@ public class AgendaComissaoEndpoint {
 			@HeaderParam("Authorization") String authorization) {
 		try {
 			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
-			service.followComissao(Casa.valueOf(casa), comissao, user);
+			service.followComissao(Origem.valueOf(casa), comissao, user);
 			return Response.noContent().build();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -55,7 +55,7 @@ public class AgendaComissaoEndpoint {
 			@HeaderParam("Authorization") String authorization) {
 		try {
 			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
-			service.unfollowComissao(Casa.valueOf(casa), comissao, user);
+			service.unfollowComissao(Origem.valueOf(casa), comissao, user);
 			return Response.noContent().build();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -64,15 +64,13 @@ public class AgendaComissaoEndpoint {
 
 	}
 
-	
-
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response listAll(@HeaderParam("Authorization") String authorization) throws Exception {
 		try {
 			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
 			user = usuarioService.loadComAgendasSeguidas(user.getId());
-			
+
 			return Response.ok(user.getAgendasSeguidas()).build();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -88,7 +86,7 @@ public class AgendaComissaoEndpoint {
 		try {
 			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
 
-			AgendaComissao agenda = service.getAgenda(Casa.valueOf(casa), comissao.trim(), true);
+			AgendaComissao agenda = service.getAgenda(Origem.valueOf(casa), comissao.trim(), true);
 			if (agenda == null) {
 				return Response.noContent().build();
 			} else {
