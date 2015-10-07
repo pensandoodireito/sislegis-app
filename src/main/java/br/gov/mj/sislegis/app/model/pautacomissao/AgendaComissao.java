@@ -23,13 +23,12 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
-import javax.xml.bind.annotation.XmlElement;
+
+import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.AbstractEntity;
+import br.gov.mj.sislegis.app.model.Usuario;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import br.gov.mj.sislegis.app.model.AbstractEntity;
-import br.gov.mj.sislegis.app.model.Casa;
-import br.gov.mj.sislegis.app.model.Usuario;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = { "comissao", "casa" }))
@@ -81,7 +80,7 @@ public class AgendaComissao implements Serializable, AbstractEntity {
 
 	@Column
 	@Enumerated(EnumType.STRING)
-	private Casa casa;
+	private Origem casa;
 
 	@OneToMany(targetEntity = br.gov.mj.sislegis.app.model.pautacomissao.Sessao.class, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE }, orphanRemoval = true, mappedBy = "agenda")
@@ -92,7 +91,7 @@ public class AgendaComissao implements Serializable, AbstractEntity {
 		return sessoes;
 	}
 
-	public Casa getCasa() {
+	public Origem getCasa() {
 		return casa;
 	}
 
@@ -100,7 +99,7 @@ public class AgendaComissao implements Serializable, AbstractEntity {
 
 	}
 
-	public AgendaComissao(Casa casa, String comissao, Date date) {
+	public AgendaComissao(Origem casa, String comissao, Date date) {
 		this.casa = casa;
 		this.comissao = comissao;
 		this.dataReferencia = date;

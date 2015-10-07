@@ -26,7 +26,7 @@ import javax.persistence.PersistenceContext;
 
 import org.apache.commons.mail.EmailException;
 
-import br.gov.mj.sislegis.app.model.Casa;
+import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
@@ -43,7 +43,7 @@ import br.gov.mj.sislegis.app.util.SislegisUtil;
 /**
  * Implementa o gerenciamento de agendas de comissoes seguidas
  * 
- * @author sislegis
+ * @author coutinho
  *
  */
 @Singleton
@@ -69,12 +69,12 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 	}
 
 	@Override
-	public AgendaComissao getAgenda(Casa casa, String comissao) {
+	public AgendaComissao getAgenda(Origem casa, String comissao) {
 		return getAgenda(casa, comissao, false);
 	}
 
 	@Override
-	public AgendaComissao getAgenda(Casa casa, String comissao, boolean forceload) {
+	public AgendaComissao getAgenda(Origem casa, String comissao, boolean forceload) {
 
 		try {
 			AgendaComissao agenda = (AgendaComissao) em.createNamedQuery("getByCasaComissao")
@@ -127,7 +127,7 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 	}
 
 	@Override
-	public void unfollowComissao(Casa casa, String comissao, Usuario user) {
+	public void unfollowComissao(Origem casa, String comissao, Usuario user) {
 		AgendaComissao agenda = getAgenda(casa, comissao);
 		if (agenda == null) {
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).warning(
@@ -140,7 +140,7 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 	}
 
 	@Override
-	public void followComissao(Casa casa, String comissao, Usuario user) {
+	public void followComissao(Origem casa, String comissao, Usuario user) {
 		AgendaComissao agenda = getAgenda(casa, comissao);
 		if (agenda == null) {
 			agenda = new AgendaComissao(casa, comissao, getNextMonday().getTime());
@@ -182,7 +182,7 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 	 * Se é a 1a vez que essa agenda está sendo seguida, ou houver mudança de
 	 * semana, nenhum email é enviado.
 	 */
-	@Schedule(minute = "*", hour = "*", persistent = false, info = "Atualiza status pautas")
+	@Schedule(minute = "*/5", hour = "*", persistent = false, info = "Atualiza status pautas")
 	public void atualizaStatusAgendas() {
 		Set<AgendaComissao> atualizadas = new HashSet<AgendaComissao>();
 		Calendar nextMonday = getNextMonday();
@@ -209,7 +209,9 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 				}
 
 				List<ReuniaoBean> reunioes = new ArrayList<ReuniaoBean>();
-				if (Casa.CAMARA.equals(agenda.getCasa())) {
+				switch (agenda.getCasa()) {
+				case CAMARA:
+
 					Comissao comissaoCamara = getComissaoCamara(agenda.getComissao(), comissoesCamara);
 					if (comissaoCamara == null) {
 						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).severe(
@@ -217,9 +219,18 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 						continue;
 					}
 					reunioes.addAll(parserCamara.getReunioes(comissaoCamara.getId(), semanaDo, semanaAte));
-				} else {
-					reunioes.addAll(parserSenado.getReunioes(agenda.getComissao(), semanaDo));
+
+					break;
+				case SENADO:
+
+					reunioes.addAll(parserSenado.getReunioes(agenda.getComissao(), semanaDo, semanaAte));
+
+					break;
+				default:
+					throw new IllegalArgumentException("Origem invalida");
+
 				}
+
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info(
 						"Atualizando " + agenda.getComissao() + " há " + reunioes.size() + " reunioes");
 

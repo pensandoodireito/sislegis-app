@@ -41,15 +41,26 @@ public class ParserPautaSenado {
 	}
 
 	public List<ReuniaoBeanSenado> getReunioes(String siglaComissao, String datIni) throws Exception {
-		String wsURL = "http://legis.senado.leg.br/dadosabertos/agenda/" + datIni + "?colegiado=" + siglaComissao;
-		
+		return getReunioes(siglaComissao, datIni, null);
+	}
+
+	public List<ReuniaoBeanSenado> getReunioes(String siglaComissao, String datIni, String dataFim) throws Exception {
+
+		StringBuilder wsURL = new StringBuilder("http://legis.senado.leg.br/dadosabertos/agenda/");
+		wsURL.append(datIni);
+		if (dataFim != null) {
+			wsURL.append("/");
+			wsURL.append(datIni);
+		}
+		wsURL.append("?colegiado=").append(siglaComissao);
+
 		XStream xstreamAgenda = new XStream();
 		xstreamAgenda.ignoreUnknownElements();
 
 		ListaReunioes reunioes = new ListaReunioes();
 
 		configAgenda(xstreamAgenda);
-		ParserFetcher.fetchXStream(wsURL, xstreamAgenda, reunioes);
+		ParserFetcher.fetchXStream(wsURL.toString(), xstreamAgenda, reunioes);
 
 		return reunioes.getReunioes();
 	}
@@ -62,7 +73,6 @@ public class ParserPautaSenado {
 		xstream.aliasField("Tipo", ReuniaoBeanSenado.class, "tipo");
 		xstream.aliasField("Situacao", ReuniaoBeanSenado.class, "situacao");
 		xstream.aliasField("TituloDaReuniao", ReuniaoBeanSenado.class, "titulo");
-		
 
 		xstream.addImplicitCollection(ListaReunioes.class, "reunioes");
 
