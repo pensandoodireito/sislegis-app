@@ -100,4 +100,12 @@ public class TarefaEndpoint {
 
 		return Response.noContent().build();
 	}
+
+	@POST
+	@Path("/marcarVisualizadas")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response marcarComoVisualizadas(List<Long> idTarefas, @HeaderParam("Referer") String referer){
+		tarefaService.marcarComoVisualizadas(idTarefas);
+		return Response.noContent().build();
+	}
 }
