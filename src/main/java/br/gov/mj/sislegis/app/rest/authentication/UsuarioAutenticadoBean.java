@@ -36,9 +36,8 @@ public class UsuarioAutenticadoBean {
 	void init() {
 		JSONObject keycloakConfig = new JSONObject(KeyCloakGenerated.conf);
 		StringBuffer url = new StringBuffer();
-		url.append(keycloakConfig.getString("auth-server-url"));
-		url.append("/realms/").append(keycloakConfig.getString("realm"))
-				.append("/protocol/openid-connect/userinfo");
+		url.append(keycloakConfig.getString("auth-server-url-for-backend-requests"));
+		url.append("/realms/").append(keycloakConfig.getString("realm")).append("/protocol/openid-connect/userinfo");
 		keycloakURL = url.toString();
 
 	}
@@ -53,13 +52,11 @@ public class UsuarioAutenticadoBean {
 		return novoUsuario;
 	}
 
-	public Usuario carregaUsuarioAutenticado(String authorization)
-			throws IOException {
+	public Usuario carregaUsuarioAutenticado(String authorization) throws IOException {
 		JSONObject jsonUser = null;
 
 		jsonUser = buscaDadosUsuarioDoKeycloak(authorization);
-		Usuario authenticatedUser = usuarioService.findByEmail(jsonUser
-				.getString("email"));
+		Usuario authenticatedUser = usuarioService.findByEmail(jsonUser.getString("email"));
 		if (authenticatedUser == null) {
 			authenticatedUser = criaUsuario(jsonUser);
 		}
@@ -75,32 +72,27 @@ public class UsuarioAutenticadoBean {
 	 * @return
 	 * @throws IOException
 	 */
-	private JSONObject buscaDadosUsuarioDoKeycloak(String authorization)
-			throws IOException {
+	private JSONObject buscaDadosUsuarioDoKeycloak(String authorization) throws IOException {
 		JSONObject jsonUser = null;
 		HttpClient client = new DefaultHttpClient();
 		try {
 			HttpGet get = new HttpGet(keycloakURL);
 			get.addHeader("Authorization", authorization);
-			try {
-				HttpResponse response = client.execute(get);
-				if (response.getStatusLine().getStatusCode() != 200) {
-					throw new IOException(
-							"Não foi possível obter dados do usuáro logado. Http Status: "
-									+ response.getStatusLine().getStatusCode());
-				}
-				HttpEntity httpEntity = response.getEntity();
-
-				InputStream is = httpEntity.getContent();
-				try {
-					jsonUser = new JSONObject(IOUtils.toString(is, "UTF-8"));
-
-				} finally {
-					is.close();
-				}
-			} catch (Exception e) {
-				throw new IOException(e);
+			HttpResponse response = client.execute(get);
+			if (response.getStatusLine().getStatusCode() != 200) {
+				throw new IOException("Não foi possível obter dados do usuáro logado. Http Status: "
+						+ response.getStatusLine().getStatusCode());
 			}
+			HttpEntity httpEntity = response.getEntity();
+
+			InputStream is = httpEntity.getContent();
+			try {
+				jsonUser = new JSONObject(IOUtils.toString(is, "UTF-8"));
+
+			} finally {
+				is.close();
+			}
+
 		} finally {
 			client.getConnectionManager().shutdown();
 		}
