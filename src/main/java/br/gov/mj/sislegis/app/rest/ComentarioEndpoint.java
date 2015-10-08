@@ -47,11 +47,9 @@ public class ComentarioEndpoint {
 
 	@Inject
 	private ComentarioService comentarioService;
-	@Inject
-	private UsuarioService usuarioService;
 
 	@Inject
-	UsuarioAutenticadoBean controleUsuarioAutenticado;
+	private UsuarioAutenticadoBean controleUsuarioAutenticado;
 
 	public ComentarioEndpoint() {
 		super();
@@ -71,9 +69,8 @@ public class ComentarioEndpoint {
 			e.printStackTrace();
 			return Response.status(Response.Status.FORBIDDEN).build();
 		}  catch (IOException e) {
-			// TODO O que fazer???
 			e.printStackTrace();
-			return Response.status(Response.Status.BAD_REQUEST).build();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 		}
 		return Response.created(
 				UriBuilder.fromResource(ComentarioEndpoint.class)
@@ -135,7 +132,7 @@ public class ComentarioEndpoint {
 		} catch (IOException e) {
 			// TODO O que fazer???
 			e.printStackTrace();
-			return Response.status(Response.Status.BAD_REQUEST).build();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 		}
 
 		return Response.noContent().build();
