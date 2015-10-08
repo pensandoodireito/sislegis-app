@@ -5,9 +5,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -31,6 +33,7 @@ import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.Sessao;
+import br.gov.mj.sislegis.app.model.pautacomissao.SituacaoSessao;
 import br.gov.mj.sislegis.app.parser.ReuniaoBean;
 import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
 import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
@@ -240,9 +243,6 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 					Sessao sessaoWS = reuniaoBean.getSessao();
 					Sessao sessaoDb = null;
 
-					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine(
-							" procurarndo '" + sessaoWS.getIdentificadorExterno() + "' " + agenda.getSessoes().size()
-									+ " " + sessoes.size());
 					for (Iterator<Sessao> iterator = sessoes.iterator(); iterator.hasNext();) {
 						Sessao sess = (Sessao) iterator.next();
 
@@ -262,35 +262,53 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 							sessaoDb.popula(sessaoWS);
 							agenda.addSessao(sessaoDb);
 							agenda.setPautasAtualizadas();
-							atualizadas.add(agenda);
+							if (SituacaoSessao.Agendada.equals(sessaoWS.getSituacao())) {
+								atualizadas.add(agenda);
+							}
 						}
 
 					}
 				}
 				agenda.setConsultada();
 				if (atualizadas.contains(agenda)) {
-					agenda.setPautasAtualizadas();
 					notifyUsuariosPautaMudou(agenda);
 				}
 				save(agenda);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Erro checando agendas externas ", e);
 		}
 
 	}
 
-	// TODO mudar de List para HashMap
+	private Map<String, Comissao> mapComissao = null;
+	private Object mutexMap = new Object();
+
+	/**
+	 * Retorna um objeto Comissao baseado na sua sigla. Na primeira utilização
+	 * cria-se um Map para tornar mais rápidas as subsequentes.
+	 * 
+	 * @param comissao
+	 * @param comissoesCamara
+	 * @return
+	 */
 	private Comissao getComissaoCamara(String comissao, List<Comissao> comissoesCamara) {
-		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Procurando '" + comissao + "'");
-		for (Iterator<Comissao> iterator = comissoesCamara.iterator(); iterator.hasNext();) {
-			Comissao comissaoCamara = (Comissao) iterator.next();
-			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("comissaoCamara '" + comissaoCamara.getSigla() + "'");
-			if (comissaoCamara.getSigla().trim().equals(comissao)) {
-				return comissaoCamara;
+		if (mapComissao == null) {
+			synchronized (mutexMap) {
+				if (mapComissao == null) {
+					mapComissao = new HashMap<String, Comissao>();
+					for (Iterator<Comissao> iterator = comissoesCamara.iterator(); iterator.hasNext();) {
+						Comissao comissaoCamara = (Comissao) iterator.next();
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine(
+								"comissaoCamara '" + comissaoCamara.getSigla() + "'");
+						mapComissao.put(comissaoCamara.getSigla().trim(), comissaoCamara);
+					}
+				}
 			}
 		}
-		return null;
+		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Procurando '" + comissao + "'");
+		return mapComissao.get(comissao.trim());
 	}
 
 	/**
