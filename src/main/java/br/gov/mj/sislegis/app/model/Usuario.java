@@ -13,6 +13,8 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 
 @Entity
@@ -36,8 +38,13 @@ public class Usuario implements AbstractEntity {
 	@JoinTable(name = "Usuario_Agendas")
 	private Set<AgendaComissao> agendasSeguidas = new HashSet<AgendaComissao>();
 
+	@JsonIgnore
 	public Set<AgendaComissao> getAgendasSeguidas() {
-		return agendasSeguidas;
+		if (agendasSeguidas == null) {
+			return new HashSet<AgendaComissao>();
+		} else {
+			return agendasSeguidas;
+		}
 	}
 
 	public void addAgendaSeguida(AgendaComissao ag) {

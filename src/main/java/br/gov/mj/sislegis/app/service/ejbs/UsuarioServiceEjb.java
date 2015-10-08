@@ -2,9 +2,11 @@ package br.gov.mj.sislegis.app.service.ejbs;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.annotation.Resource;
 import javax.ejb.Stateless;
+import javax.naming.CommunicationException;
 import javax.naming.InitialContext;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -20,6 +22,7 @@ import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.UsuarioService;
+import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 @Stateless
 public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implements UsuarioService {
@@ -133,8 +136,22 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 
 		} catch (NamingException e) {
 
-			e.printStackTrace();
-			// TODO checar quais excecoes notificamos
+			try {
+				if (e.getRootCause().getCause().getCause().getCause() instanceof CommunicationException) {
+					if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.FINE)) {
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
+								"Não foi possível carregar o recurso do LDAP. Sua rede pode acessar o LDAP do MJ?");
+					} else {
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
+								"Não foi possível carregar o recurso do LDAP. Sua rede pode acessar o LDAP do MJ?", e);
+					}
+				}else{
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Houve um erro consultando o LDAP", e);	
+				}
+			} catch (Exception e1) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Houve um erro consultando o LDAP", e);
+			}
+
 		}
 		return usuarios;
 	}
