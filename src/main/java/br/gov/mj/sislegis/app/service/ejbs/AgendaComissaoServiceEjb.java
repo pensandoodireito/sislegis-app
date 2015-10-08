@@ -277,6 +277,7 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Erro checando agendas externas ", e);
 		}
 
 	}
