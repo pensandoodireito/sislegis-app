@@ -5,8 +5,10 @@ import java.util.List;
 
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
+import javax.naming.InitialContext;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.persistence.EntityManager;
@@ -15,6 +17,7 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.UsuarioService;
 
@@ -31,7 +34,8 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 		controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 		controls.setTimeLimit(1000);// maximo 1 segundo de espera
 		controls.setCountLimit(20); // maximo 20 resultados
-		controls.setReturningAttributes(new String[] { "cn", "userPrincipalName", "displayName", "department", "sAMAccountName" });
+		controls.setReturningAttributes(new String[] { "cn", "userPrincipalName", "displayName", "department",
+				"sAMAccountName" });
 	}
 
 	@Override
@@ -41,11 +45,13 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 
 	@Override
 	public Usuario findByEmail(String email) {
-		TypedQuery<Usuario> findByIdQuery = em.createQuery("SELECT u FROM Usuario u WHERE upper(u.email) like upper(:email) ORDER BY u.email ASC", Usuario.class);
+		TypedQuery<Usuario> findByIdQuery = em.createQuery(
+				"SELECT u FROM Usuario u WHERE upper(u.email) like upper(:email) ORDER BY u.email ASC", Usuario.class);
 		findByIdQuery.setParameter("email", email);
 
 		try {
-			return findByIdQuery.getSingleResult();
+			Usuario user = findByIdQuery.getSingleResult();
+			return user;
 		} catch (javax.persistence.NoResultException e) {
 			// no execption just return null
 			return null;
@@ -54,8 +60,19 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 	}
 
 	@Override
+	public List<Usuario> listUsuariosSeguidoresDeComissao(AgendaComissao agenda) {
+		TypedQuery<Usuario> findByIdQuery = em.createQuery(
+				"SELECT u FROM Usuario u join u.agendasSeguidas agendas where agendas.id=:idAgenda", Usuario.class);
+
+		findByIdQuery.setParameter("idAgenda", agenda.getId());
+		return findByIdQuery.getResultList();
+
+	}
+
+	@Override
 	public List<Usuario> findByNome(String nome) {
-		TypedQuery<Usuario> findByIdQuery = em.createQuery("SELECT u FROM Usuario u WHERE upper(u.nome) like upper(:nome) ORDER BY u.nome ASC", Usuario.class);
+		TypedQuery<Usuario> findByIdQuery = em.createQuery(
+				"SELECT u FROM Usuario u WHERE upper(u.nome) like upper(:nome) ORDER BY u.nome ASC", Usuario.class);
 		findByIdQuery.setParameter("nome", "%" + nome + "%");
 		return findByIdQuery.getResultList();
 	}
@@ -63,7 +80,10 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 	@Override
 	public List<Usuario> findByIdEquipe(Long idEquipe) {
 
-		Query query = em.createNativeQuery("SELECT u.* FROM Usuario u " + " inner join equipe_usuario eu on u.id = eu.usuario_id " + " inner join Equipe e on e.id = eu.equipe_id " + "	WHERE e.id = :idEquipe ORDER BY u.nome ASC", Usuario.class);
+		Query query = em.createNativeQuery("SELECT u.* FROM Usuario u "
+				+ " inner join equipe_usuario eu on u.id = eu.usuario_id "
+				+ " inner join Equipe e on e.id = eu.equipe_id " + "	WHERE e.id = :idEquipe ORDER BY u.nome ASC",
+				Usuario.class);
 		query.setParameter("idEquipe", idEquipe);
 		List<Usuario> usuarios = query.getResultList();
 
@@ -90,15 +110,17 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 	 * 
 	 * </pre>
 	 */
-	@Resource(lookup = "java:global/federation/ldap/mjldap")
+	// @Resource(lookup = "java:global/federation/ldap/mjldap")
 	private javax.naming.directory.InitialDirContext ldapContext;
 
 	@Override
 	public List<Usuario> findByNomeOnLDAP(String nome) {
 		List<Usuario> usuarios = new ArrayList<Usuario>();
 		try {
+			ldapContext = (InitialDirContext) InitialContext.doLookup("java:global/federation/ldap/mjldap");
 
-			NamingEnumeration<SearchResult> results = ldapContext.search("OU=SISLEGIS", "(&(objectclass=person)(cn=" + nome + "*))", controls);
+			NamingEnumeration<SearchResult> results = ldapContext.search("OU=SISLEGIS", "(&(objectclass=person)(cn="
+					+ nome + "*))", controls);
 			if (results.hasMoreElements()) {
 				while (results.hasMoreElements()) {
 					SearchResult searchResult = (SearchResult) results.nextElement();
@@ -115,6 +137,13 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 			// TODO checar quais excecoes notificamos
 		}
 		return usuarios;
+	}
+
+	@Override
+	public Usuario loadComAgendasSeguidas(Long id) {
+		Usuario user = findById(id);
+		user.getAgendasSeguidas().size();
+		return user;
 	}
 
 }
