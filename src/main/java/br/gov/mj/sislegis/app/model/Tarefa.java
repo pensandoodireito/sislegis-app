@@ -52,6 +52,8 @@ public class Tarefa implements AbstractEntity {
 	@Transient
 	private ProposicaoJSON proposicao;
 
+	private boolean isVisualizada;
+
 	public Long getId() {
 		return this.id;
 	}
@@ -107,6 +109,14 @@ public class Tarefa implements AbstractEntity {
 
 	public void setProposicao(ProposicaoJSON proposicao) {
 		this.proposicao = proposicao;
+	}
+
+	public boolean isVisualizada() {
+		return isVisualizada;
+	}
+
+	public void setVisualizada(boolean isVisualizada) {
+		this.isVisualizada = isVisualizada;
 	}
 
 	@Override

@@ -1,22 +1,21 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-
-import org.apache.commons.mail.DefaultAuthenticator;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.HtmlEmail;
-
 import br.gov.mj.sislegis.app.json.ProposicaoJSON;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Tarefa;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.TarefaService;
 import br.gov.mj.sislegis.app.util.PropertiesUtil;
+import org.apache.commons.mail.DefaultAuthenticator;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.HtmlEmail;
+
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import java.util.List;
 
 @Stateless
 public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implements TarefaService {
@@ -149,4 +148,14 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 
 		return null;
 	}
+
+	@Override
+	public void marcarComoVisualizadas(List<Long> idTarefas) {
+		for (Long id : idTarefas){
+			Query query = em.createQuery("UPDATE Tarefa SET isVisualizada = TRUE WHERE id = :id", Tarefa.class);
+			query.setParameter("id", id);
+			query.executeUpdate();
+		}
+	}
+
 }
