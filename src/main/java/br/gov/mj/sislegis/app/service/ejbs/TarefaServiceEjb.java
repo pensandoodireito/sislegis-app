@@ -106,8 +106,8 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 
 	@Override
 	public List<Tarefa> buscarPorUsuario(Long idUsuario) {
-		TypedQuery<Tarefa> findByIdQuery = em.createQuery("SELECT t FROM Tarefa t "
-				+ "WHERE t.usuario.id = :idUsuario", Tarefa.class);
+		TypedQuery<Tarefa> findByIdQuery = em.createQuery(
+				"SELECT t FROM Tarefa t WHERE t.usuario.id = :idUsuario", Tarefa.class);
 		findByIdQuery.setParameter("idUsuario", idUsuario);
 		List<Tarefa> resultList = findByIdQuery.getResultList();
 
