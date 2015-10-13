@@ -537,17 +537,46 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	 */
 	class ChecaAlteracoesProposicao implements Comparator<Proposicao> {
 
-		String descricaoAlteracao = "";
+		StringBuilder descricaoAlteracao;
 
 		@Override
-		public int compare(Proposicao o1, Proposicao o2) {
-			descricaoAlteracao = "";
+		public int compare(Proposicao local, Proposicao remote) {
+			descricaoAlteracao = new StringBuilder();
+			if (!local.getAno().equals(remote.getAno())) {
+				descricaoAlteracao.append("Alterado ano: ").append(local.getAno()).append("=>").append(remote.getAno())
+						.append("\n");
+				local.setAno(remote.getAno());
+			}
+			
+			if (!local.getAutor().equals(remote.getAutor())) {
+				descricaoAlteracao.append("Alterado autor: ").append(local.getAutor()).append("=>").append(remote.getAutor())
+						.append("\n");
+				local.setAutor(remote.getAutor());
+			}
+			
+			if (!local.getEmenta().equals(remote.getEmenta())) {
+				descricaoAlteracao.append("Alterada ementa: ").append(local.getEmenta()).append("=>").append(remote.getEmenta())
+						.append("\n");
+				local.setEmenta(remote.getEmenta());
+			}
+			
+			if (!local.getNumero().equals(remote.getNumero())) {
+				descricaoAlteracao.append("Alterado número: ").append(local.getNumero()).append("=>")
+						.append(remote.getNumero()).append("\n");
+				local.setNumero(remote.getNumero());
+			}
+			
+			if (!local.getTipo().equals(remote.getTipo())) {
+				descricaoAlteracao.append("Alterado número: ").append(local.getNumero()).append("=>")
+						.append(remote.getNumero()).append("\n");
+				local.setNumero(remote.getNumero());
+			}
 
-			return 0;
+			return descricaoAlteracao.length();
 		}
 
 		public String getDescricaoAlteracao() {
-			return descricaoAlteracao;
+			return descricaoAlteracao.toString();
 		}
 	};
 

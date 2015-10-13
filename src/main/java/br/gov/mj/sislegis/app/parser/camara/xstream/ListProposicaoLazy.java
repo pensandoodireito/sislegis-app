@@ -12,14 +12,15 @@ import br.gov.mj.sislegis.app.parser.CollectionLazyConverter;
  * @author coutinho
  *
  */
-public class ListProposicaoLazy extends CollectionLazyConverter<Proposicao, Proposicao> {
+public class ListProposicaoLazy extends CollectionLazyConverter<Proposicao, ProposicaoWS> {
 
-	public ListProposicaoLazy(List<Proposicao> materias) {
+	public ListProposicaoLazy(List<ProposicaoWS> materias) {
 		super(materias);
 	}
 
 	@Override
-	protected Proposicao convertKtoE(Proposicao proposicao) {
+	protected Proposicao convertKtoE(ProposicaoWS proposicaoWS) {
+		Proposicao proposicao = proposicaoWS.toProposicao();
 		proposicao.setOrigem(Origem.CAMARA);
 		proposicao.setLinkProposicao("http://www.camara.gov.br/proposicoesWeb/fichadetramitacao?idProposicao="
 				+ proposicao.getIdProposicao());

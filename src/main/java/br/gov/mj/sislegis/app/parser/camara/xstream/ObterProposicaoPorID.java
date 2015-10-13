@@ -6,8 +6,11 @@ import br.gov.mj.sislegis.app.model.Proposicao;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+
 /**
- * XStream mapper de http://www.camara.gov.br/SitCamaraWS/Proposicoes.asmx?op=ObterProposicaoPorID
+ * XStream mapper de http://www.camara.gov.br/SitCamaraWS/Proposicoes.asmx?op=
+ * ObterProposicaoPorID
+ * 
  * @author rafael.coutinho
  *
  */
@@ -43,8 +46,6 @@ public class ObterProposicaoPorID {
 	@XStreamAlias("tema")
 	String tema;
 
-	
-
 	public static void config(XStream xstream) {
 		xstream.processAnnotations(ObterProposicaoPorID.class);
 	}
@@ -53,16 +54,16 @@ public class ObterProposicaoPorID {
 		Proposicao proposicao = new Proposicao();
 		proposicao.setAno(ano);
 		proposicao.setAutor(autor);
-//		proposicao.setComissao(comissao);
-		proposicao.setEmenta(ementa);
+		// proposicao.setComissao(comissao);
+		proposicao.setEmenta(ementa.trim());
 		proposicao.setIdProposicao(idProposicao);
-//		proposicao.setLinkProposicao(linkInteiroTeor);
+		// proposicao.setLinkProposicao(linkInteiroTeor);
 		proposicao.setLinkProposicao("http://www.camara.gov.br/proposicoesWeb/fichadetramitacao?idProposicao="
-		+ proposicao.getIdProposicao());
-		proposicao.setNumero(numero);		
+				+ proposicao.getIdProposicao());
+		proposicao.setNumero(numero);
 		proposicao.setOrigem(Origem.CAMARA);
 		proposicao.setTipo(tipo.trim());
-//		proposicao.setSigla(sigla);
+		proposicao.setSituacao(situacao.trim());
 		return proposicao;
 	}
 

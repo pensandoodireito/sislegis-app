@@ -33,13 +33,14 @@ public class Materia {
 		}
 		p.setOrigem(Origem.SENADO);
 		if (!situacaoAtual.autuacoes.autuacoes.isEmpty()) {
-
 			p.setComissao(situacaoAtual.autuacoes.autuacoes.get(0).Local.SiglaLocal);
+			p.setSituacao(situacaoAtual.autuacoes.autuacoes.get(0).Situacao.SiglaSituacao);
 		}
 
 		p.setEmenta(DadosBasicosMateria.EmentaMateria);
 		p.setIdProposicao(identificacaoMateria.CodigoMateria);
-		p.setSigla(identificacaoMateria.SiglaSubtipoMateria);
+
+		p.setTipo(identificacaoMateria.SiglaSubtipoMateria);
 
 		return p;
 

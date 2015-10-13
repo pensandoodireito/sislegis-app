@@ -51,6 +51,9 @@ public class Proposicao implements AbstractEntity {
 	private String numero;
 
 	@Column
+	private String situacao;
+
+	@Column
 	private String autor;
 
 	@Enumerated(EnumType.STRING)
@@ -367,12 +370,23 @@ public class Proposicao implements AbstractEntity {
 			result += ", comissao: " + comissao;
 		if (seqOrdemPauta != null)
 			result += ", seqOrdemPauta: " + seqOrdemPauta;
+		if (situacao != null)
+			result += ", situacao: " + situacao;
 		return result;
 	}
 
 	public void addAlteracao(AlteracaoProposicao altera) {
 		altera.setProposicao(this);
 		alteracoesProposicao.add(altera);
-		
+
 	}
+
+	public String getSituacao() {
+		return situacao;
+	}
+
+	public void setSituacao(String siglaSituacao) {
+		this.situacao = siglaSituacao;
+	}
+
 }

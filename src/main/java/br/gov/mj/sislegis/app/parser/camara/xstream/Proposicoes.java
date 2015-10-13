@@ -20,9 +20,9 @@ import com.thoughtworks.xstream.annotations.XStreamImplicit;
 @XStreamAlias("proposicoes")
 public class Proposicoes {
 	@XStreamImplicit(itemFieldName = "proposicao")
-	List<Proposicao> proposicoes = new ArrayList<Proposicao>();
+	List<ProposicaoWS> proposicoes = new ArrayList<ProposicaoWS>();
 
-	public List<Proposicao> getProposicoes() {
+	public List<ProposicaoWS> getProposicoes() {
 		return proposicoes;
 	}
 
@@ -30,21 +30,38 @@ public class Proposicoes {
 		xstream.processAnnotations(Proposicoes.class);
 		xstream.processAnnotations(Autor.class);
 		xstream.processAnnotations(OrgaoNumerador.class);
-		xstream.alias("tipoProposicao", TipoProposicao.class);
+		xstream.processAnnotations(ProposicaoWS.class);
+		xstream.processAnnotations(TipoProposicao.class);
+		xstream.processAnnotations(Autor.class);
 
-		xstream.aliasField("ano", Proposicao.class, "ano");
-		xstream.aliasField("id", Proposicao.class, "idProposicao");
+		Situacao.configXstream(xstream);
 
-		xstream.aliasField("numero", Proposicao.class, "numero");
-		xstream.aliasField("nome", Proposicao.class, "sigla");
-		xstream.aliasField("txtEmenta", Proposicao.class, "ementa");
-		xstream.aliasField("tipoProposicao", Proposicao.class, "tipo");
-		xstream.registerLocalConverter(Proposicao.class, "tipo", new TipoConverter());
-		xstream.aliasField("autor1", Proposicao.class, "autor");
-		xstream.registerLocalConverter(Proposicao.class, "autor", new AuthorConverter());
+	}
+}
 
-		xstream.aliasField("orgaoNumerador", Proposicao.class, "comissao");
-		xstream.registerLocalConverter(Proposicao.class, "comissao", new ComissaoConverter());
+@XStreamAlias("proposicao")
+class ProposicaoWS {
+	TipoProposicao tipoProposicao;
+	String ano;
+	Integer id;
+	String numero;
+	String nome;
+	String txtEmenta;
+	Situacao situacao;
+	Autor autor1;
+	String orgaoNumerador;
 
+	public Proposicao toProposicao() {
+		Proposicao proposicao = new Proposicao();
+		proposicao.setAno(ano);
+		proposicao.setIdProposicao(id);
+		proposicao.setNumero(numero);
+		proposicao.setSigla(nome);
+		proposicao.setTipo(tipoProposicao.getNome());
+		proposicao.setEmenta(txtEmenta);
+		proposicao.setAutor(autor1.txtNomeAutor);
+		proposicao.setComissao(orgaoNumerador);
+		proposicao.setSituacao(situacao.orgao.siglaOrgaoEstado);
+		return proposicao;
 	}
 }

@@ -32,9 +32,14 @@ public class ParserProposicaoCamara implements ProposicaoSearcher {
 
 		Collection<Proposicao> prop = parser.searchProposicao("REQ", 41, 2015);
 		for (Iterator iterator = prop.iterator(); iterator.hasNext();) {
-			Proposicao proposicao = (Proposicao) iterator.next();
+			Proposicao proposicaoLista = (Proposicao) iterator.next();
+			Proposicao proposicaoId = parser.getProposicao(proposicaoLista.getIdProposicao().longValue());
+			System.out.println("Busca '"+proposicaoLista.toString());
+			System.out.println("PorId '"+proposicaoId);
+			if (!proposicaoId.toString().equals(proposicaoLista.toString())) {
+				System.err.println("Proposicoes sao diferntes dependendo do WS usado");
+			}
 
-			System.out.println(parser.getProposicao(proposicao.getIdProposicao().longValue()).toString());
 		}
 
 	}
