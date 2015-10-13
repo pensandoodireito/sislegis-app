@@ -11,7 +11,7 @@ import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.parser.ParserFetcher;
 import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
-import br.gov.mj.sislegis.app.parser.senado.xstream.DetalheMateria;
+import br.gov.mj.sislegis.app.parser.senado.xstream.DetalheMateriaV4;
 import br.gov.mj.sislegis.app.parser.senado.xstream.ListMateriaClass;
 import br.gov.mj.sislegis.app.parser.senado.xstream.ListaSubtiposMateria;
 import br.gov.mj.sislegis.app.parser.senado.xstream.Materia;
@@ -24,28 +24,31 @@ public class ParserProposicaoSenado implements ProposicaoSearcher {
 
 	public static void main(String[] args) throws Exception {
 		ParserProposicaoSenado parser = new ParserProposicaoSenado();
-		Long idProposicao = 24257L; // Informação que vem do filtro
-		System.out.println(parser.getProposicao(idProposicao).toString());
 		System.out.println(parser.listaTipos());
-		System.out.println(parser.searchProposicao("pls", null, 2013));
+		Collection<Proposicao> searchProps = parser.searchProposicao("pls", null, 2013);
+		System.out.println("Busca retornou " + searchProps.size() + " proposicoes");
+		Proposicao propLista = searchProps.iterator().next();
+		Proposicao propGet = parser.getProposicao(propLista.getIdProposicao().longValue());
+		System.out.println(propGet.toString());
+		System.out.println(propLista.toString());
 	}
 
-	public Proposicao getProposicao(Long idProposicao) throws Exception {
-		String wsURL = "http://legis.senado.leg.br/dadosabertos/materia/" + idProposicao + "?v=3";
+	@Override
+	public Proposicao getProposicao(Long idProposicao) throws IOException {
+		String wsURL = "http://legis.senado.leg.br/dadosabertos/materia/" + idProposicao + "?v=4";
 
 		XStream xstream = new XStream();
 		xstream.ignoreUnknownElements();
+		DetalheMateriaV4 detalhaMateria = new DetalheMateriaV4();
+		DetalheMateriaV4.configXstream(xstream);
 
-		DetalheMateria detalheMateria = new DetalheMateria();
-
-		DetalheMateria.configXstream(xstream);
-		ParserFetcher.fetchXStream(wsURL, xstream, detalheMateria);
+		ParserFetcher.fetchXStream(wsURL, xstream, detalhaMateria);
 
 		Proposicao proposicao = new Proposicao();
 
-		proposicao = detalheMateria.getProposicao();
+		proposicao = detalhaMateria.getProposicao();
 		if (proposicao == null) {
-			proposicao = new Proposicao();
+			throw new IOException("Nao foi possível parsera proposicao");
 		}
 		proposicao.setOrigem(Origem.SENADO);
 		proposicao.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate="

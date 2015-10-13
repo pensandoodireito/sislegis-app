@@ -16,6 +16,7 @@ import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 import br.gov.mj.sislegis.app.parser.camara.xstream.ListProposicaoLazy;
 import br.gov.mj.sislegis.app.parser.camara.xstream.ListaSigla;
+import br.gov.mj.sislegis.app.parser.camara.xstream.ObterProposicaoPorID;
 import br.gov.mj.sislegis.app.parser.camara.xstream.Proposicoes;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
@@ -29,13 +30,11 @@ public class ParserProposicaoCamara implements ProposicaoSearcher {
 		System.out.println(parser.getProposicao(idProposicao).toString());
 		System.out.println(parser.listaTipos());
 
-		Collection<Proposicao> prop = parser.searchProposicao("DIS", 41, 2015);
+		Collection<Proposicao> prop = parser.searchProposicao("REQ", 41, 2015);
 		for (Iterator iterator = prop.iterator(); iterator.hasNext();) {
 			Proposicao proposicao = (Proposicao) iterator.next();
-			System.out.println(proposicao);
-			System.out.println(proposicao.getIdProposicao());
-			System.out.println(proposicao.getComissao());
-			System.out.println(proposicao.getLinkProposicao());
+
+			System.out.println(parser.getProposicao(proposicao.getIdProposicao().longValue()).toString());
 		}
 
 	}
@@ -56,10 +55,8 @@ public class ParserProposicaoCamara implements ProposicaoSearcher {
 		wsURL.append("&datApresentacaoIni=&datApresentacaoFim=&idTipoAutor=&parteNomeAutor=&siglaPartidoAutor=&siglaUFAutor=&generoAutor=&codEstado=&codOrgaoEstado=&emTramitacao=&v=4");
 		XStream xstream = new XStream();
 		xstream.ignoreUnknownElements();
-
 		Proposicoes proposicoes = new Proposicoes();
 		Proposicoes.configXstream(xstream);
-		
 
 		Collection<Proposicao> listProposicao = new ArrayList<Proposicao>();
 		try {
@@ -75,24 +72,21 @@ public class ParserProposicaoCamara implements ProposicaoSearcher {
 		return listProposicao;
 	}
 
-	public Proposicao getProposicao(Long idProposicao) throws Exception {
+	public Proposicao getProposicao(Long idProposicao) throws IOException {
 		String wsURL = "http://www.camara.gov.br/SitCamaraWS/Proposicoes.asmx/ObterProposicaoPorID?idProp="
 				+ idProposicao;
 
 		XStream xstream = new XStream();
 		xstream.ignoreUnknownElements();
 
-		Proposicao proposicao = new Proposicao();
+		ObterProposicaoPorID obterProposicaoWS = new ObterProposicaoPorID();
+		ObterProposicaoPorID.config(xstream);
+		ParserFetcher.fetchXStream(wsURL, xstream, obterProposicaoWS);
 
-		config(xstream);
-		ParserFetcher.fetchXStream(wsURL, xstream, proposicao);
-
-		proposicao.setOrigem(Origem.CAMARA);
-		proposicao.setLinkProposicao("http://www.camara.gov.br/proposicoesWeb/fichadetramitacao?idProposicao="
-				+ proposicao.getIdProposicao());
-		return proposicao;
+		return obterProposicaoWS.toProposicao();
 	}
 
+	@Deprecated
 	private static void config(XStream xstream) {
 		xstream.alias("proposicao", Proposicao.class);
 

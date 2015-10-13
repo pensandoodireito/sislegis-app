@@ -3,6 +3,7 @@ package br.gov.mj.sislegis.app.service.ejbs;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,6 +26,7 @@ import br.gov.mj.sislegis.app.json.ComentarioJSON;
 import br.gov.mj.sislegis.app.json.EncaminhamentoProposicaoJSON;
 import br.gov.mj.sislegis.app.json.ProposicaoJSON;
 import br.gov.mj.sislegis.app.json.TagJSON;
+import br.gov.mj.sislegis.app.model.AlteracaoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
@@ -32,6 +34,8 @@ import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
 import br.gov.mj.sislegis.app.model.Tag;
 import br.gov.mj.sislegis.app.model.TagProposicao;
 import br.gov.mj.sislegis.app.model.TagProposicaoPK;
+import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
+import br.gov.mj.sislegis.app.parser.ProposicaoSearcherFactory;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
 import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
@@ -526,5 +530,40 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			throw new IllegalArgumentException("Origem não informada");
 		}
 
+	}
+
+	/**
+	 * Este comparador checa por alterações na proposição.
+	 */
+	class ChecaAlteracoesProposicao implements Comparator<Proposicao> {
+
+		String descricaoAlteracao = "";
+
+		@Override
+		public int compare(Proposicao o1, Proposicao o2) {
+			descricaoAlteracao = "";
+
+			return 0;
+		}
+
+		public String getDescricaoAlteracao() {
+			return descricaoAlteracao;
+		}
+	};
+
+	ChecaAlteracoesProposicao checadorAlteracoes = new ChecaAlteracoesProposicao();
+
+	@Override
+	public boolean syncDadosProposicao(Proposicao proposicaoLocal) throws IOException {
+		ProposicaoSearcher parser = ProposicaoSearcherFactory.getInstance(proposicaoLocal);
+		Proposicao proposicaoRemota = parser.getProposicao(proposicaoLocal.getId());
+		if (checadorAlteracoes.compare(proposicaoLocal, proposicaoRemota) != 0) {
+			AlteracaoProposicao altera = new AlteracaoProposicao(proposicaoLocal,
+					checadorAlteracoes.getDescricaoAlteracao(), new Date());
+			proposicaoLocal.addAlteracao(altera);
+			save(proposicaoLocal);
+
+		}
+		return false;
 	}
 }

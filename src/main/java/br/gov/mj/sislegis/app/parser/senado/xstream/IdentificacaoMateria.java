@@ -6,6 +6,8 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 class IdentificacaoMateria {
 
 	Integer CodigoMateria;
+	
+	String IndicadorTramitando;
 	String SiglaCasaIdentificacaoMateria;
 	String NomeCasaIdentificacaoMateria;
 	String SiglaSubtipoMateria;

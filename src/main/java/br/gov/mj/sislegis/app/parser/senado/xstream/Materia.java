@@ -9,12 +9,12 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @XStreamAlias("Materia")
 public class Materia {
 	@XStreamAlias("IdentificacaoMateria")
-	IdentificacaoMateria IdentificacaoMateria;
+	IdentificacaoMateria identificacaoMateria;
 	@XStreamAlias("DadosBasicosMateria")
 	DadosBasicosMateria DadosBasicosMateria;
 
 	@XStreamAlias("AutoresPrincipais")
-	AutoresPrincipais AutoresPrincipais;
+	AutoresPrincipais autoresPrincipais;
 
 	@XStreamAlias("SituacaoAtual")
 	SituacaoAtual situacaoAtual;
@@ -22,14 +22,14 @@ public class Materia {
 	@Override
 	public String toString() {
 
-		return IdentificacaoMateria.toString();
+		return identificacaoMateria.toString();
 	}
 
 	public Proposicao toProposicao() {
 		Proposicao p = new Proposicao();
-		p.setAno(IdentificacaoMateria.AnoMateria);
-		if (AutoresPrincipais != null && !AutoresPrincipais.autores.isEmpty()) {
-			p.setAutor(AutoresPrincipais.autores.get(0).NomeAutor);
+		p.setAno(identificacaoMateria.AnoMateria);
+		if (autoresPrincipais != null && !autoresPrincipais.autores.isEmpty()) {
+			p.setAutor(autoresPrincipais.autores.get(0).NomeAutor);
 		}
 		p.setOrigem(Origem.SENADO);
 		if (!situacaoAtual.autuacoes.autuacoes.isEmpty()) {
@@ -38,8 +38,8 @@ public class Materia {
 		}
 
 		p.setEmenta(DadosBasicosMateria.EmentaMateria);
-		p.setIdProposicao(IdentificacaoMateria.CodigoMateria);
-		p.setSigla(IdentificacaoMateria.SiglaSubtipoMateria);
+		p.setIdProposicao(identificacaoMateria.CodigoMateria);
+		p.setSigla(identificacaoMateria.SiglaSubtipoMateria);
 
 		return p;
 

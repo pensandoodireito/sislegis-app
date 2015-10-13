@@ -9,8 +9,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * XStream mapper para o serviço XSD:
  * http://legis.senado.gov.br/dadosabertos/dados/PesquisaBasicaMateriav4.xsd<br>
  * Documentacao:
- * http://legis.senado.gov.br/dadosabertos/docs/path__materia_pesquisa_lista
- * .html<br>
+ * http://legis.senado.gov.br/dadosabertos/docs/path__materia_pesquisa_lista.html<br>
  * 
  * @author coutinho
  *

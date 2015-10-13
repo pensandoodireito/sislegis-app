@@ -22,6 +22,7 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -55,8 +56,8 @@ public class Proposicao implements AbstractEntity {
 	@Enumerated(EnumType.STRING)
 	@Column
 	private Origem origem;
-	
-	@Column(length=2000)
+
+	@Column(length = 2000)
 	private String resultadoASPAR;
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "proposicao")
@@ -71,7 +72,7 @@ public class Proposicao implements AbstractEntity {
 	@Transient
 	private String sigla;
 
-	@Column(length=2000)
+	@Column(length = 2000)
 	private String ementa;
 
 	@Column
@@ -82,7 +83,7 @@ public class Proposicao implements AbstractEntity {
 
 	@Column
 	private Posicionamento posicionamento;
-	
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Usuario responsavel;
 
@@ -91,30 +92,28 @@ public class Proposicao implements AbstractEntity {
 
 	@Transient
 	private Set<Comentario> listaComentario = new HashSet<Comentario>();
-	
+
 	@Transient
 	private Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao = new HashSet<EncaminhamentoProposicao>();
-	
+
 	@Transient
 	private Reuniao reuniao;
-	
+
 	@Column(nullable = false)
 	private boolean isFavorita;
 
+	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.REMOVE }, mappedBy = "proposicao")
+	private Set<AlteracaoProposicao> alteracoesProposicao = new HashSet<AlteracaoProposicao>();
+
 	@ManyToMany(fetch = FetchType.EAGER, mappedBy = "proposicoesFilha")
 	private Set<Proposicao> proposicoesPai;
-	
-	
+
 	@ManyToMany(fetch = FetchType.EAGER)
-	@JoinTable(name = "proposicao_proposicao", 
-	            joinColumns = { @JoinColumn(name = "proposicao_id")}, 
-	            inverseJoinColumns={@JoinColumn(name="proposicao_id_filha")}) 
+	@JoinTable(name = "proposicao_proposicao", joinColumns = { @JoinColumn(name = "proposicao_id") }, inverseJoinColumns = { @JoinColumn(name = "proposicao_id_filha") })
 	private Set<Proposicao> proposicoesFilha;
-	
+
 	@ManyToMany(fetch = FetchType.EAGER)
-	@JoinTable(name = "proposicao_elaboracao_normativa", 
-				joinColumns = { @JoinColumn(name = "proposicao_id") }, 
-				inverseJoinColumns = { @JoinColumn(name = "elaboracao_normativa_id") })
+	@JoinTable(name = "proposicao_elaboracao_normativa", joinColumns = { @JoinColumn(name = "proposicao_id") }, inverseJoinColumns = { @JoinColumn(name = "elaboracao_normativa_id") })
 	private Set<ElaboracaoNormativa> elaboracoesNormativas;
 
 	public String getSigla() {
@@ -169,7 +168,7 @@ public class Proposicao implements AbstractEntity {
 	public void setNumero(String numero) {
 		this.numero = numero;
 	}
-	
+
 	public String getEmenta() {
 		return ementa;
 	}
@@ -254,8 +253,7 @@ public class Proposicao implements AbstractEntity {
 		return listaEncaminhamentoProposicao;
 	}
 
-	public void setListaEncaminhamentoProposicao(
-			Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao) {
+	public void setListaEncaminhamentoProposicao(Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao) {
 		this.listaEncaminhamentoProposicao = listaEncaminhamentoProposicao;
 	}
 
@@ -290,7 +288,7 @@ public class Proposicao implements AbstractEntity {
 	public void setResultadoASPAR(String resultadoASPAR) {
 		this.resultadoASPAR = resultadoASPAR;
 	}
-	
+
 	public boolean isFavorita() {
 		return isFavorita;
 	}
@@ -314,14 +312,17 @@ public class Proposicao implements AbstractEntity {
 	public void setProposicoesFilha(Set<Proposicao> proposicoesFilha) {
 		this.proposicoesFilha = proposicoesFilha;
 	}
-	
+
 	public Set<ElaboracaoNormativa> getElaboracoesNormativas() {
 		return elaboracoesNormativas;
 	}
 
-	public void setElaboracoesNormativas(
-			Set<ElaboracaoNormativa> elaboracoesNormativas) {
+	public void setElaboracoesNormativas(Set<ElaboracaoNormativa> elaboracoesNormativas) {
 		this.elaboracoesNormativas = elaboracoesNormativas;
+	}
+
+	public Set<AlteracaoProposicao> getAlteracoesProposicao() {
+		return alteracoesProposicao;
 	}
 
 	@Override
@@ -367,5 +368,11 @@ public class Proposicao implements AbstractEntity {
 		if (seqOrdemPauta != null)
 			result += ", seqOrdemPauta: " + seqOrdemPauta;
 		return result;
+	}
+
+	public void addAlteracao(AlteracaoProposicao altera) {
+		altera.setProposicao(this);
+		alteracoesProposicao.add(altera);
+		
 	}
 }

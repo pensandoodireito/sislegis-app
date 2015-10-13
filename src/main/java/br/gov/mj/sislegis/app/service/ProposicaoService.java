@@ -62,4 +62,17 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @return 1 se criou, 0 se já existia, -1 se houve erro.
 	 */
 	int salvarProposicaoIndependente(Proposicao proposicaoFromBusca);
+
+	/**
+	 * Consulta webservices por alterações na proposição passada. Se houver
+	 * atualiza com dados mais recentes e salva histórico.
+	 * 
+	 * @param proposicao
+	 *            a ser consultada
+	 * @return true se encontrou alguma mudança. Caso contrário false
+	 * @throws IOException
+	 *             quando algum erro acontece no acesso ao webservices
+	 * 
+	 */
+	boolean syncDadosProposicao(Proposicao proposicao) throws IOException;
 }
