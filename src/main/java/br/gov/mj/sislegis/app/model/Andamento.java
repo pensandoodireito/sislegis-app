@@ -8,7 +8,7 @@ import java.util.Date;
 
 @Entity
 @XmlRootElement
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties({"idProposicao"})
 public class Andamento implements AbstractEntity{
 
     @Id
