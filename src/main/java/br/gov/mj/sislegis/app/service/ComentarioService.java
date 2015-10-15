@@ -1,5 +1,6 @@
 package br.gov.mj.sislegis.app.service;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import javax.ejb.Local;
@@ -10,10 +11,15 @@ import br.gov.mj.sislegis.app.model.Usuario;
 
 @Local
 public interface ComentarioService extends Service<Comentario> {
-	public List<ComentarioJSON> findByProposicao(Long id);
 
-	public void salvarComentario(ComentarioJSON comentarioJSON, Usuario usuario) throws IllegalAccessException;
+	List<ComentarioJSON> findByProposicao(Long id);
 
-	public ComentarioJSON findByIdJSON(Long id);
+	List<ComentarioJSON> findByProposicao(Long idProposicao, Integer posicaoInicial, Integer limite);
+
+	BigInteger totalByProposicao(Long idProposicao);
+
+	void salvarComentario(ComentarioJSON comentarioJSON, Usuario usuario) throws IllegalAccessException;
+
+	ComentarioJSON findByIdJSON(Long id);
 
 }

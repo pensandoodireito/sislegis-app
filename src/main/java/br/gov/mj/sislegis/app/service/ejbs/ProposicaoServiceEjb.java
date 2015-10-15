@@ -295,7 +295,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		return listaProposicaoJSON;
 	}
 
-	public ProposicaoJSON populaProposicaoJSON(Proposicao proposicao) {
+	private ProposicaoJSON populaProposicaoJSON(Proposicao proposicao) {
 		ProposicaoJSON proposicaoJSON = new ProposicaoJSON(proposicao.getId(), proposicao.getIdProposicao(),
 				proposicao.getTipo(), proposicao.getAno(), proposicao.getNumero(), proposicao.getAutor(),
 				proposicao.getEmenta(), proposicao.getOrigem(), proposicao.getSigla(), proposicao.getComissao(),

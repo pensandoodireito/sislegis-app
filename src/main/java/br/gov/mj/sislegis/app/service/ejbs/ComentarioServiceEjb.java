@@ -1,5 +1,6 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -7,6 +8,7 @@ import java.util.Objects;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import br.gov.mj.sislegis.app.json.ComentarioJSON;
@@ -33,7 +35,7 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long>
 	}
 
 	public List<ComentarioJSON> findByProposicao(Long id) {
-		List<ComentarioJSON> lista = new ArrayList<ComentarioJSON>();
+		List<ComentarioJSON> lista = new ArrayList<>();
 		TypedQuery<Comentario> findByIdQuery = em
 				.createQuery(
 						"SELECT DISTINCT c FROM Comentario c "
@@ -49,6 +51,40 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long>
 
 		}
 		return lista;
+	}
+
+	@Override
+	public List<ComentarioJSON> findByProposicao(Long idProposicao, Integer posicaoInicial, Integer limite) {
+		List<ComentarioJSON> lista = new ArrayList<>();
+		TypedQuery<Comentario> findByIdQuery = em
+				.createQuery(
+						"SELECT DISTINCT c FROM Comentario c "
+								+ "INNER JOIN FETCH c.autor a "
+								+ "INNER JOIN FETCH c.proposicao p "
+								+ "WHERE p.id = :entityId "
+								+ "ORDER BY c.dataCriacao desc",
+						Comentario.class);
+		findByIdQuery.setParameter("entityId", idProposicao);
+
+		findByIdQuery.setFirstResult(posicaoInicial);
+		findByIdQuery.setMaxResults(limite);
+
+		final List<Comentario> results = findByIdQuery.getResultList();
+		for (Comentario comentario : results) {
+			lista.add(new ComentarioJSON(comentario.getId(), comentario
+					.getDescricao(), comentario.getAutor(), comentario
+					.getDataCriacao(), comentario.getProposicao().getId()));
+
+		}
+		return lista;
+	}
+
+	@Override
+	public BigInteger totalByProposicao(Long idProposicao) {
+		Query query = em.createNativeQuery("SELECT COUNT(1) FROM comentario WHERE proposicao_id = :idProposicao");
+		query.setParameter("idProposicao", idProposicao);
+		BigInteger total = (BigInteger) query.getSingleResult();
+		return total;
 	}
 
 	public ComentarioJSON findByIdJSON(Long id) {
