@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.parser.ParserFetcher;
 import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
@@ -23,6 +22,31 @@ import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 import com.thoughtworks.xstream.XStream;
 
+/**
+ * Obtem dados de proposicao dos webservices da Câmara: <br>
+ * O principal webservice é o ListarProposicao cuja url é:
+ * 
+ * <pre>
+ * http://www.camara.gov.br/SitCamaraWS/Proposicoes.asmx/ListarProposicoes?sigla=CON&numero=1&ano=2015&datApresentacaoIni=&datApresentacaoFim=&idTipoAutor=&parteNomeAutor=&siglaPartidoAutor=&siglaUFAutor=&generoAutor=&codEstado=&codOrgaoEstado=&emTramitacao=&v=4
+ * </pre>
+ * 
+ * <br>
+ * O mapeamento dos campos da proposicao e do webservices são:<br>
+ * <ul>
+ * <li>CAMPO - XPATH</li>
+ * <li>idProposicao - proposicoes/proposicao/id</li>
+ * <li>tipo - proposicoes/proposicao/tipoProposicao/sigla</li>
+ * <li>ano - proposicoes/proposicao/ano</li>
+ * <li>numero - proposicoes/proposicao/numero</li>
+ * <li>situacao - proposicoes/proposicao/situacao/descricao</li>
+ * <li>comissao - proposicoes/proposicao/situacao/orgao/siglaOrgaoEstado</li>
+ * <li>autor - proposicoes/proposicao/autor1/txtNomeAutor</li>
+ * <li>ementa - proposicoes/proposicao/txtEmenta</li>
+ * <li>linkProposicao - proposicoes/proposicao/id + link estatico http://www2.camara.leg.br/proposicoesWeb/fichadetramitacao?idProposicao=</li>
+ * </ul>
+ * 
+ * Veja o metodo conversor em @see ProposicaoWS
+ */
 public class ParserProposicaoCamara implements ProposicaoSearcher {
 
 	public static void main(String[] args) throws Exception {
@@ -112,7 +136,9 @@ public class ParserProposicaoCamara implements ProposicaoSearcher {
 		ObterProposicaoPorID.config(xstream);
 		ParserFetcher.fetchXStream(wsURL, xstream, obterProposicaoWS);
 		Proposicao prop = obterProposicaoWS.toProposicao();
-		// por algum motivo o search é melhor.
+		// por algum motivo o search é melhor (possui todos os campos), portanto
+		// bucsamos novamente por
+		// ele.
 		Collection<Proposicao> props = searchProposicao(prop.getTipo(), Integer.parseInt(prop.getNumero()),
 				Integer.parseInt(prop.getAno()));
 		if (!props.isEmpty() && props.size() == 1) {
@@ -120,19 +146,6 @@ public class ParserProposicaoCamara implements ProposicaoSearcher {
 		}
 
 		return prop;
-	}
-
-	@Deprecated
-	private static void config(XStream xstream) {
-		xstream.alias("proposicao", Proposicao.class);
-
-		xstream.aliasAttribute(Proposicao.class, "tipo", "tipo");
-		xstream.aliasAttribute(Proposicao.class, "numero", "numero");
-		xstream.aliasAttribute(Proposicao.class, "ano", "ano");
-
-		xstream.aliasField("nomeProposicao", Proposicao.class, "sigla");
-		xstream.aliasField("Ementa", Proposicao.class, "ementa");
-		xstream.aliasField("Autor", Proposicao.class, "autor");
 	}
 
 	public List<TipoProposicao> listaTipos() throws IOException {

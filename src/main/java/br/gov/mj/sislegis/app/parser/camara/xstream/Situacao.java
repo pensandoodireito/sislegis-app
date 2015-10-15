@@ -14,6 +14,10 @@ public class Situacao {
 		xStream.processAnnotations(Situacao.class);
 		xStream.processAnnotations(Orgao.class);
 	}
+
+	public String getDescricao() {
+		return descricao;
+	}
 }
 
 @XStreamAlias("orgao")

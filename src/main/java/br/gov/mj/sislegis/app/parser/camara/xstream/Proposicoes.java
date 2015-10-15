@@ -63,7 +63,9 @@ class ProposicaoWS {
 		if (orgaoNumerador != null) {
 			proposicao.setComissao(orgaoNumerador.sigla.trim());
 		}
-		proposicao.setSituacao(situacao.orgao.siglaOrgaoEstado);
+		proposicao.setSituacao(situacao.getDescricao());
+		proposicao.setLinkProposicao("http://www2.camara.leg.br/proposicoesWeb/fichadetramitacao?idProposicao="
+				+ proposicao.getIdProposicao());
 		return proposicao;
 	}
 }

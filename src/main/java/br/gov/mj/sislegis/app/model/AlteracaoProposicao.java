@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @XmlRootElement
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AlteracaoProposicao implements AbstractEntity {
+public class AlteracaoProposicao implements AbstractEntity, Comparable<AlteracaoProposicao> {
 
 	private static final long serialVersionUID = 7949894944142814382L;
 
@@ -36,7 +36,7 @@ public class AlteracaoProposicao implements AbstractEntity {
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Proposicao proposicao;
 
-	@Column
+	@Column(length = 2000)
 	private String descricaoAlteracao;
 
 	@Column
@@ -51,6 +51,9 @@ public class AlteracaoProposicao implements AbstractEntity {
 		super();
 		this.proposicao = proposicao;
 		this.descricaoAlteracao = descricaoAlteracao;
+		if (descricaoAlteracao.length() > 2000) {
+			this.descricaoAlteracao = descricaoAlteracao.substring(0, 1999);
+		}
 		this.data = data;
 	}
 
@@ -99,6 +102,16 @@ public class AlteracaoProposicao implements AbstractEntity {
 	public void setProposicao(Proposicao proposicao) {
 		this.proposicao = proposicao;
 
+	}
+
+	@Override
+	public int compareTo(AlteracaoProposicao o) {
+		if (data == null) {
+			return -1;
+		} else if (o.data == null) {
+			return 1;
+		}
+		return data.compareTo(o.data);
 	}
 
 }

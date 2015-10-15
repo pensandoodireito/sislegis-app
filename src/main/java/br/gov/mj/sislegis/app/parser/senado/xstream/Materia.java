@@ -54,7 +54,8 @@ public class Materia {
 		p.setNumero(identificacaoMateria.NumeroMateria);
 
 		p.setTipo(identificacaoMateria.SiglaSubtipoMateria);
-
+		p.setOrigem(Origem.SENADO);
+		p.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate=" + p.getIdProposicao());
 		return p;
 
 	}

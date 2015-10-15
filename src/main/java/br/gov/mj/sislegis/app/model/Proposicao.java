@@ -3,6 +3,8 @@ package br.gov.mj.sislegis.app.model;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -20,11 +22,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -116,8 +120,9 @@ public class Proposicao implements AbstractEntity {
 	@Column(nullable = false)
 	private boolean isFavorita;
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.REMOVE }, mappedBy = "proposicao")
-	private Set<AlteracaoProposicao> alteracoesProposicao = new HashSet<AlteracaoProposicao>();
+	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "proposicao")
+	@OrderBy("data ASC")
+	private SortedSet<AlteracaoProposicao> alteracoesProposicao = new TreeSet<AlteracaoProposicao>();
 
 	@ManyToMany(fetch = FetchType.EAGER, mappedBy = "proposicoesFilha")
 	private Set<Proposicao> proposicoesPai;
@@ -337,6 +342,11 @@ public class Proposicao implements AbstractEntity {
 
 	public Set<AlteracaoProposicao> getAlteracoesProposicao() {
 		return alteracoesProposicao;
+	}
+
+	@JsonIgnore
+	public AlteracaoProposicao getLastAlteracoesProposicao() {
+		return alteracoesProposicao.last();
 	}
 
 	@Override

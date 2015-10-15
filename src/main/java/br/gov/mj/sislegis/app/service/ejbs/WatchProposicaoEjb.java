@@ -76,7 +76,8 @@ public class WatchProposicaoEjb implements WatchProposicaoService {
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Notificando " + usuario.getEmail());
 
 				String body = MessageFormat.format(res.getString("email.mudanca_proposicao.body"), usuario.getNome(),
-						proposicao.getSigla());
+						proposicao.getSigla(), proposicao.getLastAlteracoesProposicao().getDescricaoAlteracao(),
+						proposicao.getLinkProposicao());
 
 				try {
 					SislegisUtil.sendEmail(usuario.getEmail(), usuario.getNome(), assunto, body);
@@ -94,5 +95,4 @@ public class WatchProposicaoEjb implements WatchProposicaoService {
 
 		return new AsyncResult<String>(status);
 	}
-
 }

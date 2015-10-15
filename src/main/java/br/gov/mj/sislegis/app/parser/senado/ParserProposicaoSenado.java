@@ -19,7 +19,31 @@ import br.gov.mj.sislegis.app.parser.senado.xstream.PesquisaBasicaMateria;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 import com.thoughtworks.xstream.XStream;
-
+/**
+ * Obtem dados de proposicao dos webservices da Senado: <br>
+ * O principal webservice é o ListarProposicao cuja url é:
+ * 
+ * <pre>
+ * http://legis.senado.leg.br/dadosabertos/materia/113361?v=4
+ * </pre>
+ * 
+ * <br>
+ * O mapeamento dos campos da proposicao e do webservices são:<br>
+ * <ul>
+ * <li>CAMPO - XPATH</li>
+ * <li>idProposicao - DetalheMateria/Materia/IdentificacaoMateria/CodigoMateria</li>
+ * <li>tipo - DetalheMateria/Materia/IdentificacaoMateria/SiglaSubtipoMateria</li>
+ * <li>ano - DetalheMateria/Materia/IdentificacaoMateria/AnoMateria</li>
+ * <li>numero - DetalheMateria/Materia/IdentificacaoMateria/NumeroMateria</li>
+ * <li>situacao - DetalheMateria/Materia/SituacaoAtual/Autuacoes/Autuacao/Situacao/SiglaSituacao</li>
+ * <li>comissao - DetalheMateria/Materia/SituacaoAtual/Autuacoes/Autuacao/Local/SiglaLocal</li>
+ * <li>autor - DetalheMateria/Materia/Autoria/Autor/NomeAutor</li>
+ * <li>ementa - DetalheMateria/Materia/DadosBasicosMateria/EmentaMateria</li>
+ * <li>linkProposicao - DetalheMateria/Materia/id</li>
+ * </ul>
+ * 
+ * Veja o metodo conversor em @see ProposicaoWS
+ */
 public class ParserProposicaoSenado implements ProposicaoSearcher {
 
 	public static void main(String[] args) throws Exception {
@@ -50,9 +74,7 @@ public class ParserProposicaoSenado implements ProposicaoSearcher {
 		if (proposicao == null) {
 			throw new IOException("Nao foi possível parsera proposicao");
 		}
-		proposicao.setOrigem(Origem.SENADO);
-		proposicao.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate="
-				+ proposicao.getIdProposicao());
+		
 
 		return proposicao;
 	}

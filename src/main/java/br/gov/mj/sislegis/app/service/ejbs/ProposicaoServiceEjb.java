@@ -563,35 +563,49 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 			if ((local.getAutor() == null && remote.getAutor() != null)
 					|| (remote.getAutor() != null && !local.getAutor().equals(remote.getAutor()))) {
-				descricaoAlteracao.append("Alterado autor: ").append(local.getAutor()).append("=>")
-						.append(remote.getAutor()).append("\n");
+				descricaoAlteracao.append("Alterado autor: '").append(local.getAutor()).append("' => '")
+						.append(remote.getAutor()).append("'\n");
 				local.setAutor(remote.getAutor());
 			}
 
 			if ((local.getEmenta() == null && remote.getEmenta() != null)
 					|| !local.getEmenta().equals(remote.getEmenta())) {
-				descricaoAlteracao.append("Alterada ementa: ").append(local.getEmenta()).append("=>")
-						.append(remote.getEmenta()).append("\n");
+
+				String ementaLocal = null;
+				if (local.getEmenta() != null && local.getEmenta().length() > 100) {
+					ementaLocal = local.getEmenta().substring(0, 100);
+				} else {
+					ementaLocal = local.getEmenta();
+				}
+
+				String ementaRemota = null;
+				if (remote.getEmenta() != null && remote.getEmenta().length() > 100) {
+					ementaRemota = remote.getEmenta().substring(0, 100);
+				} else {
+					ementaRemota = remote.getEmenta();
+				}
+				descricaoAlteracao.append("Alterada ementa: '").append(ementaLocal).append("' => '")
+						.append(ementaRemota).append("'\n");
 				local.setEmenta(remote.getEmenta());
 			}
 
 			if ((local.getNumero() == null && remote.getNumero() != null)
 					|| !local.getNumero().equals(remote.getNumero())) {
-				descricaoAlteracao.append("Alterado número: ").append(local.getNumero()).append("=>")
-						.append(remote.getNumero()).append("\n");
+				descricaoAlteracao.append("Alterado número: '").append(local.getNumero()).append("' => '")
+						.append(remote.getNumero()).append("'\n");
 				local.setNumero(remote.getNumero());
 			}
 
 			if ((local.getTipo() == null && remote.getTipo() != null) || !local.getTipo().equals(remote.getTipo())) {
-				descricaoAlteracao.append("Alterado número: ").append(local.getNumero()).append("=>")
-						.append(remote.getNumero()).append("\n");
-				local.setNumero(remote.getNumero());
+				descricaoAlteracao.append("Alterado tipo: '").append(local.getTipo()).append("' => '")
+						.append(remote.getTipo()).append("'\n");
+				local.setTipo(remote.getTipo());
 			}
 
 			if ((local.getSituacao() == null && remote.getSituacao() != null)
 					|| !local.getSituacao().equals(remote.getSituacao())) {
-				descricaoAlteracao.append("Alterado situação: ").append(local.getSituacao()).append("=>")
-						.append(remote.getSituacao()).append("\n");
+				descricaoAlteracao.append("Alterado situação: '").append(local.getSituacao()).append("' => '")
+						.append(remote.getSituacao()).append("' \n");
 				local.setSituacao(remote.getSituacao());
 			}
 
