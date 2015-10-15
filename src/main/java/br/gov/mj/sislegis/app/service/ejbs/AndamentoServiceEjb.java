@@ -28,7 +28,7 @@ public class AndamentoServiceEjb extends AbstractPersistence<Andamento, Long> im
     @Override
     public List<Andamento> findByIdProposicao(Long idProposicao) {
         TypedQuery<Andamento> query = getEntityManager().createQuery(
-                "SELECT a FROM Andamento a WHERE a.proposicao.id = :idProposicao ORDER BY a.dataHora", Andamento.class);
+                "SELECT a FROM Andamento a WHERE a.proposicao.id = :idProposicao ORDER BY a.dataCriacao DESC", Andamento.class);
         query.setParameter("idProposicao", idProposicao);
 
         return query.getResultList();

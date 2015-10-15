@@ -1,14 +1,11 @@
 package br.gov.mj.sislegis.app.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Date;
 
 @Entity
 @XmlRootElement
-@JsonIgnoreProperties({"idProposicao"})
 public class Andamento implements AbstractEntity{
 
     @Id
@@ -19,9 +16,9 @@ public class Andamento implements AbstractEntity{
     @Column(length=2000)
     private String descricao;
 
-    @Column(nullable = false, unique = true)
-    @Temporal(TemporalType.DATE)
-    private Date dataHora = new Date();
+    @Column(nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dataCriacao = new Date();
 
     @ManyToOne(fetch = FetchType.EAGER)
     private Usuario usuario;
@@ -46,12 +43,12 @@ public class Andamento implements AbstractEntity{
         this.descricao = descricao;
     }
 
-    public Date getDataHora() {
-        return dataHora;
+    public Date getDataCriacao() {
+        return dataCriacao;
     }
 
-    public void setDataHora(Date data) {
-        this.dataHora = data;
+    public void setDataCriacao(Date data) {
+        this.dataCriacao = data;
     }
 
     public Usuario getUsuario() {
@@ -91,7 +88,7 @@ public class Andamento implements AbstractEntity{
         return "Andamento{" +
                 "id=" + id +
                 ", descricao='" + descricao + '\'' +
-                ", dataHora=" + dataHora +
+                ", dataCriacao=" + dataCriacao +
                 ", usuario=" + usuario +
                 ", proposicao=" + proposicao +
                 '}';
