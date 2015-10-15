@@ -54,6 +54,9 @@ public class Tarefa implements AbstractEntity {
 
 	private boolean isVisualizada;
 
+	@Column(length=8000)
+	private String comentarioFinalizacao;
+
 	public Long getId() {
 		return this.id;
 	}
@@ -117,6 +120,14 @@ public class Tarefa implements AbstractEntity {
 
 	public void setVisualizada(boolean isVisualizada) {
 		this.isVisualizada = isVisualizada;
+	}
+
+	public String getComentarioFinalizacao() {
+		return comentarioFinalizacao;
+	}
+
+	public void setComentarioFinalizacao(String comentarioFinalizacao) {
+		this.comentarioFinalizacao = comentarioFinalizacao;
 	}
 
 	@Override
