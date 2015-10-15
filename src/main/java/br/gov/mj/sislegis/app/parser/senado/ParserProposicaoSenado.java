@@ -25,7 +25,7 @@ public class ParserProposicaoSenado implements ProposicaoSearcher {
 	public static void main(String[] args) throws Exception {
 		ParserProposicaoSenado parser = new ParserProposicaoSenado();
 		System.out.println(parser.listaTipos());
-		Collection<Proposicao> searchProps = parser.searchProposicao("pls", null, 2013);
+		Collection<Proposicao> searchProps = parser.searchProposicao("RQS", 1, 2015);
 		System.out.println("Busca retornou " + searchProps.size() + " proposicoes");
 		Proposicao propLista = searchProps.iterator().next();
 		Proposicao propGet = parser.getProposicao(propLista.getIdProposicao().longValue());
@@ -89,19 +89,27 @@ public class ParserProposicaoSenado implements ProposicaoSearcher {
 		}
 		wsURL.append("&ano=").append(ano);
 
-		XStream xstream = new XStream();
-		xstream.ignoreUnknownElements();
+		try {
+			XStream xstream = new XStream();
+			xstream.ignoreUnknownElements();
 
-		PesquisaBasicaMateria pesquisaMateria = new PesquisaBasicaMateria();
-		PesquisaBasicaMateria.configXstream(xstream);
+			PesquisaBasicaMateria pesquisaMateria = new PesquisaBasicaMateria();
+			PesquisaBasicaMateria.configXstream(xstream);
 
-		ParserFetcher.fetchXStream(wsURL.toString(), xstream, pesquisaMateria);
-		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
-				"Descricao do data set retornado:  '" + pesquisaMateria.getDescricaoResposta() + "'");
+			ParserFetcher.fetchXStream(wsURL.toString(), xstream, pesquisaMateria);
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine(
+					"Descricao do data set retornado:  '" + pesquisaMateria.getDescricaoResposta() + "'");
 
-		List<Materia> listMaterias = pesquisaMateria.getMaterias();
-		Collection<Proposicao> listProposicao = new ListMateriaClass(listMaterias);
+			List<Materia> listMaterias = pesquisaMateria.getMaterias();
+			Collection<Proposicao> listProposicao = new ListMateriaClass(listMaterias);
 
-		return listProposicao;
+			return listProposicao;
+		} catch (Exception e) {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
+					Level.SEVERE,
+					"Falhou ao procurar por proposicao. Params " + sigla + "," + numero + "," + ano + ". URL "
+							+ wsURL.toString(), e);
+			return null;
+		}
 	}
 }

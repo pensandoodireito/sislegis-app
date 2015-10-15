@@ -18,6 +18,6 @@ public class Situacao {
 
 @XStreamAlias("orgao")
 class Orgao {
-	Long codOrgaoEstado;
+	String codOrgaoEstado;
 	String siglaOrgaoEstado;
 }

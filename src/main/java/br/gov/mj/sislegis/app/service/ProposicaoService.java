@@ -11,6 +11,7 @@ import javax.ejb.Local;
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.json.ProposicaoJSON;
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 
 @Local
@@ -75,4 +76,27 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * 
 	 */
 	boolean syncDadosProposicao(Proposicao proposicao) throws IOException;
+
+	/**
+	 * Adiciona proposicao na lista de proposições seguidas pelo usuário. Ele
+	 * será notificado se houver qqer alteração nesta proposicao
+	 * 
+	 * @param user
+	 * @param idProposicao
+	 */
+	public void followProposicao(Usuario user, Long idProposicao);
+
+	/**
+	 * É o inverso do metodo anterior
+	 * 
+	 * @param user
+	 * @param idProposicao
+	 */
+	public void unfollowProposicao(Usuario user, Long idProposicao);
+
+	/**
+	 * Lista todas as proposicoes que tenham ao menos um seguidor.
+	 * @return
+	 */
+	List<Proposicao> listProposicoesSeguidas();
 }

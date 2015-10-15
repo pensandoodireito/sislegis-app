@@ -17,16 +17,27 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
-import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
+//@formatter:off
+@NamedNativeQueries({
+  @NamedNativeQuery(
+          name    =   "getAllProposicoesSeguidas",
+          query   =   "SELECT * " +
+                      "FROM Proposicao a where a.id in (select distinct proposicoesSeguidas_id from Usuario_ProposicaoSeguida)",
+                      resultClass=Proposicao.class
+  )
+})
+//@formatter:on
 @XmlRootElement
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Proposicao implements AbstractEntity {
@@ -356,14 +367,14 @@ public class Proposicao implements AbstractEntity {
 	@Override
 	public String toString() {
 		String result = getClass().getSimpleName() + " ";
-		if (idProposicao != null)
-			result += "idProposicao: " + idProposicao;
-		if (tipo != null && !tipo.trim().isEmpty())
-			result += ", tipo: " + tipo;
-		if (ano != null && !ano.trim().isEmpty())
-			result += ", ano: " + ano;
-		if (numero != null && !numero.trim().isEmpty())
-			result += ", numero: " + numero;
+
+		result += "idProposicao: " + idProposicao;
+
+		result += ", tipo: " + tipo;
+
+		result += ", ano: " + ano;
+
+		result += ", numero: " + numero;
 		if (autor != null && !autor.trim().isEmpty())
 			result += ", autor: " + autor;
 		if (comissao != null && !comissao.trim().isEmpty())

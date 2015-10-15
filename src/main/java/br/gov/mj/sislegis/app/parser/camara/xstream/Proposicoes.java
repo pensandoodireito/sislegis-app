@@ -49,7 +49,7 @@ class ProposicaoWS {
 	String txtEmenta;
 	Situacao situacao;
 	Autor autor1;
-	String orgaoNumerador;
+	OrgaoNumerador orgaoNumerador;
 
 	public Proposicao toProposicao() {
 		Proposicao proposicao = new Proposicao();
@@ -57,10 +57,12 @@ class ProposicaoWS {
 		proposicao.setIdProposicao(id);
 		proposicao.setNumero(numero);
 		proposicao.setSigla(nome);
-		proposicao.setTipo(tipoProposicao.getNome());
+		proposicao.setTipo(tipoProposicao.getSigla());
 		proposicao.setEmenta(txtEmenta);
 		proposicao.setAutor(autor1.txtNomeAutor);
-		proposicao.setComissao(orgaoNumerador);
+		if (orgaoNumerador != null) {
+			proposicao.setComissao(orgaoNumerador.sigla.trim());
+		}
 		proposicao.setSituacao(situacao.orgao.siglaOrgaoEstado);
 		return proposicao;
 	}

@@ -35,9 +35,22 @@ public class Usuario implements AbstractEntity {
 	private String nome;
 
 	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(name = "Usuario_ProposicaoSeguida")
+	private Set<Proposicao> proposicoesSeguidas = new HashSet<Proposicao>();
+
+	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "Usuario_Agendas")
 	private Set<AgendaComissao> agendasSeguidas = new HashSet<AgendaComissao>();
 
+	
+	@JsonIgnore
+	public Set<Proposicao> getProposicoesSeguidas() {
+		if (proposicoesSeguidas == null) {
+			return new HashSet<Proposicao>();
+		} else {
+			return proposicoesSeguidas;
+		}
+	}
 	@JsonIgnore
 	public Set<AgendaComissao> getAgendasSeguidas() {
 		if (agendasSeguidas == null) {

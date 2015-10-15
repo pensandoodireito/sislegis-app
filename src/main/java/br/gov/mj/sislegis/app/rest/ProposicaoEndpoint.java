@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -29,9 +30,12 @@ import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.json.ProposicaoJSON;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
+import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
+import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.Service;
+import br.gov.mj.sislegis.app.service.UsuarioService;
 
 /**
  * 
@@ -231,4 +235,37 @@ public class ProposicaoEndpoint {
 		return proposicaoService.listTipos(Origem.SENADO);
 
 	}
+
+	@Inject
+	private UsuarioAutenticadoBean controleUsuarioAutenticado;
+
+	@POST
+	@Path("/follow/{id:[0-9]+}")
+	public Response follow(@PathParam("id") Long id, @HeaderParam("Authorization") String authorization) {
+		try {
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+			proposicaoService.followProposicao(user, id);
+
+			return Response.noContent().build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
+
+	}
+
+	@DELETE
+	@Path("/unfollow/{id:[0-9]+}")
+	public Response unfollow(@PathParam("id") Long id, @HeaderParam("Authorization") String authorization) {
+		try {
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+			proposicaoService.unfollowProposicao(user, id);
+			return Response.noContent().build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
+
+	}
+
 }

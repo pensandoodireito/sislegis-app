@@ -1,6 +1,7 @@
 package br.gov.mj.sislegis.app.parser;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
 import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
 
 /**
@@ -17,7 +18,7 @@ public class ProposicaoSearcherFactory {
 		case SENADO:
 			return new ParserProposicaoSenado();
 		case CAMARA:
-			return new ParserProposicaoSenado();
+			return new ParserProposicaoCamara();
 
 		}
 		return null;

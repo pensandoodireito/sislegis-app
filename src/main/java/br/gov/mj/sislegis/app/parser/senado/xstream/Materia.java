@@ -1,7 +1,11 @@
 package br.gov.mj.sislegis.app.parser.senado.xstream;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
@@ -32,13 +36,22 @@ public class Materia {
 			p.setAutor(autoresPrincipais.autores.get(0).NomeAutor);
 		}
 		p.setOrigem(Origem.SENADO);
-		if (!situacaoAtual.autuacoes.autuacoes.isEmpty()) {
+		if (situacaoAtual == null) {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING, "Nao carregou a situacao atual");
+		} else if (situacaoAtual.autuacoes == null) {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
+					"Nao carregou autuacoes da situacao atual");
+		} else if (situacaoAtual.autuacoes.autuacoes == null) {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
+					"Nao carregou autuacoes da situacao atual");
+		} else if (!situacaoAtual.autuacoes.autuacoes.isEmpty()) {
 			p.setComissao(situacaoAtual.autuacoes.autuacoes.get(0).Local.SiglaLocal);
 			p.setSituacao(situacaoAtual.autuacoes.autuacoes.get(0).Situacao.SiglaSituacao);
 		}
 
 		p.setEmenta(DadosBasicosMateria.EmentaMateria);
 		p.setIdProposicao(identificacaoMateria.CodigoMateria);
+		p.setNumero(identificacaoMateria.NumeroMateria);
 
 		p.setTipo(identificacaoMateria.SiglaSubtipoMateria);
 

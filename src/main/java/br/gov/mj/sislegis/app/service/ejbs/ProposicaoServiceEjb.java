@@ -34,6 +34,7 @@ import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
 import br.gov.mj.sislegis.app.model.Tag;
 import br.gov.mj.sislegis.app.model.TagProposicao;
 import br.gov.mj.sislegis.app.model.TagProposicaoPK;
+import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
 import br.gov.mj.sislegis.app.parser.ProposicaoSearcherFactory;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
@@ -130,6 +131,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	@Override
 	public Proposicao detalharProposicaoCamaraWS(Long id) throws Exception {
 		return parserProposicaoCamara.getProposicao(id);
+	}
+
+	@Override
+	public List<Proposicao> listProposicoesSeguidas() {
+		List<Proposicao> seguidas = em.createNamedQuery("getAllProposicoesSeguidas", Proposicao.class).getResultList();
+		return seguidas;
 	}
 
 	@Override
@@ -542,34 +549,50 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		@Override
 		public int compare(Proposicao local, Proposicao remote) {
 			descricaoAlteracao = new StringBuilder();
-			if (!local.getAno().equals(remote.getAno())) {
+			if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.FINE)) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Comparando Proposicoes ");
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Local:  " + local);
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Remota: " + remote);
+			}
+			if ((local.getAno() == null && remote.getAno() != null)
+					|| (remote.getAno() != null && !local.getAno().equals(remote.getAno()))) {
 				descricaoAlteracao.append("Alterado ano: ").append(local.getAno()).append("=>").append(remote.getAno())
 						.append("\n");
 				local.setAno(remote.getAno());
 			}
-			
-			if (!local.getAutor().equals(remote.getAutor())) {
-				descricaoAlteracao.append("Alterado autor: ").append(local.getAutor()).append("=>").append(remote.getAutor())
-						.append("\n");
+
+			if ((local.getAutor() == null && remote.getAutor() != null)
+					|| (remote.getAutor() != null && !local.getAutor().equals(remote.getAutor()))) {
+				descricaoAlteracao.append("Alterado autor: ").append(local.getAutor()).append("=>")
+						.append(remote.getAutor()).append("\n");
 				local.setAutor(remote.getAutor());
 			}
-			
-			if (!local.getEmenta().equals(remote.getEmenta())) {
-				descricaoAlteracao.append("Alterada ementa: ").append(local.getEmenta()).append("=>").append(remote.getEmenta())
-						.append("\n");
+
+			if ((local.getEmenta() == null && remote.getEmenta() != null)
+					|| !local.getEmenta().equals(remote.getEmenta())) {
+				descricaoAlteracao.append("Alterada ementa: ").append(local.getEmenta()).append("=>")
+						.append(remote.getEmenta()).append("\n");
 				local.setEmenta(remote.getEmenta());
 			}
-			
-			if (!local.getNumero().equals(remote.getNumero())) {
+
+			if ((local.getNumero() == null && remote.getNumero() != null)
+					|| !local.getNumero().equals(remote.getNumero())) {
 				descricaoAlteracao.append("Alterado número: ").append(local.getNumero()).append("=>")
 						.append(remote.getNumero()).append("\n");
 				local.setNumero(remote.getNumero());
 			}
-			
-			if (!local.getTipo().equals(remote.getTipo())) {
+
+			if ((local.getTipo() == null && remote.getTipo() != null) || !local.getTipo().equals(remote.getTipo())) {
 				descricaoAlteracao.append("Alterado número: ").append(local.getNumero()).append("=>")
 						.append(remote.getNumero()).append("\n");
 				local.setNumero(remote.getNumero());
+			}
+
+			if ((local.getSituacao() == null && remote.getSituacao() != null)
+					|| !local.getSituacao().equals(remote.getSituacao())) {
+				descricaoAlteracao.append("Alterado situação: ").append(local.getSituacao()).append("=>")
+						.append(remote.getSituacao()).append("\n");
+				local.setSituacao(remote.getSituacao());
 			}
 
 			return descricaoAlteracao.length();
@@ -580,19 +603,48 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 	};
 
-	ChecaAlteracoesProposicao checadorAlteracoes = new ChecaAlteracoesProposicao();
+	private ChecaAlteracoesProposicao checadorAlteracoes = new ChecaAlteracoesProposicao();
 
 	@Override
 	public boolean syncDadosProposicao(Proposicao proposicaoLocal) throws IOException {
-		ProposicaoSearcher parser = ProposicaoSearcherFactory.getInstance(proposicaoLocal);
-		Proposicao proposicaoRemota = parser.getProposicao(proposicaoLocal.getId());
-		if (checadorAlteracoes.compare(proposicaoLocal, proposicaoRemota) != 0) {
-			AlteracaoProposicao altera = new AlteracaoProposicao(proposicaoLocal,
-					checadorAlteracoes.getDescricaoAlteracao(), new Date());
-			proposicaoLocal.addAlteracao(altera);
-			save(proposicaoLocal);
+		try {
+			ProposicaoSearcher parser = ProposicaoSearcherFactory.getInstance(proposicaoLocal);
+			Proposicao proposicaoRemota = parser.getProposicao(proposicaoLocal.getIdProposicao().longValue());
 
+			if (checadorAlteracoes.compare(proposicaoLocal, proposicaoRemota) != 0) {
+				AlteracaoProposicao altera = new AlteracaoProposicao(proposicaoLocal,
+						checadorAlteracoes.getDescricaoAlteracao(), new Date());
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine(
+						"Houve alteração da proposicao " + proposicaoLocal.getSigla() + ". A alteração foi "
+								+ altera.getDescricaoAlteracao());
+				proposicaoLocal.addAlteracao(altera);
+				save(proposicaoLocal);
+				return true;
+
+			}
+		} catch (Exception e) {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+					"Falhou ao sincronizar proposicao " + proposicaoLocal, e);
 		}
 		return false;
 	}
+
+	@Override
+	public void followProposicao(Usuario user, Long idProposicao) {
+		user = usuarioService.findById(user.getId());
+		Proposicao prop = findById(idProposicao);
+		user.getProposicoesSeguidas().add(prop);
+		usuarioService.save(user);
+
+	}
+
+	@Override
+	public void unfollowProposicao(Usuario user, Long idProposicao) {
+		user = usuarioService.findById(user.getId());
+		Proposicao prop = findById(idProposicao);
+		user.getProposicoesSeguidas().remove(prop);
+		usuarioService.save(user);
+
+	}
+
 }

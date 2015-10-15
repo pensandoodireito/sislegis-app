@@ -14,6 +14,7 @@ import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.parser.ParserFetcher;
 import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
+import br.gov.mj.sislegis.app.parser.camara.xstream.Erro;
 import br.gov.mj.sislegis.app.parser.camara.xstream.ListProposicaoLazy;
 import br.gov.mj.sislegis.app.parser.camara.xstream.ListaSigla;
 import br.gov.mj.sislegis.app.parser.camara.xstream.ObterProposicaoPorID;
@@ -26,16 +27,15 @@ public class ParserProposicaoCamara implements ProposicaoSearcher {
 
 	public static void main(String[] args) throws Exception {
 		ParserProposicaoCamara parser = new ParserProposicaoCamara();
-		Long idProposicao = 562039L; // TODO: Informação que vem do filtro
+		Long idProposicao = 1197825l; // TODO: Informação que vem do filtro
 		System.out.println(parser.getProposicao(idProposicao).toString());
 		System.out.println(parser.listaTipos());
-
-		Collection<Proposicao> prop = parser.searchProposicao("REQ", 41, 2015);
+		Collection<Proposicao> prop = parser.searchProposicao("INC", 1, 2015);
 		for (Iterator iterator = prop.iterator(); iterator.hasNext();) {
 			Proposicao proposicaoLista = (Proposicao) iterator.next();
 			Proposicao proposicaoId = parser.getProposicao(proposicaoLista.getIdProposicao().longValue());
-			System.out.println("Busca '"+proposicaoLista.toString());
-			System.out.println("PorId '"+proposicaoId);
+			System.out.println("Busca '" + proposicaoLista.toString());
+			System.out.println("PorId '" + proposicaoId);
 			if (!proposicaoId.toString().equals(proposicaoLista.toString())) {
 				System.err.println("Proposicoes sao diferntes dependendo do WS usado");
 			}
@@ -70,14 +70,38 @@ public class ParserProposicaoCamara implements ProposicaoSearcher {
 			listProposicao = new ListProposicaoLazy(proposicoes.getProposicoes());
 
 		} catch (FileNotFoundException e) {
-
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.INFO, "Nenhum resultado encontrado");
+		} catch (Exception e) {
+			if (e.getMessage().equals("erro")) {
+
+				try {
+					Erro erro = new Erro();
+					xstream = new XStream();
+					xstream.ignoreUnknownElements();
+					xstream.processAnnotations(Erro.class);
+					ParserFetcher.fetchXStream(wsURL.toString(), xstream, erro);
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
+							Level.SEVERE,
+							"WebService retornou erro '" + erro.getDescricao() + "' para URL '" + wsURL.toString()
+									+ "'");
+
+				} catch (Exception e1) {
+					throw new IOException(e);
+				}
+
+			} else {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
+						"Falhou na conversão do parser para url " + wsURL.toString(), e);
+				throw new IOException(e);
+			}
 		}
 
 		return listProposicao;
 	}
 
 	public Proposicao getProposicao(Long idProposicao) throws IOException {
+
+		// Versao mais precisa usando o search.
 		String wsURL = "http://www.camara.gov.br/SitCamaraWS/Proposicoes.asmx/ObterProposicaoPorID?idProp="
 				+ idProposicao;
 
@@ -87,8 +111,15 @@ public class ParserProposicaoCamara implements ProposicaoSearcher {
 		ObterProposicaoPorID obterProposicaoWS = new ObterProposicaoPorID();
 		ObterProposicaoPorID.config(xstream);
 		ParserFetcher.fetchXStream(wsURL, xstream, obterProposicaoWS);
+		Proposicao prop = obterProposicaoWS.toProposicao();
+		// por algum motivo o search é melhor.
+		Collection<Proposicao> props = searchProposicao(prop.getTipo(), Integer.parseInt(prop.getNumero()),
+				Integer.parseInt(prop.getAno()));
+		if (!props.isEmpty() && props.size() == 1) {
+			prop = props.iterator().next();
+		}
 
-		return obterProposicaoWS.toProposicao();
+		return prop;
 	}
 
 	@Deprecated
