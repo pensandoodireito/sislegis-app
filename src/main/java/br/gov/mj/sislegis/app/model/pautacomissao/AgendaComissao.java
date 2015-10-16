@@ -1,6 +1,5 @@
 package br.gov.mj.sislegis.app.model.pautacomissao;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -133,7 +132,7 @@ public class AgendaComissao extends AbstractEntity {
 
 	public Sessao getSessao(String identificadorExterno) {
 		if (sessoes != null) {
-			for (Iterator iterator = sessoes.iterator(); iterator.hasNext();) {
+			for (Iterator<Sessao> iterator = sessoes.iterator(); iterator.hasNext();) {
 				Sessao sessao = (Sessao) iterator.next();
 				if (identificadorExterno.equals(sessao.getIdentificadorExterno())) {
 					return sessao;

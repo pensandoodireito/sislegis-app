@@ -1,6 +1,5 @@
 package br.gov.mj.sislegis.app.model.pautacomissao;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -21,7 +20,7 @@ import br.gov.mj.sislegis.app.model.AbstractEntity;
 
 @Entity
 @NamedQueries({ @NamedQuery(name = "getByIdExterno", query = "SELECT s FROM Sessao s where s.identificadorExterno=:idExterno") })
-public class Sessao extends AbstractEntity {
+public class Sessao extends AbstractEntity	{
 	private static final long serialVersionUID = 1L;
 	@Column
 	@Temporal(TemporalType.TIMESTAMP)

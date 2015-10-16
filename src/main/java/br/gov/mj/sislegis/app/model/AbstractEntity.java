@@ -24,6 +24,9 @@ public abstract class AbstractEntity implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
 		if (this == obj) {
 			return true;
 		}
@@ -31,19 +34,18 @@ public abstract class AbstractEntity implements Serializable {
 			return false;
 		}
 		AbstractEntity other = (AbstractEntity) obj;
-		if (getId() != null) {
-			if (!getId().equals(other.getId())) {
-				return false;
-			}
+		if (getId() == null) {
+			return false;
+		} else {
+			return getId().equals(other.getId());
 		}
-		return true;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((getId() == null) ? 0 : getId().hashCode());
+		result = prime * result + ((getId() == null) ? super.hashCode() : getId().hashCode());
 		return result;
 	}
 
