@@ -39,7 +39,7 @@ public class AndamentoEndpoint {
     }
 
     @GET
-    @Path("/{idProposicao:[0-9][0-9]*}")
+    @Path("/proposicao/{idProposicao:[0-9][0-9]*}")
     @Produces(MediaType.APPLICATION_JSON)
     public List<Andamento> findByIdProposicao(@PathParam("idProposicao") Long idProposicao) {
         List<Andamento> andamentos = andamentoService.findByIdProposicao(idProposicao);
