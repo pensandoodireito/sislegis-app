@@ -18,6 +18,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties({"equipe"})
 public class EquipeUsuario implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6090959072309141223L;
+
 	@EmbeddedId
     private EquipeUsuarioPK id;
 	

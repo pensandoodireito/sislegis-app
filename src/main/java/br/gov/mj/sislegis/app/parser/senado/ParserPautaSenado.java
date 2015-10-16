@@ -1,5 +1,6 @@
 package br.gov.mj.sislegis.app.parser.senado;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class ParserPautaSenado {
 			wsURL.append("/");
 			wsURL.append(datIni);
 		}
-		wsURL.append("?colegiado=").append(siglaComissao);
+		wsURL.append("?colegiado=").append(URLEncoder.encode(siglaComissao, "UTF-8"));
 
 		XStream xstreamAgenda = new XStream();
 		xstreamAgenda.ignoreUnknownElements();
