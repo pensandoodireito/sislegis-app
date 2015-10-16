@@ -43,6 +43,9 @@ public class ReuniaoProposicao extends AbstractEntity {
 	}
 
 	public Number getId() {
+		if (reuniaoProposicaoPK == null) {
+			return null;
+		}
 		return reuniaoProposicaoPK.hashCode();
 	}
 
