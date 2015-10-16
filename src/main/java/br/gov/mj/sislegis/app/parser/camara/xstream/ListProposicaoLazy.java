@@ -21,9 +21,7 @@ public class ListProposicaoLazy extends CollectionLazyConverter<Proposicao, Prop
 	@Override
 	protected Proposicao convertKtoE(ProposicaoWS proposicaoWS) {
 		Proposicao proposicao = proposicaoWS.toProposicao();
-		proposicao.setOrigem(Origem.CAMARA);
-		proposicao.setLinkProposicao("http://www.camara.gov.br/proposicoesWeb/fichadetramitacao?idProposicao="
-				+ proposicao.getIdProposicao());
+		
 		return proposicao;
 	}
 

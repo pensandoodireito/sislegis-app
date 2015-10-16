@@ -252,6 +252,7 @@ public class Proposicao implements AbstractEntity {
 		this.posicionamento = posicionamento;
 	}
 
+	@JsonIgnore
 	public Set<ReuniaoProposicao> getListaReuniaoProposicoes() {
 		return listaReuniaoProposicoes;
 	}
@@ -340,6 +341,7 @@ public class Proposicao implements AbstractEntity {
 		this.elaboracoesNormativas = elaboracoesNormativas;
 	}
 
+	@JsonIgnore
 	public Set<AlteracaoProposicao> getAlteracoesProposicao() {
 		return alteracoesProposicao;
 	}
