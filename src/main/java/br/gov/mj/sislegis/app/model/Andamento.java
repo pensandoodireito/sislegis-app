@@ -6,7 +6,7 @@ import java.util.Date;
 
 @Entity
 @XmlRootElement
-public class Andamento implements AbstractEntity{
+public class Andamento extends AbstractEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -65,22 +65,6 @@ public class Andamento implements AbstractEntity{
 
     public void setProposicao(Proposicao proposicao) {
         this.proposicao = proposicao;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Andamento andamento = (Andamento) o;
-
-        return !(id != null ? !id.equals(andamento.id) : andamento.id != null);
-
-    }
-
-    @Override
-    public int hashCode() {
-        return id != null ? id.hashCode() : 0;
     }
 
     @Override
