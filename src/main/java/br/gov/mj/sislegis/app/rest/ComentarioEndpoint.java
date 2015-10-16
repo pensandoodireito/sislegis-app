@@ -14,12 +14,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.List;
 
-/**
- * 
- */
 @Path("/comentarios")
 public class ComentarioEndpoint {
 
@@ -31,17 +27,13 @@ public class ComentarioEndpoint {
 
 	public ComentarioEndpoint() {
 		super();
-
 	}
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response create(ComentarioJSON entity,
-			@HeaderParam("Authorization") String authorization) {
-
+	public Response create(ComentarioJSON entity, @HeaderParam("Authorization") String authorization) {
 		try {
-			Usuario user = controleUsuarioAutenticado
-					.carregaUsuarioAutenticado(authorization);
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
 			comentarioService.salvarComentario(entity, user);
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
@@ -50,9 +42,7 @@ public class ComentarioEndpoint {
 			e.printStackTrace();
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 		}
-		return Response.created(
-				UriBuilder.fromResource(ComentarioEndpoint.class)
-						.path(String.valueOf(entity.getId())).build()).build();
+		return Response.created(UriBuilder.fromResource(ComentarioEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
 	}
 
 	@DELETE
@@ -84,8 +74,7 @@ public class ComentarioEndpoint {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Comentario> listAll(@QueryParam("start") Integer startPosition,
-			@QueryParam("max") Integer maxResult) {
+	public List<Comentario> listAll(@QueryParam("start") Integer startPosition,	@QueryParam("max") Integer maxResult) {
 		final List<Comentario> results = comentarioService.listAll();
 		return results;
 	}
@@ -93,7 +82,7 @@ public class ComentarioEndpoint {
 	@GET
 	@Path("/total/{idProposicao:[0-9][0-9]*}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public BigInteger totalByProposicao(@PathParam("idProposicao") Long idProposicao){
+	public Long totalByProposicao(@PathParam("idProposicao") Long idProposicao){
 		return comentarioService.totalByProposicao(idProposicao);
 	}
 
@@ -110,19 +99,14 @@ public class ComentarioEndpoint {
 	public Response update(ComentarioJSON entity,
 			@HeaderParam("Authorization") String authorization) {
 		try {
-
-			comentarioService.salvarComentario(entity,
-					controleUsuarioAutenticado
-							.carregaUsuarioAutenticado(authorization));
+			comentarioService.salvarComentario(entity, controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization));
 
 		} catch (OptimisticLockException e) {
-			return Response.status(Response.Status.CONFLICT)
-					.entity(e.getEntity()).build();
+			return Response.status(Response.Status.CONFLICT).entity(e.getEntity()).build();
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 			return Response.status(Response.Status.FORBIDDEN).build();
 		} catch (IOException e) {
-			// TODO O que fazer???
 			e.printStackTrace();
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 		}

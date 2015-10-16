@@ -1,22 +1,21 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-
 import br.gov.mj.sislegis.app.json.ComentarioJSON;
 import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ComentarioService;
+
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Stateless
 public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long>
@@ -80,11 +79,11 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long>
 	}
 
 	@Override
-	public BigInteger totalByProposicao(Long idProposicao) {
+	public Long totalByProposicao(Long idProposicao) {
 		Query query = em.createNativeQuery("SELECT COUNT(1) FROM comentario WHERE proposicao_id = :idProposicao");
 		query.setParameter("idProposicao", idProposicao);
 		BigInteger total = (BigInteger) query.getSingleResult();
-		return total;
+		return total.longValue();
 	}
 
 	public ComentarioJSON findByIdJSON(Long id) {
