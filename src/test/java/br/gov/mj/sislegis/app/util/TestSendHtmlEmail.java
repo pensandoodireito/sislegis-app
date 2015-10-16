@@ -15,7 +15,7 @@ public class TestSendHtmlEmail {
 	String host = "smtp.gmail.com";
 	String port = "587";
 	String userName = "sislegissal";
-	String userName2 = "guilherme.hott";
+	String userName2 = "user";
 	String password = "Sislegis@123";
 	String emailServer = "gmail.com";
 	String emailServer2 = "gmail.com";
