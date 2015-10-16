@@ -1,6 +1,5 @@
 package br.gov.mj.sislegis.app.model.pautacomissao;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -17,9 +16,11 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import br.gov.mj.sislegis.app.model.AbstractEntity;
+
 @Entity
 @NamedQueries({ @NamedQuery(name = "getByIdExterno", query = "SELECT s FROM Sessao s where s.identificadorExterno=:idExterno") })
-public class Sessao implements Serializable {
+public class Sessao extends AbstractEntity	{
 	private static final long serialVersionUID = 1L;
 	@Column
 	@Temporal(TemporalType.TIMESTAMP)
@@ -90,28 +91,6 @@ public class Sessao implements Serializable {
 
 	public void setAgenda(AgendaComissao agenda) {
 		this.agenda = agenda;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-
-		if (obj instanceof Sessao) {
-			Sessao other = (Sessao) obj;
-			if (id != null) {
-				if (id.equals(other.id)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
 	}
 
 }
