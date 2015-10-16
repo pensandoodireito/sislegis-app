@@ -1,6 +1,7 @@
 package br.gov.mj.sislegis.app.parser.senado;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
@@ -80,7 +81,7 @@ public class ParserProposicaoSenado implements ProposicaoSearcher {
 	public Collection<Proposicao> searchProposicao(String sigla, Integer numero, Integer ano) throws IOException {
 		StringBuilder wsURL = new StringBuilder("http://legis.senado.leg.br/dadosabertos/materia/pesquisa/lista?");
 		wsURL.append("v=4");
-		wsURL.append("&sigla=").append(sigla);
+		wsURL.append("&sigla=").append(URLEncoder.encode(sigla, "UTF-8"));
 		if (numero != null) {
 			wsURL.append("&numero=").append(numero);
 		}
