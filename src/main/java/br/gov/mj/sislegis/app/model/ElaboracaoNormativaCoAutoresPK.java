@@ -11,17 +11,17 @@ public class ElaboracaoNormativaCoAutoresPK implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	private long idElaboracaoNormativa;
 	private long idOrgao;
-	
-	public ElaboracaoNormativaCoAutoresPK(long idElaboracaoNormativa, long idOrgao){
+
+	public ElaboracaoNormativaCoAutoresPK(long idElaboracaoNormativa, long idOrgao) {
 		super();
-		this.idElaboracaoNormativa=idElaboracaoNormativa;
-		this.idOrgao=idOrgao;
+		this.idElaboracaoNormativa = idElaboracaoNormativa;
+		this.idOrgao = idOrgao;
 	}
 
-	public ElaboracaoNormativaCoAutoresPK(){
+	public ElaboracaoNormativaCoAutoresPK() {
 		super();
 	}
 
@@ -40,7 +40,7 @@ public class ElaboracaoNormativaCoAutoresPK implements Serializable {
 	public void setIdOrgao(long idOrgao) {
 		this.idOrgao = idOrgao;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -64,5 +64,5 @@ public class ElaboracaoNormativaCoAutoresPK implements Serializable {
 		if (idOrgao != other.idOrgao)
 			return false;
 		return true;
-	}	
+	}
 }

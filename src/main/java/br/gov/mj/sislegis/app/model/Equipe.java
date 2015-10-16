@@ -16,7 +16,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Entity
 @Table(name = "equipe")
 @XmlRootElement
-public class Equipe implements AbstractEntity {
+public class Equipe extends AbstractEntity {
 
 	private static final long serialVersionUID = 8516082010865687791L;
 
@@ -27,8 +27,8 @@ public class Equipe implements AbstractEntity {
 
 	@Column
 	private String nome;
-	
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "equipe", cascade={CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "equipe", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, orphanRemoval = true)
 	private Set<EquipeUsuario> listaEquipeUsuario;
 
 	public Long getId() {
@@ -38,7 +38,7 @@ public class Equipe implements AbstractEntity {
 	public void setId(final Long id) {
 		this.id = id;
 	}
-	
+
 	public String getNome() {
 		return nome;
 	}
@@ -46,38 +46,13 @@ public class Equipe implements AbstractEntity {
 	public void setNome(String nome) {
 		this.nome = nome;
 	}
-	
+
 	public Set<EquipeUsuario> getListaEquipeUsuario() {
 		return listaEquipeUsuario;
 	}
 
 	public void setListaEquipeUsuario(Set<EquipeUsuario> listaEquipeUsuario) {
 		this.listaEquipeUsuario = listaEquipeUsuario;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof Equipe)) {
-			return false;
-		}
-		Equipe other = (Equipe) obj;
-		if (id != null) {
-			if (!id.equals(other.id)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
 	}
 
 	@Override

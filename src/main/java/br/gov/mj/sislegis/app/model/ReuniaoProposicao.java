@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @XmlRootElement
-public class ReuniaoProposicao implements AbstractEntity {
+public class ReuniaoProposicao extends AbstractEntity {
 
 	private static final long serialVersionUID = 7949894944142814382L;
 
@@ -24,10 +24,10 @@ public class ReuniaoProposicao implements AbstractEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@MapsId("idProposicao")
 	private Proposicao proposicao;
-	
+
 	@Column
 	private String siglaComissao;
-	
+
 	@Column
 	private Integer seqOrdemPauta;
 
@@ -91,25 +91,5 @@ public class ReuniaoProposicao implements AbstractEntity {
 		String result = getClass().getSimpleName() + " ";
 		return result;
 	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof Reuniao)) {
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((reuniaoProposicaoPK == null) ? 0 : reuniaoProposicaoPK.hashCode());
-		return result;
-	}	
-
 
 }

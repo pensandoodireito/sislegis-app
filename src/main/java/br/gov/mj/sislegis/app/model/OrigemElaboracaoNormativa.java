@@ -9,16 +9,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @XmlRootElement
-public class OrigemElaboracaoNormativa implements AbstractEntity {
+public class OrigemElaboracaoNormativa extends AbstractEntity {
 
 	private static final long serialVersionUID = 3437558309464749280L;
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 
-	@Column(unique=true)
+	@Column(unique = true)
 	private String descricao;
 
 	public Long getId() {
@@ -27,31 +27,6 @@ public class OrigemElaboracaoNormativa implements AbstractEntity {
 
 	public void setId(final Long id) {
 		this.id = id;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof OrigemElaboracaoNormativa)) {
-			return false;
-		}
-		OrigemElaboracaoNormativa other = (OrigemElaboracaoNormativa) obj;
-		if (id != null) {
-			if (!id.equals(other.id)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
 	}
 
 	public String getDescricao() {

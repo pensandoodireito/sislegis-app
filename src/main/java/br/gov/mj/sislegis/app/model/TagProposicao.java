@@ -10,14 +10,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @XmlRootElement
-public class TagProposicao implements AbstractEntity {
-	
+public class TagProposicao extends AbstractEntity {
+
 	private static final long serialVersionUID = 7949894944142814382L;
-	
+
 	@EmbeddedId
 	private TagProposicaoPK tagProposicaoPK;
 
-	
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@MapsId("tag")
 	private Tag tag;
@@ -34,7 +33,6 @@ public class TagProposicao implements AbstractEntity {
 		this.tagProposicaoPK = tagProposicaoPK;
 	}
 
-
 	public Proposicao getProposicao() {
 		return proposicao;
 	}
@@ -42,29 +40,10 @@ public class TagProposicao implements AbstractEntity {
 	public void setProposicao(Proposicao proposicao) {
 		this.proposicao = proposicao;
 	}
-	
+
 	@Override
 	public String toString() {
 		String result = getClass().getSimpleName() + " ";
-		return result;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof Reuniao)) {
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((tagProposicaoPK == null) ? 0 : tagProposicaoPK.hashCode());
 		return result;
 	}
 
