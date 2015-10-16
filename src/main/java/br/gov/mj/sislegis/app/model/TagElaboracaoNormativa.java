@@ -1,6 +1,5 @@
 package br.gov.mj.sislegis.app.model;
 
-
 import javax.persistence.CascadeType;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -11,17 +10,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @XmlRootElement
-public class TagElaboracaoNormativa implements AbstractEntity {
-	
+public class TagElaboracaoNormativa extends AbstractEntity {
+
 	private static final long serialVersionUID = 7949894944142814382L;
-	
+
 	@EmbeddedId
 	private TagElaboracaoNormativaPK tagElaboracaoNormativaPK;
-	
+
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@MapsId("tag")
 	private Tag tag;
-	
+
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@MapsId("id")
 	private ElaboracaoNormativa elaboracaoNormativa;
@@ -30,8 +29,7 @@ public class TagElaboracaoNormativa implements AbstractEntity {
 		return tagElaboracaoNormativaPK;
 	}
 
-	public void setTagElaboracaoNormativaPK(
-			TagElaboracaoNormativaPK tagElaboracaoNormativaPK) {
+	public void setTagElaboracaoNormativaPK(TagElaboracaoNormativaPK tagElaboracaoNormativaPK) {
 		this.tagElaboracaoNormativaPK = tagElaboracaoNormativaPK;
 	}
 
@@ -50,14 +48,14 @@ public class TagElaboracaoNormativa implements AbstractEntity {
 	public void setElaboracaoNormativa(ElaboracaoNormativa elaboracaoNormativa) {
 		this.elaboracaoNormativa = elaboracaoNormativa;
 	}
-	
-	
+
 	@Override
 	public String toString() {
 		String result = getClass().getSimpleName() + " ";
 		return result;
 	}
-	
+
+	// FIXME faz sentido isso? Se for reuniao.... é igual????
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -79,7 +77,7 @@ public class TagElaboracaoNormativa implements AbstractEntity {
 
 	@Override
 	public Number getId() {
-		// TODO Auto-generated method stub
+		// FIXME porque esse cara retorna null??
 		return null;
 	}
 }

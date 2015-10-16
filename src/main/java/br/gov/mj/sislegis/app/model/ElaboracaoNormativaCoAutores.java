@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @XmlRootElement
-public class ElaboracaoNormativaCoAutores implements AbstractEntity {
+public class ElaboracaoNormativaCoAutores extends AbstractEntity {
 
 	/**
 	 * 

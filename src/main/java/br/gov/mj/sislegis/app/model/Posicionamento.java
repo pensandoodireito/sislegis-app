@@ -9,8 +9,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @XmlRootElement
-public class Posicionamento implements AbstractEntity {
-	
+public class Posicionamento extends AbstractEntity {
+
 	private static final long serialVersionUID = -5843916678553628190L;
 
 	@Id
@@ -18,7 +18,7 @@ public class Posicionamento implements AbstractEntity {
 	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 
-	@Column(unique=true)
+	@Column(unique = true)
 	private String nome;
 
 	public Long getId() {
@@ -27,31 +27,6 @@ public class Posicionamento implements AbstractEntity {
 
 	public void setId(final Long id) {
 		this.id = id;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof Posicionamento)) {
-			return false;
-		}
-		Posicionamento other = (Posicionamento) obj;
-		if (id != null) {
-			if (!id.equals(other.id)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
 	}
 
 	public String getNome() {

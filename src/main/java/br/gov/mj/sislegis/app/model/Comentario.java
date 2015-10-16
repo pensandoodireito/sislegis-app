@@ -16,19 +16,18 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-
 @Entity
 @XmlRootElement
-@JsonIgnoreProperties({"idProposicao"})
-public class Comentario implements AbstractEntity {
-
+@JsonIgnoreProperties({ "idProposicao" })
+public class Comentario extends AbstractEntity {
+	
 	private static final long serialVersionUID = 739840933885769688L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 
-	@Column(length=8000)
+	@Column(length = 8000)
 	private String descricao;
 
 	@ManyToOne(fetch = FetchType.EAGER)
@@ -41,38 +40,12 @@ public class Comentario implements AbstractEntity {
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Proposicao proposicao;
 
-
 	public Long getId() {
 		return this.id;
 	}
 
 	public void setId(final Long id) {
 		this.id = id;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!(obj instanceof Comentario)) {
-			return false;
-		}
-		Comentario other = (Comentario) obj;
-		if (id != null) {
-			if (!id.equals(other.id)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
 	}
 
 	public String getDescricao() {
@@ -110,7 +83,7 @@ public class Comentario implements AbstractEntity {
 	}
 
 	public Proposicao getProposicao() {
-		if(!Objects.isNull(this.proposicao)){
+		if (!Objects.isNull(this.proposicao)) {
 			Proposicao p = new Proposicao();
 			p.setId(proposicao.getId());
 			this.proposicao = p;
