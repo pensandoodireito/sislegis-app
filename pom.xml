@@ -281,7 +281,7 @@
 						<include>**/*Spec.java</include>
 					</includes>
 
-					<!-- Excluir execucao automatica dos testes dos endpoints, pois fazem interacao com a base de dados -->
+					<!-- Excluir execucao automatica dos testes dos endpoints, pois fazem interacao com a base de dados e precisam do Token de autenticacao -->
 					<excludes>
 						<exclude>**/endpoint/*</exclude>
 					</excludes>
