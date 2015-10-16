@@ -35,7 +35,7 @@ public class AgendaComissaoEndpoint {
 	private UsuarioService usuarioService;
 
 	@POST
-	@Path("/{casa}/{comissao:[A-Z]*}")
+	@Path("/{casa}/{comissao}")
 	public Response follow(@PathParam("casa") String casa, @PathParam("comissao") String comissao,
 			@HeaderParam("Authorization") String authorization) {
 		try {
@@ -50,7 +50,7 @@ public class AgendaComissaoEndpoint {
 	}
 
 	@DELETE
-	@Path("/{casa}/{comissao:[A-Z]*}")
+	@Path("/{casa}/{comissao}")
 	public Response unfollow(@PathParam("casa") String casa, @PathParam("comissao") String comissao,
 			@HeaderParam("Authorization") String authorization) {
 		try {
@@ -79,7 +79,7 @@ public class AgendaComissaoEndpoint {
 	}
 
 	@GET
-	@Path("/{casa}/{comissao:[A-Z]*}")
+	@Path("/{casa}/{comissao}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getAgendaComissao(@PathParam("casa") String casa, @PathParam("comissao") String comissao,
 			@HeaderParam("Authorization") String authorization) throws Exception {
