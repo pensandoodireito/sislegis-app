@@ -1,17 +1,15 @@
 package br.gov.mj.sislegis.app.service;
 
+import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.parser.TipoProposicao;
+
+import javax.ejb.Local;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-import javax.ejb.Local;
-
-import br.gov.mj.sislegis.app.enumerated.Origem;
-import br.gov.mj.sislegis.app.json.ProposicaoJSON;
-import br.gov.mj.sislegis.app.model.Proposicao;
-import br.gov.mj.sislegis.app.parser.TipoProposicao;
 
 @Local
 public interface ProposicaoService extends Service<Proposicao> {
@@ -26,19 +24,19 @@ public interface ProposicaoService extends Service<Proposicao> {
 
 	public void salvarListaProposicao(List<Proposicao> lista);
 
-	public List<ProposicaoJSON> listarTodos();
+	public List<Proposicao> listarTodos();
 
-	public ProposicaoJSON buscarPorId(Long id);
+	public Proposicao buscarPorId(Long id);
 
-	public List<ProposicaoJSON> buscarProposicoesPorDataReuniao(Date dataReuniao);
+	public List<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao);
 
-	public void atualizarProposicaoJSON(ProposicaoJSON proposicaoJSON);
+	public void atualizarProposicaoJSON(Proposicao proposicao);
 
 	public Proposicao buscarPorIdProposicao(Integer idProposicao);
 
 	public List<Proposicao> buscarPorSufixo(String sufixo);
 
-	public List<ProposicaoJSON> consultar(String sigla, String autor, String ementa, String origem, String isFavorita,
+	public List<Proposicao> consultar(String sigla, String autor, String ementa, String origem, String isFavorita,
 			Integer offset, Integer limit);
 
 	/**
