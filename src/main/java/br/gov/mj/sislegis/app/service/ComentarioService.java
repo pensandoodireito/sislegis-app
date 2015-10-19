@@ -12,9 +12,7 @@ public interface ComentarioService extends Service<Comentario> {
 
 	List<ComentarioJSON> findByProposicao(Long id);
 
-	List<ComentarioJSON> findByProposicao(Long idProposicao, Integer posicaoInicial, Integer limite);
-
-	Long totalByProposicao(Long idProposicao);
+	Integer totalByProposicao(Long idProposicao);
 
 	void salvarComentario(ComentarioJSON comentarioJSON, Usuario usuario) throws IllegalAccessException;
 

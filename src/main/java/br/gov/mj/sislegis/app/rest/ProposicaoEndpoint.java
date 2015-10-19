@@ -132,7 +132,7 @@ public class ProposicaoEndpoint {
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response findById(@PathParam("id") Long id) {
+	public Response findById(@PathParam("id") Integer id) {
 		return Response.ok(proposicaoService.buscarPorId(id)).build();
 	}
 

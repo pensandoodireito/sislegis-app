@@ -26,13 +26,11 @@ public interface ProposicaoService extends Service<Proposicao> {
 
 	public List<Proposicao> listarTodos();
 
-	public Proposicao buscarPorId(Long id);
+	public Proposicao buscarPorId(Integer id);
 
 	public List<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao);
 
 	public void atualizarProposicaoJSON(Proposicao proposicao);
-
-	public Proposicao buscarPorIdProposicao(Integer idProposicao);
 
 	public List<Proposicao> buscarPorSufixo(String sufixo);
 

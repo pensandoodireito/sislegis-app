@@ -52,38 +52,13 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long>
 		return lista;
 	}
 
-	@Override
-	public List<ComentarioJSON> findByProposicao(Long idProposicao, Integer posicaoInicial, Integer limite) {
-		List<ComentarioJSON> lista = new ArrayList<>();
-		TypedQuery<Comentario> findByIdQuery = em
-				.createQuery(
-						"SELECT DISTINCT c FROM Comentario c "
-								+ "INNER JOIN FETCH c.autor a "
-								+ "INNER JOIN FETCH c.proposicao p "
-								+ "WHERE p.id = :entityId "
-								+ "ORDER BY c.dataCriacao desc",
-						Comentario.class);
-		findByIdQuery.setParameter("entityId", idProposicao);
-
-		findByIdQuery.setFirstResult(posicaoInicial);
-		findByIdQuery.setMaxResults(limite);
-
-		final List<Comentario> results = findByIdQuery.getResultList();
-		for (Comentario comentario : results) {
-			lista.add(new ComentarioJSON(comentario.getId(), comentario
-					.getDescricao(), comentario.getAutor(), comentario
-					.getDataCriacao(), comentario.getProposicao().getId()));
-
-		}
-		return lista;
-	}
 
 	@Override
-	public Long totalByProposicao(Long idProposicao) {
+	public Integer totalByProposicao(Long idProposicao) {
 		Query query = em.createNativeQuery("SELECT COUNT(1) FROM comentario WHERE proposicao_id = :idProposicao");
 		query.setParameter("idProposicao", idProposicao);
 		BigInteger total = (BigInteger) query.getSingleResult();
-		return total.longValue();
+		return total.intValue();
 	}
 
 	public ComentarioJSON findByIdJSON(Long id) {

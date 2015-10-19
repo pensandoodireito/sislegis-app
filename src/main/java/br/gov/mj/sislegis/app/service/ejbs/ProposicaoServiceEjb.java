@@ -110,7 +110,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	public int salvarProposicaoIndependente(Proposicao proposicaoFromBusca) {
 		// Agora vamos salvar/associar as proposições na reunião
 		try {
-			Proposicao proposicao = buscarPorIdProposicao(proposicaoFromBusca.getIdProposicao());
+			Proposicao proposicao = buscarPorId(proposicaoFromBusca.getIdProposicao());
 
 			// Caso a proposição não exista, salvamos ela e associamos a
 			// reunião
@@ -155,7 +155,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		// Agora vamos salvar/associar as proposições na reunião
 		for (Proposicao proposicaoFromBusca : listaProposicao) {
 			try {
-				Proposicao proposicao = buscarPorIdProposicao(proposicaoFromBusca.getIdProposicao());
+				Proposicao proposicao = buscarPorId(proposicaoFromBusca.getIdProposicao());
 
 				// Caso a proposição não exista, salvamos ela e associamos a
 				// reunião
@@ -190,8 +190,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 	}
 
-	private ReuniaoProposicao getReuniaoProposicao(Reuniao reuniao, Proposicao proposicaoFromBusca,
-			Proposicao proposicao) {
+	private ReuniaoProposicao getReuniaoProposicao(Reuniao reuniao, Proposicao proposicaoFromBusca,	Proposicao proposicao) {
 		ReuniaoProposicao rp = new ReuniaoProposicao();
 		ReuniaoProposicaoPK reuniaoProposicaoPK = new ReuniaoProposicaoPK();
 		reuniaoProposicaoPK.setIdReuniao(reuniao.getId());
@@ -212,7 +211,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	@Override
 	public List<Proposicao> listarTodos() {
-		return listAll();
+		List<Proposicao> proposicoes = listAll();
+		popularTotalComentariosEncaminhamentos(proposicoes);
+		return proposicoes;
 
 //		List<Proposicao> lista = listAll();
 //
@@ -262,11 +263,11 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (Objects.nonNull(isFavorita) && !isFavorita.equals("")) {
 			findByIdQuery.setParameter("isFavorita", new Boolean(isFavorita));
 		}
-		List<Proposicao> lista = findByIdQuery.setFirstResult(offset) // offset
-				.setMaxResults(limit) // limit
-				.getResultList();
 
-		return lista;
+		List<Proposicao> proposicoes = findByIdQuery.setFirstResult(offset).setMaxResults(limit).getResultList();
+		popularTotalComentariosEncaminhamentos(proposicoes);
+
+		return proposicoes;
 
 //		List<ProposicaoJSON> listaProposicaoJSON = new ArrayList<ProposicaoJSON>();
 //		for (Proposicao proposicao : lista) {
@@ -307,9 +308,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 //	}
 
 	@Override
-	public Proposicao buscarPorId(Long id) {
-		return findById(id);
-		// TODO Popular comentarios e encaminhamentos?
+	public Proposicao buscarPorId(Integer id) {
+		Proposicao proposicao = findById(id.longValue());
+		if (proposicao != null) {
+			popularTotalComentariosEncaminhamentos(proposicao);
+		}
+		return proposicao;
 
 //		Proposicao proposicao = findById(id);
 //		ProposicaoJSON proposicaoJSON = populaProposicaoJSON(proposicao);
@@ -333,9 +337,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				proposicao.setSeqOrdemPauta(reuniaoProposicao.getSeqOrdemPauta());
 				proposicao.setLinkPauta(reuniaoProposicao.getLinkPauta());
 				proposicao.setReuniao(reuniaoProposicao.getReuniao());
-				proposicoes.add(proposicao);
 
-				// TODO Popular comentarios e encaminhamentos?
+				popularTotalComentariosEncaminhamentos(proposicao);
+
+				proposicoes.add(proposicao);
 			}
 		}
 
@@ -471,19 +476,6 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 //	}
 
 	@Override
-	public Proposicao buscarPorIdProposicao(Integer idProposicao) {
-		TypedQuery<Proposicao> findByIdQuery = em.createQuery(
-				"SELECT p FROM Proposicao p WHERE p.idProposicao = :idProposicao", Proposicao.class);
-		findByIdQuery.setParameter("idProposicao", idProposicao);
-		final List<Proposicao> results = findByIdQuery.getResultList();
-		if (!Objects.isNull(results) && !results.isEmpty()) {
-			return results.get(0);
-		} else {
-			return null;
-		}
-	}
-
-	@Override
 	public void deleteById(Long id) {
 		List<EncaminhamentoProposicaoJSON> listaEnc = encaminhamentoProposicaoService.findByProposicao(id);
 		for (Iterator<EncaminhamentoProposicaoJSON> iterator = listaEnc.iterator(); iterator.hasNext();) {
@@ -502,11 +494,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	@Override
 	public List<Proposicao> buscarPorSufixo(String sufixo) {
-		TypedQuery<Proposicao> findByIdQuery = getEntityManager().createQuery(
-				"SELECT p FROM Proposicao p WHERE upper(CONCAT(p.tipo,' ',p.numero,'/',p.ano)) like upper(:sigla)",
-				Proposicao.class);
-		findByIdQuery.setParameter("sigla", "%" + sufixo + "%");
-		return findByIdQuery.getResultList();
+		TypedQuery<Proposicao> query = getEntityManager().createQuery(
+				"SELECT p FROM Proposicao p WHERE upper(CONCAT(p.tipo,' ',p.numero,'/',p.ano)) like upper(:sigla)",	Proposicao.class);
+		query.setParameter("sigla", "%" + sufixo + "%");
+		List<Proposicao> proposicoes = query.getResultList();
+		popularTotalComentariosEncaminhamentos(proposicoes);
+		return proposicoes;
 	}
 
 	@Override
@@ -538,5 +531,18 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			throw new IllegalArgumentException("Origem não informada");
 		}
 
+	}
+
+	private void popularTotalComentariosEncaminhamentos(Proposicao proposicao) {
+		if (proposicao != null) {
+			proposicao.setTotalComentarios(comentarioService.totalByProposicao(proposicao.getId()));
+			proposicao.setTotalEncaminhamentos(encaminhamentoProposicaoService.totalByProposicao(proposicao.getId()));
+		}
+	}
+
+	private void popularTotalComentariosEncaminhamentos(List<Proposicao> proposicoes){
+		for (Proposicao proposicao : proposicoes){
+			popularTotalComentariosEncaminhamentos(proposicao);
+		}
 	}
 }

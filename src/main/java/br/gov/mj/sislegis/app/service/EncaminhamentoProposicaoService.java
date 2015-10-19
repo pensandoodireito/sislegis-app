@@ -11,6 +11,8 @@ import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
 public interface EncaminhamentoProposicaoService extends Service<EncaminhamentoProposicao> {
 
 	EncaminhamentoProposicao salvarEncaminhamentoProposicao(EncaminhamentoProposicao encaminhamentoProposicao, String referer);
-	List<EncaminhamentoProposicaoJSON> findByProposicao(Long id);
 
+	List<EncaminhamentoProposicaoJSON> findByProposicao(Long idProposicao);
+
+	Integer totalByProposicao(Long idProposicao);
 }

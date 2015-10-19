@@ -79,20 +79,6 @@ public class ComentarioEndpoint {
 		return results;
 	}
 
-	@GET
-	@Path("/total/{idProposicao:[0-9][0-9]*}")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Long totalByProposicao(@PathParam("idProposicao") Long idProposicao){
-		return comentarioService.totalByProposicao(idProposicao);
-	}
-
-	@GET
-	@Path("/proposicaoLazy/")
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<ComentarioJSON> findByProposicaoLazy(@QueryParam("idProposicao") Long idProposicao, @QueryParam("posicaoInicial") Integer posicaoInicial, @QueryParam("limite")Integer limite){
-		return comentarioService.findByProposicao(idProposicao, posicaoInicial, limite);
-	}
-
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
 	@Consumes(MediaType.APPLICATION_JSON)
