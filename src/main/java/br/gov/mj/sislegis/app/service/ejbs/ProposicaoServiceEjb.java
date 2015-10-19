@@ -3,10 +3,7 @@ package br.gov.mj.sislegis.app.service.ejbs;
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.json.ComentarioJSON;
 import br.gov.mj.sislegis.app.json.EncaminhamentoProposicaoJSON;
-import br.gov.mj.sislegis.app.model.Proposicao;
-import br.gov.mj.sislegis.app.model.Reuniao;
-import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
-import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
+import br.gov.mj.sislegis.app.model.*;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
 import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
@@ -391,8 +388,15 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	@Override
 	public Proposicao save(Proposicao entity) {
 		if (entity.getResponsavel() != null && entity.getResponsavel().getId() == null) {
+
 			// criar usuario antes
-			usuarioService.save(entity.getResponsavel());
+			Usuario usuarioExistente = usuarioService.findByEmail(entity.getResponsavel().getEmail());
+			if (usuarioExistente == null){
+				usuarioService.save(entity.getResponsavel());
+			} else{
+				entity.setResponsavel(usuarioExistente);
+			}
+
 		}
 		return super.save(entity);
 	}
