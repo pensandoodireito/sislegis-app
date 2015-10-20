@@ -1,5 +1,6 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -8,6 +9,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import br.gov.mj.sislegis.app.enumerated.TipoTarefa;
@@ -70,12 +72,17 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 		tarefaService.save(tarefa, referer);
 	}
 
-	public List<EncaminhamentoProposicaoJSON> findByProposicao(Long id) {
-		TypedQuery<EncaminhamentoProposicao> findByIdQuery = em.createQuery("SELECT c FROM EncaminhamentoProposicao c "
-				+ "INNER JOIN FETCH c.responsavel res " + "INNER JOIN FETCH c.comentario com "
-				+ "INNER JOIN FETCH c.encaminhamento enc " + "INNER JOIN FETCH c.proposicao p WHERE p.id = :entityId",
-				EncaminhamentoProposicao.class);
-		findByIdQuery.setParameter("entityId", id);
+
+	public List<EncaminhamentoProposicaoJSON> findByProposicao(Long idProposicao) {
+		TypedQuery<EncaminhamentoProposicao> findByIdQuery = em
+				.createQuery(
+						"SELECT c FROM EncaminhamentoProposicao c "
+								+ "INNER JOIN FETCH c.responsavel res "
+								+ "INNER JOIN FETCH c.comentario com "
+								+ "INNER JOIN FETCH c.encaminhamento enc "
+								+ "INNER JOIN FETCH c.proposicao p WHERE p.id = :entityId",
+								EncaminhamentoProposicao.class);
+		findByIdQuery.setParameter("entityId", idProposicao);
 		final List<EncaminhamentoProposicao> results = findByIdQuery.getResultList();
 		List<EncaminhamentoProposicaoJSON> lista = new ArrayList<EncaminhamentoProposicaoJSON>();
 		for (EncaminhamentoProposicao ep : results) {
@@ -83,6 +90,14 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 					.getEncaminhamento(), ep.getResponsavel(), ep.getDataHoraLimite()));
 		}
 		return lista;
+	}
+
+	@Override
+	public Integer totalByProposicao(Long idProposicao) {
+		Query query = em.createNativeQuery("SELECT COUNT(1) FROM encaminhamentoproposicao WHERE proposicao_id = :idProposicao");
+		query.setParameter("idProposicao", idProposicao);
+		BigInteger total = (BigInteger) query.getSingleResult();
+		return total.intValue();
 	}
 
 }

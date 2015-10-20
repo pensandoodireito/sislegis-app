@@ -36,7 +36,7 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 	@OneToOne(fetch = FetchType.EAGER)
 	private Encaminhamento encaminhamento;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	private Proposicao proposicao;
 
 	@OneToOne(fetch = FetchType.EAGER)
@@ -72,11 +72,11 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 	}
 
 	public Proposicao getProposicao() {
-		if (!Objects.isNull(this.proposicao)) {
-			Proposicao p = new Proposicao();
-			p.setId(proposicao.getId());
-			this.proposicao = p;
-		}
+//		if (!Objects.isNull(this.proposicao)) {
+//			Proposicao p = new Proposicao();
+//			p.setId(proposicao.getId());
+//			this.proposicao = p;
+//		}
 		return proposicao;
 	}
 

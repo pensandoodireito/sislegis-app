@@ -12,8 +12,8 @@ public interface ComentarioService extends Service<Comentario> {
 
 	public List<Comentario> findByIdProposicao(Long id);
 
-
 	public void salvarComentario(Comentario comentario, Usuario usuario) throws IllegalAccessException;
 
+	Integer totalByProposicao(Long idProposicao);
 
 }

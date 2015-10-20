@@ -1,10 +1,12 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import br.gov.mj.sislegis.app.model.Comentario;
@@ -33,11 +35,19 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> 
 		TypedQuery<Comentario> findByIdQuery = em.createQuery("SELECT DISTINCT c FROM Comentario c "
 				+ "INNER JOIN FETCH c.autor a " + "INNER JOIN FETCH c.proposicao p WHERE p.id = :entityId",
 				Comentario.class);
+
 		findByIdQuery.setParameter("entityId", id);
 		final List<Comentario> results = findByIdQuery.getResultList();
 
 		return results;
+	}
 
+	@Override
+	public Integer totalByProposicao(Long idProposicao) {
+		Query query = em.createNativeQuery("SELECT COUNT(1) FROM comentario WHERE proposicao_id = :idProposicao");
+		query.setParameter("idProposicao", idProposicao);
+		BigInteger total = (BigInteger) query.getSingleResult();
+		return total.intValue();
 	}
 
 	@Override

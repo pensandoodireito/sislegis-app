@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.ElaboracaoNormativa;
 import br.gov.mj.sislegis.app.model.Posicionamento;
 import br.gov.mj.sislegis.app.model.Usuario;
@@ -26,7 +27,7 @@ public class ProposicaoJSON implements Serializable {
 	private String ano;
 
 	private String numero;
-	
+
 	private String autor;
 
 	private String ementa;
@@ -44,83 +45,77 @@ public class ProposicaoJSON implements Serializable {
 	private String linkProposicao;
 
 	private String linkPauta;
-	
+
 	private Boolean isFavorita;
-	
+
 	private Long idReuniao;
-	
+
 	private Usuario responsavel;
-	
+
 	private boolean responsavelNaoDefinido;
 
-	private List<ComentarioJSON> listaComentario = new ArrayList<ComentarioJSON>();
+	private List<Comentario> listaComentario = new ArrayList<Comentario>();
 
 	private List<EncaminhamentoProposicaoJSON> listaEncaminhamentoProposicao = new ArrayList<EncaminhamentoProposicaoJSON>();
 
 	private Posicionamento posicionamento;
-	
+
 	private boolean posicionamentoNaoDefinido;
 
 	private List<TagJSON> tags;
-	
-	private Set<ProposicaoJSON> proposicoesFilha;
-	
-	private Set<ElaboracaoNormativa> elaboracoesNormativas;
-	
-	public ProposicaoJSON(){}
 
-	public ProposicaoJSON(Long id, Integer idProposicao, String tipo,
-			String ano, String numero, String autor,
-			String ementa, Origem origem, String sigla, String comissao,
-			Integer seqOrdemPauta, String linkProposicao, String linkPauta,
-			String resultadoASPAR,
-			Boolean isFavorita,
-			Long idReuniao,
-			List<ComentarioJSON> listaComentario,
-			List<EncaminhamentoProposicaoJSON> listaEncaminhamentoProposicao,
-			Posicionamento posicionamento, List<TagJSON> tags,
-			Usuario responsavel, Set<ProposicaoJSON> proposicoesFilha,
-			Set<ElaboracaoNormativa> elaboracoesNormativas) {
-		this.id=id;
-		this.idProposicao=idProposicao;
-		this.tipo=tipo;
-		this.ano=ano;
-		this.numero=numero;
-		this.autor=autor;
-		this.ementa=ementa;
-		this.origem=origem;
-		this.sigla=sigla;
-		this.comissao=comissao;
-		this.seqOrdemPauta=seqOrdemPauta;
-		this.linkProposicao=linkProposicao;
-		this.linkPauta=linkPauta;
-		this.resultadoASPAR=resultadoASPAR;
-		this.isFavorita=isFavorita;
-		this.idReuniao=idReuniao;
-		this.listaComentario=listaComentario;
-		this.listaEncaminhamentoProposicao = listaEncaminhamentoProposicao;
-		this.posicionamento=posicionamento;
-		this.posicionamentoNaoDefinido=posicionamento==null?true:false;
-		this.tags=tags;
-		this.responsavel=responsavel;
-		this.responsavelNaoDefinido = (this.responsavel == null);
-		this.proposicoesFilha=proposicoesFilha;
-		this.elaboracoesNormativas=elaboracoesNormativas;
+	private Set<ProposicaoJSON> proposicoesFilha;
+
+	private Set<ElaboracaoNormativa> elaboracoesNormativas;
+
+	public ProposicaoJSON() {
 	}
-	
-	public ProposicaoJSON(Long id, Integer idProposicao, String tipo,
-			String ano, String numero, String autor,
+
+	public ProposicaoJSON(Long id, Integer idProposicao, String tipo, String ano, String numero, String autor,
+			String ementa, Origem origem, String sigla, String comissao, Integer seqOrdemPauta, String linkProposicao,
+			String linkPauta, String resultadoASPAR, Boolean isFavorita, Long idReuniao,
+			List<Comentario> listaComentario, List<EncaminhamentoProposicaoJSON> listaEncaminhamentoProposicao,
+			Posicionamento posicionamento, List<TagJSON> tags, Usuario responsavel,
+			Set<ProposicaoJSON> proposicoesFilha, Set<ElaboracaoNormativa> elaboracoesNormativas) {
+		this.id = id;
+		this.idProposicao = idProposicao;
+		this.tipo = tipo;
+		this.ano = ano;
+		this.numero = numero;
+		this.autor = autor;
+		this.ementa = ementa;
+		this.origem = origem;
+		this.sigla = sigla;
+		this.comissao = comissao;
+		this.seqOrdemPauta = seqOrdemPauta;
+		this.linkProposicao = linkProposicao;
+		this.linkPauta = linkPauta;
+		this.resultadoASPAR = resultadoASPAR;
+		this.isFavorita = isFavorita;
+		this.idReuniao = idReuniao;
+		this.listaComentario = listaComentario;
+		this.listaEncaminhamentoProposicao = listaEncaminhamentoProposicao;
+		this.posicionamento = posicionamento;
+		this.posicionamentoNaoDefinido = posicionamento == null ? true : false;
+		this.tags = tags;
+		this.responsavel = responsavel;
+		this.responsavelNaoDefinido = (this.responsavel == null);
+		this.proposicoesFilha = proposicoesFilha;
+		this.elaboracoesNormativas = elaboracoesNormativas;
+	}
+
+	public ProposicaoJSON(Long id, Integer idProposicao, String tipo, String ano, String numero, String autor,
 			String ementa, Origem origem, String sigla, String comissao) {
-		this.id=id;
-		this.idProposicao=idProposicao;
-		this.tipo=tipo;
-		this.ano=ano;
-		this.numero=numero;
-		this.autor=autor;
-		this.ementa=ementa;
-		this.origem=origem;
-		this.sigla=sigla;
-		this.comissao=comissao;
+		this.id = id;
+		this.idProposicao = idProposicao;
+		this.tipo = tipo;
+		this.ano = ano;
+		this.numero = numero;
+		this.autor = autor;
+		this.ementa = ementa;
+		this.origem = origem;
+		this.sigla = sigla;
+		this.comissao = comissao;
 	}
 
 	public String getComissao() {
@@ -186,7 +181,7 @@ public class ProposicaoJSON implements Serializable {
 	public void setNumero(String numero) {
 		this.numero = numero;
 	}
-	
+
 	public String getAutor() {
 		return autor;
 	}
@@ -219,11 +214,11 @@ public class ProposicaoJSON implements Serializable {
 		this.posicionamento = posicionamento;
 	}
 
-	public List<ComentarioJSON> getListaComentario() {
+	public List<Comentario> getListaComentario() {
 		return listaComentario;
 	}
 
-	public void setListaComentario(List<ComentarioJSON> listaComentario) {
+	public void setListaComentario(List<Comentario> listaComentario) {
 		this.listaComentario = listaComentario;
 	}
 
@@ -303,8 +298,7 @@ public class ProposicaoJSON implements Serializable {
 		return elaboracoesNormativas;
 	}
 
-	public void setElaboracoesNormativas(
-			Set<ElaboracaoNormativa> elaboracoesNormativas) {
+	public void setElaboracoesNormativas(Set<ElaboracaoNormativa> elaboracoesNormativas) {
 		this.elaboracoesNormativas = elaboracoesNormativas;
 	}
 
