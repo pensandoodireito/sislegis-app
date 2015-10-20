@@ -26,6 +26,7 @@ import br.gov.mj.sislegis.app.json.ComentarioJSON;
 import br.gov.mj.sislegis.app.json.EncaminhamentoProposicaoJSON;
 import br.gov.mj.sislegis.app.json.ProposicaoJSON;
 import br.gov.mj.sislegis.app.json.TagJSON;
+<<<<<<< HEAD
 import br.gov.mj.sislegis.app.model.AlteracaoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
@@ -385,8 +386,14 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	@Override
 	public Proposicao save(Proposicao entity) {
 		if (entity.getResponsavel() != null && entity.getResponsavel().getId() == null) {
-			// criar usuario antes
-			usuarioService.save(entity.getResponsavel());
+
+			Usuario usuarioExistente = usuarioService.findByEmail(entity.getResponsavel().getEmail());
+			if (usuarioExistente == null){
+				usuarioService.save(entity.getResponsavel());
+			} else{
+				entity.setResponsavel(usuarioExistente);
+			}
+
 		}
 		return super.save(entity);
 	}
