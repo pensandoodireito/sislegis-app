@@ -58,9 +58,9 @@ public class ComentarioEndpoint {
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response create(ComentarioJSON entity,
+	public Response create(Comentario entity,
 			@HeaderParam("Authorization") String authorization) {
-
+		
 		try {
 			Usuario user = controleUsuarioAutenticado
 					.carregaUsuarioAutenticado(authorization);
@@ -74,7 +74,7 @@ public class ComentarioEndpoint {
 		}
 		return Response.created(
 				UriBuilder.fromResource(ComentarioEndpoint.class)
-						.path(String.valueOf(entity.getId())).build()).build();
+						.path(String.valueOf(entity.getId())).build()).header("Access-Control-Expose-Headers", "Location").build();
 	}
 
 	@DELETE
@@ -115,7 +115,7 @@ public class ComentarioEndpoint {
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response update(ComentarioJSON entity,
+	public Response update(Comentario entity,
 			@HeaderParam("Authorization") String authorization) {
 		try {
 
