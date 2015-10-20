@@ -14,28 +14,25 @@ import java.util.Map;
 @Local
 public interface ProposicaoService extends Service<Proposicao> {
 
-	public List<Proposicao> buscarProposicoesPautaCamaraWS(Map parametros) throws Exception;
+	List<Proposicao> buscarProposicoesPautaCamaraWS(Map parametros) throws Exception;
 
-	public List<Proposicao> buscarProposicoesPautaSenadoWS(Map parametros) throws Exception;
+	List<Proposicao> buscarProposicoesPautaSenadoWS(Map parametros) throws Exception;
 
-	public Proposicao detalharProposicaoCamaraWS(Long id) throws Exception;
+	Proposicao detalharProposicaoCamaraWS(Long id) throws Exception;
 
-	public Proposicao detalharProposicaoSenadoWS(Long id) throws Exception;
+	Proposicao detalharProposicaoSenadoWS(Long id) throws Exception;
 
-	public void salvarListaProposicao(List<Proposicao> lista);
+	void salvarListaProposicao(List<Proposicao> lista);
 
-	public List<Proposicao> listarTodos();
+	List<Proposicao> listarTodos();
 
-	public Proposicao buscarPorId(Integer id);
+	Proposicao buscarPorId(Integer id);
 
-	public List<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao);
+	List<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao);
 
-	public void atualizarProposicaoJSON(Proposicao proposicao);
+	List<Proposicao> buscarPorSufixo(String sufixo);
 
-	public List<Proposicao> buscarPorSufixo(String sufixo);
-
-	public List<Proposicao> consultar(String sigla, String autor, String ementa, String origem, String isFavorita,
-			Integer offset, Integer limit);
+	List<Proposicao> consultar(String sigla, String autor, String ementa, String origem, String isFavorita,	Integer offset, Integer limit);
 
 	/**
 	 * Faz buscas por proposições diretamente dos webservices da origem, não
@@ -46,10 +43,10 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @param ano
 	 * @return Lista de proposicoes encontradas na origem
 	 */
-	public Collection<Proposicao> buscaProposicaoIndependentePor(Origem origem, String tipo, Integer numero, Integer ano)
-			throws IOException;
+	Collection<Proposicao> buscaProposicaoIndependentePor(Origem origem, String tipo, Integer numero, Integer ano)
+		throws IOException;
 
-	public Collection<TipoProposicao> listTipos(Origem valueOf) throws IOException;
+	Collection<TipoProposicao> listTipos(Origem valueOf) throws IOException;
 
 	/**
 	 * Salva uma proposicao não relacionada a uma reuniao

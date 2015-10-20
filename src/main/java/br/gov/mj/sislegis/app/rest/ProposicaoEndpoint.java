@@ -180,7 +180,7 @@ public class ProposicaoEndpoint {
 	@Path("/{id:[0-9][0-9]*}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response update(Proposicao entity) {
-		proposicaoService.atualizarProposicaoJSON(entity);
+		proposicaoService.save(entity);
 		return Response.noContent().build();
 	}
 

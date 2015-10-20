@@ -374,22 +374,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 //	}
 
 	@Override
-	public void atualizarProposicaoJSON(Proposicao proposicao) {
-
-		save(proposicao);
-		// TODO Verificar se ainda ha necessidade de se remover as tags, ja que o mapeamento esta como cascade
-
-//		processaExclusaoTagProposicao(proposicaoJSON);
-//		Proposicao proposicao = proposicaoJsonToProposicao(proposicaoJSON);
-//
-//		save(proposicao);
-	}
-
-	@Override
 	public Proposicao save(Proposicao entity) {
 		if (entity.getResponsavel() != null && entity.getResponsavel().getId() == null) {
 
-			// criar usuario antes
 			Usuario usuarioExistente = usuarioService.findByEmail(entity.getResponsavel().getEmail());
 			if (usuarioExistente == null){
 				usuarioService.save(entity.getResponsavel());
