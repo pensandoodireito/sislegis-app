@@ -12,7 +12,11 @@ import br.gov.mj.sislegis.app.model.Usuario;
 public interface ComentarioService extends Service<Comentario> {
 	public List<ComentarioJSON> findByProposicao(Long id);
 
+	public List<Comentario> findByIdProposicao(Long id);
+
 	public void salvarComentario(ComentarioJSON comentarioJSON, Usuario usuario) throws IllegalAccessException;
+
+	public void salvarComentario(Comentario comentario, Usuario usuario) throws IllegalAccessException;
 
 	public ComentarioJSON findByIdJSON(Long id);
 
