@@ -26,10 +26,13 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import br.gov.mj.sislegis.app.enumerated.Origem;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 
 @Entity
 //@formatter:off
@@ -78,9 +81,6 @@ public class Proposicao extends AbstractEntity {
 	@Column(length = 2000)
 	private String resultadoASPAR;
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "proposicao")
-	private Set<ReuniaoProposicao> listaReuniaoProposicoes;
-
 	@Transient
 	private String comissao;
 
@@ -109,10 +109,10 @@ public class Proposicao extends AbstractEntity {
 	private Set<TagProposicao> tags;
 
 	@Transient
-	private Set<Comentario> listaComentario = new HashSet<Comentario>();
+	private Set<Comentario> listaComentario = new HashSet<>();
 
 	@Transient
-	private Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao = new HashSet<EncaminhamentoProposicao>();
+	private Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao = new HashSet<>();
 
 	@Transient
 	private Reuniao reuniao;
@@ -120,9 +120,17 @@ public class Proposicao extends AbstractEntity {
 	@Column(nullable = false)
 	private boolean isFavorita;
 
+
 	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "proposicao")
 	@OrderBy("data ASC")
 	private SortedSet<AlteracaoProposicao> alteracoesProposicao = new TreeSet<AlteracaoProposicao>();
+
+	@Transient
+	private Integer totalComentarios = 0;
+
+	@Transient
+	private Integer totalEncaminhamentos = 0;
+
 
 	@ManyToMany(fetch = FetchType.EAGER, mappedBy = "proposicoesFilha")
 	private Set<Proposicao> proposicoesPai;
@@ -252,15 +260,6 @@ public class Proposicao extends AbstractEntity {
 		this.posicionamento = posicionamento;
 	}
 
-	@JsonIgnore
-	public Set<ReuniaoProposicao> getListaReuniaoProposicoes() {
-		return listaReuniaoProposicoes;
-	}
-
-	public void setListaReuniaoProposicoes(Set<ReuniaoProposicao> listaReuniaoProposicoes) {
-		this.listaReuniaoProposicoes = listaReuniaoProposicoes;
-	}
-
 	public Set<Comentario> getListaComentario() {
 		return this.listaComentario;
 	}
@@ -315,6 +314,28 @@ public class Proposicao extends AbstractEntity {
 
 	public void setFavorita(boolean isFavorita) {
 		this.isFavorita = isFavorita;
+	}
+
+	public Integer getTotalComentarios() {
+		if (CollectionUtils.isNotEmpty(listaComentario)){
+			totalComentarios = listaComentario.size();
+		}
+		return totalComentarios;
+	}
+
+	public void setTotalComentarios(Integer totalComentarios) {
+		this.totalComentarios = totalComentarios;
+	}
+
+	public Integer getTotalEncaminhamentos() {
+		if (CollectionUtils.isNotEmpty(listaEncaminhamentoProposicao)){
+			totalEncaminhamentos = listaEncaminhamentoProposicao.size();
+		}
+		return totalEncaminhamentos;
+	}
+
+	public void setTotalEncaminhamentos(Integer totalEncaminhamentos) {
+		this.totalEncaminhamentos = totalEncaminhamentos;
 	}
 
 	public Set<Proposicao> getProposicoesPai() {

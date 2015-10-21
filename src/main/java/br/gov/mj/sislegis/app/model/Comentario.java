@@ -14,13 +14,14 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @XmlRootElement
 @JsonIgnoreProperties({ "idProposicao" })
 public class Comentario extends AbstractEntity {
-	
+
 	private static final long serialVersionUID = 739840933885769688L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
