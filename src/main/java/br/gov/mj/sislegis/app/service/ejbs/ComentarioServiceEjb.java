@@ -54,7 +54,7 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> 
 	public void salvarComentario(Comentario comentario, Usuario autor) throws IllegalAccessException {
 		if (comentario.getId() != null) {
 			if (comentario.getAutor() != null) {
-				if (!comentario.getAutor().equals(autor)) {
+				if (!comentario.getAutor().getEmail().equals(autor.getEmail())) {
 					throw new IllegalAccessException("Somente autor do comentário pode alterá-lo.");
 				}
 			}
