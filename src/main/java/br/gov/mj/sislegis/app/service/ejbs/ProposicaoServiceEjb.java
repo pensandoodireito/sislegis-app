@@ -1,47 +1,26 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-
 import br.gov.mj.sislegis.app.enumerated.Origem;
-import br.gov.mj.sislegis.app.json.EncaminhamentoProposicaoJSON;
-import br.gov.mj.sislegis.app.model.Comentario;
-import br.gov.mj.sislegis.app.model.Proposicao;
-import br.gov.mj.sislegis.app.model.Reuniao;
-import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
-import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
-import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.model.*;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
 import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
 import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserPlenarioSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
-import br.gov.mj.sislegis.app.service.AbstractPersistence;
-import br.gov.mj.sislegis.app.service.ComentarioService;
-import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
-import br.gov.mj.sislegis.app.service.ProposicaoService;
-import br.gov.mj.sislegis.app.service.ReuniaoProposicaoService;
-import br.gov.mj.sislegis.app.service.ReuniaoService;
-import br.gov.mj.sislegis.app.service.TagService;
-import br.gov.mj.sislegis.app.service.UsuarioService;
+import br.gov.mj.sislegis.app.service.*;
 import br.gov.mj.sislegis.app.util.Conversores;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Stateless
 public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> implements ProposicaoService {
@@ -231,17 +210,6 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		List<Proposicao> proposicoes = listAll();
 		popularTotalComentariosEncaminhamentos(proposicoes);
 		return proposicoes;
-
-		// List<Proposicao> lista = listAll();
-		//
-		// List<ProposicaoJSON> listaProposicaoJSON = new
-		// ArrayList<ProposicaoJSON>();
-		// for (Proposicao proposicao : lista) {
-		// ProposicaoJSON proposicaoJSON = populaProposicaoJSON(proposicao);
-		// listaProposicaoJSON.add(proposicaoJSON);
-		// }
-		//
-		// return listaProposicaoJSON;
 	}
 
 	@Override
@@ -286,55 +254,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		popularTotalComentariosEncaminhamentos(proposicoes);
 
 		return proposicoes;
-
-		// List<ProposicaoJSON> listaProposicaoJSON = new
-		// ArrayList<ProposicaoJSON>();
-		// for (Proposicao proposicao : lista) {
-		// ProposicaoJSON proposicaoJSON = populaProposicaoJSON(proposicao);
-		// listaProposicaoJSON.add(proposicaoJSON);
-		// }
-		//
-		// return listaProposicaoJSON;
 	}
-
-	// private ProposicaoJSON populaProposicaoJSON(Proposicao proposicao) {
-	// ProposicaoJSON proposicaoJSON = new ProposicaoJSON(proposicao.getId(),
-	// proposicao.getIdProposicao(),
-	// proposicao.getTipo(), proposicao.getAno(), proposicao.getNumero(),
-	// proposicao.getAutor(),
-	// proposicao.getEmenta(), proposicao.getOrigem(), proposicao.getSigla(),
-	// proposicao.getComissao(),
-	// proposicao.getSeqOrdemPauta(), proposicao.getLinkProposicao(),
-	// proposicao.getLinkPauta(),
-	// proposicao.getResultadoASPAR(), proposicao.isFavorita(),
-	// proposicao.getReuniao() == null ? null
-	// : proposicao.getReuniao().getId(),
-	// comentarioService.findByProposicao(proposicao.getId()),
-	// encaminhamentoProposicaoService.findByProposicao(proposicao.getId()),
-	// proposicao.getPosicionamento(),
-	// tagService.populaListaTagsProposicaoJSON(proposicao.getTags()),
-	// proposicao.getResponsavel(),
-	// populaProposicoesFilhasJSON(proposicao.getProposicoesFilha()),
-	// proposicao.getElaboracoesNormativas());
-	//
-	// return proposicaoJSON;
-	// }
-	//
-	// private Set<ProposicaoJSON> populaProposicoesFilhasJSON(Set<Proposicao>
-	// proposicaoList) {
-	// Set<ProposicaoJSON> proposicaoJsonList = new HashSet<ProposicaoJSON>();
-	//
-	// for (Proposicao proposicao : proposicaoList) {
-	// ProposicaoJSON proposicaoJSON = new ProposicaoJSON();
-	// proposicaoJSON.setId(proposicao.getId());
-	// proposicaoJSON.setIdProposicao(proposicao.getIdProposicao());
-	// proposicaoJSON.setSigla(proposicao.getSigla());
-	//
-	// proposicaoJsonList.add(proposicaoJSON);
-	// }
-	//
-	// return proposicaoJsonList;
-	// }
 
 	@Override
 	public Proposicao buscarPorId(Integer id) {
@@ -343,11 +263,6 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			popularTotalComentariosEncaminhamentos(proposicao);
 		}
 		return proposicao;
-
-		// Proposicao proposicao = findById(id);
-		// ProposicaoJSON proposicaoJSON = populaProposicaoJSON(proposicao);
-		// populaComentarioProposicao(proposicao, proposicaoJSON);
-		// return proposicaoJSON;
 	}
 
 	@Override
@@ -376,36 +291,6 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		return proposicoes;
 	}
 
-	// List<ProposicaoJSON> listaProposicaoJSON = new
-	// ArrayList<ProposicaoJSON>();
-	// Reuniao reuniao = reuniaoService.buscaReuniaoPorData(dataReuniao);
-	//
-	// if (!Objects.isNull(reuniao)) {
-	// Set<ReuniaoProposicao> listaReuniaoProposicoes =
-	// reuniao.getListaReuniaoProposicoes();
-	// // Copiamos alguns valores de ReuniaoProposicao para Proposicao,
-	// // afim de retornar somente uma entidade com alguns valores
-	// // transientes
-	// for (ReuniaoProposicao reuniaoProposicao : listaReuniaoProposicoes) {
-	// Proposicao proposicao = reuniaoProposicao.getProposicao();
-	// proposicao.setComissao(reuniaoProposicao.getSiglaComissao());
-	// proposicao.setSeqOrdemPauta(reuniaoProposicao.getSeqOrdemPauta());
-	// proposicao.setLinkPauta(reuniaoProposicao.getLinkPauta());
-	// proposicao.setReuniao(reuniaoProposicao.getReuniao());
-	//
-	// ProposicaoJSON proposicaoJSON = populaProposicaoJSON(proposicao);
-	// populaComentarioProposicao(proposicao, proposicaoJSON);
-	// listaProposicaoJSON.add(proposicaoJSON);
-	// }
-	// }
-	//
-	// return listaProposicaoJSON;
-
-	// private void populaComentarioProposicao(Proposicao proposicao,
-	// ProposicaoJSON proposicaoJSON) {
-	// proposicaoJSON.setListaComentario(comentarioService.findByProposicao(proposicao.getId()));
-	// }
-
 	@Override
 	public Proposicao save(Proposicao entity) {
 		if (entity.getResponsavel() != null && entity.getResponsavel().getId() == null) {
@@ -421,97 +306,11 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		return super.save(entity);
 	}
 
-	// private void processaExclusaoTagProposicao(Proposicao proposicao) {
-	// if (!Objects.isNull(proposicaoJSON.getId())) {
-	// Query query = em.createNativeQuery(
-	// "SELECT tp.* FROM TagProposicao tp WHERE tp.proposicao_id = :idProposicao",
-	// TagProposicao.class);
-	// query.setParameter("idProposicao", proposicaoJSON.getId());
-	// List<TagProposicao> listaTagsProposicao = query.getResultList();
-	//
-	// c: for (TagProposicao tagProposicao : listaTagsProposicao) {
-	// for (TagJSON tagJSON : proposicaoJSON.getTags()) {
-	// if (tagJSON.getText().equals(tagProposicao.getTag().getTag()))
-	// continue c;
-	// }
-	// em.createNativeQuery(
-	// "delete FROM TagProposicao tp WHERE " +
-	// "tp.proposicao_id = :idProposicao "
-	// + "and tp.tag_id = :tag", TagProposicao.class)
-	// .setParameter("idProposicao", tagProposicao.getProposicao().getId())
-	// .setParameter("tag", tagProposicao.getTag()).executeUpdate();
-	// }
-	// }
-	// }
-
-	// private Proposicao proposicaoJsonToProposicao(ProposicaoJSON
-	// proposicaoJSON) {
-	// Proposicao proposicao = findById(proposicaoJSON.getId());
-	// proposicao.setAno(proposicaoJSON.getAno());
-	// proposicao.setIdProposicao(proposicaoJSON.getIdProposicao());
-	// proposicao.setNumero(proposicaoJSON.getNumero());
-	// proposicao.setSigla(proposicaoJSON.getSigla());
-	// proposicao.setAutor(proposicaoJSON.getAutor());
-	// proposicao.setOrigem(proposicaoJSON.getOrigem());
-	// proposicao.setComissao(proposicaoJSON.getComissao());
-	// proposicao.setSeqOrdemPauta(proposicaoJSON.getSeqOrdemPauta());
-	// proposicao.setPosicionamento(proposicaoJSON.getPosicionamento());
-	// proposicao.setResponsavel(proposicaoJSON.getResponsavel());
-	// proposicao.setResultadoASPAR(proposicaoJSON.getResultadoASPAR());
-	// proposicao.setFavorita(proposicaoJSON.isFavorita());
-	// proposicao.setProposicoesFilha(populaProposicoesFilha(proposicaoJSON,
-	// proposicao));
-	// proposicao.setElaboracoesNormativas(proposicaoJSON.getElaboracoesNormativas());
-	// Set<TagProposicao> tags = populaTagsProposicao(proposicaoJSON,
-	// proposicao);
-	// proposicao.setTags(tags);
-	// return proposicao;
-	// }
-
-	// private Set<TagProposicao> populaTagsProposicao(ProposicaoJSON
-	// proposicaoJSON, Proposicao proposicao) {
-	// Set<TagProposicao> tagsProposicao = new HashSet<TagProposicao>();
-	// for (TagJSON tagJSON : proposicaoJSON.getTags()) {
-	// TagProposicaoPK tagProposicaoPK = new TagProposicaoPK();
-	// TagProposicao tagProposicao = new TagProposicao();
-	// Tag tag = new Tag();
-	// tagProposicaoPK.setIdProposicao(proposicaoJSON.getId());
-	// tagProposicaoPK.setTag(tagJSON.getText());
-	// tagProposicao.setTagProposicaoPK(tagProposicaoPK);
-	// tagProposicao.setProposicao(proposicao);
-	// tag.setTag(tagJSON.getText());
-	// tagProposicao.setTag(tag);
-	// tagsProposicao.add(tagProposicao);
-	// }
-	// return tagsProposicao;
-	// }
-
-	// private Set<Proposicao> populaProposicoesFilha(ProposicaoJSON
-	// proposicaoJSON, Proposicao proposicao) {
-	// Set<Proposicao> proposicoesFilhas = new HashSet<Proposicao>();
-	//
-	// for (ProposicaoJSON proposicaoFilha :
-	// proposicaoJSON.getProposicoesFilha()) {
-	// Proposicao proposicaoFilhaTemp = new Proposicao();
-	// proposicaoFilhaTemp.setId(proposicaoFilha.getId());
-	// proposicaoFilhaTemp.setIdProposicao(proposicaoFilha.getIdProposicao());
-	//
-	// if (proposicaoFilhaTemp.getProposicoesPai() == null) {
-	// proposicaoFilhaTemp.setProposicoesPai(new HashSet<Proposicao>());
-	// }
-	// proposicaoFilhaTemp.getProposicoesPai().add(proposicao);
-	//
-	// proposicoesFilhas.add(proposicaoFilhaTemp);
-	// }
-	//
-	// return proposicoesFilhas;
-	// }
-
 	@Override
 	public void deleteById(Long id) {
-		List<EncaminhamentoProposicaoJSON> listaEnc = encaminhamentoProposicaoService.findByProposicao(id);
-		for (Iterator<EncaminhamentoProposicaoJSON> iterator = listaEnc.iterator(); iterator.hasNext();) {
-			EncaminhamentoProposicaoJSON ep = iterator.next();
+		List<EncaminhamentoProposicao> listaEnc = encaminhamentoProposicaoService.findByProposicao(id);
+		for (Iterator<EncaminhamentoProposicao> iterator = listaEnc.iterator(); iterator.hasNext();) {
+			EncaminhamentoProposicao ep = iterator.next();
 			encaminhamentoProposicaoService.deleteById(ep.getId());
 		}
 
@@ -570,6 +369,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (proposicao != null) {
 			proposicao.setTotalComentarios(comentarioService.totalByProposicao(proposicao.getId()));
 			proposicao.setTotalEncaminhamentos(encaminhamentoProposicaoService.totalByProposicao(proposicao.getId()));
+
+			// TODO Remover o carregamento da lista quando tiver a nova implementacao do carregamento por demanda
+			Set<EncaminhamentoProposicao> encaminhamentos = new HashSet<>(encaminhamentoProposicaoService.findByProposicao(proposicao.getId()));
+			proposicao.setListaEncaminhamentoProposicao(encaminhamentos);
 		}
 	}
 

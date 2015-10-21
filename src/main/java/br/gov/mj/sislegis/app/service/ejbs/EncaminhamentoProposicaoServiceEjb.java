@@ -1,9 +1,12 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import br.gov.mj.sislegis.app.enumerated.TipoTarefa;
+import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.Tarefa;
+import br.gov.mj.sislegis.app.service.AbstractPersistence;
+import br.gov.mj.sislegis.app.service.ComentarioService;
+import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
+import br.gov.mj.sislegis.app.service.TarefaService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -11,15 +14,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-
-import br.gov.mj.sislegis.app.enumerated.TipoTarefa;
-import br.gov.mj.sislegis.app.json.EncaminhamentoProposicaoJSON;
-import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
-import br.gov.mj.sislegis.app.model.Tarefa;
-import br.gov.mj.sislegis.app.service.AbstractPersistence;
-import br.gov.mj.sislegis.app.service.ComentarioService;
-import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
-import br.gov.mj.sislegis.app.service.TarefaService;
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.List;
 
 @Stateless
 public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<EncaminhamentoProposicao, Long> implements
@@ -73,7 +70,7 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 	}
 
 
-	public List<EncaminhamentoProposicaoJSON> findByProposicao(Long idProposicao) {
+	public List<EncaminhamentoProposicao> findByProposicao(Long idProposicao) {
 		TypedQuery<EncaminhamentoProposicao> findByIdQuery = em
 				.createQuery(
 						"SELECT c FROM EncaminhamentoProposicao c "
@@ -84,12 +81,16 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 								EncaminhamentoProposicao.class);
 		findByIdQuery.setParameter("entityId", idProposicao);
 		final List<EncaminhamentoProposicao> results = findByIdQuery.getResultList();
-		List<EncaminhamentoProposicaoJSON> lista = new ArrayList<EncaminhamentoProposicaoJSON>();
-		for (EncaminhamentoProposicao ep : results) {
-			lista.add(new EncaminhamentoProposicaoJSON(ep.getId(), ep.getProposicao().getId(), ep.getComentario(), ep
-					.getEncaminhamento(), ep.getResponsavel(), ep.getDataHoraLimite()));
-		}
-		return lista;
+
+		return  results;
+
+//		List<EncaminhamentoProposicaoJSON> lista = new ArrayList<EncaminhamentoProposicaoJSON>();
+//		for (EncaminhamentoProposicao ep : results) {
+//			lista.add(new EncaminhamentoProposicaoJSON(ep.getId(), ep.getProposicao().getId(), ep.getComentario(), ep
+//					.getEncaminhamento(), ep.getResponsavel(), ep.getDataHoraLimite()));
+//		}
+//		return lista;
+
 	}
 
 	@Override

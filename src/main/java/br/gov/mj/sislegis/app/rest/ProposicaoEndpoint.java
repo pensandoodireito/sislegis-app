@@ -2,7 +2,6 @@ package br.gov.mj.sislegis.app.rest;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
-import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.Service;
@@ -36,9 +35,7 @@ public class ProposicaoEndpoint {
 		parametros.put("data", data);
 
 		List<Proposicao> lista = proposicaoService.buscarProposicoesPautaCamaraWS(parametros);
-//		for (Proposicao proposicao : lista) {
-//			proposicao.setListaReuniaoProposicoes(new HashSet<ReuniaoProposicao>());
-//		}
+
 		return lista;
 	}
 
@@ -53,9 +50,7 @@ public class ProposicaoEndpoint {
 		parametros.put("data", data);
 
 		List<Proposicao> lista = proposicaoService.buscarProposicoesPautaSenadoWS(parametros);
-//		for (Proposicao proposicao : lista) {
-//			proposicao.setListaReuniaoProposicoes(new HashSet<ReuniaoProposicao>());
-//		}
+
 		return lista;
 	}
 
@@ -157,23 +152,7 @@ public class ProposicaoEndpoint {
 	@Path("/buscarPorSufixo")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Proposicao> buscarPorSufixo(@QueryParam("sufixo") String sufixo) {
-
 		return proposicaoService.buscarPorSufixo(sufixo);
-
-		/*List<Proposicao> proposicoes = proposicaoService.buscarPorSufixo(sufixo);
-		List<ProposicaoJSON> proposicaoJsonList = new ArrayList<ProposicaoJSON>();
-
-		for (Proposicao proposicao : proposicoes) {
-			ProposicaoJSON proposicaoJSON = new ProposicaoJSON();
-			proposicaoJSON.setId(proposicao.getId());
-			proposicaoJSON.setIdProposicao(proposicao.getIdProposicao());
-			proposicaoJSON.setSigla(proposicao.getSigla());
-
-			proposicaoJsonList.add(proposicaoJSON);
-		}
-
-		return proposicaoJsonList;*/
-
 	}
 
 	@PUT
