@@ -1,5 +1,7 @@
 package br.gov.mj.sislegis.app.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,6 +33,7 @@ public class Reuniao extends AbstractEntity {
 	@Temporal(TemporalType.DATE)
 	private Date data;
 
+	@JsonIgnore
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "reuniao")
 	private Set<ReuniaoProposicao> listaReuniaoProposicoes = new HashSet<ReuniaoProposicao>();
 

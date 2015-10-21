@@ -1,29 +1,14 @@
 package br.gov.mj.sislegis.app.model;
 
+import br.gov.mj.sislegis.app.enumerated.Origem;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.collections.CollectionUtils;
+
+import javax.persistence.*;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Transient;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import br.gov.mj.sislegis.app.enumerated.Origem;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @XmlRootElement
@@ -59,9 +44,6 @@ public class Proposicao extends AbstractEntity {
 	@Column(length = 2000)
 	private String resultadoASPAR;
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "proposicao")
-	private Set<ReuniaoProposicao> listaReuniaoProposicoes;
-
 	@Transient
 	private String comissao;
 
@@ -90,16 +72,22 @@ public class Proposicao extends AbstractEntity {
 	private Set<TagProposicao> tags;
 
 	@Transient
-	private Set<Comentario> listaComentario = new HashSet<Comentario>();
+	private Set<Comentario> listaComentario = new HashSet<>();
 
 	@Transient
-	private Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao = new HashSet<EncaminhamentoProposicao>();
+	private Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao = new HashSet<>();
 
 	@Transient
 	private Reuniao reuniao;
 
 	@Column(nullable = false)
 	private boolean isFavorita;
+
+	@Transient
+	private Integer totalComentarios = 0;
+
+	@Transient
+	private Integer totalEncaminhamentos = 0;
 
 	@ManyToMany(fetch = FetchType.EAGER, mappedBy = "proposicoesFilha")
 	private Set<Proposicao> proposicoesPai;
@@ -229,14 +217,6 @@ public class Proposicao extends AbstractEntity {
 		this.posicionamento = posicionamento;
 	}
 
-	public Set<ReuniaoProposicao> getListaReuniaoProposicoes() {
-		return listaReuniaoProposicoes;
-	}
-
-	public void setListaReuniaoProposicoes(Set<ReuniaoProposicao> listaReuniaoProposicoes) {
-		this.listaReuniaoProposicoes = listaReuniaoProposicoes;
-	}
-
 	public Set<Comentario> getListaComentario() {
 		return this.listaComentario;
 	}
@@ -291,6 +271,28 @@ public class Proposicao extends AbstractEntity {
 
 	public void setFavorita(boolean isFavorita) {
 		this.isFavorita = isFavorita;
+	}
+
+	public Integer getTotalComentarios() {
+		if (CollectionUtils.isNotEmpty(listaComentario)){
+			totalComentarios = listaComentario.size();
+		}
+		return totalComentarios;
+	}
+
+	public void setTotalComentarios(Integer totalComentarios) {
+		this.totalComentarios = totalComentarios;
+	}
+
+	public Integer getTotalEncaminhamentos() {
+		if (CollectionUtils.isNotEmpty(listaEncaminhamentoProposicao)){
+			totalEncaminhamentos = listaEncaminhamentoProposicao.size();
+		}
+		return totalEncaminhamentos;
+	}
+
+	public void setTotalEncaminhamentos(Integer totalEncaminhamentos) {
+		this.totalEncaminhamentos = totalEncaminhamentos;
 	}
 
 	public Set<Proposicao> getProposicoesPai() {
