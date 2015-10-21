@@ -83,14 +83,6 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 		final List<EncaminhamentoProposicao> results = findByIdQuery.getResultList();
 
 		return  results;
-
-//		List<EncaminhamentoProposicaoJSON> lista = new ArrayList<EncaminhamentoProposicaoJSON>();
-//		for (EncaminhamentoProposicao ep : results) {
-//			lista.add(new EncaminhamentoProposicaoJSON(ep.getId(), ep.getProposicao().getId(), ep.getComentario(), ep
-//					.getEncaminhamento(), ep.getResponsavel(), ep.getDataHoraLimite()));
-//		}
-//		return lista;
-
 	}
 
 	@Override

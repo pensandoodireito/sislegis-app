@@ -44,9 +44,6 @@ public class Proposicao extends AbstractEntity {
 	@Column(length = 2000)
 	private String resultadoASPAR;
 
-//	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "proposicao")
-//	private Set<ReuniaoProposicao> listaReuniaoProposicoes;
-
 	@Transient
 	private String comissao;
 
@@ -219,14 +216,6 @@ public class Proposicao extends AbstractEntity {
 	public void setPosicionamento(Posicionamento posicionamento) {
 		this.posicionamento = posicionamento;
 	}
-
-//	public Set<ReuniaoProposicao> getListaReuniaoProposicoes() {
-//		return listaReuniaoProposicoes;
-//	}
-//
-//	public void setListaReuniaoProposicoes(Set<ReuniaoProposicao> listaReuniaoProposicoes) {
-//		this.listaReuniaoProposicoes = listaReuniaoProposicoes;
-//	}
 
 	public Set<Comentario> getListaComentario() {
 		return this.listaComentario;
