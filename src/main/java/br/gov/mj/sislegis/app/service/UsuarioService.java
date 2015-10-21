@@ -1,5 +1,6 @@
 package br.gov.mj.sislegis.app.service;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.ejb.Local;
@@ -30,5 +31,7 @@ public interface UsuarioService extends Service<Usuario> {
 	 * @return
 	 */
 	List<Usuario> listUsuariosSeguidoresDeProposicao(Proposicao proposicao);
+
+	Collection<Proposicao> proposicoesSeguidas(Long id);
 
 }

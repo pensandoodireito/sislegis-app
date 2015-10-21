@@ -1,6 +1,7 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -173,6 +174,11 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 		Usuario user = findById(id);
 		user.getAgendasSeguidas().size();
 		return user;
+	}
+
+	@Override
+	public Collection<Proposicao> proposicoesSeguidas(Long id) {
+		return (findById(id)).getProposicoesSeguidas();
 	}
 
 }
