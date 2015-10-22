@@ -1,6 +1,7 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,6 +19,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
+import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
@@ -68,6 +70,16 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 				"SELECT u FROM Usuario u join u.agendasSeguidas agendas where agendas.id=:idAgenda", Usuario.class);
 
 		findByIdQuery.setParameter("idAgenda", agenda.getId());
+		return findByIdQuery.getResultList();
+
+	}
+
+	@Override
+	public List<Usuario> listUsuariosSeguidoresDeProposicao(Proposicao proposicao) {
+		TypedQuery<Usuario> findByIdQuery = em.createQuery(
+				"SELECT u FROM Usuario u join u.proposicoesSeguidas prop where prop.id=:idProp", Usuario.class);
+
+		findByIdQuery.setParameter("idProp", proposicao.getId());
 		return findByIdQuery.getResultList();
 
 	}
@@ -145,8 +157,9 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
 								"Não foi possível carregar o recurso do LDAP. Sua rede pode acessar o LDAP do MJ?", e);
 					}
-				}else{
-					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Houve um erro consultando o LDAP", e);	
+				} else {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
+							"Houve um erro consultando o LDAP", e);
 				}
 			} catch (Exception e1) {
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Houve um erro consultando o LDAP", e);
@@ -161,6 +174,13 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 		Usuario user = findById(id);
 		user.getAgendasSeguidas().size();
 		return user;
+	}
+
+	@Override
+	public Collection<Proposicao> proposicoesSeguidas(Long id) {
+		Collection<Proposicao> props = (findById(id)).getProposicoesSeguidas();
+		props.size();
+		return props;
 	}
 
 }

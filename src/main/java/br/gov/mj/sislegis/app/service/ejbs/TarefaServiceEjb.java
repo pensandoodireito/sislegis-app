@@ -1,7 +1,5 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
-import br.gov.mj.sislegis.app.json.ProposicaoJSON;
-import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Tarefa;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.TarefaService;
@@ -60,27 +58,11 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 
 		for (Tarefa tarefa : resultList) {
 			if (tarefa.getEncaminhamentoProposicao() != null) {
-				Proposicao prop = em.find(Proposicao.class, tarefa.getEncaminhamentoProposicao().getProposicao().getId());
-				tarefa.setProposicao(populaProposicaoJSON(prop));
+				tarefa.setProposicao(tarefa.getEncaminhamentoProposicao().getProposicao());
 			}
 		}
 		
 		return resultList;
-	}
-	
-	public ProposicaoJSON populaProposicaoJSON(Proposicao proposicao) {	
-		ProposicaoJSON proposicaoJSON = new ProposicaoJSON(proposicao.getId(), 
-				proposicao.getIdProposicao(), 
-				proposicao.getTipo(), 
-				proposicao.getAno(),
-				proposicao.getNumero(), 
-				proposicao.getAutor(), 
-				proposicao.getEmenta(), 
-				proposicao.getOrigem(), 
-				proposicao.getSigla(),
-				proposicao.getComissao());
-
-		return proposicaoJSON;
 	}
 	
 	@Override

@@ -3,6 +3,8 @@ package br.gov.mj.sislegis.app.model;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -17,15 +19,32 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import br.gov.mj.sislegis.app.enumerated.Origem;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+
 @Entity
+//@formatter:off
+@NamedNativeQueries({
+  @NamedNativeQuery(
+          name    =   "getAllProposicoesSeguidas",
+          query   =   "SELECT * " +
+                      "FROM Proposicao a where a.id in (select distinct proposicoesSeguidas_id from Usuario_ProposicaoSeguida)",
+                      resultClass=Proposicao.class
+  )
+})
+//@formatter:on
 @XmlRootElement
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Proposicao extends AbstractEntity {
@@ -50,6 +69,9 @@ public class Proposicao extends AbstractEntity {
 	private String numero;
 
 	@Column
+	private String situacao;
+
+	@Column
 	private String autor;
 
 	@Enumerated(EnumType.STRING)
@@ -58,9 +80,6 @@ public class Proposicao extends AbstractEntity {
 
 	@Column(length = 2000)
 	private String resultadoASPAR;
-
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "proposicao")
-	private Set<ReuniaoProposicao> listaReuniaoProposicoes;
 
 	@Transient
 	private String comissao;
@@ -90,16 +109,28 @@ public class Proposicao extends AbstractEntity {
 	private Set<TagProposicao> tags;
 
 	@Transient
-	private Set<Comentario> listaComentario = new HashSet<Comentario>();
+	private Set<Comentario> listaComentario = new HashSet<>();
 
 	@Transient
-	private Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao = new HashSet<EncaminhamentoProposicao>();
+	private Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao = new HashSet<>();
 
 	@Transient
 	private Reuniao reuniao;
 
 	@Column(nullable = false)
 	private boolean isFavorita;
+
+
+	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "proposicao")
+	@OrderBy("data ASC")
+	private SortedSet<AlteracaoProposicao> alteracoesProposicao = new TreeSet<AlteracaoProposicao>();
+
+	@Transient
+	private Integer totalComentarios = 0;
+
+	@Transient
+	private Integer totalEncaminhamentos = 0;
+
 
 	@ManyToMany(fetch = FetchType.EAGER, mappedBy = "proposicoesFilha")
 	private Set<Proposicao> proposicoesPai;
@@ -229,14 +260,6 @@ public class Proposicao extends AbstractEntity {
 		this.posicionamento = posicionamento;
 	}
 
-	public Set<ReuniaoProposicao> getListaReuniaoProposicoes() {
-		return listaReuniaoProposicoes;
-	}
-
-	public void setListaReuniaoProposicoes(Set<ReuniaoProposicao> listaReuniaoProposicoes) {
-		this.listaReuniaoProposicoes = listaReuniaoProposicoes;
-	}
-
 	public Set<Comentario> getListaComentario() {
 		return this.listaComentario;
 	}
@@ -293,6 +316,28 @@ public class Proposicao extends AbstractEntity {
 		this.isFavorita = isFavorita;
 	}
 
+	public Integer getTotalComentarios() {
+		if (CollectionUtils.isNotEmpty(listaComentario)){
+			totalComentarios = listaComentario.size();
+		}
+		return totalComentarios;
+	}
+
+	public void setTotalComentarios(Integer totalComentarios) {
+		this.totalComentarios = totalComentarios;
+	}
+
+	public Integer getTotalEncaminhamentos() {
+		if (CollectionUtils.isNotEmpty(listaEncaminhamentoProposicao)){
+			totalEncaminhamentos = listaEncaminhamentoProposicao.size();
+		}
+		return totalEncaminhamentos;
+	}
+
+	public void setTotalEncaminhamentos(Integer totalEncaminhamentos) {
+		this.totalEncaminhamentos = totalEncaminhamentos;
+	}
+
 	public Set<Proposicao> getProposicoesPai() {
 		return proposicoesPai;
 	}
@@ -317,23 +362,50 @@ public class Proposicao extends AbstractEntity {
 		this.elaboracoesNormativas = elaboracoesNormativas;
 	}
 
+	@JsonIgnore
+	public Set<AlteracaoProposicao> getAlteracoesProposicao() {
+		return alteracoesProposicao;
+	}
+
+	@JsonIgnore
+	public AlteracaoProposicao getLastAlteracoesProposicao() {
+		return alteracoesProposicao.last();
+	}
+
 	@Override
 	public String toString() {
 		String result = getClass().getSimpleName() + " ";
-		if (idProposicao != null)
-			result += "idProposicao: " + idProposicao;
-		if (tipo != null && !tipo.trim().isEmpty())
-			result += ", tipo: " + tipo;
-		if (ano != null && !ano.trim().isEmpty())
-			result += ", ano: " + ano;
-		if (numero != null && !numero.trim().isEmpty())
-			result += ", numero: " + numero;
+
+		result += "idProposicao: " + idProposicao;
+
+		result += ", tipo: " + tipo;
+
+		result += ", ano: " + ano;
+
+		result += ", numero: " + numero;
 		if (autor != null && !autor.trim().isEmpty())
 			result += ", autor: " + autor;
 		if (comissao != null && !comissao.trim().isEmpty())
 			result += ", comissao: " + comissao;
 		if (seqOrdemPauta != null)
 			result += ", seqOrdemPauta: " + seqOrdemPauta;
+		if (situacao != null)
+			result += ", situacao: " + situacao;
 		return result;
 	}
+
+	public void addAlteracao(AlteracaoProposicao altera) {
+		altera.setProposicao(this);
+		alteracoesProposicao.add(altera);
+
+	}
+
+	public String getSituacao() {
+		return situacao;
+	}
+
+	public void setSituacao(String siglaSituacao) {
+		this.situacao = siglaSituacao;
+	}
+
 }
