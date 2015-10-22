@@ -1,5 +1,6 @@
 package br.gov.mj.sislegis.app.parser.senado.xstream;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.thoughtworks.xstream.XStream;
@@ -28,6 +29,9 @@ public class PesquisaBasicaMateria {
 	}
 
 	public List<Materia> getMaterias() {
+		if (materias == null) {
+			return new ArrayList<Materia>();
+		}
 		return materias.materias;
 	}
 
