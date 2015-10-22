@@ -178,7 +178,9 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 
 	@Override
 	public Collection<Proposicao> proposicoesSeguidas(Long id) {
-		return (findById(id)).getProposicoesSeguidas();
+		Collection<Proposicao> props = (findById(id)).getProposicoesSeguidas();
+		props.size();
+		return props;
 	}
 
 }

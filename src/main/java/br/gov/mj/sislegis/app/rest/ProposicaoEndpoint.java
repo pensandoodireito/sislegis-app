@@ -233,7 +233,7 @@ public class ProposicaoEndpoint {
 	}
 
 	@DELETE
-	@Path("/unfollow/{id:[0-9]+}")
+	@Path("/follow/{id:[0-9]+}")
 	public Response unfollow(@PathParam("id") Long id, @HeaderParam("Authorization") String authorization) {
 		try {
 			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
