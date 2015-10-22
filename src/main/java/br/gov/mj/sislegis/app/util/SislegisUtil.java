@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.EmailException;
@@ -17,6 +19,10 @@ public class SislegisUtil {
 		final HtmlEmail htmlEmail = new HtmlEmail();
 
 		try {
+			if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.FINEST)) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINEST,
+						"Email para " + toMail + " conteudo '" + body + "'");
+			}
 			String emailFrom = PropertiesUtil.getProperties().getProperty("email");
 
 			htmlEmail.setHostName(PropertiesUtil.getProperties().getProperty("host"));

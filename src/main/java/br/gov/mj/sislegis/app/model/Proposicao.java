@@ -1,16 +1,50 @@
 package br.gov.mj.sislegis.app.model;
 
-import br.gov.mj.sislegis.app.enumerated.Origem;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.apache.commons.collections.CollectionUtils;
-
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedNativeQueries;
+import javax.persistence.NamedNativeQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Transient;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.apache.commons.collections.CollectionUtils;
+
+import br.gov.mj.sislegis.app.enumerated.Origem;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 
 @Entity
+//@formatter:off
+@NamedNativeQueries({
+  @NamedNativeQuery(
+          name    =   "getAllProposicoesSeguidas",
+          query   =   "SELECT * " +
+                      "FROM Proposicao a where a.id in (select distinct proposicoesSeguidas_id from Usuario_ProposicaoSeguida)",
+                      resultClass=Proposicao.class
+  )
+})
+//@formatter:on
 @XmlRootElement
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Proposicao extends AbstractEntity {
@@ -33,6 +67,9 @@ public class Proposicao extends AbstractEntity {
 
 	@Column
 	private String numero;
+
+	@Column
+	private String situacao;
 
 	@Column
 	private String autor;
@@ -83,11 +120,17 @@ public class Proposicao extends AbstractEntity {
 	@Column(nullable = false)
 	private boolean isFavorita;
 
+
+	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "proposicao")
+	@OrderBy("data ASC")
+	private SortedSet<AlteracaoProposicao> alteracoesProposicao = new TreeSet<AlteracaoProposicao>();
+
 	@Transient
 	private Integer totalComentarios = 0;
 
 	@Transient
 	private Integer totalEncaminhamentos = 0;
+
 
 	@ManyToMany(fetch = FetchType.EAGER, mappedBy = "proposicoesFilha")
 	private Set<Proposicao> proposicoesPai;
@@ -319,23 +362,50 @@ public class Proposicao extends AbstractEntity {
 		this.elaboracoesNormativas = elaboracoesNormativas;
 	}
 
+	@JsonIgnore
+	public Set<AlteracaoProposicao> getAlteracoesProposicao() {
+		return alteracoesProposicao;
+	}
+
+	@JsonIgnore
+	public AlteracaoProposicao getLastAlteracoesProposicao() {
+		return alteracoesProposicao.last();
+	}
+
 	@Override
 	public String toString() {
 		String result = getClass().getSimpleName() + " ";
-		if (idProposicao != null)
-			result += "idProposicao: " + idProposicao;
-		if (tipo != null && !tipo.trim().isEmpty())
-			result += ", tipo: " + tipo;
-		if (ano != null && !ano.trim().isEmpty())
-			result += ", ano: " + ano;
-		if (numero != null && !numero.trim().isEmpty())
-			result += ", numero: " + numero;
+
+		result += "idProposicao: " + idProposicao;
+
+		result += ", tipo: " + tipo;
+
+		result += ", ano: " + ano;
+
+		result += ", numero: " + numero;
 		if (autor != null && !autor.trim().isEmpty())
 			result += ", autor: " + autor;
 		if (comissao != null && !comissao.trim().isEmpty())
 			result += ", comissao: " + comissao;
 		if (seqOrdemPauta != null)
 			result += ", seqOrdemPauta: " + seqOrdemPauta;
+		if (situacao != null)
+			result += ", situacao: " + situacao;
 		return result;
 	}
+
+	public void addAlteracao(AlteracaoProposicao altera) {
+		altera.setProposicao(this);
+		alteracoesProposicao.add(altera);
+
+	}
+
+	public String getSituacao() {
+		return situacao;
+	}
+
+	public void setSituacao(String siglaSituacao) {
+		this.situacao = siglaSituacao;
+	}
+
 }
