@@ -1,10 +1,8 @@
 package br.gov.mj.sislegis.app.rest;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +11,7 @@ import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -26,16 +25,17 @@ import javax.ws.rs.core.UriBuilder;
 import org.jboss.resteasy.annotations.cache.Cache;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
-import br.gov.mj.sislegis.app.json.ProposicaoJSON;
 import br.gov.mj.sislegis.app.model.Proposicao;
-import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
+import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
+import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.Service;
 
 /**
  * 
  */
+
 @Path("/proposicaos")
 public class ProposicaoEndpoint {
 
@@ -56,9 +56,7 @@ public class ProposicaoEndpoint {
 		parametros.put("data", data);
 
 		List<Proposicao> lista = proposicaoService.buscarProposicoesPautaCamaraWS(parametros);
-		for (Proposicao proposicao : lista) {
-			proposicao.setListaReuniaoProposicoes(new HashSet<ReuniaoProposicao>());
-		}
+
 		return lista;
 	}
 
@@ -68,14 +66,12 @@ public class ProposicaoEndpoint {
 	public List<Proposicao> buscarProposicoesPautaSenado(@QueryParam("siglaComissao") String siglaComissao,
 			@QueryParam("data") Date data) throws Exception {
 
-		Map<String, Object> parametros = new HashMap<String, Object>();
+		Map<String, Object> parametros = new HashMap<>();
 		parametros.put("siglaComissao", siglaComissao);
 		parametros.put("data", data);
 
 		List<Proposicao> lista = proposicaoService.buscarProposicoesPautaSenadoWS(parametros);
-		for (Proposicao proposicao : lista) {
-			proposicao.setListaReuniaoProposicoes(new HashSet<ReuniaoProposicao>());
-		}
+
 		return lista;
 	}
 
@@ -152,53 +148,39 @@ public class ProposicaoEndpoint {
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response findById(@PathParam("id") Long id) {
+	public Response findById(@PathParam("id") Integer id) {
 		return Response.ok(proposicaoService.buscarPorId(id)).build();
 	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<ProposicaoJSON> listAll() {
-		List<ProposicaoJSON> results = proposicaoService.listarTodos();
-		return results;
+	public List<Proposicao> listAll() {
+		return proposicaoService.listarTodos();
 	}
 
 	@GET
 	@Path("/consultar")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<ProposicaoJSON> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor,
-			@QueryParam("sigla") String sigla, @QueryParam("origem") String origem,
-			@QueryParam("isFavorita") String isFavorita, @QueryParam("limit") Integer limit,
-			@QueryParam("offset") Integer offset) {
-		List<ProposicaoJSON> results = proposicaoService.consultar(sigla, autor, ementa, origem, isFavorita, offset,
-				limit);
+	public List<Proposicao> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor,
+			@QueryParam("sigla") String sigla, @QueryParam("origem") String origem,	@QueryParam("isFavorita") String isFavorita,
+			@QueryParam("limit") Integer limit, @QueryParam("offset") Integer offset) {
+
+		List<Proposicao> results = proposicaoService.consultar(sigla, autor, ementa, origem, isFavorita, offset, limit);
 		return results;
 	}
 
 	@GET
 	@Path("/buscarPorSufixo")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<ProposicaoJSON> buscarPorSufixo(@QueryParam("sufixo") String sufixo) {
-		List<Proposicao> proposicoes = proposicaoService.buscarPorSufixo(sufixo);
-		List<ProposicaoJSON> proposicaoJsonList = new ArrayList<ProposicaoJSON>();
-
-		for (Proposicao proposicao : proposicoes) {
-			ProposicaoJSON proposicaoJSON = new ProposicaoJSON();
-			proposicaoJSON.setId(proposicao.getId());
-			proposicaoJSON.setIdProposicao(proposicao.getIdProposicao());
-			proposicaoJSON.setSigla(proposicao.getSigla());
-
-			proposicaoJsonList.add(proposicaoJSON);
-		}
-
-		return proposicaoJsonList;
+	public List<Proposicao> buscarPorSufixo(@QueryParam("sufixo") String sufixo) {
+		return proposicaoService.buscarPorSufixo(sufixo);
 	}
 
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response update(ProposicaoJSON entity) {
-		proposicaoService.atualizarProposicaoJSON(entity);
+	public Response update(Proposicao entity) {
+		proposicaoService.save(entity);
 		return Response.noContent().build();
 	}
 
@@ -231,4 +213,37 @@ public class ProposicaoEndpoint {
 		return proposicaoService.listTipos(Origem.SENADO);
 
 	}
+
+	@Inject
+	private UsuarioAutenticadoBean controleUsuarioAutenticado;
+
+	@POST
+	@Path("/follow/{id:[0-9]+}")
+	public Response follow(@PathParam("id") Long id, @HeaderParam("Authorization") String authorization) {
+		try {
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+			proposicaoService.followProposicao(user, id);
+
+			return Response.noContent().build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
+
+	}
+
+	@DELETE
+	@Path("/follow/{id:[0-9]+}")
+	public Response unfollow(@PathParam("id") Long id, @HeaderParam("Authorization") String authorization) {
+		try {
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+			proposicaoService.unfollowProposicao(user, id);
+			return Response.noContent().build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
+
+	}
+
 }

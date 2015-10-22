@@ -36,7 +36,7 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 	@OneToOne(fetch = FetchType.EAGER)
 	private Encaminhamento encaminhamento;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	private Proposicao proposicao;
 
 	@OneToOne(fetch = FetchType.EAGER)
