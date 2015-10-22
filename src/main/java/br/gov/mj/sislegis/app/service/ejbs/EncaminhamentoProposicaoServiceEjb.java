@@ -69,25 +69,32 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 		tarefaService.save(tarefa, referer);
 	}
 
-
 	public List<EncaminhamentoProposicao> findByProposicao(Long idProposicao) {
-		TypedQuery<EncaminhamentoProposicao> findByIdQuery = em
-				.createQuery(
-						"SELECT c FROM EncaminhamentoProposicao c "
-								+ "INNER JOIN FETCH c.responsavel res "
-								+ "INNER JOIN FETCH c.comentario com "
-								+ "INNER JOIN FETCH c.encaminhamento enc "
-								+ "INNER JOIN FETCH c.proposicao p WHERE p.id = :entityId",
-								EncaminhamentoProposicao.class);
+		TypedQuery<EncaminhamentoProposicao> findByIdQuery = em.createQuery(
+				"SELECT c FROM EncaminhamentoProposicao c where c.proposicao.id=:entityId",
+				EncaminhamentoProposicao.class);
 		findByIdQuery.setParameter("entityId", idProposicao);
 		final List<EncaminhamentoProposicao> results = findByIdQuery.getResultList();
 
-		return  results;
+		return results;
+	}
+	//Por algum motivo esse metodo não está usando JPA, e está fazendo join na mao...
+	@Deprecated
+	public List<EncaminhamentoProposicao> findByProposicao2(Long idProposicao) {
+		TypedQuery<EncaminhamentoProposicao> findByIdQuery = em.createQuery("SELECT c FROM EncaminhamentoProposicao c "
+				+ "INNER JOIN FETCH c.responsavel res " + "INNER JOIN FETCH c.comentario com "
+				+ "INNER JOIN FETCH c.encaminhamento enc " + "INNER JOIN FETCH c.proposicao p WHERE p.id = :entityId",
+				EncaminhamentoProposicao.class);
+		findByIdQuery.setParameter("entityId", idProposicao);
+		final List<EncaminhamentoProposicao> results = findByIdQuery.getResultList();
+
+		return results;
 	}
 
 	@Override
 	public Integer totalByProposicao(Long idProposicao) {
-		Query query = em.createNativeQuery("SELECT COUNT(1) FROM encaminhamentoproposicao WHERE proposicao_id = :idProposicao");
+		Query query = em
+				.createNativeQuery("SELECT COUNT(1) FROM encaminhamentoproposicao WHERE proposicao_id = :idProposicao");
 		query.setParameter("idProposicao", idProposicao);
 		BigInteger total = (BigInteger) query.getSingleResult();
 		return total.intValue();

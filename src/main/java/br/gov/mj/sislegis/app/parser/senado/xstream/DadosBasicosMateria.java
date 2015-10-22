@@ -6,4 +6,10 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 class DadosBasicosMateria {
 	String EmentaMateria;
 	String ExplicacaoEmentaMateria;
+	
+	
+	String IndexacaoMateria;
+	String IndicadorComplementar;
+	String DataApresentacao;
+	String DataLeitura;
 }
