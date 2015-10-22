@@ -3,6 +3,7 @@ package br.gov.mj.sislegis.app.parser.camara.xstream;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 
@@ -59,6 +60,7 @@ class ProposicaoWS {
 		proposicao.setSigla(nome);
 		proposicao.setTipo(tipoProposicao.getSigla());
 		proposicao.setEmenta(txtEmenta);
+		proposicao.setOrigem(Origem.CAMARA);
 		proposicao.setAutor(autor1.txtNomeAutor);
 		if (orgaoNumerador != null) {
 			proposicao.setComissao(orgaoNumerador.sigla.trim());
