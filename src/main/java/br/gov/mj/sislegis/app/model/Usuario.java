@@ -42,7 +42,6 @@ public class Usuario extends AbstractEntity {
 	@JoinTable(name = "Usuario_Agendas")
 	private Set<AgendaComissao> agendasSeguidas = new HashSet<AgendaComissao>();
 
-	
 	@JsonIgnore
 	public Set<Proposicao> getProposicoesSeguidas() {
 		if (proposicoesSeguidas == null) {
@@ -51,6 +50,7 @@ public class Usuario extends AbstractEntity {
 			return proposicoesSeguidas;
 		}
 	}
+
 	@JsonIgnore
 	public Set<AgendaComissao> getAgendasSeguidas() {
 		if (agendasSeguidas == null) {
@@ -97,7 +97,7 @@ public class Usuario extends AbstractEntity {
 
 	@Override
 	public String toString() {
-		String result = getClass().getSimpleName() + " ";
+		String result = getClass().getSimpleName() + " " + getId() + ":";
 		if (nome != null && !nome.trim().isEmpty())
 			result += "nome: " + nome;
 		if (email != null && !email.trim().isEmpty())
