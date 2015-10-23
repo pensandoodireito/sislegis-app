@@ -13,11 +13,10 @@ class ProposicaoSenadoWSSpec extends Specification{
         def caminho = "/dadosabertos/materia/"+idProposicao
         def versaoHomologadaWS = 3
         def parametros = [v : versaoHomologadaWS]
-        def xmlComissoes
 
         when:
         def response = client.get(path: caminho, query : parametros)
-        xmlComissoes = response.data
+        def xmlComissoes = response.data
 
         then:
         assert xmlComissoes.Metadados.VersaoServico == versaoHomologadaWS
