@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.ejb.Local;
+import javax.persistence.EntityManager;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Usuario;
@@ -33,5 +34,8 @@ public interface UsuarioService extends Service<Usuario> {
 	List<Usuario> listUsuariosSeguidoresDeProposicao(Proposicao proposicao);
 
 	Collection<Proposicao> proposicoesSeguidas(Long id);
+
+
+	Usuario findOrCreateByEmail(String string, String email);
 
 }

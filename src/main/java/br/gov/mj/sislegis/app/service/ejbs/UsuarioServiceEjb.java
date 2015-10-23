@@ -7,6 +7,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.naming.CommunicationException;
 import javax.naming.InitialContext;
 import javax.naming.NamingEnumeration;
@@ -49,6 +51,7 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 	}
 
 	@Override
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Usuario findByEmail(String email) {
 		TypedQuery<Usuario> findByIdQuery = em.createQuery(
 				"SELECT u FROM Usuario u WHERE upper(u.email) like upper(:email) ORDER BY u.email ASC", Usuario.class);
@@ -62,6 +65,19 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 			return null;
 		}
 
+	}
+
+	@Override
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public Usuario findOrCreateByEmail(String name, String email) {
+		Usuario user = findByEmail(email);
+		if (user == null) {
+			user = new Usuario();
+			user.setEmail(email);
+			user.setNome(name);
+			save(user);
+		}
+		return user;
 	}
 
 	@Override

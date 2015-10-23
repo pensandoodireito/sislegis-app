@@ -2,17 +2,21 @@ package br.gov.mj.sislegis.app.rest.authentication;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.ConcurrencyManagement;
+import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.Local;
 import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import javax.persistence.TypedQuery;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -24,6 +28,7 @@ import org.json.JSONObject;
 
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.service.UsuarioService;
+import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 @Local
 @Singleton
@@ -42,26 +47,30 @@ public class UsuarioAutenticadoBean {
 
 	}
 
-	private Usuario criaUsuario(JSONObject jsonUser) {
-		// Criá-lo
-		Usuario novoUsuario = new Usuario();
-		novoUsuario.setEmail(jsonUser.getString("email"));
-		novoUsuario.setNome(jsonUser.getString("name"));
-
-		usuarioService.save(novoUsuario);
-		return novoUsuario;
-	}
-
-	public Usuario carregaUsuarioAutenticado(String authorization) throws IOException {
+	public synchronized Usuario carregaUsuarioAutenticado(String authorization) throws IOException {
 		JSONObject jsonUser = null;
 
 		jsonUser = buscaDadosUsuarioDoKeycloak(authorization);
-		Usuario authenticatedUser = usuarioService.findByEmail(jsonUser.getString("email"));
-		if (authenticatedUser == null) {
-			authenticatedUser = criaUsuario(jsonUser);
-		}
+		String email = jsonUser.getString("email");
+		Usuario authenticatedUser = usuarioService.findOrCreateByEmail(jsonUser.getString("name"), email);
 
 		return authenticatedUser;
+	}
+
+	private String getContent(HttpResponse response) throws IOException {
+		InputStream is = null;
+
+		try {
+			HttpEntity httpEntity = response.getEntity();
+
+			is = httpEntity.getContent();
+			return IOUtils.toString(is, "UTF-8");
+		} finally {
+			if (is != null) {
+				is.close();
+			}
+		}
+
 	}
 
 	/**
@@ -80,18 +89,17 @@ public class UsuarioAutenticadoBean {
 			get.addHeader("Authorization", authorization);
 			HttpResponse response = client.execute(get);
 			if (response.getStatusLine().getStatusCode() != 200) {
+				if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.FINE)) {
+
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine(
+							"Falhou ao obter dados do usuario logado: '" + getContent(response));
+				}
+
 				throw new IOException("Não foi possível obter dados do usuáro logado. Http Status: "
 						+ response.getStatusLine().getStatusCode());
 			}
-			HttpEntity httpEntity = response.getEntity();
 
-			InputStream is = httpEntity.getContent();
-			try {
-				jsonUser = new JSONObject(IOUtils.toString(is, "UTF-8"));
-
-			} finally {
-				is.close();
-			}
+			jsonUser = new JSONObject(getContent(response));
 
 		} finally {
 			client.getConnectionManager().shutdown();

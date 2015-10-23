@@ -2,7 +2,10 @@ package br.gov.mj.sislegis.app.service;
 
 import java.util.List;
 
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -24,7 +27,7 @@ public abstract class AbstractPersistence<T extends AbstractEntity, PK extends N
 	public AbstractPersistence(Class<T> entityClass) {
 		this.entityClass = entityClass;
 	}
-
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public T save(T e) {
 		if (e.getId() != null)
 			return getEntityManager().merge(e);
@@ -34,6 +37,7 @@ public abstract class AbstractPersistence<T extends AbstractEntity, PK extends N
 		}
 	}
 
+	
 	public void remove(T entity) {
 		getEntityManager().remove(getEntityManager().merge(entity));
 	}
@@ -47,47 +51,42 @@ public abstract class AbstractPersistence<T extends AbstractEntity, PK extends N
 	}
 
 	public List<T> listAll() {
-		CriteriaQuery cq = getEntityManager().getCriteriaBuilder()
-				.createQuery();
+		CriteriaQuery cq = getEntityManager().getCriteriaBuilder().createQuery();
 		cq.select(cq.from(entityClass));
 		return getEntityManager().createQuery(cq).getResultList();
 	}
 
 	public List<T> listAll(Integer offset, Integer limit) {
-		CriteriaQuery cq = getEntityManager().getCriteriaBuilder()
-				.createQuery();
+		CriteriaQuery cq = getEntityManager().getCriteriaBuilder().createQuery();
 		cq.select(cq.from(entityClass));
-		return getEntityManager().createQuery(cq)
-		         .setFirstResult(offset) // offset
-		         .setMaxResults(limit) // limit
-		         .getResultList();
+		return getEntityManager().createQuery(cq).setFirstResult(offset) // offset
+				.setMaxResults(limit) // limit
+				.getResultList();
 	}
 
 	public List<T> findByProperty(String property, Object value, String orderBy) {
 		TypedQuery<T> findByIdQuery = getEntityManager().createQuery(
-				"SELECT c FROM "+entityClass.getSimpleName()+" c WHERE upper(c."+property+") like upper(:"+property+") ORDER BY c."+property+" "+orderBy+"",
-				entityClass);
-		findByIdQuery.setParameter(property, "%"+value+"%");
+				"SELECT c FROM " + entityClass.getSimpleName() + " c WHERE upper(c." + property + ") like upper(:"
+						+ property + ") ORDER BY c." + property + " " + orderBy + "", entityClass);
+		findByIdQuery.setParameter(property, "%" + value + "%");
 		return findByIdQuery.getResultList();
 	}
-	
+
 	/***
 	 * Retorna um único resultado
+	 * 
 	 * @param property
 	 * @param value
 	 * @return
 	 */
-	public T findByProperty(String property, Object value){
-		CriteriaQuery cq = getEntityManager().getCriteriaBuilder()
-				.createQuery();
+	public T findByProperty(String property, Object value) {
+		CriteriaQuery cq = getEntityManager().getCriteriaBuilder().createQuery();
 		Root<T> c = cq.from(entityClass);
 		cq.select(c);
-		cq.where(
-			      getEntityManager().getCriteriaBuilder().equal(c.get(property), value)
-			  );
-		return (T)getEntityManager().createQuery(cq).getSingleResult();
+		cq.where(getEntityManager().getCriteriaBuilder().equal(c.get(property), value));
+		return (T) getEntityManager().createQuery(cq).getSingleResult();
 	}
-	
+
 	// Exige a definição do <code>EntityManager</code> responsável pelas
 	// operações de persistencia.
 	protected abstract EntityManager getEntityManager();
