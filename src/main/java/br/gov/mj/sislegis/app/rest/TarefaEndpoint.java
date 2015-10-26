@@ -76,13 +76,6 @@ public class TarefaEndpoint {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response update(Tarefa entity, @HeaderParam("Referer") String referer) {
 		try {
-
-			// validar o campo comentario quando a tarefa for finalizada
-			if (entity.isFinalizada() && StringUtils.isEmpty(entity.getComentarioFinalizacao())){
-				entity.setFinalizada(false);
-				return Response.status(Response.Status.BAD_REQUEST).entity(entity).build();
-			}
-
 			tarefaService.save(entity, referer);
 
 		} catch (OptimisticLockException e) {
