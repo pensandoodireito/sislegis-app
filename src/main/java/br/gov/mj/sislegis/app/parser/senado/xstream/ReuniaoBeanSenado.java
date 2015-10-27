@@ -37,7 +37,7 @@ public class ReuniaoBeanSenado extends br.gov.mj.sislegis.app.parser.ReuniaoBean
 		return comissoes;
 	}
 
-	public Set<ProposicaoPautaComissao> getProposioesPauta(PautaReuniaoComissao reuniao) {
+	public Set<ProposicaoPautaComissao> getProposicoesPauta(PautaReuniaoComissao reuniao) {
 
 		for (ParteBean parteBean : this.getPartes()) {
 			List<ItemBean> itens = parteBean.getItens();

@@ -18,7 +18,9 @@ import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
+import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
+import br.gov.mj.sislegis.app.service.ejbs.EJBUnitTestable;
 import br.gov.mj.sislegis.app.service.ejbs.ProposicaoServiceEjb;
 
 public class PautaProposicaoReuniaoTests {
@@ -44,7 +46,7 @@ public class PautaProposicaoReuniaoTests {
 			proposicaoService = new ProposicaoServiceEjb();
 			em = emf.createEntityManager();
 			em.setFlushMode(FlushModeType.AUTO);
-			((ProposicaoServiceEjb) proposicaoService).setEntityManager(em);
+			((EJBUnitTestable) proposicaoService).setInjectedEntities(em, new ParserProposicaoCamara());
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

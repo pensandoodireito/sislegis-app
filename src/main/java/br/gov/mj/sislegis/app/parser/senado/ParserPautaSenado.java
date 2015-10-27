@@ -96,7 +96,7 @@ public class ParserPautaSenado {
 			prc.setTipo(pautaReuniaoComissao.getTipo());
 			prc.setTitulo(pautaReuniaoComissao.getTitulo());
 
-			Set<ProposicaoPautaComissao> ps = pautaReuniaoComissao.getProposioesPauta(prc);
+			Set<ProposicaoPautaComissao> ps = pautaReuniaoComissao.getProposicoesPauta(prc);
 
 			if (ps.size() > 0) {
 				pautas.add(prc);

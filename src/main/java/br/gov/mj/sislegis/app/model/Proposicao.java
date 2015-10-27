@@ -21,6 +21,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedNativeQueries;
 import javax.persistence.NamedNativeQuery;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Transient;
@@ -42,6 +44,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
                       "FROM Proposicao a where a.id in (select distinct proposicoesSeguidas_id from Usuario_ProposicaoSeguida)",
                       resultClass=Proposicao.class
   )
+})
+
+@NamedQueries({ 
+	@NamedQuery(
+			name = "findByUniques", 
+			query = "select p from Proposicao p where p.idProposicao=:idProposicao and p.origem=:origem")
+
 })
 //@formatter:on
 @XmlRootElement

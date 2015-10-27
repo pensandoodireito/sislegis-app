@@ -19,13 +19,13 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import br.gov.mj.sislegis.app.model.AbstractEntity;
 import br.gov.mj.sislegis.app.model.Comissao;
 
 @Entity
-
 @Table(name = "PautaReuniaoComissao", uniqueConstraints = @UniqueConstraint(columnNames = { "comissao", "date",
 		"codigoReuniao" }))
-public class PautaReuniaoComissao implements Serializable {
+public class PautaReuniaoComissao extends AbstractEntity implements Serializable {
 	/**
 	 * 
 	 */
@@ -40,9 +40,9 @@ public class PautaReuniaoComissao implements Serializable {
 	String comissao;
 	@Column
 	Date date;
+
 	@Column
 	protected Integer codigoReuniao;
-
 
 	@Column
 	String linkPauta;
@@ -54,8 +54,7 @@ public class PautaReuniaoComissao implements Serializable {
 	@Column
 	protected String tipo;
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinTable(name = "ProposicaoPautaComissao", joinColumns = { @JoinColumn(name = "pautaReuniaoComissaoId") })
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "pautaReuniaoComissao")
 	@OrderBy("ordemPauta")
 	SortedSet<ProposicaoPautaComissao> proposicoes = new TreeSet<ProposicaoPautaComissao>();
 
@@ -126,6 +125,14 @@ public class PautaReuniaoComissao implements Serializable {
 
 	public void addProposicaoPauta(ProposicaoPautaComissao ppc) {
 		proposicoes.add(ppc);
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public Date getDate() {
+		return date;
 	}
 
 	@Override

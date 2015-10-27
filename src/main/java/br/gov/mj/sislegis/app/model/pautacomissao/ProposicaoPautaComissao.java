@@ -6,15 +6,17 @@ import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapsId;
 import javax.persistence.Table;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
 
 @Entity
 @Table(name = "Proposicao_PautaComissao")
+@IdClass(PropostaPautaPK.class)
 public class ProposicaoPautaComissao implements Serializable, Comparable<ProposicaoPautaComissao> {
 
 	/**
@@ -22,24 +24,10 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 	 */
 	private static final long serialVersionUID = 2853814379434569522L;
 
-	public PautaReuniaoComissao getPautaReuniaoComissao() {
-		return pautaReuniaoComissao;
-	}
-
-	public void setPautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao) {
-		this.pautaReuniaoComissao = pautaReuniaoComissao;
-	}
-
-	public void setKey(PropostaPautaPK key) {
-		this.key = key;
-	}
-
-	public void setProposicao(Proposicao proposicao) {
-		this.proposicao = proposicao;
-	}
-
-	@EmbeddedId
-	PropostaPautaPK key = new PropostaPautaPK();
+	@Id
+	Long proposicaoId;
+	@Id
+	Long pautaReuniaoComissaoId;
 
 	@Column
 	Integer ordemPauta = 0;
@@ -47,26 +35,21 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 	@Column
 	String relator;
 
-	@MapsId("proposicaoId")
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "proposicaoId", updatable = false, insertable = false, referencedColumnName = "id", nullable = false)
 	Proposicao proposicao;
 
-	@MapsId("pautaReuniaoComissaoId")
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "pautaReuniaoComissaoId", referencedColumnName = "id", nullable = false)
+	@JoinColumn(name = "pautaReuniaoComissaoId", updatable = false, insertable = false, referencedColumnName = "id", nullable = false)
 	PautaReuniaoComissao pautaReuniaoComissao;
 
 	ProposicaoPautaComissao() {
 
 	}
 
-	public PropostaPautaPK getKey() {
-		return key;
-	}
-
 	public ProposicaoPautaComissao(PautaReuniaoComissao pc, Proposicao proposicao) {
-		this.pautaReuniaoComissao = pc;
-		this.proposicao = proposicao;
+		setProposicao(proposicao);
+		setPautaReuniaoComissao(pautaReuniaoComissao);
 	}
 
 	public String getRelator() {
@@ -75,10 +58,6 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 
 	public void setRelator(String relator) {
 		this.relator = relator;
-	}
-
-	public PautaReuniaoComissao getPautaComissao() {
-		return pautaReuniaoComissao;
 	}
 
 	public Proposicao getProposicao() {
@@ -91,6 +70,24 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 
 	public void setOrdemPauta(Integer ordemPauta) {
 		this.ordemPauta = ordemPauta;
+	}
+
+	public PautaReuniaoComissao getPautaReuniaoComissao() {
+		return pautaReuniaoComissao;
+	}
+
+	public void setPautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao) {
+		this.pautaReuniaoComissao = pautaReuniaoComissao;
+		if (pautaReuniaoComissao != null) {
+			pautaReuniaoComissaoId = pautaReuniaoComissao.getId();
+		}
+	}
+
+	public void setProposicao(Proposicao proposicao) {
+		this.proposicao = proposicao;
+		if (proposicao != null) {
+			proposicaoId = proposicao.getId();
+		}
 	}
 
 	@Override
@@ -106,12 +103,31 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 	}
 
 	@Override
-	public String toString() {
-		if (key != null) {
-			StringBuilder sb = new StringBuilder(key.toString());
-			sb.append(" ordem:" + ordemPauta + " Relator:{" + relator + "}");
-			return sb.toString();
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+
+		} else {
+			if (obj instanceof ProposicaoPautaComissao) {
+				if (this.proposicao == null) {
+					return false;
+				}
+				if (this.pautaReuniaoComissao == null) {
+					return false;
+				}
+				if (this.pautaReuniaoComissao.equals(((ProposicaoPautaComissao) obj).getPautaReuniaoComissao())
+						&& this.getProposicao().equals(((ProposicaoPautaComissao) obj).getProposicao())) {
+					return true;
+				}
+
+			}
 		}
-		return super.toString();
+		return false;
+	}
+
+	@Override
+	public String toString() {
+
+		return proposicaoId + ":" + pautaReuniaoComissaoId + "@" + super.hashCode();
 	}
 }

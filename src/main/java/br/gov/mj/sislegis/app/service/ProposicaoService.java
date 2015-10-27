@@ -98,7 +98,7 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 */
 	List<Proposicao> listProposicoesSeguidas();
 
-	PautaReuniaoComissao savePautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao);
+	PautaReuniaoComissao savePautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao) throws Exception;
 
 
 	PautaReuniaoComissao findPautaReuniao(String comissao, Date date, Integer codigoReuniao);

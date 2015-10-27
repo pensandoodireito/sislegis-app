@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,6 +19,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
@@ -30,6 +32,7 @@ import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
+import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
 import br.gov.mj.sislegis.app.parser.ProposicaoSearcherFactory;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
@@ -50,7 +53,8 @@ import br.gov.mj.sislegis.app.util.Conversores;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 @Stateless
-public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> implements ProposicaoService {
+public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> implements ProposicaoService,
+		EJBUnitTestable {
 
 	@Inject
 	private ParserPautaCamara parserPautaCamara;
@@ -90,10 +94,6 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	public ProposicaoServiceEjb() {
 		super(Proposicao.class);
-	}
-
-	public void setEntityManager(EntityManager em) {
-		this.em = em;
 	}
 
 	@Override
@@ -523,17 +523,76 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public PautaReuniaoComissao savePautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao) {
-
+	public PautaReuniaoComissao savePautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao) throws Exception {
+		// check se proposicoes existem
+		SortedSet<ProposicaoPautaComissao> sortedSet = pautaReuniaoComissao.getProposicoes();
 		getEntityManager().persist(pautaReuniaoComissao);
+		for (Iterator<ProposicaoPautaComissao> iterator = sortedSet.iterator(); iterator.hasNext();) {
+			ProposicaoPautaComissao proposicaoPautaComissao = (ProposicaoPautaComissao) iterator.next();
+			Proposicao proposicao = proposicaoPautaComissao.getProposicao();
+			if (proposicaoPautaComissao.getProposicao().getId() == null) {
+				Proposicao proposicaoDb = findProposicaoBy(proposicao.getOrigem(), proposicao.getIdProposicao());
+				if (proposicaoDb == null) {
+					// TEM Que buscar dos WS
+					switch (proposicao.getOrigem()) {
+					case CAMARA:
+						proposicaoDb = detalharProposicaoCamaraWS((long) proposicao.getIdProposicao());
+						if (proposicaoDb == null) {
+							throw new IllegalArgumentException("Não foi possível encontrar proposicao da "
+									+ proposicao.getIdProposicao() + " " + proposicao.getOrigem() + " "
+									+ proposicao.getComissao());
+						}
+						break;
+					case SENADO:
+						proposicaoDb = detalharProposicaoSenadoWS((long) proposicao.getIdProposicao());
+						break;
+					}
+					save(proposicaoDb);
+					proposicaoPautaComissao.setProposicao(proposicaoDb);
+				} else {
+					proposicaoPautaComissao.setProposicao(proposicaoDb);
+				}
+			}
+			proposicaoPautaComissao.setPautaReuniaoComissao(pautaReuniaoComissao);
+
+			System.out.println(proposicaoPautaComissao.getPautaReuniaoComissao() + " "
+					+ proposicaoPautaComissao.getProposicao());
+			getEntityManager().persist(proposicaoPautaComissao);
+		}
+
 		return pautaReuniaoComissao;
 
+	}
+
+	private Proposicao findProposicaoBy(Origem origem, Integer idProposicao) {
+		Query q = em.createNamedQuery("findByUniques", Proposicao.class);
+		q.setParameter("origem", origem);
+		q.setParameter("idProposicao", idProposicao);
+
+		List<Proposicao> props = q.getResultList();
+		if (props.isEmpty()) {
+			return null;
+		} else {
+			if (props.size() > 0) {
+				throw new IllegalArgumentException("Mais de uma proposicao com id=" + idProposicao + " e origem "
+						+ origem.name());
+			}
+			return props.get(0);
+
+		}
 	}
 
 	@Override
 	public PautaReuniaoComissao findPautaReuniao(String comissao, Date date, Integer codigoReuniao) {
 
 		return null;
+
+	}
+
+	@Override
+	public void setInjectedEntities(Object... injections) {
+		this.em = (EntityManager) injections[0];
+		this.parserProposicaoCamara = (ParserProposicaoCamara) injections[1];
 
 	}
 
