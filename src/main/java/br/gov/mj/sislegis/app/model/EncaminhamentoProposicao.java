@@ -35,6 +35,9 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private Comentario comentario;
 
+	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	private Comentario comentarioFinalizacao;
+
 	@OneToOne(fetch = FetchType.EAGER)
 	private Encaminhamento encaminhamento;
 
@@ -56,6 +59,14 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 
 	public void setComentario(Comentario comentario) {
 		this.comentario = comentario;
+	}
+
+	public Comentario getComentarioFinalizacao() {
+		return comentarioFinalizacao;
+	}
+
+	public void setComentarioFinalizacao(Comentario comentarioFinalizacao) {
+		this.comentarioFinalizacao = comentarioFinalizacao;
 	}
 
 	public Encaminhamento getEncaminhamento() {

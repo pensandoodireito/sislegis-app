@@ -102,7 +102,7 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 		comentario.setAutor(tarefa.getUsuario());
 
 		tarefa.setComentarioFinalizacao(comentario);
-		tarefa.getEncaminhamentoProposicao().setComentario(comentario);
+		tarefa.getEncaminhamentoProposicao().setComentarioFinalizacao(comentario);
 
 		save(tarefa);
 	}

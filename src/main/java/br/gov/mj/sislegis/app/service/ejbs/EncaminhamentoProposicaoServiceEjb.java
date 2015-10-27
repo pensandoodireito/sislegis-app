@@ -112,7 +112,7 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 		comentario.setDescricao(descricaoComentario);
 		comentario.setProposicao(encaminhamento.getProposicao());
 
-		encaminhamento.setComentario(comentario);
+		encaminhamento.setComentarioFinalizacao(comentario);
 
 		Tarefa tarefa = tarefaService.buscarPorEncaminhamentoProposicaoId(idEncaminhamentoProposicao);
 		if (tarefa != null) {
