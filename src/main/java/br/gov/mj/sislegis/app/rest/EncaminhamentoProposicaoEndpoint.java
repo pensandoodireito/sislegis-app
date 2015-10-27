@@ -77,9 +77,9 @@ public class EncaminhamentoProposicaoEndpoint {
 
 	@POST
 	@Path("/finalizar")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response finalizar(Long idEncaminhamentoProposicao, String descricaoComentario){
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Response finalizar(@FormParam("idEncaminhamentoProposicao") Long idEncaminhamentoProposicao, @FormParam("descricaoComentario") String descricaoComentario){
 		service.finalizar(idEncaminhamentoProposicao, descricaoComentario);
-		return Response.noContent().build();
+		return Response.ok().build();
 	}
 }

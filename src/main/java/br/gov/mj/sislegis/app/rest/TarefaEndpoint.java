@@ -3,9 +3,7 @@ package br.gov.mj.sislegis.app.rest;
 import br.gov.mj.sislegis.app.model.Tarefa;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
-import br.gov.mj.sislegis.app.service.Service;
 import br.gov.mj.sislegis.app.service.TarefaService;
-import org.apache.commons.lang.StringUtils;
 
 import javax.inject.Inject;
 import javax.persistence.OptimisticLockException;
@@ -19,9 +17,7 @@ import java.util.List;
 
 @Path("/tarefas")
 public class TarefaEndpoint {
-	@Inject
-	private Service<Tarefa> service;
-	
+
 	@Inject
 	private TarefaService tarefaService;
 
@@ -38,7 +34,7 @@ public class TarefaEndpoint {
 	@DELETE
 	@Path("/{id:[0-9][0-9]*}")
 	public Response deleteById(@PathParam("id") Long id) {
-		service.deleteById(id);
+		tarefaService.deleteById(id);
 		return Response.noContent().build();
 	}
 
@@ -52,7 +48,7 @@ public class TarefaEndpoint {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Tarefa> listAll(@QueryParam("start") Integer startPosition,	@QueryParam("max") Integer maxResult) {
-		return service.listAll();
+		return tarefaService.listAll();
 	}
 
 	@GET
