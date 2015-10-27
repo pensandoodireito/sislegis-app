@@ -3,18 +3,18 @@ package br.gov.mj.sislegis.app.parser.camara;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.pautacomissao.Sessao;
 import br.gov.mj.sislegis.app.model.pautacomissao.SituacaoSessao;
 import br.gov.mj.sislegis.app.parser.ReuniaoBean;
 
 class ReuniaoBeanCamara extends ReuniaoBean {
 
-	protected List<Proposicao> proposicoes = new ArrayList<Proposicao>();
+	protected List<ProposicaoPautaComissaoWrapper> proposicoes = new ArrayList<ProposicaoPautaComissaoWrapper>();
 
-	protected List<Proposicao> getProposicoes() {
+	protected List<ProposicaoPautaComissaoWrapper> getPautaProposicoes() {
 		return proposicoes;
 	}
 
@@ -25,9 +25,8 @@ class ReuniaoBeanCamara extends ReuniaoBean {
 	@Override
 	public Sessao getSessao() {
 		Sessao sessao = new Sessao();
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy kk:mm");
 		try {
-			sessao.setData(sdf.parse(data + " " + hora));
+			sessao.setData(getDate());
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
@@ -41,11 +40,15 @@ class ReuniaoBeanCamara extends ReuniaoBean {
 		case Convocada:
 			sessao.setSituacao(SituacaoSessao.Agendada);
 			break;
-		
 
 		default:
 			break;
 		}
 		return sessao;
+	}
+
+	public Date getDate() throws ParseException {
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy kk:mm");
+		return sdf.parse(data + " " + hora);
 	}
 }

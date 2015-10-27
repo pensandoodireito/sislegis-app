@@ -29,6 +29,7 @@ import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
 import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
 import br.gov.mj.sislegis.app.parser.ProposicaoSearcherFactory;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
@@ -91,9 +92,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		super(Proposicao.class);
 	}
 
+	public void setEntityManager(EntityManager em) {
+		this.em = em;
+	}
+
 	@Override
 	protected EntityManager getEntityManager() {
-		// TODO Auto-generated method stub
 		return em;
 	}
 
@@ -159,24 +163,11 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	}
 
-	@Override
-	public void salvarListaProposicao(List<Proposicao> listaProposicao) {
-		Reuniao reuniao = null;
+	public void salvarListaProposicao(Reuniao reuniao, List<Proposicao> listaProposicao) {
 
-		if (!listaProposicao.isEmpty()) {
-			Proposicao proposicao = listaProposicao.get(0); // uma forma de
-															// obter a data da
-															// reuniao é através
-															// do objeto
-															// proposicao
-			reuniao = reuniaoService.buscaReuniaoPorData(proposicao.getReuniao().getData());
-
-			// Caso a reunião não exista, salva pela primeira vez
-			if (Objects.isNull(reuniao)) {
-				reuniao = new Reuniao();
-				reuniao.setData(proposicao.getReuniao().getData());
-				reuniao = reuniaoService.save(reuniao);
-			}
+		// Caso a reunião não exista, salva pela primeira vez
+		if (Objects.isNull(reuniao.getId())) {
+			reuniao = reuniaoService.save(reuniao);
 		}
 
 		// Agora vamos salvar/associar as proposições na reunião
@@ -298,27 +289,30 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public List<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao) {
+	public Collection<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao) {
 		List<Proposicao> proposicoes = new ArrayList<>();
 		Reuniao reuniao = reuniaoService.buscaReuniaoPorData(dataReuniao);
-
 		if (!Objects.isNull(reuniao)) {
-			Set<ReuniaoProposicao> listaReuniaoProposicoes = reuniao.getListaReuniaoProposicoes();
-			// Copiamos alguns valores de ReuniaoProposicao para Proposicao,
-			// afim de retornar somente uma entidade com alguns valores
-			// transientes
-			for (ReuniaoProposicao reuniaoProposicao : listaReuniaoProposicoes) {
-				Proposicao proposicao = reuniaoProposicao.getProposicao();
-				proposicao.setComissao(reuniaoProposicao.getSiglaComissao());
-				proposicao.setSeqOrdemPauta(reuniaoProposicao.getSeqOrdemPauta());
-				proposicao.setLinkPauta(reuniaoProposicao.getLinkPauta());
-				proposicao.setReuniao(reuniaoProposicao.getReuniao());
-
-				popularTotalComentariosEncaminhamentos(proposicao);
-
-				proposicoes.add(proposicao);
-			}
+			proposicoes.addAll(reuniao.getProposicoes());
 		}
+		// if (!Objects.isNull(reuniao)) {
+		// Set<ReuniaoProposicao> listaReuniaoProposicoes =
+		// reuniao.getListaReuniaoProposicoes();
+		// // Copiamos alguns valores de ReuniaoProposicao para Proposicao,
+		// // afim de retornar somente uma entidade com alguns valores
+		// // transientes
+		// for (ReuniaoProposicao reuniaoProposicao : listaReuniaoProposicoes) {
+		// Proposicao proposicao = reuniaoProposicao.getProposicao();
+		// proposicao.setComissao(reuniaoProposicao.getSiglaComissao());
+		// proposicao.setSeqOrdemPauta(reuniaoProposicao.getSeqOrdemPauta());
+		// proposicao.setLinkPauta(reuniaoProposicao.getLinkPauta());
+		// proposicao.setReuniao(reuniaoProposicao.getReuniao());
+		//
+		// popularTotalComentariosEncaminhamentos(proposicao);
+		//
+		// proposicoes.add(proposicao);
+		// }
+		// }
 
 		return proposicoes;
 	}
@@ -526,6 +520,21 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		for (Proposicao proposicao : proposicoes) {
 			popularTotalComentariosEncaminhamentos(proposicao);
 		}
+	}
+
+	@Override
+	public PautaReuniaoComissao savePautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao) {
+
+		getEntityManager().persist(pautaReuniaoComissao);
+		return pautaReuniaoComissao;
+
+	}
+
+	@Override
+	public PautaReuniaoComissao findPautaReuniao(String comissao, Date date, Integer codigoReuniao) {
+
+		return null;
+
 	}
 
 }

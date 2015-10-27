@@ -33,7 +33,6 @@ import br.gov.mj.sislegis.app.enumerated.Origem;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-
 @Entity
 //@formatter:off
 @NamedNativeQueries({
@@ -96,9 +95,6 @@ public class Proposicao extends AbstractEntity {
 	@Column
 	private String linkProposicao;
 
-	@Transient
-	private String linkPauta;
-
 	@Column
 	private Posicionamento posicionamento;
 
@@ -109,17 +105,21 @@ public class Proposicao extends AbstractEntity {
 	private Set<TagProposicao> tags;
 
 	@Transient
+	private String linkPauta;
+
+	@Transient
 	private Set<Comentario> listaComentario = new HashSet<>();
 
 	@Transient
 	private Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao = new HashSet<>();
 
-	@Transient
-	private Reuniao reuniao;
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(name = "reuniao_proposicao", joinColumns = { @JoinColumn(name = "proposicao_id") })
+	@OrderBy("data asc")
+	private SortedSet<Reuniao> reuniao = new TreeSet<Reuniao>();
 
 	@Column(nullable = false)
 	private boolean isFavorita;
-
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "proposicao")
 	@OrderBy("data ASC")
@@ -130,7 +130,6 @@ public class Proposicao extends AbstractEntity {
 
 	@Transient
 	private Integer totalEncaminhamentos = 0;
-
 
 	@ManyToMany(fetch = FetchType.EAGER, mappedBy = "proposicoesFilha")
 	private Set<Proposicao> proposicoesPai;
@@ -292,14 +291,6 @@ public class Proposicao extends AbstractEntity {
 		this.responsavel = responsavel;
 	}
 
-	public Reuniao getReuniao() {
-		return reuniao;
-	}
-
-	public void setReuniao(Reuniao reuniao) {
-		this.reuniao = reuniao;
-	}
-
 	public String getResultadoASPAR() {
 		return resultadoASPAR;
 	}
@@ -317,7 +308,7 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public Integer getTotalComentarios() {
-		if (CollectionUtils.isNotEmpty(listaComentario)){
+		if (CollectionUtils.isNotEmpty(listaComentario)) {
 			totalComentarios = listaComentario.size();
 		}
 		return totalComentarios;
@@ -328,7 +319,7 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public Integer getTotalEncaminhamentos() {
-		if (CollectionUtils.isNotEmpty(listaEncaminhamentoProposicao)){
+		if (CollectionUtils.isNotEmpty(listaEncaminhamentoProposicao)) {
 			totalEncaminhamentos = listaEncaminhamentoProposicao.size();
 		}
 		return totalEncaminhamentos;

@@ -20,6 +20,9 @@ public class Materia {
 	@XStreamAlias("AutoresPrincipais")
 	AutoresPrincipais autoresPrincipais;
 
+	@XStreamAlias("Relatoria")
+	Relatoria relatoria;
+
 	@XStreamAlias("SituacaoAtual")
 	SituacaoAtual situacaoAtual;
 
@@ -29,9 +32,35 @@ public class Materia {
 		return identificacaoMateria.toString();
 	}
 
+	public String getRelator() {
+		if (relatoria != null && relatoria.relatores != null && !relatoria.relatores.isEmpty()) {
+			return relatoria.relatores.get(0).tratamento + " " + relatoria.relatores.get(0).nome;
+		}
+		return "";
+	}
+	@XStreamAlias("Ano")
+	String ano;
+	@XStreamAlias("Codigo")
+	Integer codigo;
+	@XStreamAlias("Numero")
+	String numero;
+	@XStreamAlias("Subtipo")
+	String subtipo;
 	public Proposicao toProposicao() {
 		Proposicao p = new Proposicao();
+		if(identificacaoMateria==null){
+			identificacaoMateria=new IdentificacaoMateria();
+			identificacaoMateria.AnoMateria=ano;
+			identificacaoMateria.CodigoMateria=codigo;
+			identificacaoMateria.NumeroMateria=numero;
+			identificacaoMateria.SiglaSubtipoMateria=subtipo;
+			System.err.println("identificacaoMateria nula "+this);
+		}
+		p.setIdProposicao(identificacaoMateria.CodigoMateria);
+		p.setNumero(identificacaoMateria.NumeroMateria);
 		p.setAno(identificacaoMateria.AnoMateria);
+		p.setTipo(identificacaoMateria.SiglaSubtipoMateria);
+		
 		if (autoresPrincipais != null && !autoresPrincipais.autores.isEmpty()) {
 			p.setAutor(autoresPrincipais.autores.get(0).NomeAutor);
 		}
@@ -48,12 +77,12 @@ public class Materia {
 			p.setComissao(situacaoAtual.autuacoes.autuacoes.get(0).Local.SiglaLocal);
 			p.setSituacao(situacaoAtual.autuacoes.autuacoes.get(0).Situacao.SiglaSituacao);
 		}
-
+		if(DadosBasicosMateria!=null){
 		p.setEmenta(DadosBasicosMateria.EmentaMateria);
-		p.setIdProposicao(identificacaoMateria.CodigoMateria);
-		p.setNumero(identificacaoMateria.NumeroMateria);
+		}
+		
 
-		p.setTipo(identificacaoMateria.SiglaSubtipoMateria);
+		
 		p.setOrigem(Origem.SENADO);
 		p.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate=" + p.getIdProposicao());
 		return p;
@@ -66,6 +95,8 @@ public class Materia {
 		xstream.processAnnotations(DadosBasicosMateria.class);
 		xstream.processAnnotations(AutoresPrincipais.class);
 		xstream.processAnnotations(AutorPrincipal.class);
+		Relatoria.configXstream(xstream);
+		
 		SituacaoAtual.configXstream(xstream);
 
 	}

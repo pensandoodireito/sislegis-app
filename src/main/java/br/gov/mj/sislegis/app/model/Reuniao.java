@@ -13,6 +13,9 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -33,12 +36,20 @@ public class Reuniao extends AbstractEntity {
 	@Temporal(TemporalType.DATE)
 	private Date data;
 
-	@JsonIgnore
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "reuniao")
-	private Set<ReuniaoProposicao> listaReuniaoProposicoes = new HashSet<ReuniaoProposicao>();
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinTable(name = "reuniao_proposicao", joinColumns = { @JoinColumn(name = "reuniao_id") })
+	private Set<Proposicao> proposicoes = new HashSet<Proposicao>();
 
 	public Long getId() {
 		return this.id;
+	}
+
+	public void addProposicao(Proposicao proposicao) {
+		proposicoes.add(proposicao);
+	}
+
+	public Set<Proposicao> getProposicoes() {
+		return proposicoes;
 	}
 
 	public void setId(final Long id) {
@@ -51,14 +62,6 @@ public class Reuniao extends AbstractEntity {
 
 	public void setData(Date data) {
 		this.data = data;
-	}
-
-	public Set<ReuniaoProposicao> getListaReuniaoProposicoes() {
-		return listaReuniaoProposicoes;
-	}
-
-	public void setListaReuniaoProposicoes(Set<ReuniaoProposicao> listaReuniaoProposicoes) {
-		this.listaReuniaoProposicoes = listaReuniaoProposicoes;
 	}
 
 	@Override

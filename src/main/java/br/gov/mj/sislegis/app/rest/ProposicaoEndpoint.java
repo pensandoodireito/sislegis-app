@@ -20,6 +20,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import org.jboss.resteasy.annotations.cache.Cache;
@@ -93,13 +94,13 @@ public class ProposicaoEndpoint {
 	@Path("/salvarProposicoes")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response salvarProposicoes(List<Proposicao> listaProposicoesSelecionados) {
-		try {
-			proposicaoService.salvarListaProposicao(listaProposicoesSelecionados);
-		} catch (EJBTransactionRolledbackException e) {
-			return Response.status(Response.Status.CONFLICT).build();
-		}
-		return Response.noContent().build();
-
+//		try {
+//			proposicaoService.salvarListaProposicao(listaProposicoesSelecionados);
+//		} catch (EJBTransactionRolledbackException e) {
+//			return Response.status(Response.Status.CONFLICT).build();
+//		}
+//		return Response.noContent().build();
+		return Response.status(Status.SERVICE_UNAVAILABLE).build();
 	}
 
 	@POST

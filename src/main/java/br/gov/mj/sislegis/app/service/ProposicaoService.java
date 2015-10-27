@@ -10,7 +10,9 @@ import javax.ejb.Local;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 
 
@@ -25,13 +27,14 @@ public interface ProposicaoService extends Service<Proposicao> {
 
 	Proposicao detalharProposicaoSenadoWS(Long id) throws Exception;
 
-	void salvarListaProposicao(List<Proposicao> lista);
+	//void salvarListaProposicao(List<Proposicao> lista);
+	
 
 	List<Proposicao> listarTodos();
 
 	Proposicao buscarPorId(Integer id);
 
-	List<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao);
+	Collection<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao);
 
 	List<Proposicao> buscarPorSufixo(String sufixo);
 
@@ -94,4 +97,11 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @return
 	 */
 	List<Proposicao> listProposicoesSeguidas();
+
+	PautaReuniaoComissao savePautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao);
+
+
+	PautaReuniaoComissao findPautaReuniao(String comissao, Date date, Integer codigoReuniao);
+
+	
 }
