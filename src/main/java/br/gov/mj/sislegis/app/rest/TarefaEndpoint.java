@@ -96,9 +96,9 @@ public class TarefaEndpoint {
 
 	@POST
 	@Path("/finalizar")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response finalizar(Long idTarefa, String descricaoComentario){
-//		tarefaService.finalizar(idTarefa, descricaoComentario);
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Response finalizar(@FormParam("idTarefa") Long idTarefa, @FormParam("descricaoComentario") String descricaoComentario){
+		tarefaService.finalizar(idTarefa, descricaoComentario);
 		return Response.ok().build();
 	}
 }

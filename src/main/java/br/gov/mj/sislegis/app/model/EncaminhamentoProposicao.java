@@ -30,7 +30,7 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 
-	private String descricao;
+	private String detalhes;
 
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private Comentario comentario;
@@ -75,12 +75,12 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 		return id;
 	}
 
-	public String getDescricao() {
-		return descricao;
+	public String getDetalhes() {
+		return detalhes;
 	}
 
-	public void setDescricao(String descricao) {
-		this.descricao = descricao;
+	public void setDetalhes(String descricao) {
+		this.detalhes = descricao;
 	}
 
 	public Proposicao getProposicao() {
