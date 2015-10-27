@@ -31,6 +31,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.commons.collections.CollectionUtils;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -109,6 +110,10 @@ public class Proposicao extends AbstractEntity {
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	private Usuario responsavel;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "proposicao")
+	@OrderBy("pautaReuniaoComissao.data")
+	private SortedSet<ProposicaoPautaComissao> pautasComissoes = new TreeSet<ProposicaoPautaComissao>();
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "proposicao")
 	private Set<TagProposicao> tags;
@@ -408,4 +413,7 @@ public class Proposicao extends AbstractEntity {
 		this.situacao = siglaSituacao;
 	}
 
+	public SortedSet<ProposicaoPautaComissao> getPautasComissoes() {
+		return pautasComissoes;
+	}
 }

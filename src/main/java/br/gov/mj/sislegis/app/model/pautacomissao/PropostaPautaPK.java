@@ -1,10 +1,8 @@
 package br.gov.mj.sislegis.app.model.pautacomissao;
 
 import java.io.Serializable;
-import java.util.Date;
 
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
 
 public class PropostaPautaPK implements Serializable {
 	/**
@@ -40,6 +38,15 @@ public class PropostaPautaPK implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (proposicaoId == null) {
+			return false;
+		}
+		if (pautaReuniaoComissaoId == null) {
+			return false;
+		}
 		if (obj instanceof PropostaPautaPK) {
 			return proposicaoId == ((PropostaPautaPK) obj).proposicaoId
 					&& pautaReuniaoComissaoId == ((PropostaPautaPK) obj).pautaReuniaoComissaoId;

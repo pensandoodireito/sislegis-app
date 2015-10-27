@@ -547,16 +547,21 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 						proposicaoDb = detalharProposicaoSenadoWS((long) proposicao.getIdProposicao());
 						break;
 					}
-					save(proposicaoDb);
+					proposicaoDb = save(proposicaoDb);
+					System.out.println("b " + proposicaoDb);
 					proposicaoPautaComissao.setProposicao(proposicaoDb);
 				} else {
+					System.out.println("a " + proposicaoDb);
 					proposicaoPautaComissao.setProposicao(proposicaoDb);
 				}
+			} else {
+//				System.out.println("Proposicao tem id " + proposicaoPautaComissao.getProposicao());
+//				proposicaoPautaComissao.setProposicao(proposicaoPautaComissao.getProposicao());
 			}
 			proposicaoPautaComissao.setPautaReuniaoComissao(pautaReuniaoComissao);
-
-			System.out.println(proposicaoPautaComissao.getPautaReuniaoComissao() + " "
-					+ proposicaoPautaComissao.getProposicao());
+//
+//			System.out.println(proposicaoPautaComissao.getPautaReuniaoComissao().getId() + " | "
+//					+ proposicaoPautaComissao.getProposicao().getId());
 			getEntityManager().persist(proposicaoPautaComissao);
 		}
 

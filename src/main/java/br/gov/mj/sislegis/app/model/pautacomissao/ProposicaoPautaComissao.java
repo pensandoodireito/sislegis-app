@@ -61,6 +61,9 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 	}
 
 	public Proposicao getProposicao() {
+		if (proposicao != null && proposicao.getId() != proposicaoId) {
+			proposicaoId = proposicao.getId();
+		}
 		return proposicao;
 	}
 
@@ -73,6 +76,9 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 	}
 
 	public PautaReuniaoComissao getPautaReuniaoComissao() {
+		if (pautaReuniaoComissao != null && pautaReuniaoComissao.getId() != pautaReuniaoComissaoId) {
+			pautaReuniaoComissaoId = pautaReuniaoComissao.getId();
+		}
 		return pautaReuniaoComissao;
 	}
 
