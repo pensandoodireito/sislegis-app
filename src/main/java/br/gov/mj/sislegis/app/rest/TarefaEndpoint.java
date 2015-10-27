@@ -93,4 +93,12 @@ public class TarefaEndpoint {
 		tarefaService.marcarComoVisualizadas(idTarefas);
 		return Response.noContent().build();
 	}
+
+	@POST
+	@Path("/finalizar")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response finalizar(Long idTarefa, String descricaoComentario){
+//		tarefaService.finalizar(idTarefa, descricaoComentario);
+		return Response.ok().build();
+	}
 }

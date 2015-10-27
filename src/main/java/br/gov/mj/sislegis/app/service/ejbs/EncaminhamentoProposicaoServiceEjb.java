@@ -1,6 +1,7 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
 import br.gov.mj.sislegis.app.enumerated.TipoTarefa;
+import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
 import br.gov.mj.sislegis.app.model.Tarefa;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
@@ -98,6 +99,29 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 		query.setParameter("idProposicao", idProposicao);
 		BigInteger total = (BigInteger) query.getSingleResult();
 		return total.intValue();
+	}
+
+	@Override
+	public void finalizar(Long idEncaminhamentoProposicao, String descricaoComentario) {
+		EncaminhamentoProposicao encaminhamento = findById(idEncaminhamentoProposicao);
+		encaminhamento.setFinalizado(true);
+
+		Comentario comentario = new Comentario();
+		comentario.setAutor(encaminhamento.getResponsavel());
+		comentario.setDataCriacao(new Date());
+		comentario.setDescricao(descricaoComentario);
+		comentario.setProposicao(encaminhamento.getProposicao());
+
+		encaminhamento.setComentario(comentario);
+
+		Tarefa tarefa = tarefaService.buscarPorEncaminhamentoProposicaoId(idEncaminhamentoProposicao);
+		if (tarefa != null) {
+			tarefa.setFinalizada(true);
+			tarefa.setComentarioFinalizacao(comentario);
+			tarefaService.save(tarefa); // tarefa salva tambem o encaminhamento (cascade)
+		} else{
+			save(encaminhamento);
+		}
 	}
 
 }

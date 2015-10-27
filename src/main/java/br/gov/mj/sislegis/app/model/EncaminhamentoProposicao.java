@@ -30,6 +30,8 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 
+	private String descricao;
+
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private Comentario comentario;
 
@@ -45,6 +47,8 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 	@Column
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date dataHoraLimite;
+
+	private Boolean finalizado;
 
 	public Comentario getComentario() {
 		return comentario;
@@ -69,6 +73,14 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 	@Override
 	public Long getId() {
 		return id;
+	}
+
+	public String getDescricao() {
+		return descricao;
+	}
+
+	public void setDescricao(String descricao) {
+		this.descricao = descricao;
 	}
 
 	public Proposicao getProposicao() {
@@ -116,5 +128,13 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 		if (dataHoraLimite != null)
 			result += ", dataHoraLimite: " + dataHoraLimite;
 		return result;
+	}
+
+	public Boolean isFinalizado() {
+		return finalizado;
+	}
+
+	public void setFinalizado(Boolean finalizado) {
+		this.finalizado = finalizado;
 	}
 }

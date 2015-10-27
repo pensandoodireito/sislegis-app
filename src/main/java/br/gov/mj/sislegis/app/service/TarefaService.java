@@ -11,5 +11,6 @@ public interface TarefaService extends Service<Tarefa> {
 	List<Tarefa> buscarPorUsuario(Long idUsuario);
 	Tarefa buscarPorEncaminhamentoProposicaoId(Long idEncaminhamentoProposicao);
 	void marcarComoVisualizadas(List<Long> idTarefas);
+	void finalizar(Long idTarefa, String comentarioFinalizacao);
 
 }

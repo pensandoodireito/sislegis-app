@@ -1,5 +1,6 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
+import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.Tarefa;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.TarefaService;
@@ -9,6 +10,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import java.util.Date;
 import java.util.List;
 
 @Stateless
@@ -85,6 +87,24 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 			query.setParameter("id", id);
 			query.executeUpdate();
 		}
+	}
+
+	@Override
+	public void finalizar(Long idTarefa, String comentarioFinalizacao) {
+		Tarefa tarefa = findById(idTarefa);
+		tarefa.setFinalizada(true);
+		tarefa.getEncaminhamentoProposicao().setFinalizado(true);
+
+		Comentario comentario = new Comentario();
+		comentario.setProposicao(tarefa.getEncaminhamentoProposicao().getProposicao());
+		comentario.setDescricao(comentarioFinalizacao);
+		comentario.setDataCriacao(new Date());
+		comentario.setAutor(tarefa.getUsuario());
+
+		tarefa.setComentarioFinalizacao(comentario);
+		tarefa.getEncaminhamentoProposicao().setComentario(comentario);
+
+		save(tarefa);
 	}
 
 }

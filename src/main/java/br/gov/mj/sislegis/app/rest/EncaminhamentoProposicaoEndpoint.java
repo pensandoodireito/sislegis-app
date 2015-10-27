@@ -75,4 +75,11 @@ public class EncaminhamentoProposicaoEndpoint {
 		return results;
 	}
 
+	@POST
+	@Path("/finalizar")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response finalizar(Long idEncaminhamentoProposicao, String descricaoComentario){
+		service.finalizar(idEncaminhamentoProposicao, descricaoComentario);
+		return Response.noContent().build();
+	}
 }

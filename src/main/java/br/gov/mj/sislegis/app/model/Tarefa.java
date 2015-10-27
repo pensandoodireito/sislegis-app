@@ -28,7 +28,7 @@ public class Tarefa extends AbstractEntity {
 
 	private boolean isFinalizada;
 
-	@OneToOne(fetch = FetchType.EAGER)
+	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	private EncaminhamentoProposicao encaminhamentoProposicao;
 
 	@ManyToOne(fetch = FetchType.EAGER)
@@ -38,6 +38,9 @@ public class Tarefa extends AbstractEntity {
 	private Proposicao proposicao;
 
 	private boolean isVisualizada;
+
+	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	private Comentario comentarioFinalizacao;
 
 	public Long getId() {
 		return this.id;
@@ -103,4 +106,11 @@ public class Tarefa extends AbstractEntity {
 		this.isVisualizada = isVisualizada;
 	}
 
+	public Comentario getComentarioFinalizacao() {
+		return comentarioFinalizacao;
+	}
+
+	public void setComentarioFinalizacao(Comentario comentarioFinalizacao) {
+		this.comentarioFinalizacao = comentarioFinalizacao;
+	}
 }
