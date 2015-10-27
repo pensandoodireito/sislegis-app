@@ -34,9 +34,6 @@ public class Tarefa extends AbstractEntity {
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Usuario usuario;
 
-	@Transient
-	private Proposicao proposicao;
-
 	private boolean isVisualizada;
 
 	public Long getId() {
@@ -85,14 +82,6 @@ public class Tarefa extends AbstractEntity {
 
 	public void setUsuario(Usuario usuario) {
 		this.usuario = usuario;
-	}
-
-	public Proposicao getProposicao() {
-		return proposicao;
-	}
-
-	public void setProposicao(Proposicao proposicao) {
-		this.proposicao = proposicao;
 	}
 
 	public boolean isVisualizada() {

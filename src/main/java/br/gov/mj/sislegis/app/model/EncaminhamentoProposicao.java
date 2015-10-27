@@ -75,8 +75,13 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 		if (!Objects.isNull(this.proposicao)) {
 			Proposicao p = new Proposicao();
 			p.setId(proposicao.getId());
+			p.setEmenta(proposicao.getEmenta());
+			p.setTipo(proposicao.getTipo());
+			p.setNumero(proposicao.getNumero());
+			p.setAno(proposicao.getAno());
 			this.proposicao = p;
 		}
+
 		return proposicao;
 	}
 
