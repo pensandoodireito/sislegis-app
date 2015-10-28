@@ -55,12 +55,6 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 				"SELECT t FROM Tarefa t WHERE t.usuario.id = :idUsuario", Tarefa.class);
 		findByIdQuery.setParameter("idUsuario", idUsuario);
 		List<Tarefa> resultList = findByIdQuery.getResultList();
-
-		for (Tarefa tarefa : resultList) {
-			if (tarefa.getEncaminhamentoProposicao() != null) {
-				tarefa.setProposicao(tarefa.getEncaminhamentoProposicao().getProposicao());
-			}
-		}
 		
 		return resultList;
 	}
