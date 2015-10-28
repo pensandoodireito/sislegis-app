@@ -16,7 +16,9 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import br.gov.mj.sislegis.app.rest.serializers.CompactProposicaoSerializer;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
 @XmlRootElement
@@ -71,17 +73,8 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 		return id;
 	}
 
+	@JsonSerialize(using = CompactProposicaoSerializer.class)
 	public Proposicao getProposicao() {
-		if (!Objects.isNull(this.proposicao)) {
-			Proposicao p = new Proposicao();
-			p.setId(proposicao.getId());
-			p.setEmenta(proposicao.getEmenta());
-			p.setTipo(proposicao.getTipo());
-			p.setNumero(proposicao.getNumero());
-			p.setAno(proposicao.getAno());
-			this.proposicao = p;
-		}
-
 		return proposicao;
 	}
 
