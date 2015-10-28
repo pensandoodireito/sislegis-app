@@ -27,7 +27,7 @@ public class EncaminhamentoProposicaoEndpoint {
 		EncaminhamentoProposicao savedEntity = service.salvarEncaminhamentoProposicao(entity, referer);
 		
 		return Response.created(
-				UriBuilder.fromResource(EncaminhamentoEndpoint.class)
+				UriBuilder.fromResource(TipoEncaminhamentoEndpoint.class)
 						.path(String.valueOf(savedEntity.getId())).build()).build();
 	}
 

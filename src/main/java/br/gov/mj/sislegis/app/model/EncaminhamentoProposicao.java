@@ -3,17 +3,7 @@ package br.gov.mj.sislegis.app.model;
 import java.util.Date;
 import java.util.Objects;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -39,7 +29,8 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 	private Comentario comentarioFinalizacao;
 
 	@OneToOne(fetch = FetchType.EAGER)
-	private Encaminhamento encaminhamento;
+	@JoinColumn(name = "tipo_encaminhamento_id")
+	private TipoEncaminhamento tipoEncaminhamento;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Proposicao proposicao;
@@ -69,12 +60,12 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 		this.comentarioFinalizacao = comentarioFinalizacao;
 	}
 
-	public Encaminhamento getEncaminhamento() {
-		return encaminhamento;
+	public TipoEncaminhamento getTipoEncaminhamento() {
+		return tipoEncaminhamento;
 	}
 
-	public void setEncaminhamento(Encaminhamento encaminhamento) {
-		this.encaminhamento = encaminhamento;
+	public void setTipoEncaminhamento(TipoEncaminhamento tipoEncaminhamento) {
+		this.tipoEncaminhamento = tipoEncaminhamento;
 	}
 
 	public void setId(Long id) {
@@ -130,8 +121,8 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 			result += "id: " + id;
 		if (comentario != null)
 			result += ", comentario: " + comentario;
-		if (encaminhamento != null)
-			result += ", encaminhamento: " + encaminhamento;
+		if (tipoEncaminhamento != null)
+			result += ", tipoEncaminhamento: " + tipoEncaminhamento;
 		if (proposicao != null)
 			result += ", proposicao: " + proposicao;
 		if (responsavel != null)

@@ -26,17 +26,17 @@ insert into Posicionamento (nome, id) values ('Previamente Não é tema do MJ', 
 insert into Posicionamento (nome, id) values ('Seguir pela Rejeição', nextval ('hibernate_sequence'));
 
 -- Encaminhamentos
-insert into Encaminhamento (nome, id) values ('Agendar Reunião', nextval ('hibernate_sequence'));
-insert into Encaminhamento (nome, id) values ('Apenas Monitorar', nextval ('hibernate_sequence'));
-insert into Encaminhamento (nome, id) values ('Cobrar Posicionamento', nextval ('hibernate_sequence'));
-insert into Encaminhamento (nome, id) values ('Despachar Nota Técnica com o Secretário', nextval ('hibernate_sequence'));
-insert into Encaminhamento (nome, id) values ('Elaborar Nota Técnica', nextval ('hibernate_sequence'));
-insert into Encaminhamento (nome, id) values ('Elaborar VTS', nextval ('hibernate_sequence'));
-insert into Encaminhamento (nome, id) values ('Enviar E-mail', nextval ('hibernate_sequence'));
-insert into Encaminhamento (nome, id) values ('Fazer contato telefônico', nextval ('hibernate_sequence'));
-insert into Encaminhamento (nome, id) values ('Incluir na Pauta Prioritária', nextval ('hibernate_sequence'));
-insert into Encaminhamento (nome, id) values ('Pedir Retirada de Pauta', nextval ('hibernate_sequence'));
-insert into Encaminhamento (nome, id) values ('Retirar da Pauta do MJ', nextval ('hibernate_sequence'));
+insert into tipo_encaminhamento (nome, id) values ('Agendar Reunião', nextval ('hibernate_sequence'));
+insert into tipo_encaminhamento (nome, id) values ('Apenas Monitorar', nextval ('hibernate_sequence'));
+insert into tipo_encaminhamento (nome, id) values ('Cobrar Posicionamento', nextval ('hibernate_sequence'));
+insert into tipo_encaminhamento (nome, id) values ('Despachar Nota Técnica com o Secretário', nextval ('hibernate_sequence'));
+insert into tipo_encaminhamento (nome, id) values ('Elaborar Nota Técnica', nextval ('hibernate_sequence'));
+insert into tipo_encaminhamento (nome, id) values ('Elaborar VTS', nextval ('hibernate_sequence'));
+insert into tipo_encaminhamento (nome, id) values ('Enviar E-mail', nextval ('hibernate_sequence'));
+insert into tipo_encaminhamento (nome, id) values ('Fazer contato telefônico', nextval ('hibernate_sequence'));
+insert into tipo_encaminhamento (nome, id) values ('Incluir na Pauta Prioritária', nextval ('hibernate_sequence'));
+insert into tipo_encaminhamento (nome, id) values ('Pedir Retirada de Pauta', nextval ('hibernate_sequence'));
+insert into tipo_encaminhamento (nome, id) values ('Retirar da Pauta do MJ', nextval ('hibernate_sequence'));
 
 -- Tags
 insert into Tag (id) values('Ministério');
