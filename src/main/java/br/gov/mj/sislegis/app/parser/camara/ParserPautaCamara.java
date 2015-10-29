@@ -14,6 +14,7 @@ import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.ParserFetcher;
+import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
@@ -114,7 +115,7 @@ public class ParserPautaCamara {
 				ptemp.setSigla(pautaProposicao.sigla);
 				ProposicaoPautaComissao ppc = new ProposicaoPautaComissao(pautaReuniaoComissao, ptemp);
 				ppc.setOrdemPauta(pautaProposicao.numOrdemApreciacao);
-				ppc.setRelator(pautaProposicao.relator);
+				ppc.setRelator(pautaProposicao.getRelator());
 				pautaReuniaoComissao.addProposicaoPauta(ppc);
 			}
 			if (pautaReuniaoComissao.getProposicoesDaPauta().size() > 0) {
@@ -178,5 +179,12 @@ class ProposicaoPautaComissaoWrapper {
 	String sigla;
 	String textoParecerRelator;
 	String ementa;
+
+	public String getRelator() {
+		if (relator == null || relator.length() == 0) {
+			return ProposicaoSearcher.SEM_RELATOR_DEFINIDO;
+		}
+		return relator;
+	}
 
 }

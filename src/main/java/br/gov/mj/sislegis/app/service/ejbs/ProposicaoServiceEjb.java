@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -313,27 +312,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 							"SELECT * FROM Proposicao p where  p.id in (select proposicao_id from reuniaoproposicao r where  r.reuniao_id=:rid)",
 							Proposicao.class);
 			query.setParameter("rid", reuniao.getId());
-			System.out.println("entrou" + reuniao.getId());
+
 			proposicoes.addAll(query.getResultList());
 		}
-		// if (!Objects.isNull(reuniao)) {
-		// Set<ReuniaoProposicao> listaReuniaoProposicoes =
-		// reuniao.getListaReuniaoProposicoes();
-		// // Copiamos alguns valores de ReuniaoProposicao para Proposicao,
-		// // afim de retornar somente uma entidade com alguns valores
-		// // transientes
-		// for (ReuniaoProposicao reuniaoProposicao : listaReuniaoProposicoes) {
-		// Proposicao proposicao = reuniaoProposicao.getProposicao();
-		// proposicao.setComissao(reuniaoProposicao.getSiglaComissao());
-		// proposicao.setSeqOrdemPauta(reuniaoProposicao.getSeqOrdemPauta());
-		// proposicao.setLinkPauta(reuniaoProposicao.getLinkPauta());
-		// proposicao.setReuniao(reuniaoProposicao.getReuniao());
-		//
-		// popularTotalComentariosEncaminhamentos(proposicao);
-		//
-		// proposicoes.add(proposicao);
-		// }
-		// }
 
 		return proposicoes;
 	}
@@ -547,14 +528,39 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	@Override
 	public PautaReuniaoComissao savePautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao) throws IOException {
 		// check se proposicoes existem
-		SortedSet<ProposicaoPautaComissao> sortedSet = pautaReuniaoComissao.getProposicoesDaPauta();
-		getEntityManager().persist(pautaReuniaoComissao);
-		for (Iterator<ProposicaoPautaComissao> iterator = sortedSet.iterator(); iterator.hasNext();) {
+		PautaReuniaoComissao prc = findPautaReuniao(pautaReuniaoComissao.getComissao(), pautaReuniaoComissao.getData(),
+				pautaReuniaoComissao.getCodigoReuniao());
+		Set<ProposicaoPautaComissao> additionalProposicoes = new HashSet<ProposicaoPautaComissao>(
+				pautaReuniaoComissao.getProposicoesDaPauta());
+		boolean existing = false;
+		if (prc != null) {
+			existing = true;
+			pautaReuniaoComissao = prc;
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+					"Pauta reuniao ja existia " + pautaReuniaoComissao.getProposicoesDaPauta().size());
+		} else {
+			getEntityManager().persist(pautaReuniaoComissao);
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+					"Criou pauta reuniao " + pautaReuniaoComissao.getId());
+		}
+
+		for (Iterator<ProposicaoPautaComissao> iterator = additionalProposicoes.iterator(); iterator.hasNext();) {
 			ProposicaoPautaComissao proposicaoPautaComissao = (ProposicaoPautaComissao) iterator.next();
+			if (existing) {
+				if (pautaReuniaoComissao.getProposicoesDaPauta().contains(proposicaoPautaComissao)) {
+
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+							"Ja continha " + proposicaoPautaComissao.getProposicao());
+					continue;
+				}
+			}
+
 			Proposicao proposicao = proposicaoPautaComissao.getProposicao();
 			if (proposicaoPautaComissao.getProposicao().getId() == null) {
 				Proposicao proposicaoDb = findProposicaoBy(proposicao.getOrigem(), proposicao.getIdProposicao());
 				if (proposicaoDb == null) {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+							"Proposicao nao existia no banco " + proposicao.getIdProposicao());
 					// TEM Que buscar dos WS
 					switch (proposicao.getOrigem()) {
 					case CAMARA:
@@ -570,27 +576,25 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 						break;
 					}
 					proposicaoDb = save(proposicaoDb);
-					System.out.println("b " + proposicaoDb);
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+							"Proposicao criada " + proposicaoDb.getId());
 					proposicaoPautaComissao.setProposicao(proposicaoDb);
 				} else {
-					System.out.println("a " + proposicaoDb);
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "Proposicao ja existia no banco ");
 					proposicaoPautaComissao.setProposicao(proposicaoDb);
 				}
 			} else {
-				// System.out.println("Proposicao tem id " +
-				// proposicaoPautaComissao.getProposicao());
-				// proposicaoPautaComissao.setProposicao(proposicaoPautaComissao.getProposicao());
-				// TODO tenho q forcar o id
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+						"Proposicao ja persistida " + proposicaoPautaComissao.getProposicao());
+
 				proposicaoPautaComissao.getProposicao();
 			}
 			proposicaoPautaComissao.setPautaReuniaoComissao(pautaReuniaoComissao);
-			//
-			// System.out.println(proposicaoPautaComissao.getPautaReuniaoComissao().getId()
-			// + " | "
-			// + proposicaoPautaComissao.getProposicao().getId());
+			
 			getEntityManager().persist(proposicaoPautaComissao);
+			pautaReuniaoComissao.addProposicaoPauta(proposicaoPautaComissao);
 		}
-
+		getEntityManager().merge(pautaReuniaoComissao);
 		return pautaReuniaoComissao;
 
 	}
@@ -602,7 +606,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 		List<PautaReuniaoComissao> props = q.getResultList();
 		if (props.isEmpty()) {
-			System.out.println("nenhum encontrado com " + codigoReuniao);
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "nenhuma pauta encontrada " + codigoReuniao);
+
 			return null;
 		} else {
 			if (props.size() > 1) {
@@ -646,20 +651,33 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	public void adicionaProposicoesReuniao(Set<PautaReuniaoComissao> pautaReunioes, Reuniao reuniao) throws IOException {
 		if (reuniao.getId() == null) {
 			reuniao = reuniaoService.save(reuniao);
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+					"Criou reuniao para o dia " + reuniao.getData());
 		}
-		System.out.println("reuniao " + reuniao.getId());
+		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+				"Salvando " + pautaReunioes.size() + " pautas e suas proposicoes");
 		for (Iterator<PautaReuniaoComissao> iterator = pautaReunioes.iterator(); iterator.hasNext();) {
 
 			PautaReuniaoComissao prc = iterator.next();
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "Criando pautareuniao na base");
 
 			prc = savePautaReuniaoComissao(prc);
-			System.out.println("prc " + prc.getId() + " " + prc.getCodigoReuniao());
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+					"Associando suas proposicoes a reuniao, ha: " + prc.getProposicoesDaPauta().size());
 			for (Iterator<ProposicaoPautaComissao> iterator2 = prc.getProposicoesDaPauta().iterator(); iterator2
 					.hasNext();) {
+
 				ProposicaoPautaComissao ppc = iterator2.next();
-				Proposicao proposicao = findById(ppc.getProposicaoId());
-				System.out.println("proposicao " + proposicao.getId());
-				associateReuniaoProposicao(reuniao, proposicao);
+				if (reuniaoProposicaoService.findById(reuniao.getId(), ppc.getProposicaoId()) == null) {
+					Proposicao proposicao = findById(ppc.getProposicaoId());
+
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+							"Associando " + proposicao + " " + reuniao);
+					associateReuniaoProposicao(reuniao, proposicao);
+				} else {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+							"Ja estava associada " + ppc.getProposicaoId() + " " + reuniao);
+				}
 			}
 
 		}
@@ -680,6 +698,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	@Override
 	public PautaReuniaoComissao findPautaReuniao(String comissao, Date date, Integer codigoReuniao) {
+		Query q = em.createNamedQuery("findByComissaoDataOrigem").setParameter("comissao", comissao)
+				.setParameter("data", date).setParameter("codigoReuniao", codigoReuniao);
+		List<PautaReuniaoComissao> res = q.getResultList();
+		if (!res.isEmpty()) {
+			return res.get(0);
+		}
 
 		return null;
 

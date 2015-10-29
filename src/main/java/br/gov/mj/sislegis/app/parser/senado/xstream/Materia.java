@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 import com.thoughtworks.xstream.XStream;
@@ -43,12 +44,14 @@ public class Materia {
 				desc += relator.nome;
 			}
 			return desc;
+		} else if (nomeRelator != null && nomeRelator.length() > 0) {
+			return nomeRelator;
 		}
-		return "";
+		return ProposicaoSearcher.SEM_RELATOR_DEFINIDO;
 	}
 
 	// Cada webservice tem uma estrutura, a abaixo é para a pauta. Acima é para
-	// proposicao direto
+	// proposicao direto, o mais abaixo é para o ws de reuniao do pleanrio
 	@XStreamAlias("autoria")
 	Autoria autoria;
 
@@ -67,14 +70,39 @@ public class Materia {
 	@XStreamAlias("Ementa")
 	String ementa;
 
+	@XStreamAlias("AnoMateria")
+	String anoMateria;
+	@XStreamAlias("NumeroMateria")
+	String numeroMateria;
+	@XStreamAlias("SiglaMateria")
+	String siglaMateria;
+	@XStreamAlias("CodigoMateria")
+	Integer codigoMateria;
+	@XStreamAlias("NomeRelator")
+	String nomeRelator;
+	@XStreamAlias("SequenciaOrdem")
+	Integer sequenciaOrdem;
+
+	public Integer getSequenciaOrdem() {
+		return sequenciaOrdem;
+	}
+
 	public Proposicao toProposicao() {
 		Proposicao p = new Proposicao();
 		if (identificacaoMateria == null) {
 			identificacaoMateria = new IdentificacaoMateria();
-			identificacaoMateria.AnoMateria = ano;
-			identificacaoMateria.CodigoMateria = codigo;
-			identificacaoMateria.NumeroMateria = numero;
-			identificacaoMateria.SiglaSubtipoMateria = subtipo;
+			if (ano == null) {
+				identificacaoMateria.AnoMateria = anoMateria;
+				identificacaoMateria.NumeroMateria = numeroMateria;
+				identificacaoMateria.SiglaSubtipoMateria = siglaMateria;
+				identificacaoMateria.CodigoMateria = codigoMateria;
+			} else {
+				identificacaoMateria.AnoMateria = ano;
+				identificacaoMateria.CodigoMateria = codigo;
+				identificacaoMateria.NumeroMateria = numero;
+				identificacaoMateria.SiglaSubtipoMateria = subtipo;
+			}
+
 		}
 		p.setIdProposicao(identificacaoMateria.CodigoMateria);
 		p.setNumero(identificacaoMateria.NumeroMateria);

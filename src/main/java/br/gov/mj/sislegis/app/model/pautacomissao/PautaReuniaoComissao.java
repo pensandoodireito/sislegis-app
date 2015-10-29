@@ -27,7 +27,10 @@ import br.gov.mj.sislegis.app.model.Comissao;
 @Entity
 @Table(name = "PautaReuniaoComissao", uniqueConstraints = @UniqueConstraint(columnNames = { "comissao", "data",
 		"codigoReuniao" }))
-@NamedQueries({ @NamedQuery(name = "findByCodigoReuniao", query = "select p from PautaReuniaoComissao p where p.codigoReuniao=:codigoReuniao")
+@NamedQueries(
+		{ 
+			@NamedQuery(name = "findByCodigoReuniao", query = "select p from PautaReuniaoComissao p where p.codigoReuniao=:codigoReuniao"),
+			@NamedQuery(name = "findByComissaoDataOrigem", query = "select p from PautaReuniaoComissao p where p.comissao=:comissao and p.data=:data and p.codigoReuniao=:codigoReuniao  ")
 
 })
 public class PautaReuniaoComissao extends AbstractEntity implements Serializable, Comparable<PautaReuniaoComissao> {
@@ -162,15 +165,15 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 
 	@Override
 	public int compareTo(PautaReuniaoComissao o) {
-		if(o==null){
+		if (o == null) {
 			System.err.println("O nulo");
 			return 1;
 		}
-		if(o.data==null){
+		if (o.data == null) {
 			System.err.println("O.data nulo");
 			return 1;
 		}
-		if(data==null){
+		if (data == null) {
 			System.err.println("data nulo");
 			return 1;
 		}
