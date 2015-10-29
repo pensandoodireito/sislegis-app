@@ -34,10 +34,23 @@ public class Materia {
 
 	public String getRelator() {
 		if (relatoria != null && relatoria.relatores != null && !relatoria.relatores.isEmpty()) {
-			return relatoria.relatores.get(0).tratamento + " " + relatoria.relatores.get(0).nome;
+			Relator relator = relatoria.relatores.get(0);
+			String desc = "";
+			if (relator.tratamento != null && relator.tratamento.length() > 0) {
+				desc = relator.tratamento + " ";
+			}
+			if (relator.nome != null && relator.nome.length() > 0) {
+				desc += relator.nome;
+			}
+			return desc;
 		}
 		return "";
 	}
+
+	// Cada webservice tem uma estrutura, a abaixo é para a pauta. Acima é para
+	// proposicao direto
+	@XStreamAlias("autoria")
+	Autoria autoria;
 
 	@XStreamAlias("Situacoes")
 	Situacoes situacoes;
@@ -62,7 +75,6 @@ public class Materia {
 			identificacaoMateria.CodigoMateria = codigo;
 			identificacaoMateria.NumeroMateria = numero;
 			identificacaoMateria.SiglaSubtipoMateria = subtipo;
-			System.err.println("identificacaoMateria nula " + this);
 		}
 		p.setIdProposicao(identificacaoMateria.CodigoMateria);
 		p.setNumero(identificacaoMateria.NumeroMateria);
@@ -70,12 +82,16 @@ public class Materia {
 		p.setTipo(identificacaoMateria.SiglaSubtipoMateria);
 
 		if (autoresPrincipais != null && !autoresPrincipais.autores.isEmpty()) {
-			p.setAutor(autoresPrincipais.autores.get(0).NomeAutor);
+			AutorPrincipal autor = autoresPrincipais.autores.get(0);
+			p.setAutor(autor.getDescricao());
+		} else if (autoria != null && autoria.Autor != null) {
+			p.setAutor(autoria.Autor.getDescricao());
 		}
 		p.setOrigem(Origem.SENADO);
 		if (situacaoAtual == null) {
-			System.out.println(situacoes);
-			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING, "Nao carregou a situacao atual");
+			if (situacoes == null || situacoes.situacao == null) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING, "Nao carregou a situacao atual ");
+			}
 		} else if (situacaoAtual.autuacoes == null) {
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
 					"Nao carregou autuacoes da situacao atual");
