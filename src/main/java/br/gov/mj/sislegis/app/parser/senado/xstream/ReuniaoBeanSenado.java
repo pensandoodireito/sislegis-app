@@ -62,79 +62,12 @@ public class ReuniaoBeanSenado extends br.gov.mj.sislegis.app.parser.ReuniaoBean
 				}
 			}
 
-			List<EventoBean> eventos = parteBean.getEventos(); // tipicamente
-			// aparece em
-			// audiencias
-			// publicas
-			for (Iterator iterator = eventos.iterator(); iterator.hasNext();) {
-				EventoBean eventoBean = (EventoBean) iterator.next();
-
-				Materias materias = eventoBean.getMateriasRelacionadas();
-				if (materias != null && materias.materias != null) {
-					for (Iterator iterator2 = materias.materias.iterator(); iterator2.hasNext();) {
-						Materia materia = (Materia) iterator2.next();
-
-						Proposicao prop = materia.toProposicao();
-						ProposicaoPautaComissao propPauta = new ProposicaoPautaComissao(reuniao, prop);
-						propPauta.setOrdemPauta(-1);
-						propPauta.setRelator(materia.getRelator());
-						reuniao.addProposicaoPauta(propPauta);
-
-					}
-				}
-			}
+			// Eventos não deve aparecer na lista de proposicoes discutidas
 
 		}
 
 		return reuniao.getProposicoesDaPauta();
 	}
-
-	// protected List<Proposicao> getProposicoes() {
-	// List<Proposicao> materias = new ArrayList<Proposicao>();
-	//
-	// for (ParteBean parteBean : this.getPartes()) {
-	// List<ItemBean> itens = parteBean.getItens();
-	// List<EventoBean> eventos = parteBean.getEventos(); // tipicamente
-	// // aparece em
-	// // audiencias
-	// // publicas
-	//
-	// for (ItemBean itemBean : itens) {
-	// // Não adicionamos por exemplo, os requerimentos, pois não são
-	// // tratados como proposições
-	// if (itemBean.tipo.equalsIgnoreCase(MATERIA)) {
-	// Proposicao prop = itemBean.getProposicao();
-	// prop.setComissao(comissoes.get(0).getSigla() + " - " +
-	// comissoes.get(0).getNome());
-	// prop.setOrigem(Origem.SENADO);
-	// prop.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate="
-	// + prop.getIdProposicao());
-	// prop.setLinkPauta("http://legis.senado.leg.br/comissoes/reuniao?reuniao="
-	// + getCodigo());
-	// materias.add(prop);
-	// }
-	// }
-	// if (eventos != null) {
-	//
-	// for (EventoBean eventoBean : eventos) {
-	// List<Proposicao> proposicoes = eventoBean.getProposicoes();
-	//
-	// for (Proposicao prop : proposicoes) {
-	// prop.setComissao(comissoes.get(0).getSigla() + " - " +
-	// comissoes.get(0).getNome());
-	// prop.setOrigem(Origem.SENADO);
-	// prop.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate="
-	// + prop.getIdProposicao());
-	// prop.setLinkPauta("http://legis.senado.leg.br/comissoes/reuniao?reuniao="
-	// + getCodigo());
-	// materias.add(prop);
-	// }
-	// }
-	// }
-	// }
-	//
-	// return materias;
-	// }
 
 	@Override
 	public String toString() {

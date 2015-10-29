@@ -2,11 +2,13 @@ package br.gov.mj.sislegis.app.parser.senado;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.parser.ParserFetcher;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
@@ -22,7 +24,8 @@ public class ParserPlenarioSenado {
 		System.out.println(parser.getProposicoes(datIni).toString());
 	}
 
-	public List<Proposicao> getProposicoes(String datIni) throws Exception {
+	// FIXME tem q converter
+	public Set<PautaReuniaoComissao> getProposicoes(String datIni) throws Exception {
 		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "Buscando dados da sessão do plenario");
 		List<Proposicao> proposicoes = new ArrayList<Proposicao>();
 
@@ -53,7 +56,7 @@ public class ParserPlenarioSenado {
 			}
 		}
 
-		return proposicoes;
+		return null;
 	}
 
 	private void configAgendaPlenario(XStream xstream) {

@@ -38,34 +38,43 @@ public class Materia {
 		}
 		return "";
 	}
+
+	@XStreamAlias("Situacoes")
+	Situacoes situacoes;
+
 	@XStreamAlias("Ano")
 	String ano;
 	@XStreamAlias("Codigo")
 	Integer codigo;
 	@XStreamAlias("Numero")
 	String numero;
+
 	@XStreamAlias("Subtipo")
 	String subtipo;
+	@XStreamAlias("Ementa")
+	String ementa;
+
 	public Proposicao toProposicao() {
 		Proposicao p = new Proposicao();
-		if(identificacaoMateria==null){
-			identificacaoMateria=new IdentificacaoMateria();
-			identificacaoMateria.AnoMateria=ano;
-			identificacaoMateria.CodigoMateria=codigo;
-			identificacaoMateria.NumeroMateria=numero;
-			identificacaoMateria.SiglaSubtipoMateria=subtipo;
-			System.err.println("identificacaoMateria nula "+this);
+		if (identificacaoMateria == null) {
+			identificacaoMateria = new IdentificacaoMateria();
+			identificacaoMateria.AnoMateria = ano;
+			identificacaoMateria.CodigoMateria = codigo;
+			identificacaoMateria.NumeroMateria = numero;
+			identificacaoMateria.SiglaSubtipoMateria = subtipo;
+			System.err.println("identificacaoMateria nula " + this);
 		}
 		p.setIdProposicao(identificacaoMateria.CodigoMateria);
 		p.setNumero(identificacaoMateria.NumeroMateria);
 		p.setAno(identificacaoMateria.AnoMateria);
 		p.setTipo(identificacaoMateria.SiglaSubtipoMateria);
-		
+
 		if (autoresPrincipais != null && !autoresPrincipais.autores.isEmpty()) {
 			p.setAutor(autoresPrincipais.autores.get(0).NomeAutor);
 		}
 		p.setOrigem(Origem.SENADO);
 		if (situacaoAtual == null) {
+			System.out.println(situacoes);
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING, "Nao carregou a situacao atual");
 		} else if (situacaoAtual.autuacoes == null) {
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
@@ -77,12 +86,12 @@ public class Materia {
 			p.setComissao(situacaoAtual.autuacoes.autuacoes.get(0).Local.SiglaLocal);
 			p.setSituacao(situacaoAtual.autuacoes.autuacoes.get(0).Situacao.SiglaSituacao);
 		}
-		if(DadosBasicosMateria!=null){
-		p.setEmenta(DadosBasicosMateria.EmentaMateria);
+		if (DadosBasicosMateria != null) {
+			p.setEmenta(DadosBasicosMateria.EmentaMateria);
+		} else {
+			p.setEmenta(ementa);
 		}
-		
 
-		
 		p.setOrigem(Origem.SENADO);
 		p.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate=" + p.getIdProposicao());
 		return p;
@@ -96,7 +105,7 @@ public class Materia {
 		xstream.processAnnotations(AutoresPrincipais.class);
 		xstream.processAnnotations(AutorPrincipal.class);
 		Relatoria.configXstream(xstream);
-		
+
 		SituacaoAtual.configXstream(xstream);
 
 	}

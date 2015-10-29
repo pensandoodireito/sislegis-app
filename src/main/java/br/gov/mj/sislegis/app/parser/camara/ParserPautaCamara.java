@@ -66,7 +66,6 @@ public class ParserPautaCamara {
 		String wsURL = new StringBuilder("http://www.camara.gov.br/SitCamaraWS/Orgaos.asmx/ObterPauta?IDOrgao=")
 				.append(idComissao).append("&datIni=").append(datIni).append("&datFim=").append(datFim).toString();
 
-		System.out.println(wsURL);
 		XStream xstream = new XStream();
 		xstream.ignoreUnknownElements();
 
@@ -124,29 +123,6 @@ public class ParserPautaCamara {
 		}
 
 		return pautas;
-	}
-
-	public List<Proposicao> getProposicoes(Long idComissao, String datIni, String datFim) throws Exception {
-		List<Proposicao> proposicoes = new ArrayList<Proposicao>();
-		// PautaBean pauta = getPauta(idComissao, datIni, datFim);
-		// for (ReuniaoBeanCamara reuniao : pauta.getReunioes()) {
-		// // adiciona dados da comissao
-		// int seqOrdemPauta = 1;
-		// for (Proposicao proposicao : reuniao.getProposicoes()) {
-		// proposicao.setSeqOrdemPauta(seqOrdemPauta++);
-		// proposicao.setComissao(pauta.getOrgao());
-		// proposicao.setOrigem(Origem.CAMARA);
-		// proposicao.setLinkProposicao("http://www.camara.gov.br/proposicoesWeb/fichadetramitacao?idProposicao="
-		// + proposicao.getIdProposicao());
-		// proposicao
-		// .setLinkPauta("http://www.camara.leg.br/internet/ordemdodia/ordemDetalheReuniaoCom.asp?codReuniao="
-		// + reuniao.getCodigo().toString());
-		// }
-		//
-		// proposicoes.addAll(reuniao.getProposicoes());
-		// }
-
-		return proposicoes;
 	}
 
 	private void config(XStream xstream) {

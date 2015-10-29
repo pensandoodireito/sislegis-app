@@ -4,16 +4,11 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.ejb.EJBTransactionRolledbackException;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -37,13 +32,10 @@ import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
-import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
-import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.ReuniaoService;
-import br.gov.mj.sislegis.app.service.Service;
 
 /**
  * 
@@ -54,43 +46,12 @@ public class ProposicaoEndpoint {
 
 	@Inject
 	private ProposicaoService proposicaoService;
-	@Inject
-	private ReuniaoService reuniaoEJB;
 
 	@GET
 	@Path("/proposicoesPautaCamara")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Set<PautaReuniaoComissao> buscarProposicoesPautaCamara(@QueryParam("idComissao") Long idComissao,
 			@QueryParam("data") Date data) throws Exception {
-
-		if (1 == 2) {
-
-			ParserPautaCamara parser = new ParserPautaCamara();
-			// Long idComissao = 2002L;
-			String datIni = "20151014";
-			String datFim = "20151015";
-			Set<PautaReuniaoComissao> pautas = parser.getPautaComissao(idComissao, datIni, datFim);
-			Reuniao reuniao = new Reuniao();
-			reuniao.setData(data);
-			proposicaoService.adicionaProposicoesReuniao(pautas, reuniao);
-
-			Collection<Proposicao> proposicoes = proposicaoService.buscarProposicoesPorDataReuniao(reuniao.getData());
-
-			PautaReuniaoComissao prc = proposicaoService.retrievePautaReuniao(pautas.iterator().next()
-					.getCodigoReuniao());
-			System.out.println(prc.getId());
-			System.out.println("Aa " + prc.getProposicoesDaPauta().size());
-			System.out.println(proposicoes.size());
-			reuniao = reuniaoEJB.findById(reuniao.getId());
-			// deInitEJBS();
-			for (Iterator iterator = proposicoes.iterator(); iterator.hasNext();) {
-				Proposicao proposicao = (Proposicao) iterator.next();
-				System.out.println(proposicao.getPautasComissoes().size());
-			}
-
-			return null;
-
-		}
 
 		Map<String, Object> parametros = new HashMap<String, Object>();
 		parametros.put("idComissao", idComissao);
@@ -104,16 +65,15 @@ public class ProposicaoEndpoint {
 	@GET
 	@Path("/proposicoesPautaSenado")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Proposicao> buscarProposicoesPautaSenado(@QueryParam("siglaComissao") String siglaComissao,
+	public Set<PautaReuniaoComissao> buscarProposicoesPautaSenado(@QueryParam("siglaComissao") String siglaComissao,
 			@QueryParam("data") Date data) throws Exception {
 
 		Map<String, Object> parametros = new HashMap<>();
 		parametros.put("siglaComissao", siglaComissao);
 		parametros.put("data", data);
 
-		List<Proposicao> lista = proposicaoService.buscarProposicoesPautaSenadoWS(parametros);
+		return proposicaoService.buscarProposicoesPautaSenadoWS(parametros);
 
-		return lista;
 	}
 
 	@GET

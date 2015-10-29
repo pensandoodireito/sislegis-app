@@ -104,28 +104,35 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		return em;
 	}
 
+	private Date getNextWeek(Date ref) {
+		Calendar c = Calendar.getInstance();
+		c.setTime(ref);
+		c.add(Calendar.WEEK_OF_YEAR, 1);
+		return c.getTime();
+	}
+
 	@Override
 	public Set<PautaReuniaoComissao> buscarProposicoesPautaCamaraWS(Map parametros) throws Exception {
 		Long idComissao = (Long) parametros.get("idComissao");
 		Date dataInicial = (Date) parametros.get("data");
-		Calendar c = Calendar.getInstance();
-		c.setTime(dataInicial);
-		c.add(Calendar.WEEK_OF_YEAR, 1);
+		Date dataFinal = getNextWeek(dataInicial);
+
 		String dataIni = Conversores.dateToString(dataInicial, "yyyyMMdd");
-		String dataFim = Conversores.dateToString(c.getTime(), "yyyyMMdd");
+		String dataFim = Conversores.dateToString(dataFinal, "yyyyMMdd");
 		return parserPautaCamara.getPautaComissao(idComissao, dataIni, dataFim);
 	}
 
 	@Override
-	public List<Proposicao> buscarProposicoesPautaSenadoWS(Map parametros) throws Exception {
+	public Set<PautaReuniaoComissao> buscarProposicoesPautaSenadoWS(Map parametros) throws Exception {
 		String siglaComissao = (String) parametros.get("siglaComissao");
-		String dataIni = Conversores.dateToString((Date) parametros.get("data"), "yyyyMMdd");
-
+		Date dataInicial = (Date) parametros.get("data");
+		String dataIni = Conversores.dateToString(dataInicial, "yyyyMMdd");
+		String dataFim = Conversores.dateToString(getNextWeek(dataInicial), "yyyyMMdd");
 		if (siglaComissao.equals("PLEN")) {
 			return parserPlenarioSenado.getProposicoes(dataIni);
 		}
 
-		return parserPautaSenado.getProposicoes(siglaComissao, dataIni);
+		return parserPautaSenado.getPautaComissao(siglaComissao, dataIni, dataFim);
 	}
 
 	@Override

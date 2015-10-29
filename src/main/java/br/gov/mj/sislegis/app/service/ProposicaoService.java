@@ -22,7 +22,7 @@ public interface ProposicaoService extends Service<Proposicao> {
 
 	Set<PautaReuniaoComissao> buscarProposicoesPautaCamaraWS(Map parametros) throws Exception;
 
-	List<Proposicao> buscarProposicoesPautaSenadoWS(Map parametros) throws Exception;
+	Set<PautaReuniaoComissao> buscarProposicoesPautaSenadoWS(Map parametros) throws Exception;
 
 	Proposicao detalharProposicaoCamaraWS(Long id) throws Exception;
 
