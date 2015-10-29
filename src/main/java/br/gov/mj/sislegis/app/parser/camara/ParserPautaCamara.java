@@ -1,6 +1,7 @@
 package br.gov.mj.sislegis.app.parser.camara;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -30,7 +31,7 @@ public class ParserPautaCamara {
 		for (Iterator iterator = pautas.iterator(); iterator.hasNext();) {
 			PautaReuniaoComissao pautaReuniaoComissao = (PautaReuniaoComissao) iterator.next();
 			System.out.println(pautaReuniaoComissao);
-			for (Iterator iterator2 = pautaReuniaoComissao.getProposicoes().iterator(); iterator2.hasNext();) {
+			for (Iterator iterator2 = pautaReuniaoComissao.getProposicoesDaPauta().iterator(); iterator2.hasNext();) {
 				ProposicaoPautaComissao ppc = (ProposicaoPautaComissao) iterator2.next();
 				System.out.println("\t" + ppc);
 
@@ -58,12 +59,14 @@ public class ParserPautaCamara {
 		return pauta;
 	}
 
-	public Set<PautaReuniaoComissao> getPautaComissao(Long idComissao, String datIni, String datFim) throws Exception {
+	public Set<PautaReuniaoComissao> getPautaComissao(Long idComissao, String datIni, String datFim)
+			throws IOException, ParseException {
 
 		Set<PautaReuniaoComissao> pautas = new HashSet<PautaReuniaoComissao>();
 		String wsURL = new StringBuilder("http://www.camara.gov.br/SitCamaraWS/Orgaos.asmx/ObterPauta?IDOrgao=")
 				.append(idComissao).append("&datIni=").append(datIni).append("&datFim=").append(datFim).toString();
 
+		System.out.println(wsURL);
 		XStream xstream = new XStream();
 		xstream.ignoreUnknownElements();
 
@@ -95,7 +98,7 @@ public class ParserPautaCamara {
 
 			PautaReuniaoComissao pautaReuniaoComissao = new PautaReuniaoComissao(reuniao.getDate(), comissao,
 					reuniao.getCodigo());
-
+			pautaReuniaoComissao.setOrigem(Origem.CAMARA);
 			pautaReuniaoComissao
 					.setLinkPauta("http://www.camara.leg.br/internet/ordemdodia/ordemDetalheReuniaoCom.asp?codReuniao="
 							+ reuniao.getCodigo().toString());
@@ -104,17 +107,18 @@ public class ParserPautaCamara {
 			pautaReuniaoComissao.setTitulo(reuniao.getTitulo());
 
 			// adiciona dados da comissao
-			int seqOrdemPauta = 1;
 			for (ProposicaoPautaComissaoWrapper pautaProposicao : reuniao.getPautaProposicoes()) {
 				Proposicao ptemp = new Proposicao();
 				ptemp.setIdProposicao(pautaProposicao.idProposicao);
 				ptemp.setOrigem(Origem.CAMARA);
+				ptemp.setEmenta(pautaProposicao.ementa);
+				ptemp.setSigla(pautaProposicao.sigla);
 				ProposicaoPautaComissao ppc = new ProposicaoPautaComissao(pautaReuniaoComissao, ptemp);
 				ppc.setOrdemPauta(pautaProposicao.numOrdemApreciacao);
 				ppc.setRelator(pautaProposicao.relator);
 				pautaReuniaoComissao.addProposicaoPauta(ppc);
 			}
-			if (pautaReuniaoComissao.getProposicoes().size() > 0) {
+			if (pautaReuniaoComissao.getProposicoesDaPauta().size() > 0) {
 				pautas.add(pautaReuniaoComissao);
 			}
 		}
@@ -197,5 +201,6 @@ class ProposicaoPautaComissaoWrapper {
 	String relator;
 	String sigla;
 	String textoParecerRelator;
+	String ementa;
 
 }

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.Local;
 
@@ -19,7 +20,7 @@ import br.gov.mj.sislegis.app.parser.TipoProposicao;
 @Local
 public interface ProposicaoService extends Service<Proposicao> {
 
-	List<Proposicao> buscarProposicoesPautaCamaraWS(Map parametros) throws Exception;
+	Set<PautaReuniaoComissao> buscarProposicoesPautaCamaraWS(Map parametros) throws Exception;
 
 	List<Proposicao> buscarProposicoesPautaSenadoWS(Map parametros) throws Exception;
 
@@ -98,10 +99,15 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 */
 	List<Proposicao> listProposicoesSeguidas();
 
-	PautaReuniaoComissao savePautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao) throws Exception;
+	PautaReuniaoComissao savePautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao) throws IOException;
 
 
 	PautaReuniaoComissao findPautaReuniao(String comissao, Date date, Integer codigoReuniao);
+
+	PautaReuniaoComissao retrievePautaReuniao(Integer codigoReuniao);
+
+	void adicionaProposicoesReuniao(Set<PautaReuniaoComissao> pautaReunioes, Reuniao reuniao) throws IOException;
+
 
 	
 }

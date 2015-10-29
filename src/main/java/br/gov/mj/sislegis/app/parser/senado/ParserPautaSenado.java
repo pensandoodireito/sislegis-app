@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
@@ -37,7 +38,7 @@ public class ParserPautaSenado {
 		for (Iterator iterator = pautas.iterator(); iterator.hasNext();) {
 			PautaReuniaoComissao pautaReuniaoComissao = (PautaReuniaoComissao) iterator.next();
 			System.out.println(pautaReuniaoComissao);
-			for (Iterator iterator2 = pautaReuniaoComissao.getProposicoes().iterator(); iterator2.hasNext();) {
+			for (Iterator iterator2 = pautaReuniaoComissao.getProposicoesDaPauta().iterator(); iterator2.hasNext();) {
 				ProposicaoPautaComissao ppc = (ProposicaoPautaComissao) iterator2.next();
 				System.out.println("\t" + ppc);
 
@@ -93,6 +94,7 @@ public class ParserPautaSenado {
 			comissao.setSigla(siglaComissao);
 			PautaReuniaoComissao prc = new PautaReuniaoComissao(pautaReuniaoComissao.getDate(), comissao,
 					pautaReuniaoComissao.getCodigo());
+			prc.setOrigem(Origem.SENADO);
 			prc.setTipo(pautaReuniaoComissao.getTipo());
 			prc.setTitulo(pautaReuniaoComissao.getTitulo());
 

@@ -2,7 +2,10 @@ package br.gov.mj.sislegis.app.parser;
 
 import static org.junit.Assert.fail;
 
+import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -15,19 +18,23 @@ import org.junit.Before;
 import org.junit.Test;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
-import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
 import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.ejbs.EJBUnitTestable;
 import br.gov.mj.sislegis.app.service.ejbs.ProposicaoServiceEjb;
+import br.gov.mj.sislegis.app.service.ejbs.ReuniaoProposicaoServiceEjb;
+import br.gov.mj.sislegis.app.service.ejbs.ReuniaoServiceEjb;
 
 public class PautaProposicaoReuniaoTests {
 	ProposicaoService proposicaoService;
 	EntityManager entityManager;
 	private static EntityManagerFactory emf = null;
 	EntityManager em;
+	private ReuniaoServiceEjb reuniaoEJB;
+	private ReuniaoProposicaoServiceEjb reuniaoProposicaoEJB;
 
 	public static void closeEntityManager() {
 		emf.close();
@@ -35,7 +42,7 @@ public class PautaProposicaoReuniaoTests {
 
 	@After
 	public void tearDown() {
-		em.close();
+		deInitEJBS();
 		closeEntityManager();
 	}
 
@@ -43,42 +50,55 @@ public class PautaProposicaoReuniaoTests {
 	public void setUp() {
 		try {
 			emf = Persistence.createEntityManagerFactory("test-sislegis-persistence-unit");
-			proposicaoService = new ProposicaoServiceEjb();
-			em = emf.createEntityManager();
-			em.setFlushMode(FlushModeType.AUTO);
-			((EJBUnitTestable) proposicaoService).setInjectedEntities(em, new ParserProposicaoCamara());
-
+			initEJBS();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
+	private void deInitEJBS() {
+		if (em.isOpen()) {
+			em.close();
+		}
+	}
+
+	private void initEJBS() {
+		em = emf.createEntityManager();
+		proposicaoService = new ProposicaoServiceEjb();
+
+		reuniaoEJB = new ReuniaoServiceEjb();
+		reuniaoEJB.setInjectedEntities(em);
+		reuniaoProposicaoEJB = new ReuniaoProposicaoServiceEjb();
+		reuniaoProposicaoEJB.setInjectedEntities(em);
+		((EJBUnitTestable) proposicaoService).setInjectedEntities(em, new ParserProposicaoCamara(), reuniaoEJB,
+				reuniaoProposicaoEJB);
+	}
+
 	@Test
 	public void testPautaCamara() {
 		try {
 			ParserPautaCamara parser = new ParserPautaCamara();
-			Long idComissao = 2003L;
-			String datIni = "20151012";
+			Long idComissao = 2002L;
+			String datIni = "20151014";
 			String datFim = "20151015";
-			System.out.println("BUSCANDO" + datFim);
 			Set<PautaReuniaoComissao> pautas = parser.getPautaComissao(idComissao, datIni, datFim);
-			for (Iterator<PautaReuniaoComissao> iterator = pautas.iterator(); iterator.hasNext();) {
+			Reuniao reuniao = new Reuniao();
+			reuniao.setData(new Date());
+			proposicaoService.adicionaProposicoesReuniao(pautas, reuniao);
 
-				PautaReuniaoComissao pautaReuniaoComissao = (PautaReuniaoComissao) iterator.next();
-				System.out.println("trantaod " + pautaReuniaoComissao);
+			Collection<Proposicao> proposicoes = proposicaoService.buscarProposicoesPorDataReuniao(reuniao.getData());
 
-				pautaReuniaoComissao = proposicaoService.savePautaReuniaoComissao(pautaReuniaoComissao);
-
-				for (Iterator<ProposicaoPautaComissao> iterator2 = pautaReuniaoComissao.getProposicoes().iterator(); iterator2
-						.hasNext();) {
-					ProposicaoPautaComissao ppc = (ProposicaoPautaComissao) iterator2.next();
-					Proposicao p = ppc.getProposicao();
-
-					proposicaoService.save(ppc.getProposicao());
-					System.out.println(ppc.getProposicao().getId());
-				}
-
+			PautaReuniaoComissao prc = proposicaoService.retrievePautaReuniao(pautas.iterator().next()
+					.getCodigoReuniao());
+			System.out.println(prc.getId());
+			System.out.println("Aa " + prc.getProposicoesDaPauta().size());
+			System.out.println(proposicoes.size());
+			reuniao = reuniaoEJB.findById(reuniao.getId());
+			// deInitEJBS();
+			for (Iterator iterator = proposicoes.iterator(); iterator.hasNext();) {
+				Proposicao proposicao = (Proposicao) iterator.next();
+				System.out.println(proposicao.getPautasComissoes().size());
 			}
 
 		} catch (Exception e) {
@@ -88,5 +108,4 @@ public class PautaProposicaoReuniaoTests {
 		}
 
 	}
-
 }

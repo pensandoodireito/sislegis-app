@@ -5,27 +5,32 @@ import java.util.Date;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.AbstractEntity;
 import br.gov.mj.sislegis.app.model.Comissao;
 
 @Entity
-@Table(name = "PautaReuniaoComissao", uniqueConstraints = @UniqueConstraint(columnNames = { "comissao", "date",
+@Table(name = "PautaReuniaoComissao", uniqueConstraints = @UniqueConstraint(columnNames = { "comissao", "data",
 		"codigoReuniao" }))
-public class PautaReuniaoComissao extends AbstractEntity implements Serializable {
+@NamedQueries({ @NamedQuery(name = "findByCodigoReuniao", query = "select p from PautaReuniaoComissao p where p.codigoReuniao=:codigoReuniao")
+
+})
+public class PautaReuniaoComissao extends AbstractEntity implements Serializable, Comparable<PautaReuniaoComissao> {
 	/**
 	 * 
 	 */
@@ -39,7 +44,11 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 	@Column
 	String comissao;
 	@Column
-	Date date;
+	Date data;
+
+	@Enumerated(EnumType.STRING)
+	@Column
+	private Origem origem;
 
 	@Column
 	protected Integer codigoReuniao;
@@ -56,15 +65,23 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "pautaReuniaoComissao")
 	@OrderBy("ordemPauta")
-	SortedSet<ProposicaoPautaComissao> proposicoes = new TreeSet<ProposicaoPautaComissao>();
+	SortedSet<ProposicaoPautaComissao> proposicoesDaPauta = new TreeSet<ProposicaoPautaComissao>();
 
 	PautaReuniaoComissao() {
 	}
 
 	public PautaReuniaoComissao(Date data, Comissao comissao, Integer codigoReuniao) {
-		date = data;
+		this.data = data;
 		this.comissao = comissao.getSigla();
 		this.codigoReuniao = codigoReuniao;
+	}
+
+	public Origem getOrigem() {
+		return origem;
+	}
+
+	public void setOrigem(Origem origem) {
+		this.origem = origem;
 	}
 
 	public String getComissao() {
@@ -72,7 +89,11 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 	}
 
 	public Date getData() {
-		return date;
+		return data;
+	}
+
+	public void setData(Date date) {
+		this.data = date;
 	}
 
 	public String getLinkPauta() {
@@ -115,32 +136,50 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 		this.tipo = tipo;
 	}
 
-	public SortedSet<ProposicaoPautaComissao> getProposicoes() {
-		return proposicoes;
+	public SortedSet<ProposicaoPautaComissao> getProposicoesDaPauta() {
+		return proposicoesDaPauta;
 	}
 
-	public void setProposicoes(SortedSet<ProposicaoPautaComissao> proposicoes) {
-		this.proposicoes = proposicoes;
+	public void setProposicoesDaPauta(SortedSet<ProposicaoPautaComissao> proposicoes) {
+		this.proposicoesDaPauta = proposicoes;
 	}
 
 	public void addProposicaoPauta(ProposicaoPautaComissao ppc) {
-		proposicoes.add(ppc);
+		proposicoesDaPauta.add(ppc);
 	}
 
 	public Long getId() {
 		return id;
 	}
 
-	public Date getDate() {
-		return date;
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(comissao);
-		sb.append(" Código:{").append(codigoReuniao).append("}").append(" contém ").append(proposicoes.size())
+		sb.append(" Código:{").append(codigoReuniao).append("}").append(" contém ").append(proposicoesDaPauta.size())
 				.append(" proposicoes na pauta");
 		return sb.toString();
+	}
+
+	@Override
+	public int compareTo(PautaReuniaoComissao o) {
+		if(o==null){
+			System.err.println("O nulo");
+			return 1;
+		}
+		if(o.data==null){
+			System.err.println("O.data nulo");
+			return 1;
+		}
+		if(data==null){
+			System.err.println("data nulo");
+			return 1;
+		}
+		if (o.data.after(data)) {
+			return -1;
+		} else if (o.data.before(data)) {
+			return 1;
+		}
+		return 0;
 	}
 
 }

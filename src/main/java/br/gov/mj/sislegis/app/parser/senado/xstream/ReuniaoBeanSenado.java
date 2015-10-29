@@ -86,7 +86,7 @@ public class ReuniaoBeanSenado extends br.gov.mj.sislegis.app.parser.ReuniaoBean
 
 		}
 
-		return reuniao.getProposicoes();
+		return reuniao.getProposicoesDaPauta();
 	}
 
 	// protected List<Proposicao> getProposicoes() {

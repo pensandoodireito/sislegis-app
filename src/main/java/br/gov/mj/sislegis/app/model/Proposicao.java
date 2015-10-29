@@ -1,6 +1,7 @@
 package br.gov.mj.sislegis.app.model;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
@@ -31,6 +32,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.commons.collections.CollectionUtils;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -44,7 +46,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
           query   =   "SELECT * " +
                       "FROM Proposicao a where a.id in (select distinct proposicoesSeguidas_id from Usuario_ProposicaoSeguida)",
                       resultClass=Proposicao.class
-  )
+  ),
+  @NamedNativeQuery(
+		  name = "listFromReuniao",
+		  query="SELECT * FROM Proposicao p where  p.id in (select proposicao_id from reuniaoproposicao r where  r.reuniao_id=:rid)",
+		  resultClass=Proposicao.class
+		  
+		  )
+  
 })
 
 @NamedQueries({ 
@@ -111,8 +120,8 @@ public class Proposicao extends AbstractEntity {
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	private Usuario responsavel;
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "proposicao")
-	@OrderBy("pautaReuniaoComissao.data")
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "proposicao")
+	@OrderBy("pautaReuniaoComissao")
 	private SortedSet<ProposicaoPautaComissao> pautasComissoes = new TreeSet<ProposicaoPautaComissao>();
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "proposicao")
@@ -128,7 +137,7 @@ public class Proposicao extends AbstractEntity {
 	private Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao = new HashSet<>();
 
 	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "reuniao_proposicao", joinColumns = { @JoinColumn(name = "proposicao_id") })
+	@JoinTable(name = "reuniaoproposicao", joinColumns = { @JoinColumn(name = "proposicao_id") })
 	@OrderBy("data asc")
 	private SortedSet<Reuniao> reuniao = new TreeSet<Reuniao>();
 
@@ -226,6 +235,9 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public String getComissao() {
+		if (comissao == null) {
+			return pautasComissoes.first().getPautaReuniaoComissao().getComissao();
+		}
 		return comissao;
 	}
 
@@ -413,7 +425,23 @@ public class Proposicao extends AbstractEntity {
 		this.situacao = siglaSituacao;
 	}
 
+	@JsonIgnore
 	public SortedSet<ProposicaoPautaComissao> getPautasComissoes() {
 		return pautasComissoes;
 	}
+
+	public ProposicaoPautaComissao getPautaComissaoAtual() {
+		// TODO isto pode ficar melhor.
+		ProposicaoPautaComissao mostRecent = null;
+		for (Iterator<ProposicaoPautaComissao> iterator = pautasComissoes.iterator(); iterator.hasNext();) {
+			ProposicaoPautaComissao ppc = (ProposicaoPautaComissao) iterator.next();
+			if (mostRecent == null
+					|| mostRecent.getPautaReuniaoComissao().getData().before(ppc.getPautaReuniaoComissao().getData())) {
+				mostRecent = ppc;
+			}
+
+		}
+		return mostRecent;
+	}
+
 }

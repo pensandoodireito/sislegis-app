@@ -2,6 +2,7 @@ package br.gov.mj.sislegis.app.service.ejbs;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
@@ -16,6 +17,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -102,11 +105,15 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public List<Proposicao> buscarProposicoesPautaCamaraWS(Map parametros) throws Exception {
+	public Set<PautaReuniaoComissao> buscarProposicoesPautaCamaraWS(Map parametros) throws Exception {
 		Long idComissao = (Long) parametros.get("idComissao");
-		String dataIni = Conversores.dateToString((Date) parametros.get("data"), "yyyyMMdd");
-		String dataFim = Conversores.dateToString(SislegisUtil.getFutureDate(), "yyyyMMdd");
-		return parserPautaCamara.getProposicoes(idComissao, dataIni, dataFim);
+		Date dataInicial = (Date) parametros.get("data");
+		Calendar c = Calendar.getInstance();
+		c.setTime(dataInicial);
+		c.add(Calendar.WEEK_OF_YEAR, 1);
+		String dataIni = Conversores.dateToString(dataInicial, "yyyyMMdd");
+		String dataFim = Conversores.dateToString(c.getTime(), "yyyyMMdd");
+		return parserPautaCamara.getPautaComissao(idComissao, dataIni, dataFim);
 	}
 
 	@Override
@@ -122,12 +129,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public Proposicao detalharProposicaoSenadoWS(Long id) throws Exception {
+	public Proposicao detalharProposicaoSenadoWS(Long id) throws IOException {
 		return parserProposicaoSenado.getProposicao(id);
 	}
 
 	@Override
-	public Proposicao detalharProposicaoCamaraWS(Long id) throws Exception {
+	public Proposicao detalharProposicaoCamaraWS(Long id) throws IOException {
 		return parserProposicaoCamara.getProposicao(id);
 	}
 
@@ -293,7 +300,14 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		List<Proposicao> proposicoes = new ArrayList<>();
 		Reuniao reuniao = reuniaoService.buscaReuniaoPorData(dataReuniao);
 		if (!Objects.isNull(reuniao)) {
-			proposicoes.addAll(reuniao.getProposicoes());
+			List<Proposicao> propoiscoes = new ArrayList<Proposicao>();
+			Query query = em
+					.createNativeQuery(
+							"SELECT * FROM Proposicao p where  p.id in (select proposicao_id from reuniaoproposicao r where  r.reuniao_id=:rid)",
+							Proposicao.class);
+			query.setParameter("rid", reuniao.getId());
+			System.out.println("entrou" + reuniao.getId());
+			proposicoes.addAll(query.getResultList());
 		}
 		// if (!Objects.isNull(reuniao)) {
 		// Set<ReuniaoProposicao> listaReuniaoProposicoes =
@@ -522,10 +536,11 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
-	public PautaReuniaoComissao savePautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao) throws Exception {
+	public PautaReuniaoComissao savePautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao) throws IOException {
 		// check se proposicoes existem
-		SortedSet<ProposicaoPautaComissao> sortedSet = pautaReuniaoComissao.getProposicoes();
+		SortedSet<ProposicaoPautaComissao> sortedSet = pautaReuniaoComissao.getProposicoesDaPauta();
 		getEntityManager().persist(pautaReuniaoComissao);
 		for (Iterator<ProposicaoPautaComissao> iterator = sortedSet.iterator(); iterator.hasNext();) {
 			ProposicaoPautaComissao proposicaoPautaComissao = (ProposicaoPautaComissao) iterator.next();
@@ -555,18 +570,41 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 					proposicaoPautaComissao.setProposicao(proposicaoDb);
 				}
 			} else {
-//				System.out.println("Proposicao tem id " + proposicaoPautaComissao.getProposicao());
-//				proposicaoPautaComissao.setProposicao(proposicaoPautaComissao.getProposicao());
+				// System.out.println("Proposicao tem id " +
+				// proposicaoPautaComissao.getProposicao());
+				// proposicaoPautaComissao.setProposicao(proposicaoPautaComissao.getProposicao());
+				// TODO tenho q forcar o id
+				proposicaoPautaComissao.getProposicao();
 			}
 			proposicaoPautaComissao.setPautaReuniaoComissao(pautaReuniaoComissao);
-//
-//			System.out.println(proposicaoPautaComissao.getPautaReuniaoComissao().getId() + " | "
-//					+ proposicaoPautaComissao.getProposicao().getId());
+			//
+			// System.out.println(proposicaoPautaComissao.getPautaReuniaoComissao().getId()
+			// + " | "
+			// + proposicaoPautaComissao.getProposicao().getId());
 			getEntityManager().persist(proposicaoPautaComissao);
 		}
 
 		return pautaReuniaoComissao;
 
+	}
+
+	@Override
+	public PautaReuniaoComissao retrievePautaReuniao(Integer codigoReuniao) {
+		Query q = em.createNamedQuery("findByCodigoReuniao", PautaReuniaoComissao.class);
+		q.setParameter("codigoReuniao", codigoReuniao);
+
+		List<PautaReuniaoComissao> props = q.getResultList();
+		if (props.isEmpty()) {
+			System.out.println("nenhum encontrado com " + codigoReuniao);
+			return null;
+		} else {
+			if (props.size() > 1) {
+				throw new IllegalArgumentException("Mais de uma PautaReuniaoComissao com codigoReuniao="
+						+ codigoReuniao);
+			}
+			return props.get(0);
+
+		}
 	}
 
 	private Proposicao findProposicaoBy(Origem origem, Integer idProposicao) {
@@ -578,7 +616,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (props.isEmpty()) {
 			return null;
 		} else {
-			if (props.size() > 0) {
+			if (props.size() > 1) {
 				throw new IllegalArgumentException("Mais de uma proposicao com id=" + idProposicao + " e origem "
 						+ origem.name());
 			}
@@ -588,17 +626,55 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
+	public void setInjectedEntities(Object... injections) {
+		this.em = (EntityManager) injections[0];
+		this.parserProposicaoCamara = (ParserProposicaoCamara) injections[1];
+		this.reuniaoService = (ReuniaoService) injections[2];
+		this.reuniaoProposicaoService = (ReuniaoProposicaoService) injections[3];
+
+	}
+
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	@Override
+	public void adicionaProposicoesReuniao(Set<PautaReuniaoComissao> pautaReunioes, Reuniao reuniao) throws IOException {
+		if (reuniao.getId() == null) {
+			reuniao = reuniaoService.save(reuniao);
+		}
+		System.out.println("reuniao " + reuniao.getId());
+		for (Iterator<PautaReuniaoComissao> iterator = pautaReunioes.iterator(); iterator.hasNext();) {
+
+			PautaReuniaoComissao prc = iterator.next();
+
+			prc = savePautaReuniaoComissao(prc);
+			System.out.println("prc " + prc.getId() + " " + prc.getCodigoReuniao());
+			for (Iterator<ProposicaoPautaComissao> iterator2 = prc.getProposicoesDaPauta().iterator(); iterator2
+					.hasNext();) {
+				ProposicaoPautaComissao ppc = iterator2.next();
+				Proposicao proposicao = findById(ppc.getProposicaoId());
+				System.out.println("proposicao " + proposicao.getId());
+				associateReuniaoProposicao(reuniao, proposicao);
+			}
+
+		}
+
+	}
+
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	private void associateReuniaoProposicao(Reuniao reuniao, Proposicao proposicao) {
+		ReuniaoProposicao rp = new ReuniaoProposicao();
+		ReuniaoProposicaoPK reuniaoProposicaoPK = new ReuniaoProposicaoPK();
+		reuniaoProposicaoPK.setIdReuniao(reuniao.getId());
+		reuniaoProposicaoPK.setIdProposicao(proposicao.getId());
+		rp.setReuniaoProposicaoPK(reuniaoProposicaoPK);
+		rp.setReuniao(reuniao);
+		rp.setProposicao(proposicao);
+		reuniaoProposicaoService.save(rp);
+	}
+
+	@Override
 	public PautaReuniaoComissao findPautaReuniao(String comissao, Date date, Integer codigoReuniao) {
 
 		return null;
 
 	}
-
-	@Override
-	public void setInjectedEntities(Object... injections) {
-		this.em = (EntityManager) injections[0];
-		this.parserProposicaoCamara = (ParserProposicaoCamara) injections[1];
-
-	}
-
 }

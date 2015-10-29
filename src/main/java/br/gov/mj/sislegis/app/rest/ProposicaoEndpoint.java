@@ -1,12 +1,19 @@
 package br.gov.mj.sislegis.app.rest;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.EJBTransactionRolledbackException;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -27,10 +34,15 @@ import org.jboss.resteasy.annotations.cache.Cache;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
+import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
+import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
+import br.gov.mj.sislegis.app.service.ReuniaoService;
 import br.gov.mj.sislegis.app.service.Service;
 
 /**
@@ -42,21 +54,49 @@ public class ProposicaoEndpoint {
 
 	@Inject
 	private ProposicaoService proposicaoService;
-
 	@Inject
-	private Service<Proposicao> service;
+	private ReuniaoService reuniaoEJB;
 
 	@GET
 	@Path("/proposicoesPautaCamara")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Proposicao> buscarProposicoesPautaCamara(@QueryParam("idComissao") Long idComissao,
+	public Set<PautaReuniaoComissao> buscarProposicoesPautaCamara(@QueryParam("idComissao") Long idComissao,
 			@QueryParam("data") Date data) throws Exception {
+
+		if (1 == 2) {
+
+			ParserPautaCamara parser = new ParserPautaCamara();
+			// Long idComissao = 2002L;
+			String datIni = "20151014";
+			String datFim = "20151015";
+			Set<PautaReuniaoComissao> pautas = parser.getPautaComissao(idComissao, datIni, datFim);
+			Reuniao reuniao = new Reuniao();
+			reuniao.setData(data);
+			proposicaoService.adicionaProposicoesReuniao(pautas, reuniao);
+
+			Collection<Proposicao> proposicoes = proposicaoService.buscarProposicoesPorDataReuniao(reuniao.getData());
+
+			PautaReuniaoComissao prc = proposicaoService.retrievePautaReuniao(pautas.iterator().next()
+					.getCodigoReuniao());
+			System.out.println(prc.getId());
+			System.out.println("Aa " + prc.getProposicoesDaPauta().size());
+			System.out.println(proposicoes.size());
+			reuniao = reuniaoEJB.findById(reuniao.getId());
+			// deInitEJBS();
+			for (Iterator iterator = proposicoes.iterator(); iterator.hasNext();) {
+				Proposicao proposicao = (Proposicao) iterator.next();
+				System.out.println(proposicao.getPautasComissoes().size());
+			}
+
+			return null;
+
+		}
 
 		Map<String, Object> parametros = new HashMap<String, Object>();
 		parametros.put("idComissao", idComissao);
 		parametros.put("data", data);
 
-		List<Proposicao> lista = proposicaoService.buscarProposicoesPautaCamaraWS(parametros);
+		Set<PautaReuniaoComissao> lista = proposicaoService.buscarProposicoesPautaCamaraWS(parametros);
 
 		return lista;
 	}
@@ -94,13 +134,44 @@ public class ProposicaoEndpoint {
 	@Path("/salvarProposicoes")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response salvarProposicoes(List<Proposicao> listaProposicoesSelecionados) {
-//		try {
-//			proposicaoService.salvarListaProposicao(listaProposicoesSelecionados);
-//		} catch (EJBTransactionRolledbackException e) {
-//			return Response.status(Response.Status.CONFLICT).build();
-//		}
-//		return Response.noContent().build();
+		// try {
+		// proposicaoService.salvarListaProposicao(listaProposicoesSelecionados);
+		// } catch (EJBTransactionRolledbackException e) {
+		// return Response.status(Response.Status.CONFLICT).build();
+		// }
+		// return Response.noContent().build();
 		return Response.status(Status.SERVICE_UNAVAILABLE).build();
+	}
+
+	@Inject
+	private ReuniaoService serviceReuniao;
+
+	@POST
+	@Path("/salvarProposicoesDePauta")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response adicionaProposicoesDePautaEmReuniao(AddProposicaoPautaWrapper proposicaoPautaWrapper) {
+		try {
+			Date reuniaoDate = new Date(proposicaoPautaWrapper.getReuniaoDate());
+			Reuniao reuniao = null;
+			try {
+				reuniao = serviceReuniao.buscaReuniaoPorData(reuniaoDate);
+			} catch (Exception e) {
+				System.err.println("E " + e.getMessage());
+
+			}
+			System.out.println("reuniao e " + reuniao);
+			if (reuniao == null) {
+				reuniao = new Reuniao();
+				reuniao.setData(reuniaoDate);
+			}
+			proposicaoService.adicionaProposicoesReuniao(proposicaoPautaWrapper.getPautaReunioes(), reuniao);
+
+			return Response.noContent().build();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return Response.status(Status.SERVICE_UNAVAILABLE).build();
+		}
+
 	}
 
 	@POST
@@ -128,7 +199,7 @@ public class ProposicaoEndpoint {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(Proposicao entity) {
-		service.save(entity);
+		proposicaoService.save(entity);
 		return Response.created(
 				UriBuilder.fromResource(ProposicaoEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
 	}
@@ -163,8 +234,9 @@ public class ProposicaoEndpoint {
 	@Path("/consultar")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Proposicao> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor,
-			@QueryParam("sigla") String sigla, @QueryParam("origem") String origem,	@QueryParam("isFavorita") String isFavorita,
-			@QueryParam("limit") Integer limit, @QueryParam("offset") Integer offset) {
+			@QueryParam("sigla") String sigla, @QueryParam("origem") String origem,
+			@QueryParam("isFavorita") String isFavorita, @QueryParam("limit") Integer limit,
+			@QueryParam("offset") Integer offset) {
 
 		List<Proposicao> results = proposicaoService.consultar(sigla, autor, ementa, origem, isFavorita, offset, limit);
 		return results;
@@ -245,6 +317,28 @@ public class ProposicaoEndpoint {
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		}
 
+	}
+
+}
+
+class AddProposicaoPautaWrapper {
+	Set<PautaReuniaoComissao> pautaReunioes;
+	long reuniaoDate;
+
+	public Set<PautaReuniaoComissao> getPautaReunioes() {
+		return pautaReunioes;
+	}
+
+	public void setPautaReunioes(Set<PautaReuniaoComissao> pautaReunioes) {
+		this.pautaReunioes = pautaReunioes;
+	}
+
+	public long getReuniaoDate() {
+		return reuniaoDate;
+	}
+
+	public void setReuniaoDate(long reuniaoDate) {
+		this.reuniaoDate = reuniaoDate;
 	}
 
 }

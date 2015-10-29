@@ -3,7 +3,6 @@ package br.gov.mj.sislegis.app.model.pautacomissao;
 import java.io.Serializable;
 
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -13,6 +12,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.rest.serializers.CompactPautaReuniaoComissao;
+import br.gov.mj.sislegis.app.rest.serializers.CompactProposicao;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
 @Table(name = "Proposicao_PautaComissao")
@@ -39,12 +43,20 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 	@JoinColumn(name = "proposicaoId", updatable = false, insertable = false, referencedColumnName = "id", nullable = false)
 	Proposicao proposicao;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "pautaReuniaoComissaoId", updatable = false, insertable = false, referencedColumnName = "id", nullable = false)
 	PautaReuniaoComissao pautaReuniaoComissao;
 
 	ProposicaoPautaComissao() {
 
+	}
+
+	public Long getProposicaoId() {
+		return proposicaoId;
+	}
+
+	public Long getPautaReuniaoComissaoId() {
+		return pautaReuniaoComissaoId;
 	}
 
 	public ProposicaoPautaComissao(PautaReuniaoComissao pc, Proposicao proposicao) {
@@ -60,6 +72,7 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 		this.relator = relator;
 	}
 
+	@JsonSerialize(using = CompactProposicao.class)
 	public Proposicao getProposicao() {
 		if (proposicao != null && proposicao.getId() != proposicaoId) {
 			proposicaoId = proposicao.getId();
@@ -75,6 +88,7 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 		this.ordemPauta = ordemPauta;
 	}
 
+	@JsonSerialize(using = CompactPautaReuniaoComissao.class)
 	public PautaReuniaoComissao getPautaReuniaoComissao() {
 		if (pautaReuniaoComissao != null && pautaReuniaoComissao.getId() != pautaReuniaoComissaoId) {
 			pautaReuniaoComissaoId = pautaReuniaoComissao.getId();
