@@ -119,7 +119,6 @@ public class ProposicaoEndpoint {
 				System.err.println("E " + e.getMessage());
 
 			}
-			System.out.println("reuniao e " + reuniao);
 			if (reuniao == null) {
 				reuniao = new Reuniao();
 				reuniao.setData(reuniaoDate);
