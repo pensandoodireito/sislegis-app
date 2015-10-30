@@ -27,7 +27,7 @@ public abstract class AbstractPersistence<T extends AbstractEntity, PK extends N
 	public AbstractPersistence(Class<T> entityClass) {
 		this.entityClass = entityClass;
 	}
-	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+//	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public T save(T e) {
 		if (e.getId() != null)
 			return getEntityManager().merge(e);

@@ -24,7 +24,7 @@ public class Resultado extends AbstractEntity{
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    private Proposicao proposicao;
+    private ReuniaoProposicao reuniaoProposicao;
 
     @Override
     public Long getId() {
@@ -59,12 +59,12 @@ public class Resultado extends AbstractEntity{
         this.usuario = usuario;
     }
 
-    public Proposicao getProposicao() {
-        return proposicao;
+    public ReuniaoProposicao getReuniaoProposicao() {
+        return reuniaoProposicao;
     }
 
-    public void setProposicao(Proposicao proposicao) {
-        this.proposicao = proposicao;
+    public void setReuniaoProposicao(ReuniaoProposicao reuniaoProposicao) {
+        this.reuniaoProposicao = reuniaoProposicao;
     }
 
     @Override
@@ -74,7 +74,7 @@ public class Resultado extends AbstractEntity{
                 ", descricao='" + descricao + '\'' +
                 ", dataCriacao=" + dataCriacao +
                 ", usuario=" + usuario +
-                ", proposicao=" + proposicao +
+                ", reuniaoProposicao=" + reuniaoProposicao +
                 '}';
     }
 }
