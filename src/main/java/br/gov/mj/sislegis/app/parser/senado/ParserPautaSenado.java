@@ -46,10 +46,7 @@ public class ParserPautaSenado {
 			}
 
 		}
-		// System.out.println(parser.getPautaComissao(siglaComissao,
-		// datIni).toString());
-		// System.out.println(parser.getProposicoes(siglaComissao,
-		// datIni).toString());
+
 	}
 
 	public Set<PautaReuniaoComissao> getPautaComissao(String siglaComissao, String datIni, String datFim)
@@ -112,33 +109,6 @@ public class ParserPautaSenado {
 
 		return pautas;
 	}
-
-	// public List<Proposicao> getProposicoes(String siglaComissao, String
-	// datIni) throws Exception {
-	// List<Proposicao> proposicoes = new ArrayList<Proposicao>();
-	//
-	// XStream xstreamReuniao = new XStream();
-	// xstreamReuniao.ignoreUnknownElements();
-	//
-	// configReuniao(xstreamReuniao);
-	//
-	// for (ReuniaoBeanSenado bean : getReunioes(siglaComissao, datIni)) {
-	//
-	// String wsURLReuniao = "http://legis.senado.leg.br/dadosabertos/reuniao/"
-	// + bean.getCodigo();
-	// ReuniaoBeanSenado reuniao = new ReuniaoBeanSenado();
-	// ParserFetcher.fetchXStream(wsURLReuniao, xstreamReuniao, reuniao);
-	//
-	// // proposicoes.addAll(reuniao.getProposicoes());
-	// }
-	//
-	// return proposicoes;
-	// }
-
-	// public List<ReuniaoBeanSenado> getReunioes(String siglaComissao, String
-	// datIni) throws Exception {
-	// return getReunioes(siglaComissao, datIni, null);
-	// }
 
 	public List<ReuniaoBeanSenado> getReunioes(String siglaComissao, String datIni, String dataFim) throws Exception {
 
