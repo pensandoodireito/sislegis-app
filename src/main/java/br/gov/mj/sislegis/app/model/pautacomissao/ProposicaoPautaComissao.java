@@ -51,6 +51,7 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 
 	}
 
+	// isto é o id da tabela de proposicao, e não o idproposicao que vem do WS!
 	public Long getProposicaoId() {
 		return proposicaoId;
 	}

@@ -590,7 +590,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				proposicaoPautaComissao.getProposicao();
 			}
 			proposicaoPautaComissao.setPautaReuniaoComissao(pautaReuniaoComissao);
-			
+
 			getEntityManager().persist(proposicaoPautaComissao);
 			pautaReuniaoComissao.addProposicaoPauta(proposicaoPautaComissao);
 		}
@@ -654,26 +654,37 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
 					"Criou reuniao para o dia " + reuniao.getData());
 		}
+
 		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
 				"Salvando " + pautaReunioes.size() + " pautas e suas proposicoes");
 		for (Iterator<PautaReuniaoComissao> iterator = pautaReunioes.iterator(); iterator.hasNext();) {
 
 			PautaReuniaoComissao prc = iterator.next();
+			Set<ProposicaoPautaComissao> proposicoesParaEstaReuniao = new HashSet<ProposicaoPautaComissao>(
+					prc.getProposicoesDaPauta());
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "Criando pautareuniao na base");
 
 			prc = savePautaReuniaoComissao(prc);
-			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
-					"Associando suas proposicoes a reuniao, ha: " + prc.getProposicoesDaPauta().size());
-			for (Iterator<ProposicaoPautaComissao> iterator2 = prc.getProposicoesDaPauta().iterator(); iterator2
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
+					Level.FINE,
+					"Associando suas proposicoes a reuniao, ha: " + prc.getProposicoesDaPauta().size()
+							+ " mas para essa reuniao temos " + pautaReunioes.size());
+			for (Iterator<ProposicaoPautaComissao> proposicoesIterator = proposicoesParaEstaReuniao.iterator(); proposicoesIterator
 					.hasNext();) {
+				ProposicaoPautaComissao ppc = proposicoesIterator.next();
+				Proposicao prop = findProposicaoBy(ppc.getProposicao().getOrigem(), ppc.getProposicao()
+						.getIdProposicao());
+				if (prop == null) {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
+							"Erro, não persistiu a proposicao " + ppc.getProposicao());
+					continue;
+				}
 
-				ProposicaoPautaComissao ppc = iterator2.next();
-				if (reuniaoProposicaoService.findById(reuniao.getId(), ppc.getProposicaoId()) == null) {
-					Proposicao proposicao = findById(ppc.getProposicaoId());
+				if (reuniaoProposicaoService.findById(reuniao.getId(), prop.getId()) == null) {
 
-					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
-							"Associando " + proposicao + " " + reuniao);
-					associateReuniaoProposicao(reuniao, proposicao);
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER)
+							.log(Level.FINE, "Associando " + prop + " " + reuniao);
+					associateReuniaoProposicao(reuniao, prop);
 				} else {
 					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
 							"Ja estava associada " + ppc.getProposicaoId() + " " + reuniao);
