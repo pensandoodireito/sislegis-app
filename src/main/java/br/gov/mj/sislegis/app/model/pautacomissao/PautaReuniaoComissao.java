@@ -18,6 +18,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
@@ -27,10 +28,9 @@ import br.gov.mj.sislegis.app.model.Comissao;
 @Entity
 @Table(name = "PautaReuniaoComissao", uniqueConstraints = @UniqueConstraint(columnNames = { "comissao", "data",
 		"codigoReuniao" }))
-@NamedQueries(
-		{ 
-			@NamedQuery(name = "findByCodigoReuniao", query = "select p from PautaReuniaoComissao p where p.codigoReuniao=:codigoReuniao"),
-			@NamedQuery(name = "findByComissaoDataOrigem", query = "select p from PautaReuniaoComissao p where p.comissao=:comissao and p.data=:data and p.codigoReuniao=:codigoReuniao  ")
+@NamedQueries({
+		@NamedQuery(name = "findByCodigoReuniao", query = "select p from PautaReuniaoComissao p where p.codigoReuniao=:codigoReuniao"),
+		@NamedQuery(name = "findByComissaoDataOrigem", query = "select p from PautaReuniaoComissao p where p.comissao=:comissao and p.data=:data and p.codigoReuniao=:codigoReuniao  ")
 
 })
 public class PautaReuniaoComissao extends AbstractEntity implements Serializable, Comparable<PautaReuniaoComissao> {
@@ -65,6 +65,8 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 	protected String situacao;
 	@Column
 	protected String tipo;
+	@Transient
+	private boolean manual = false;
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "pautaReuniaoComissao")
 	@OrderBy("ordemPauta")
@@ -76,6 +78,12 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 	public PautaReuniaoComissao(Date data, Comissao comissao, Integer codigoReuniao) {
 		this.data = data;
 		this.comissao = comissao.getSigla();
+		this.codigoReuniao = codigoReuniao;
+	}
+
+	public PautaReuniaoComissao(Date data, String siglaComissao, Integer codigoReuniao) {
+		this.data = data;
+		this.comissao = siglaComissao;
 		this.codigoReuniao = codigoReuniao;
 	}
 
@@ -149,6 +157,14 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 
 	public void addProposicaoPauta(ProposicaoPautaComissao ppc) {
 		proposicoesDaPauta.add(ppc);
+	}
+
+	public boolean isManual() {
+		return manual;
+	}
+
+	public void setManual(boolean manual) {
+		this.manual = manual;
 	}
 
 	public Long getId() {

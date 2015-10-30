@@ -21,7 +21,9 @@ public class CompactPautaReuniaoComissao extends JsonSerializer<PautaReuniaoComi
 		jgen.writeStringField("linkpauta", obj.getLinkPauta());
 		jgen.writeStringField("comissao", obj.getComissao());
 		jgen.writeNumberField("data", obj.getData().getTime());
-
+		if (obj.isManual()) {
+			jgen.writeBooleanField("manual", obj.isManual());
+		}
 		jgen.writeEndObject();
 	}
 }

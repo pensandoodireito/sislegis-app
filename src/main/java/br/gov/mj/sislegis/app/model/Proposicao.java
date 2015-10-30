@@ -32,7 +32,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.commons.collections.CollectionUtils;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
-import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -235,8 +234,8 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public String getComissao() {
-		if (comissao == null) {
-			return pautasComissoes.first().getPautaReuniaoComissao().getComissao();
+		if (!pautasComissoes.isEmpty()) {
+			return getPautaComissaoAtual().getPautaReuniaoComissao().getComissao();
 		}
 		return comissao;
 	}

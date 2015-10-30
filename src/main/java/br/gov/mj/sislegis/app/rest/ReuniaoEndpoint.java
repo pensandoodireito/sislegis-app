@@ -61,31 +61,6 @@ public class ReuniaoEndpoint {
 		return Response.ok(service.findById(id)).build();
 	}
 
-	@PUT
-	@Path("/addProposicao")
-	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response addProposicao(CompactReuniao reuniaoCompacta) {
-		System.out.println("d " + reuniaoCompacta);
-		// Reuniao reuniao = service.findById(idReuniao);
-		// try {
-		// proposicao = proposicaoService
-		// .buscaProposicaoIndependentePor(proposicao.getOrigem(),
-		// proposicao.getTipo(),
-		// Integer.valueOf(proposicao.getNumero()),
-		// Integer.valueOf(proposicao.getAno())).iterator()
-		// .next();
-		// reuniao.addProposicao(proposicao);
-		// service.save(reuniao);
-		// return Response.created(
-		// UriBuilder.fromResource(ReuniaoEndpoint.class).path(String.valueOf(reuniao.getId())).build())
-		// .build();
-		// } catch (Exception e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-	}
 
 	@GET
 	@Path("/findByData")

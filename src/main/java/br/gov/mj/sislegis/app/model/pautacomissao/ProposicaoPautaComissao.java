@@ -60,9 +60,9 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 		return pautaReuniaoComissaoId;
 	}
 
-	public ProposicaoPautaComissao(PautaReuniaoComissao pc, Proposicao proposicao) {
-		setProposicao(proposicao);
-		setPautaReuniaoComissao(pautaReuniaoComissao);
+	public ProposicaoPautaComissao(PautaReuniaoComissao pc, Proposicao prop) {
+		setProposicao(prop);
+		setPautaReuniaoComissao(pc);
 	}
 
 	public String getRelator() {
@@ -113,6 +113,12 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 
 	@Override
 	public int compareTo(ProposicaoPautaComissao o) {
+		if (o.ordemPauta == null) {
+			return 1;
+		}
+		if (ordemPauta == null) {
+			return -1;
+		}
 		if (o.ordemPauta > ordemPauta) {
 			return -1;
 		} else if (o.ordemPauta < ordemPauta) {
@@ -130,14 +136,14 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 
 		} else {
 			if (obj instanceof ProposicaoPautaComissao) {
-				if (this.proposicao == null) {
+				if (this.proposicao == null || proposicaoId == null) {
 					return false;
 				}
-				if (this.pautaReuniaoComissao == null) {
+				if (this.pautaReuniaoComissao == null || pautaReuniaoComissaoId == null) {
 					return false;
 				}
-				if (this.pautaReuniaoComissao.equals(((ProposicaoPautaComissao) obj).getPautaReuniaoComissao())
-						&& this.getProposicao().equals(((ProposicaoPautaComissao) obj).getProposicao())) {
+				if (this.pautaReuniaoComissaoId.equals(((ProposicaoPautaComissao) obj).getPautaReuniaoComissaoId())
+						&& this.proposicaoId.equals(((ProposicaoPautaComissao) obj).getProposicaoId())) {
 					return true;
 				}
 
