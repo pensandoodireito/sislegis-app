@@ -135,10 +135,10 @@ public class Proposicao extends AbstractEntity {
 	@Transient
 	private Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao = new HashSet<>();
 
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "reuniaoproposicao", joinColumns = { @JoinColumn(name = "proposicao_id") })
-	@OrderBy("data asc")
-	private SortedSet<Reuniao> reuniao = new TreeSet<Reuniao>();
+//	@ManyToMany(fetch = FetchType.LAZY)
+//	@JoinTable(name = "reuniaoproposicao", joinColumns = { @JoinColumn(name = "proposicao_id") })
+//	@OrderBy("data asc")
+//	private SortedSet<Reuniao> reuniao = new TreeSet<Reuniao>();
 
 	@Column(nullable = false)
 	private boolean isFavorita;
