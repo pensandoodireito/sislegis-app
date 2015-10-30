@@ -6,7 +6,7 @@ import java.util.Date;
 
 @Entity
 @XmlRootElement
-public class Andamento extends AbstractEntity{
+public class Resultado extends AbstractEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -69,7 +69,7 @@ public class Andamento extends AbstractEntity{
 
     @Override
     public String toString() {
-        return "Andamento{" +
+        return "Resultado{" +
                 "id=" + id +
                 ", descricao='" + descricao + '\'' +
                 ", dataCriacao=" + dataCriacao +
