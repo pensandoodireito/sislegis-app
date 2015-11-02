@@ -38,11 +38,20 @@ public class ResultadoEndpoint {
         return Response.created(UriBuilder.fromResource(ResultadoEndpoint.class).path(String.valueOf(resultado.getId())).build()).build();
     }
 
-    @GET
-    @Path("/proposicao/{idProposicao:[0-9][0-9]*}")
+    @POST
+    @Path("/byReuniaoProposicao")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Resultado> findByIdProposicao(@PathParam("idProposicao") Long idProposicao) {
-        List<Resultado> resultados = resultadoService.findByIdProposicao(idProposicao);
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public List<Resultado> findByReuniaoProposicao(@FormParam("idReuniao") Long idReuniao, @FormParam("idProposicao") Long idProposicao){
+        List<Resultado> resultados;
+
+        try {
+            resultados = resultadoService.findByReuniaoProposicao(idReuniao, idProposicao);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
         return resultados;
     }
 

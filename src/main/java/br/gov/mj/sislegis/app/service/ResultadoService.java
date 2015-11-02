@@ -8,6 +8,6 @@ import java.util.List;
 @Local
 public interface ResultadoService extends Service<Resultado> {
 
-    List<Resultado> findByIdProposicao(Long idProposicao);
+    List<Resultado> findByReuniaoProposicao(Long idReuniao, Long idProposicao);
 
 }

@@ -26,9 +26,10 @@ public class ResultadoServiceEjb extends AbstractPersistence<Resultado, Long> im
     }
 
     @Override
-    public List<Resultado> findByIdProposicao(Long idProposicao) {
+    public List<Resultado> findByReuniaoProposicao(Long idReuniao, Long idProposicao) {
         TypedQuery<Resultado> query = getEntityManager().createQuery(
-                "SELECT r FROM Resultado r WHERE r.proposicao.id = :idProposicao ORDER BY r.dataCriacao DESC", Resultado.class);
+                "SELECT r FROM Resultado r WHERE r.reuniaoProposicao.id.idReuniao = :idReuniao AND r.reuniaoProposicao.id.idProposicao = :idProposicao ORDER BY r.dataCriacao DESC", Resultado.class);
+        query.setParameter("idReuniao", idReuniao);
         query.setParameter("idProposicao", idProposicao);
 
         return query.getResultList();
