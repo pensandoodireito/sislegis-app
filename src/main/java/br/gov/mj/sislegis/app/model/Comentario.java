@@ -41,6 +41,8 @@ public class Comentario extends AbstractEntity {
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Proposicao proposicao;
 
+	private Boolean oculto = false;
+
 	public Long getId() {
 		return this.id;
 	}
@@ -73,16 +75,6 @@ public class Comentario extends AbstractEntity {
 		this.dataCriacao = dataCriacao;
 	}
 
-	@Override
-	public String toString() {
-		String result = getClass().getSimpleName() + " ";
-		if (descricao != null && !descricao.trim().isEmpty())
-			result += "descricao: " + descricao;
-		if (autor != null)
-			result += ", autor: " + autor;
-		return result;
-	}
-
 	public Proposicao getProposicao() {
 		if (!Objects.isNull(this.proposicao)) {
 			Proposicao p = new Proposicao();
@@ -94,5 +86,23 @@ public class Comentario extends AbstractEntity {
 
 	public void setProposicao(final Proposicao proposicao) {
 		this.proposicao = proposicao;
+	}
+
+	public Boolean isOculto() {
+		return oculto;
+	}
+
+	public void setOculto(Boolean oculto) {
+		this.oculto = oculto;
+	}
+
+	@Override
+	public String toString() {
+		String result = getClass().getSimpleName() + " ";
+		if (descricao != null && !descricao.trim().isEmpty())
+			result += "descricao: " + descricao;
+		if (autor != null)
+			result += ", autor: " + autor;
+		return result;
 	}
 }

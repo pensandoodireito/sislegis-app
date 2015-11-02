@@ -43,14 +43,6 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> 
 	}
 
 	@Override
-	public Integer totalByProposicao(Long idProposicao) {
-		Query query = em.createNativeQuery("SELECT COUNT(1) FROM comentario WHERE proposicao_id = :idProposicao");
-		query.setParameter("idProposicao", idProposicao);
-		BigInteger total = (BigInteger) query.getSingleResult();
-		return total.intValue();
-	}
-
-	@Override
 	public void salvarComentario(Comentario comentario, Usuario autor) throws IllegalAccessException {
 		if (comentario.getId() != null) {
 			if (comentario.getAutor() != null) {
@@ -63,4 +55,18 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> 
 		save(comentario);
 	}
 
+	@Override
+	public Integer totalByProposicao(Long idProposicao) {
+		Query query = em.createNativeQuery("SELECT COUNT(1) FROM comentario WHERE proposicao_id = :idProposicao");
+		query.setParameter("idProposicao", idProposicao);
+		BigInteger total = (BigInteger) query.getSingleResult();
+		return total.intValue();
+	}
+
+	@Override
+	public void ocultar(Long idComentario) {
+		Comentario comentario = findById(idComentario);
+		comentario.setOculto(true);
+		save(comentario);
+	}
 }
