@@ -111,7 +111,7 @@ public class ComentarioEndpoint {
 		return Response.noContent().build();
 	}
 
-	@PUT
+	@GET
 	@Path("/ocultar/{id:[0-9][0-9]*}")
 	public Response ocultar(@PathParam("id") Long id){
 		try {
