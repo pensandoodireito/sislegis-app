@@ -33,7 +33,10 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> 
 	public List<Comentario> findByIdProposicao(Long id) {
 
 		TypedQuery<Comentario> findByIdQuery = em.createQuery("SELECT DISTINCT c FROM Comentario c "
-				+ "INNER JOIN FETCH c.autor a " + "INNER JOIN FETCH c.proposicao p WHERE p.id = :entityId",
+				+ "INNER JOIN FETCH c.autor a "
+				+ "INNER JOIN FETCH c.proposicao p "
+				+ "WHERE p.id = :entityId "
+				+ "AND c.oculto = FALSE ",
 				Comentario.class);
 
 		findByIdQuery.setParameter("entityId", id);
@@ -57,7 +60,7 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> 
 
 	@Override
 	public Integer totalByProposicao(Long idProposicao) {
-		Query query = em.createNativeQuery("SELECT COUNT(1) FROM comentario WHERE proposicao_id = :idProposicao");
+		Query query = em.createNativeQuery("SELECT COUNT(1) FROM comentario WHERE proposicao_id = :idProposicao AND oculto = FALSE ");
 		query.setParameter("idProposicao", idProposicao);
 		BigInteger total = (BigInteger) query.getSingleResult();
 		return total.intValue();
