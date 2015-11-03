@@ -3,18 +3,24 @@ package br.gov.mj.sislegis.app.model.pautacomissao;
 import java.io.Serializable;
 
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapsId;
 import javax.persistence.Table;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.rest.serializers.CompactPautaReuniaoComissao;
+import br.gov.mj.sislegis.app.rest.serializers.CompactProposicao;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
 @Table(name = "Proposicao_PautaComissao")
+@IdClass(PropostaPautaPK.class)
 public class ProposicaoPautaComissao implements Serializable, Comparable<ProposicaoPautaComissao> {
 
 	/**
@@ -22,24 +28,10 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 	 */
 	private static final long serialVersionUID = 2853814379434569522L;
 
-	public PautaReuniaoComissao getPautaReuniaoComissao() {
-		return pautaReuniaoComissao;
-	}
-
-	public void setPautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao) {
-		this.pautaReuniaoComissao = pautaReuniaoComissao;
-	}
-
-	public void setKey(PropostaPautaPK key) {
-		this.key = key;
-	}
-
-	public void setProposicao(Proposicao proposicao) {
-		this.proposicao = proposicao;
-	}
-
-	@EmbeddedId
-	PropostaPautaPK key = new PropostaPautaPK();
+	@Id
+	Long proposicaoId;
+	@Id
+	Long pautaReuniaoComissaoId;
 
 	@Column
 	Integer ordemPauta = 0;
@@ -47,26 +39,30 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 	@Column
 	String relator;
 
-	@MapsId("proposicaoId")
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "proposicaoId", updatable = false, insertable = false, referencedColumnName = "id", nullable = false)
 	Proposicao proposicao;
 
-	@MapsId("pautaReuniaoComissaoId")
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "pautaReuniaoComissaoId", referencedColumnName = "id", nullable = false)
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "pautaReuniaoComissaoId", updatable = false, insertable = false, referencedColumnName = "id", nullable = false)
 	PautaReuniaoComissao pautaReuniaoComissao;
 
 	ProposicaoPautaComissao() {
 
 	}
 
-	public PropostaPautaPK getKey() {
-		return key;
+	// isto é o id da tabela de proposicao, e não o idproposicao que vem do WS!
+	public Long getProposicaoId() {
+		return proposicaoId;
 	}
 
-	public ProposicaoPautaComissao(PautaReuniaoComissao pc, Proposicao proposicao) {
-		this.pautaReuniaoComissao = pc;
-		this.proposicao = proposicao;
+	public Long getPautaReuniaoComissaoId() {
+		return pautaReuniaoComissaoId;
+	}
+
+	public ProposicaoPautaComissao(PautaReuniaoComissao pc, Proposicao prop) {
+		setProposicao(prop);
+		setPautaReuniaoComissao(pc);
 	}
 
 	public String getRelator() {
@@ -77,11 +73,11 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 		this.relator = relator;
 	}
 
-	public PautaReuniaoComissao getPautaComissao() {
-		return pautaReuniaoComissao;
-	}
-
+	@JsonSerialize(using = CompactProposicao.class)
 	public Proposicao getProposicao() {
+		if (proposicao != null && proposicao.getId() != proposicaoId) {
+			proposicaoId = proposicao.getId();
+		}
 		return proposicao;
 	}
 
@@ -93,8 +89,36 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 		this.ordemPauta = ordemPauta;
 	}
 
+	@JsonSerialize(using = CompactPautaReuniaoComissao.class)
+	public PautaReuniaoComissao getPautaReuniaoComissao() {
+		if (pautaReuniaoComissao != null && pautaReuniaoComissao.getId() != pautaReuniaoComissaoId) {
+			pautaReuniaoComissaoId = pautaReuniaoComissao.getId();
+		}
+		return pautaReuniaoComissao;
+	}
+
+	public void setPautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao) {
+		this.pautaReuniaoComissao = pautaReuniaoComissao;
+		if (pautaReuniaoComissao != null) {
+			pautaReuniaoComissaoId = pautaReuniaoComissao.getId();
+		}
+	}
+
+	public void setProposicao(Proposicao proposicao) {
+		this.proposicao = proposicao;
+		if (proposicao != null) {
+			proposicaoId = proposicao.getId();
+		}
+	}
+
 	@Override
 	public int compareTo(ProposicaoPautaComissao o) {
+		if (o.ordemPauta == null) {
+			return 1;
+		}
+		if (ordemPauta == null) {
+			return -1;
+		}
 		if (o.ordemPauta > ordemPauta) {
 			return -1;
 		} else if (o.ordemPauta < ordemPauta) {
@@ -106,12 +130,31 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 	}
 
 	@Override
-	public String toString() {
-		if (key != null) {
-			StringBuilder sb = new StringBuilder(key.toString());
-			sb.append(" ordem:" + ordemPauta + " Relator:{" + relator + "}");
-			return sb.toString();
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+
+		} else {
+			if (obj instanceof ProposicaoPautaComissao) {
+				if (this.proposicao == null || proposicaoId == null) {
+					return false;
+				}
+				if (this.pautaReuniaoComissao == null || pautaReuniaoComissaoId == null) {
+					return false;
+				}
+				if (this.pautaReuniaoComissaoId.equals(((ProposicaoPautaComissao) obj).getPautaReuniaoComissaoId())
+						&& this.proposicaoId.equals(((ProposicaoPautaComissao) obj).getProposicaoId())) {
+					return true;
+				}
+
+			}
 		}
-		return super.toString();
+		return false;
+	}
+
+	@Override
+	public String toString() {
+
+		return proposicaoId + ":" + pautaReuniaoComissaoId + "@" + super.hashCode();
 	}
 }

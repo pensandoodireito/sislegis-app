@@ -13,6 +13,8 @@ import br.gov.mj.sislegis.app.model.Proposicao;
  *
  */
 public interface ProposicaoSearcher {
+	public static final String SEM_RELATOR_DEFINIDO = "Sem relator definido";
+
 	/**
 	 * Retorna lista de proposicoes encontradas com os filtros tipo, numero e
 	 * ano
