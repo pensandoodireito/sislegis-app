@@ -98,7 +98,8 @@ public class Proposicao extends AbstractEntity {
 	@Column(length = 2000)
 	private String resultadoASPAR;
 
-	@Transient
+	@Column(name="ultima_comissao")
+//	@Transient
 	private String comissao;
 
 	@Transient
@@ -134,11 +135,6 @@ public class Proposicao extends AbstractEntity {
 
 	@Transient
 	private Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao = new HashSet<>();
-
-//	@ManyToMany(fetch = FetchType.LAZY)
-//	@JoinTable(name = "reuniaoproposicao", joinColumns = { @JoinColumn(name = "proposicao_id") })
-//	@OrderBy("data asc")
-//	private SortedSet<Reuniao> reuniao = new TreeSet<Reuniao>();
 
 	@Column(nullable = false)
 	private boolean isFavorita;
@@ -234,9 +230,6 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public String getComissao() {
-		if (!pautasComissoes.isEmpty()) {
-			return getPautaComissaoAtual().getPautaReuniaoComissao().getComissao();
-		}
 		return comissao;
 	}
 
