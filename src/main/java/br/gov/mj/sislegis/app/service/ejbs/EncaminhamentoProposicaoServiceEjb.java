@@ -41,7 +41,6 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 	public EncaminhamentoProposicao salvarEncaminhamentoProposicao(EncaminhamentoProposicao encaminhamentoProposicao) {
 		EncaminhamentoProposicao savedEntity = this.save(encaminhamentoProposicao);
 		if (savedEntity.getResponsavel() != null) {
-
 			criarTarefa(savedEntity);
 		}
 		return savedEntity;
