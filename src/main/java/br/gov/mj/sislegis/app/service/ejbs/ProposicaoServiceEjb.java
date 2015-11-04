@@ -5,12 +5,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -507,12 +505,6 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (proposicao != null) {
 			proposicao.setTotalComentarios(comentarioService.totalByProposicao(proposicao.getId()));
 			proposicao.setTotalEncaminhamentos(encaminhamentoProposicaoService.totalByProposicao(proposicao.getId()));
-
-			// TODO Remover o carregamento da lista quando tiver a nova
-			// implementacao do carregamento por demanda
-			Set<EncaminhamentoProposicao> encaminhamentos = new HashSet<>(
-					encaminhamentoProposicaoService.findByProposicao(proposicao.getId()));
-			proposicao.setListaEncaminhamentoProposicao(encaminhamentos);
 		}
 	}
 

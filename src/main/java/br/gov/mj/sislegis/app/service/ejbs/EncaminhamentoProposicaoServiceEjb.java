@@ -65,6 +65,7 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 		tarefaService.save(tarefa);
 	}
 
+	@Override
 	public List<EncaminhamentoProposicao> findByProposicao(Long idProposicao) {
 		TypedQuery<EncaminhamentoProposicao> findByIdQuery = em.createQuery(
 				"SELECT c FROM EncaminhamentoProposicao c where c.proposicao.id=:entityId",
@@ -77,6 +78,7 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 
 	// Por algum motivo esse metodo não está usando JPA, e está fazendo join na
 	// mao...
+
 	@Deprecated
 	public List<EncaminhamentoProposicao> findByProposicao2(Long idProposicao) {
 		TypedQuery<EncaminhamentoProposicao> findByIdQuery = em.createQuery("SELECT c FROM EncaminhamentoProposicao c "
