@@ -264,6 +264,24 @@ public class ProposicaoEndpoint {
 
 	}
 
+	@POST
+	@Path("/check4updates/{id:[0-9]+}")
+	public Response syncpauta(@PathParam("id") Long id) {
+		try {
+
+			if (proposicaoService.syncDadosPautaProposicao(id) || proposicaoService.syncDadosProposicao(id)) {
+				return Response.status(Status.ACCEPTED).entity(proposicaoService.findById(id)).build();
+			} else {
+				return Response.status(Status.NOT_MODIFIED).build();
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
+
+	}
+
 	@DELETE
 	@Path("/follow/{id:[0-9]+}")
 	public Response unfollow(@PathParam("id") Long id, @HeaderParam("Authorization") String authorization) {

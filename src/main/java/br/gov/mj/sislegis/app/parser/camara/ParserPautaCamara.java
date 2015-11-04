@@ -25,16 +25,16 @@ public class ParserPautaCamara {
 		ParserPautaCamara parser = new ParserPautaCamara();
 
 		// TODO: Informação que vem do filtro
-		Long idComissao = 2003L;
-		String datIni = "20151012";
-		String datFim = "20151015";
+		Long idComissao = 2001L;
+		String datIni = "20151102";
+		String datFim = "20151109";
 		Set<PautaReuniaoComissao> pautas = parser.getPautaComissao(idComissao, datIni, datFim);
 		for (Iterator iterator = pautas.iterator(); iterator.hasNext();) {
 			PautaReuniaoComissao pautaReuniaoComissao = (PautaReuniaoComissao) iterator.next();
 			System.out.println(pautaReuniaoComissao);
 			for (Iterator iterator2 = pautaReuniaoComissao.getProposicoesDaPauta().iterator(); iterator2.hasNext();) {
 				ProposicaoPautaComissao ppc = (ProposicaoPautaComissao) iterator2.next();
-				System.out.println("\t" + ppc);
+				System.out.println("\t" + ppc + " " + ppc.getProposicao()+" ");
 				System.out.println("\t Resultado: " + ppc.getResultado());
 
 			}
@@ -95,7 +95,11 @@ public class ParserPautaCamara {
 
 		for (ReuniaoBeanCamara reuniao : pauta.getReunioes()) {
 			Comissao comissao = new Comissao();
-			comissao.setSigla(reuniao.getComissao());
+			String sigla = reuniao.getComissao();
+			if (sigla != null && sigla.indexOf("-") > -1) {
+				sigla = sigla.substring(0, sigla.indexOf("-")).trim();
+			}
+			comissao.setSigla(sigla);
 
 			PautaReuniaoComissao pautaReuniaoComissao = new PautaReuniaoComissao(reuniao.getDate(), comissao,
 					reuniao.getCodigo());
@@ -113,6 +117,7 @@ public class ParserPautaCamara {
 				ptemp.setIdProposicao(pautaProposicao.idProposicao);
 				ptemp.setOrigem(Origem.CAMARA);
 				ptemp.setEmenta(pautaProposicao.ementa);
+				ptemp.setComissao(sigla);
 				ptemp.setSigla(pautaProposicao.sigla);
 				ProposicaoPautaComissao ppc = new ProposicaoPautaComissao(pautaReuniaoComissao, ptemp);
 				ppc.setOrdemPauta(pautaProposicao.numOrdemApreciacao);

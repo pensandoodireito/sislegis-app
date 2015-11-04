@@ -1,7 +1,38 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+
 import br.gov.mj.sislegis.app.enumerated.Origem;
-import br.gov.mj.sislegis.app.model.*;
+import br.gov.mj.sislegis.app.model.AlteracaoProposicao;
+import br.gov.mj.sislegis.app.model.Comentario;
+import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Reuniao;
+import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
+import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
+import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
@@ -12,22 +43,16 @@ import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
 import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserPlenarioSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
-import br.gov.mj.sislegis.app.service.*;
+import br.gov.mj.sislegis.app.service.AbstractPersistence;
+import br.gov.mj.sislegis.app.service.ComentarioService;
+import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
+import br.gov.mj.sislegis.app.service.ProposicaoService;
+import br.gov.mj.sislegis.app.service.ReuniaoProposicaoService;
+import br.gov.mj.sislegis.app.service.ReuniaoService;
+import br.gov.mj.sislegis.app.service.TagService;
+import br.gov.mj.sislegis.app.service.UsuarioService;
 import br.gov.mj.sislegis.app.util.Conversores;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
-
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import java.io.IOException;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @Stateless
 public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> implements ProposicaoService,
@@ -78,10 +103,18 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		return em;
 	}
 
-	private Date getNextWeek(Date ref) {
+	private static Date getNextWeek(Date ref) {
 		Calendar c = Calendar.getInstance();
 		c.setTime(ref);
 		c.add(Calendar.WEEK_OF_YEAR, 1);
+		return c.getTime();
+	}
+
+	private static Date getClosestMonday(Date ref) {
+		Calendar c = Calendar.getInstance();
+		c.setTime(ref);
+		c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+
 		return c.getTime();
 	}
 
@@ -90,6 +123,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		Long idComissao = (Long) parametros.get("idComissao");
 		Date dataInicial = (Date) parametros.get("data");
 		Date dataFinal = getNextWeek(dataInicial);
+		return buscarProposicoesPautaCamaraWS(idComissao, dataInicial, dataFinal);
+	}
+
+	@Override
+	public Set<PautaReuniaoComissao> buscarProposicoesPautaCamaraWS(Long idComissao, Date dataInicial, Date dataFinal)
+			throws Exception {
 
 		String dataIni = Conversores.dateToString(dataInicial, "yyyyMMdd");
 		String dataFim = Conversores.dateToString(dataFinal, "yyyyMMdd");
@@ -100,8 +139,16 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	public Set<PautaReuniaoComissao> buscarProposicoesPautaSenadoWS(Map parametros) throws Exception {
 		String siglaComissao = (String) parametros.get("siglaComissao");
 		Date dataInicial = (Date) parametros.get("data");
+		Date dataFinal = getNextWeek(dataInicial);
+		return buscarProposicoesPautaSenadoWS(siglaComissao, dataInicial, dataFinal);
+	}
+
+	@Override
+	public Set<PautaReuniaoComissao> buscarProposicoesPautaSenadoWS(String siglaComissao, Date dataInicial,
+			Date dataFinal) throws Exception {
+
 		String dataIni = Conversores.dateToString(dataInicial, "yyyyMMdd");
-		String dataFim = Conversores.dateToString(getNextWeek(dataInicial), "yyyyMMdd");
+		String dataFim = Conversores.dateToString(dataFinal, "yyyyMMdd");
 		if (siglaComissao.equals("PLEN")) {
 			return parserPlenarioSenado.getProposicoes(dataIni);
 		}
@@ -287,7 +334,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			if (dataReuniao.getTime() < 1446222706000l) {
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
 						"Reuniao mais antiga que refactoring, utilizando metodo alternativo");
-				Query query = em.createNativeQuery("select * from reuniaoproposicao r where  r.reuniao_id=:rid",
+				Query query = em.createNativeQuery("select * from reuniaoproposicao r where r.reuniao_id=:rid",
 						ReuniaoProposicao.class);
 				query.setParameter("rid", reuniao.getId());
 				List<ReuniaoProposicao> proposicoesReuniao = query.getResultList();
@@ -466,6 +513,11 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	private ChecaAlteracoesProposicao checadorAlteracoes = new ChecaAlteracoesProposicao();
 
 	@Override
+	public boolean syncDadosProposicao(Long proposicaoLocalId) throws IOException {
+		return syncDadosProposicao(findById(proposicaoLocalId));
+	}
+
+	@Override
 	public boolean syncDadosProposicao(Proposicao proposicaoLocal) throws IOException {
 		try {
 			ProposicaoSearcher parser = ProposicaoSearcherFactory.getInstance(proposicaoLocal);
@@ -488,6 +540,149 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 		return false;
 	}
+
+	@Override
+	public boolean syncDadosPautaProposicao(Long idProposicaoLocal) throws IOException {
+		return syncDadosPautaProposicao(findById(idProposicaoLocal));
+	}
+
+	@Override
+	public boolean syncDadosPautaProposicao(Proposicao proposicaoLocal) throws IOException {
+		try {
+			Date initialMonday = getClosestMonday(new Date());
+			Date nextMonday = getNextWeek(initialMonday);
+			Set<PautaReuniaoComissao> props = new HashSet<PautaReuniaoComissao>();
+			switch (proposicaoLocal.getOrigem()) {
+			case SENADO:
+				props = buscarProposicoesPautaSenadoWS(proposicaoLocal.getComissao(), initialMonday, nextMonday);
+				break;
+			case CAMARA:
+				List<Comissao> comissoes = new ParserComissoesCamara().getComissoes();
+				Comissao comissao = null;
+				String silga = proposicaoLocal.getComissao();
+				if (silga != null && silga.indexOf("-") > 0) {
+					silga = proposicaoLocal.getComissao().substring(0, proposicaoLocal.getComissao().indexOf("-"))
+							.trim();
+				}
+
+				for (Iterator<Comissao> iterator = comissoes.iterator(); iterator.hasNext();) {
+					Comissao c = (Comissao) iterator.next();
+					// Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINEST,
+					// "Comissao retornada " + c.getSigla() + " " + c.getId() +
+					// " === " + silga);
+					if (c.getSigla().trim().equals(silga)) {
+						comissao = c;
+						break;
+					}
+				}
+				if (comissao == null) {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
+							Level.SEVERE,
+							"Falhou ao sincronizar pauta pois nao encontrou comissao com id "
+									+ proposicaoLocal.getComissao() + " " + proposicaoLocal);
+					return false;
+				}
+				props = buscarProposicoesPautaCamaraWS(comissao.getId(), initialMonday, nextMonday);
+				break;
+
+			default:
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
+						"Falhou ao sincronizar pauta pois origem é desconhecida  " + proposicaoLocal);
+				return false;
+			}
+			for (Iterator<PautaReuniaoComissao> iterator = props.iterator(); iterator.hasNext();) {
+				PautaReuniaoComissao pautaReuniaoComissao = (PautaReuniaoComissao) iterator.next();
+				for (Iterator<ProposicaoPautaComissao> iterator2 = pautaReuniaoComissao.getProposicoesDaPauta()
+						.iterator(); iterator2.hasNext();) {
+					ProposicaoPautaComissao ppComissao = (ProposicaoPautaComissao) iterator2.next();
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
+							Level.FINE,
+							"buscando proposicao na pauta " + ppComissao.getProposicao().getIdProposicao() + " == "
+									+ proposicaoLocal.getIdProposicao());
+					if (ppComissao.getProposicao().getIdProposicao().equals(proposicaoLocal.getIdProposicao())) {
+						ppComissao.setProposicao(proposicaoLocal);
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+								"encontrou proposicao na pauta " + ppComissao);
+						PautaReuniaoComissao prc = retrievePautaReuniao(pautaReuniaoComissao.getCodigoReuniao());
+						if (prc != null) {
+							ppComissao.setPautaReuniaoComissao(prc);
+							for (Iterator<ProposicaoPautaComissao> iterator3 = prc.getProposicoesDaPauta().iterator(); iterator3
+									.hasNext();) {
+								ProposicaoPautaComissao localPPC = (ProposicaoPautaComissao) iterator3.next();
+								if (localPPC.getProposicao().getIdProposicao()
+										.equals(proposicaoLocal.getIdProposicao())) {
+									if (checadorAlteracoesPauta.compare(localPPC, ppComissao) > 0) {
+										Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+												"encontrou diferencas " + ppComissao + " e " + localPPC);
+										savePautaReuniaoComissao(prc);
+										return true;
+									} else {
+										Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+												"nenhuma diff encontrada");
+										return false;
+									}
+								}
+							}
+
+						} else {
+							Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+									"pautaReuniaoComissao nova " + pautaReuniaoComissao);
+							pautaReuniaoComissao.setProposicoesDaPauta(new TreeSet<ProposicaoPautaComissao>());
+							pautaReuniaoComissao.addProposicaoPauta(ppComissao);
+							savePautaReuniaoComissao(pautaReuniaoComissao);
+							return true;
+						}
+
+					}
+				}
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+						"Não foi encontrada proposicao na pauta da comissao nesta semana, nada a atualizar");
+
+			}
+
+		} catch (Exception e) {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+					"Falhou ao sincronizar proposicao " + proposicaoLocal, e);
+		}
+		return false;
+	}
+
+	/**
+	 * Este comparador checa por alterações na proposição.
+	 */
+	class ChecaAlteracoesPautaProposicao implements Comparator<ProposicaoPautaComissao> {
+
+		StringBuilder descricaoAlteracao;
+
+		@Override
+		public int compare(ProposicaoPautaComissao local, ProposicaoPautaComissao remote) {
+			descricaoAlteracao = new StringBuilder();
+			if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.FINE)) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Comparando ProposicaoPautaComissao ");
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Local:  " + local);
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Remota: " + remote);
+			}
+			if ((local.getRelator() == null && remote.getRelator() != null)
+					|| (remote.getRelator() != null && !local.getRelator().equals(remote.getRelator()))) {
+				descricaoAlteracao.append("Alterado Relator: '").append(local.getRelator()).append("' => '")
+						.append(remote.getRelator()).append("'\n");
+				local.setRelator(remote.getRelator());
+			}
+			if ((local.getOrdemPauta() == null && remote.getOrdemPauta() != null)
+					|| (remote.getOrdemPauta() != null && !local.getOrdemPauta().equals(remote.getOrdemPauta()))) {
+				descricaoAlteracao.append("Alterado Ordem pauta: '").append(local.getOrdemPauta()).append("' => '")
+						.append(remote.getOrdemPauta()).append("'\n");
+				local.setOrdemPauta(remote.getOrdemPauta());
+			}
+			return descricaoAlteracao.length();
+		}
+
+		public String getDescricaoAlteracao() {
+			return descricaoAlteracao.toString();
+		}
+	};
+
+	private ChecaAlteracoesPautaProposicao checadorAlteracoesPauta = new ChecaAlteracoesPautaProposicao();
 
 	@Override
 	public void followProposicao(Usuario user, Long idProposicao) {
