@@ -1,36 +1,23 @@
 package br.gov.mj.sislegis.app.rest;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ejb.EJBTransactionRolledbackException;
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-
-import org.jboss.resteasy.annotations.cache.Cache;
-
 import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.Posicionamento;
+import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
+import br.gov.mj.sislegis.app.service.PosicionamentoProposicaoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
-import br.gov.mj.sislegis.app.service.Service;
+import org.jboss.resteasy.annotations.cache.Cache;
+
+import javax.ejb.EJBTransactionRolledbackException;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import java.util.*;
 
 /**
  * 
@@ -43,7 +30,7 @@ public class ProposicaoEndpoint {
 	private ProposicaoService proposicaoService;
 
 	@Inject
-	private Service<Proposicao> service;
+	private PosicionamentoProposicaoService posicionamentoProposicaoService;
 
 	@GET
 	@Path("/proposicoesPautaCamara")
@@ -127,7 +114,7 @@ public class ProposicaoEndpoint {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(Proposicao entity) {
-		service.save(entity);
+		proposicaoService.save(entity);
 		return Response.created(
 				UriBuilder.fromResource(ProposicaoEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
 	}
@@ -244,6 +231,17 @@ public class ProposicaoEndpoint {
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		}
 
+	}
+
+	public Response alterarPosicionamento(Posicionamento posicionamento, Proposicao proposicao, String authorization){
+		PosicionamentoProposicao posicionamentoProposicao = new PosicionamentoProposicao();
+		posicionamentoProposicao.setPosicionamento(posicionamento);
+		posicionamentoProposicao.setProposicao(proposicao);
+		posicionamentoProposicaoService.save(posicionamentoProposicao);
+
+		// TODO Adicionar usuario
+
+		return Response.noContent().build();
 	}
 
 }
