@@ -116,6 +116,7 @@ public class ParserPautaCamara {
 				ProposicaoPautaComissao ppc = new ProposicaoPautaComissao(pautaReuniaoComissao, ptemp);
 				ppc.setOrdemPauta(pautaProposicao.numOrdemApreciacao);
 				ppc.setRelator(pautaProposicao.getRelator());
+				ppc.setResultado(pautaProposicao.resultado);
 				pautaReuniaoComissao.addProposicaoPauta(ppc);
 			}
 			if (pautaReuniaoComissao.getProposicoesDaPauta().size() > 0) {

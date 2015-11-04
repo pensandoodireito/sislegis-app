@@ -47,6 +47,9 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 	@JoinColumn(name = "pautaReuniaoComissaoId", updatable = false, insertable = false, referencedColumnName = "id", nullable = false)
 	PautaReuniaoComissao pautaReuniaoComissao;
 
+	@Column
+	String resultado;
+
 	ProposicaoPautaComissao() {
 
 	}
@@ -109,6 +112,14 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 		if (proposicao != null) {
 			proposicaoId = proposicao.getId();
 		}
+	}
+
+	public String getResultado() {
+		return resultado;
+	}
+
+	public void setResultado(String resultado) {
+		this.resultado = resultado;
 	}
 
 	@Override
