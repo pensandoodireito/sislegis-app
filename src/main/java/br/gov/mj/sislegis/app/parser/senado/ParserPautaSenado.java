@@ -1,28 +1,19 @@
 package br.gov.mj.sislegis.app.parser.senado;
 
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
-import br.gov.mj.sislegis.app.model.Comissao;
-import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.*;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.ParserFetcher;
-import br.gov.mj.sislegis.app.parser.senado.xstream.ComissaoBean;
-import br.gov.mj.sislegis.app.parser.senado.xstream.EventoBean;
-import br.gov.mj.sislegis.app.parser.senado.xstream.ItemBean;
-import br.gov.mj.sislegis.app.parser.senado.xstream.ListaProposicoes;
-import br.gov.mj.sislegis.app.parser.senado.xstream.ListaReunioes;
-import br.gov.mj.sislegis.app.parser.senado.xstream.Materia;
-import br.gov.mj.sislegis.app.parser.senado.xstream.Materias;
-import br.gov.mj.sislegis.app.parser.senado.xstream.ParteBean;
-import br.gov.mj.sislegis.app.parser.senado.xstream.ReuniaoBeanSenado;
+import br.gov.mj.sislegis.app.parser.senado.xstream.*;
 
+import br.gov.mj.sislegis.app.parser.senado.xstream.Resultado;
 import com.thoughtworks.xstream.XStream;
 
 public class ParserPautaSenado {
@@ -42,6 +33,7 @@ public class ParserPautaSenado {
 			for (Iterator iterator2 = pautaReuniaoComissao.getProposicoesDaPauta().iterator(); iterator2.hasNext();) {
 				ProposicaoPautaComissao ppc = (ProposicaoPautaComissao) iterator2.next();
 				System.out.println("\t" + ppc.getProposicao().getEmenta());
+				System.out.println("\t Resultado: " + ppc.getResultado());
 
 			}
 
@@ -62,6 +54,7 @@ public class ParserPautaSenado {
 		xstream.alias("Parte", ParteBean.class);
 		xstream.alias("Item", ItemBean.class);
 		xstream.alias("Evento", EventoBean.class);
+		xstream.alias("Resultado", Resultado.class);
 		Materias.configXstream(xstream);
 		xstream.aliasField("Partes", ReuniaoBeanSenado.class, "partes");
 		xstream.aliasField("Comissoes", ReuniaoBeanSenado.class, "comissoes");
@@ -74,10 +67,10 @@ public class ParserPautaSenado {
 		xstream.aliasField("Itens", ParteBean.class, "itens");
 		xstream.aliasField("Eventos", ParteBean.class, "eventos");
 		xstream.aliasField("Materia", ItemBean.class, "materia");
+		xstream.aliasField("Resultado", ItemBean.class, "resultado");
 		xstream.aliasAttribute(ItemBean.class, "tipo", "tipo");
-
+		xstream.processAnnotations(Resultado.class);
 		xstream.aliasField("MateriasRelacionadas", EventoBean.class, "materiasRelacionadas");
-
 		xstream.aliasField("SeqOrdemPauta", ItemBean.class, "seqOrdemPauta");
 
 		StringBuilder wsURL = new StringBuilder("http://legis.senado.leg.br/dadosabertos/agenda/");

@@ -35,6 +35,7 @@ public class ParserPautaCamara {
 			for (Iterator iterator2 = pautaReuniaoComissao.getProposicoesDaPauta().iterator(); iterator2.hasNext();) {
 				ProposicaoPautaComissao ppc = (ProposicaoPautaComissao) iterator2.next();
 				System.out.println("\t" + ppc);
+				System.out.println("\t Resultado: " + ppc.getResultado());
 
 			}
 

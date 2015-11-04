@@ -57,7 +57,7 @@ public class ReuniaoBeanSenado extends br.gov.mj.sislegis.app.parser.ReuniaoBean
 					ProposicaoPautaComissao propPauta = new ProposicaoPautaComissao(reuniao, prop);
 					propPauta.setOrdemPauta(itemBean.getSeqOrdemPauta());
 					propPauta.setRelator(itemBean.getMateria().getRelator());
-
+					propPauta.setResultado(itemBean.resultado.descricao);
 					reuniao.addProposicaoPauta(propPauta);
 				}
 			}
