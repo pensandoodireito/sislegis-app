@@ -623,6 +623,31 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		return false;
 	}
 
+	@Override
+	public boolean syncDadosPautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissaoRemoto){
+
+		PautaReuniaoComissao pautaReuniaoComissaoLocal = null;
+
+		try {
+			pautaReuniaoComissaoLocal = findPautaReuniao(pautaReuniaoComissaoRemoto.getComissao(), pautaReuniaoComissaoRemoto.getData(), pautaReuniaoComissaoRemoto.getCodigoReuniao());
+
+			if (checadorAlteracoesPautaReuniao.compare(pautaReuniaoComissaoRemoto, pautaReuniaoComissaoLocal) > 0) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "encontrou diferencas " + pautaReuniaoComissaoRemoto + " e " + pautaReuniaoComissaoLocal);
+				savePautaReuniaoComissao(pautaReuniaoComissaoLocal);
+				return true;
+			} else {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "nenhuma diff encontrada ");
+				return false;
+			}
+
+		} catch (IOException e) {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+					"Falhou ao sincronizar pautaReuniaoComissao " + pautaReuniaoComissaoLocal, e);
+		}
+
+		return false;
+	}
+
 	/**
 	 * Este comparador checa por alterações na proposição.
 	 */
@@ -650,15 +675,53 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 						.append(remote.getOrdemPauta()).append("'\n");
 				local.setOrdemPauta(remote.getOrdemPauta());
 			}
+			if ((local.getResultado() == null && remote.getResultado() != null)
+					|| (remote.getResultado() != null && !local.getResultado().equals(remote.getResultado()))) {
+				descricaoAlteracao.append("Alterado Resultado: '").append(local.getResultado()).append("' => '")
+						.append(remote.getResultado()).append("'\n");
+				local.setResultado(remote.getResultado());
+			}
 			return descricaoAlteracao.length();
 		}
 
 		public String getDescricaoAlteracao() {
 			return descricaoAlteracao.toString();
 		}
-	};
+	}
+
+	/**
+	 * Este comparador checa por alterações na pauta reuniao.
+	 */
+	class ChecaAlteracoesPautaReuniao implements Comparator<PautaReuniaoComissao> {
+
+		StringBuilder descricaoAlteracao;
+
+		@Override
+		public int compare(PautaReuniaoComissao local, PautaReuniaoComissao remote) {
+			descricaoAlteracao = new StringBuilder();
+			if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.FINE)) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Comparando PautaReuniaoComissao ");
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Local:  " + local);
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Remota: " + remote);
+			}
+			if ((local.getSituacao() == null && remote.getSituacao() != null)
+					|| (remote.getSituacao() != null && !local.getSituacao().equals(remote.getSituacao()))) {
+				descricaoAlteracao.append("Alterada Situacao: '").append(local.getSituacao()).append("' => '")
+						.append(remote.getSituacao()).append("'\n");
+				local.setSituacao(remote.getSituacao());
+			}
+
+			return descricaoAlteracao.length();
+		}
+
+		public String getDescricaoAlteracao() {
+			return descricaoAlteracao.toString();
+		}
+	}
 
 	private ChecaAlteracoesPautaProposicao checadorAlteracoesPauta = new ChecaAlteracoesPautaProposicao();
+
+	private ChecaAlteracoesPautaReuniao checadorAlteracoesPautaReuniao = new ChecaAlteracoesPautaReuniao();
 
 	@Override
 	public void followProposicao(Usuario user, Long idProposicao) {

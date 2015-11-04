@@ -12,6 +12,7 @@ import javax.ejb.Singleton;
 import javax.inject.Inject;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.service.AutoUpdateProposicaoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.UsuarioService;
@@ -46,9 +47,9 @@ public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService {
 			try {
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Atualizando " + proposicao);
 				if (proposicaoService.syncDadosProposicao(proposicao)) {
-					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Dados basica alterados");
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Dados basicos alterados");
 				} else {
-					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Dados basica sem alteracao");
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Dados basicos sem alteracao");
 				}
 				if (proposicaoService.syncDadosPautaProposicao(proposicao)) {
 					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Dados pauta alterados ");
@@ -60,6 +61,11 @@ public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService {
 						"Falhou ao atualizar proposicao " + proposicao.getSigla(), e);
 			}
 		}
+	}
+
+	@Override
+	public void atualizaResultadosDasPautas() {
+		// TODO Implementar
 	}
 
 }
