@@ -1,7 +1,34 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+
 import br.gov.mj.sislegis.app.enumerated.Origem;
-import br.gov.mj.sislegis.app.model.*;
+import br.gov.mj.sislegis.app.model.AlteracaoProposicao;
+import br.gov.mj.sislegis.app.model.Comentario;
+import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Reuniao;
+import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
+import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
+import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
 import br.gov.mj.sislegis.app.parser.ProposicaoSearcherFactory;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
@@ -10,22 +37,20 @@ import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
 import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserPlenarioSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
-import br.gov.mj.sislegis.app.service.*;
+import br.gov.mj.sislegis.app.service.AbstractPersistence;
+import br.gov.mj.sislegis.app.service.ComentarioService;
+import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
+import br.gov.mj.sislegis.app.service.ProposicaoService;
+import br.gov.mj.sislegis.app.service.ReuniaoProposicaoService;
+import br.gov.mj.sislegis.app.service.ReuniaoService;
+import br.gov.mj.sislegis.app.service.TagService;
+import br.gov.mj.sislegis.app.service.UsuarioService;
 import br.gov.mj.sislegis.app.util.Conversores;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import java.io.IOException;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 @Stateless
-public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> implements ProposicaoService {
+public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> implements ProposicaoService,
+		EJBUnitTestable {
 
 	@Inject
 	private ParserPautaCamara parserPautaCamara;
@@ -69,37 +94,47 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	@Override
 	protected EntityManager getEntityManager() {
-		// TODO Auto-generated method stub
 		return em;
 	}
 
-	@Override
-	public List<Proposicao> buscarProposicoesPautaCamaraWS(Map parametros) throws Exception {
-		Long idComissao = (Long) parametros.get("idComissao");
-		String dataIni = Conversores.dateToString((Date) parametros.get("data"), "yyyyMMdd");
-		String dataFim = Conversores.dateToString(SislegisUtil.getFutureDate(), "yyyyMMdd");
-		return parserPautaCamara.getProposicoes(idComissao, dataIni, dataFim);
+	private Date getNextWeek(Date ref) {
+		Calendar c = Calendar.getInstance();
+		c.setTime(ref);
+		c.add(Calendar.WEEK_OF_YEAR, 1);
+		return c.getTime();
 	}
 
 	@Override
-	public List<Proposicao> buscarProposicoesPautaSenadoWS(Map parametros) throws Exception {
-		String siglaComissao = (String) parametros.get("siglaComissao");
-		String dataIni = Conversores.dateToString((Date) parametros.get("data"), "yyyyMMdd");
+	public Set<PautaReuniaoComissao> buscarProposicoesPautaCamaraWS(Map parametros) throws Exception {
+		Long idComissao = (Long) parametros.get("idComissao");
+		Date dataInicial = (Date) parametros.get("data");
+		Date dataFinal = getNextWeek(dataInicial);
 
+		String dataIni = Conversores.dateToString(dataInicial, "yyyyMMdd");
+		String dataFim = Conversores.dateToString(dataFinal, "yyyyMMdd");
+		return parserPautaCamara.getPautaComissao(idComissao, dataIni, dataFim);
+	}
+
+	@Override
+	public Set<PautaReuniaoComissao> buscarProposicoesPautaSenadoWS(Map parametros) throws Exception {
+		String siglaComissao = (String) parametros.get("siglaComissao");
+		Date dataInicial = (Date) parametros.get("data");
+		String dataIni = Conversores.dateToString(dataInicial, "yyyyMMdd");
+		String dataFim = Conversores.dateToString(getNextWeek(dataInicial), "yyyyMMdd");
 		if (siglaComissao.equals("PLEN")) {
 			return parserPlenarioSenado.getProposicoes(dataIni);
 		}
 
-		return parserPautaSenado.getProposicoes(siglaComissao, dataIni);
+		return parserPautaSenado.getPautaComissao(siglaComissao, dataIni, dataFim);
 	}
 
 	@Override
-	public Proposicao detalharProposicaoSenadoWS(Long id) throws Exception {
+	public Proposicao detalharProposicaoSenadoWS(Long id) throws IOException {
 		return parserProposicaoSenado.getProposicao(id);
 	}
 
 	@Override
-	public Proposicao detalharProposicaoCamaraWS(Long id) throws Exception {
+	public Proposicao detalharProposicaoCamaraWS(Long id) throws IOException {
 		return parserProposicaoCamara.getProposicao(id);
 	}
 
@@ -135,24 +170,11 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	}
 
-	@Override
-	public void salvarListaProposicao(List<Proposicao> listaProposicao) {
-		Reuniao reuniao = null;
+	public void salvarListaProposicao(Reuniao reuniao, List<Proposicao> listaProposicao) {
 
-		if (!listaProposicao.isEmpty()) {
-			Proposicao proposicao = listaProposicao.get(0); // uma forma de
-															// obter a data da
-															// reuniao é através
-															// do objeto
-															// proposicao
-			reuniao = reuniaoService.buscaReuniaoPorData(proposicao.getReuniao().getData());
-
-			// Caso a reunião não exista, salva pela primeira vez
-			if (Objects.isNull(reuniao)) {
-				reuniao = new Reuniao();
-				reuniao.setData(proposicao.getReuniao().getData());
-				reuniao = reuniaoService.save(reuniao);
-			}
+		// Caso a reunião não exista, salva pela primeira vez
+		if (Objects.isNull(reuniao.getId())) {
+			reuniao = reuniaoService.save(reuniao);
 		}
 
 		// Agora vamos salvar/associar as proposições na reunião
@@ -274,26 +296,45 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public List<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao) {
+	public Collection<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao) {
 		List<Proposicao> proposicoes = new ArrayList<>();
 		Reuniao reuniao = reuniaoService.buscaReuniaoPorData(dataReuniao);
-
 		if (!Objects.isNull(reuniao)) {
-			Set<ReuniaoProposicao> listaReuniaoProposicoes = reuniao.getListaReuniaoProposicoes();
-			// Copiamos alguns valores de ReuniaoProposicao para Proposicao,
-			// afim de retornar somente uma entidade com alguns valores
-			// transientes
-			for (ReuniaoProposicao reuniaoProposicao : listaReuniaoProposicoes) {
-				Proposicao proposicao = reuniaoProposicao.getProposicao();
-				proposicao.setComissao(reuniaoProposicao.getSiglaComissao());
-				proposicao.setSeqOrdemPauta(reuniaoProposicao.getSeqOrdemPauta());
-				proposicao.setLinkPauta(reuniaoProposicao.getLinkPauta());
-				proposicao.setReuniao(reuniaoProposicao.getReuniao());
+			// Para evitar ter que migrar muitos dados, interceptamos requests
+			// mais antigos do que a criacao dessas entidade, e convertemos na
+			// hora.
+			if (dataReuniao.getTime() < 1446222706000l) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
+						"Reuniao mais antiga que refactoring, utilizando metodo alternativo");
+				Query query = em.createNativeQuery("select * from reuniaoproposicao r where  r.reuniao_id=:rid",
+						ReuniaoProposicao.class);
+				query.setParameter("rid", reuniao.getId());
+				List<ReuniaoProposicao> proposicoesReuniao = query.getResultList();
 
-				popularTotalComentariosEncaminhamentos(proposicao);
+				for (Iterator<ReuniaoProposicao> iterator = proposicoesReuniao.iterator(); iterator.hasNext();) {
+					ReuniaoProposicao rp = (ReuniaoProposicao) iterator.next();
+					Proposicao p = rp.getProposicao();
+					if (p.getPautaComissaoAtual() == null) {
+						PautaReuniaoComissao pr = new PautaReuniaoComissao(dataReuniao, rp.getSiglaComissao(),
+								rp.getCodigoReuniao());
+						pr.setManual(true);
+						ProposicaoPautaComissao ppc = new ProposicaoPautaComissao(pr, p);
+						ppc.setOrdemPauta(rp.getSeqOrdemPauta());
+						p.getPautasComissoes().add(ppc);
+					}
+					proposicoes.add(p);
 
-				proposicoes.add(proposicao);
+				}
+			} else {
+				Query query = em
+						.createNativeQuery(
+								"SELECT * FROM Proposicao p where  p.id in (select proposicao_id from reuniaoproposicao r where  r.reuniao_id=:rid)",
+								Proposicao.class);
+				query.setParameter("rid", reuniao.getId());
+				List<Proposicao> proposicoesReuniao = query.getResultList();
+				proposicoes.addAll(proposicoesReuniao);
 			}
+
 		}
 
 		return proposicoes;
@@ -498,4 +539,211 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 	}
 
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	@Override
+	public PautaReuniaoComissao savePautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao) throws IOException {
+		// check se proposicoes existem
+
+		Set<ProposicaoPautaComissao> additionalProposicoes = new HashSet<ProposicaoPautaComissao>(
+				pautaReuniaoComissao.getProposicoesDaPauta());
+		PautaReuniaoComissao prc = findPautaReuniao(pautaReuniaoComissao.getComissao(), pautaReuniaoComissao.getData(),
+				pautaReuniaoComissao.getCodigoReuniao());
+		boolean existing = false;
+		if (prc != null) {
+			existing = true;
+			pautaReuniaoComissao = prc;
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+					"Pauta reuniao ja existia " + pautaReuniaoComissao.getProposicoesDaPauta().size());
+		} else {
+			getEntityManager().persist(pautaReuniaoComissao);
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+					"Criou pauta reuniao " + pautaReuniaoComissao.getId());
+		}
+
+		for (Iterator<ProposicaoPautaComissao> iterator = additionalProposicoes.iterator(); iterator.hasNext();) {
+			ProposicaoPautaComissao proposicaoPautaComissao = (ProposicaoPautaComissao) iterator.next();
+			if (existing) {
+				if (pautaReuniaoComissao.getProposicoesDaPauta().contains(proposicaoPautaComissao)) {
+
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+							"Ja continha " + proposicaoPautaComissao.getProposicao());
+					continue;
+				}
+			}
+
+			proposicaoPautaComissao.setPautaReuniaoComissao(prc);
+
+			Proposicao proposicao = proposicaoPautaComissao.getProposicao();
+			if (proposicaoPautaComissao.getProposicao().getId() == null) {
+				Proposicao proposicaoDb = findProposicaoBy(proposicao.getOrigem(), proposicao.getIdProposicao());
+				if (proposicaoDb == null) {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+							"Proposicao nao existia no banco " + proposicao.getIdProposicao());
+					// TEM Que buscar dos WS
+					switch (proposicao.getOrigem()) {
+					case CAMARA:
+						proposicaoDb = detalharProposicaoCamaraWS((long) proposicao.getIdProposicao());
+						if (proposicaoDb == null) {
+							throw new IllegalArgumentException("Não foi possível encontrar proposicao da "
+									+ proposicao.getIdProposicao() + " " + proposicao.getOrigem() + " "
+									+ proposicao.getComissao());
+						}
+						break;
+					case SENADO:
+						proposicaoDb = detalharProposicaoSenadoWS((long) proposicao.getIdProposicao());
+						break;
+					}
+					proposicaoDb = save(proposicaoDb);
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+							"Proposicao criada " + proposicaoDb.getId());
+					proposicaoPautaComissao.setProposicao(proposicaoDb);
+				} else {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "Proposicao ja existia no banco ");
+					proposicaoPautaComissao.setProposicao(proposicaoDb);
+				}
+			} else {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+						"Proposicao ja persistida " + proposicaoPautaComissao);
+
+				proposicaoPautaComissao.getProposicao();
+			}
+			proposicaoPautaComissao.setPautaReuniaoComissao(pautaReuniaoComissao);
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
+					Level.FINE,
+					"Vai persistir proposicaoPautaComissao " + proposicaoPautaComissao + "  == "
+							+ proposicaoPautaComissao.getPautaReuniaoComissaoId() + " -- " + pautaReuniaoComissao);
+
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
+					Level.FINE,
+					"Proposicao ja persistida " + proposicaoPautaComissao.getProposicaoId() + " "
+							+ proposicaoPautaComissao.getPautaReuniaoComissaoId());
+			getEntityManager().persist(proposicaoPautaComissao);
+			pautaReuniaoComissao.addProposicaoPauta(proposicaoPautaComissao);
+		}
+		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "Agora salvar " + pautaReuniaoComissao);
+		getEntityManager().merge(pautaReuniaoComissao);
+		return pautaReuniaoComissao;
+
+	}
+
+	@Override
+	public PautaReuniaoComissao retrievePautaReuniao(Integer codigoReuniao) {
+		Query q = em.createNamedQuery("findByCodigoReuniao", PautaReuniaoComissao.class);
+		q.setParameter("codigoReuniao", codigoReuniao);
+
+		List<PautaReuniaoComissao> props = q.getResultList();
+		if (props.isEmpty()) {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "nenhuma pauta encontrada " + codigoReuniao);
+
+			return null;
+		} else {
+			if (props.size() > 1) {
+				throw new IllegalArgumentException("Mais de uma PautaReuniaoComissao com codigoReuniao="
+						+ codigoReuniao);
+			}
+			return props.get(0);
+
+		}
+	}
+
+	private Proposicao findProposicaoBy(Origem origem, Integer idProposicao) {
+		Query q = em.createNamedQuery("findByUniques", Proposicao.class);
+		q.setParameter("origem", origem);
+		q.setParameter("idProposicao", idProposicao);
+
+		List<Proposicao> props = q.getResultList();
+		if (props.isEmpty()) {
+			return null;
+		} else {
+			if (props.size() > 1) {
+				throw new IllegalArgumentException("Mais de uma proposicao com id=" + idProposicao + " e origem "
+						+ origem.name());
+			}
+			return props.get(0);
+
+		}
+	}
+
+	@Override
+	public void setInjectedEntities(Object... injections) {
+		this.em = (EntityManager) injections[0];
+		this.parserProposicaoCamara = (ParserProposicaoCamara) injections[1];
+		this.reuniaoService = (ReuniaoService) injections[2];
+		this.reuniaoProposicaoService = (ReuniaoProposicaoService) injections[3];
+
+	}
+
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	@Override
+	public void adicionaProposicoesReuniao(Set<PautaReuniaoComissao> pautaReunioes, Reuniao reuniao) throws IOException {
+		if (reuniao.getId() == null) {
+			reuniao = reuniaoService.save(reuniao);
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+					"Criou reuniao para o dia " + reuniao.getData());
+		}
+
+		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+				"Salvando " + pautaReunioes.size() + " pautas e suas proposicoes");
+		for (Iterator<PautaReuniaoComissao> iterator = pautaReunioes.iterator(); iterator.hasNext();) {
+
+			PautaReuniaoComissao prc = iterator.next();
+			Set<ProposicaoPautaComissao> proposicoesParaEstaReuniao = new HashSet<ProposicaoPautaComissao>(
+					prc.getProposicoesDaPauta());
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "Criando pautareuniao na base");
+
+			prc = savePautaReuniaoComissao(prc);
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
+					Level.FINE,
+					"Associando suas proposicoes a reuniao, ha: " + prc.getProposicoesDaPauta().size()
+							+ " mas para essa reuniao temos " + pautaReunioes.size());
+			for (Iterator<ProposicaoPautaComissao> proposicoesIterator = proposicoesParaEstaReuniao.iterator(); proposicoesIterator
+					.hasNext();) {
+				ProposicaoPautaComissao ppc = proposicoesIterator.next();
+				Proposicao prop = findProposicaoBy(ppc.getProposicao().getOrigem(), ppc.getProposicao()
+						.getIdProposicao());
+				if (prop == null) {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
+							"Erro, não persistiu a proposicao " + ppc.getProposicao());
+					continue;
+				}
+
+				if (reuniaoProposicaoService.findById(reuniao.getId(), prop.getId()) == null) {
+
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER)
+							.log(Level.FINE, "Associando " + prop + " " + reuniao);
+					associateReuniaoProposicao(reuniao, prop);
+				} else {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+							"Ja estava associada " + ppc.getProposicaoId() + " " + reuniao);
+				}
+			}
+
+		}
+
+	}
+
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	private void associateReuniaoProposicao(Reuniao reuniao, Proposicao proposicao) {
+		ReuniaoProposicao rp = new ReuniaoProposicao();
+		ReuniaoProposicaoPK reuniaoProposicaoPK = new ReuniaoProposicaoPK();
+		reuniaoProposicaoPK.setIdReuniao(reuniao.getId());
+		reuniaoProposicaoPK.setIdProposicao(proposicao.getId());
+		rp.setReuniaoProposicaoPK(reuniaoProposicaoPK);
+		rp.setReuniao(reuniao);
+		rp.setProposicao(proposicao);
+		reuniaoProposicaoService.save(rp);
+	}
+
+	@Override
+	public PautaReuniaoComissao findPautaReuniao(String comissao, Date date, Integer codigoReuniao) {
+		Query q = em.createNamedQuery("findByComissaoDataOrigem").setParameter("comissao", comissao)
+				.setParameter("data", date).setParameter("codigoReuniao", codigoReuniao);
+		List<PautaReuniaoComissao> res = q.getResultList();
+		if (!res.isEmpty()) {
+			return res.get(0);
+		}
+
+		return null;
+
+	}
 }
