@@ -15,27 +15,8 @@
 			<property name="hibernate.transaction.flush_before_completion"
 				value="true" />
 			<property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
+			<property name="wildfly.jpa.default-unit" value="true" />
+
 		</properties>
-	</persistence-unit>
-	<persistence-unit name="test-sislegis-persistence-unit">
-		<description>SISLEGIS Persistence Unit for unit tests</description>
-		<provider>org.hibernate.ejb.HibernatePersistence</provider>
-
-		<properties>
-			<property name="hibernate.hbm2ddl.auto" value="create" />
-			<property name="hibernate.show_sql" value="false" />
-			<property name="hibernate.format_sql" value="true" />
-
-
-			<property name="hibernate.connection.url" value="jdbc:postgresql://localhost:5432/sislegis" />
-			<property name="hibernate.connection.driver_class" value="org.postgresql.Driver" />
-			<property name="hibernate.connection.username" value="sislegis" />
-			<property name="hibernate.connection.password" value="sislegis" />
-
-			<property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
-		</properties>
-
-
-
 	</persistence-unit>
 </persistence>

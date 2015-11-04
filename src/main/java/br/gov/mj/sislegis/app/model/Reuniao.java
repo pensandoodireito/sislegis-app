@@ -1,29 +1,19 @@
 package br.gov.mj.sislegis.app.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @XmlRootElement
-public class Reuniao extends AbstractEntity {
+public class Reuniao extends AbstractEntity implements Comparable<Reuniao> {
 
 	private static final long serialVersionUID = -3187796439185752162L;
 
@@ -36,20 +26,8 @@ public class Reuniao extends AbstractEntity {
 	@Temporal(TemporalType.DATE)
 	private Date data;
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinTable(name = "reuniao_proposicao", joinColumns = { @JoinColumn(name = "reuniao_id") })
-	private Set<Proposicao> proposicoes = new HashSet<Proposicao>();
-
 	public Long getId() {
 		return this.id;
-	}
-
-	public void addProposicao(Proposicao proposicao) {
-		proposicoes.add(proposicao);
-	}
-
-	public Set<Proposicao> getProposicoes() {
-		return proposicoes;
 	}
 
 	public void setId(final Long id) {
@@ -72,6 +50,16 @@ public class Reuniao extends AbstractEntity {
 		if (data != null)
 			result += ", data: " + data;
 		return result;
+	}
+
+	@Override
+	public int compareTo(Reuniao o) {
+		if (o.data.before(data)) {
+			return 1;
+		} else if (o.data.after(data)) {
+			return -1;
+		}
+		return 0;
 	}
 
 }

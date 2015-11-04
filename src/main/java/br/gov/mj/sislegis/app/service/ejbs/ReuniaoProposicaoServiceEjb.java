@@ -10,15 +10,16 @@ import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ReuniaoProposicaoService;
 
 @Stateless
-public class ReuniaoProposicaoServiceEjb extends AbstractPersistence<ReuniaoProposicao, Long> implements ReuniaoProposicaoService  {
+public class ReuniaoProposicaoServiceEjb extends AbstractPersistence<ReuniaoProposicao, Long> implements
+		ReuniaoProposicaoService, EJBUnitTestable {
 
 	@PersistenceContext
-    private EntityManager em;
-	
+	private EntityManager em;
+
 	public ReuniaoProposicaoServiceEjb() {
 		super(ReuniaoProposicao.class);
 	}
-	
+
 	@Override
 	protected EntityManager getEntityManager() {
 		return em;
@@ -28,18 +29,22 @@ public class ReuniaoProposicaoServiceEjb extends AbstractPersistence<ReuniaoProp
 		ReuniaoProposicaoPK pk = new ReuniaoProposicaoPK();
 		pk.setIdReuniao(idReuniao);
 		pk.setIdProposicao(idProposicao);
-		
+
 		ReuniaoProposicao reuniaoProposicao = em.find(ReuniaoProposicao.class, pk);
 		em.remove(reuniaoProposicao);
 	}
-	
+
 	public ReuniaoProposicao findById(Long idReuniao, Long idProposicao) {
 		ReuniaoProposicaoPK pk = new ReuniaoProposicaoPK();
 		pk.setIdReuniao(idReuniao);
 		pk.setIdProposicao(idProposicao);
-		
+
 		return em.find(ReuniaoProposicao.class, pk);
 	}
-	
+
+	@Override
+	public void setInjectedEntities(Object... injections) {
+		em = (EntityManager) injections[0];
+	}
 
 }

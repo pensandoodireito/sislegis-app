@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
@@ -32,25 +33,24 @@ public class ParserPautaSenado {
 		// TODO: Informação que vem do filtro
 		String siglaComissao = "CAE";
 		String datIni = "20151001";
-		Set<PautaReuniaoComissao> pautas = parser.getPautaComissao(siglaComissao, datIni);
+		String datFim = "20151008";
+		Set<PautaReuniaoComissao> pautas = parser.getPautaComissao(siglaComissao, datIni, datFim);
 
 		for (Iterator iterator = pautas.iterator(); iterator.hasNext();) {
 			PautaReuniaoComissao pautaReuniaoComissao = (PautaReuniaoComissao) iterator.next();
 			System.out.println(pautaReuniaoComissao);
-			for (Iterator iterator2 = pautaReuniaoComissao.getProposicoes().iterator(); iterator2.hasNext();) {
+			for (Iterator iterator2 = pautaReuniaoComissao.getProposicoesDaPauta().iterator(); iterator2.hasNext();) {
 				ProposicaoPautaComissao ppc = (ProposicaoPautaComissao) iterator2.next();
-				System.out.println("\t" + ppc);
+				System.out.println("\t" + ppc.getProposicao().getEmenta());
 
 			}
 
 		}
-		// System.out.println(parser.getPautaComissao(siglaComissao,
-		// datIni).toString());
-		// System.out.println(parser.getProposicoes(siglaComissao,
-		// datIni).toString());
+
 	}
 
-	public Set<PautaReuniaoComissao> getPautaComissao(String siglaComissao, String datIni) throws Exception {
+	public Set<PautaReuniaoComissao> getPautaComissao(String siglaComissao, String datIni, String datFim)
+			throws Exception {
 
 		Set<PautaReuniaoComissao> pautas = new HashSet<PautaReuniaoComissao>();
 
@@ -82,21 +82,24 @@ public class ParserPautaSenado {
 
 		StringBuilder wsURL = new StringBuilder("http://legis.senado.leg.br/dadosabertos/agenda/");
 		wsURL.append(datIni);
+		wsURL.append("/");
+		wsURL.append(datFim);
 		wsURL.append("/detalhe?colegiado=").append(URLEncoder.encode(siglaComissao, "UTF-8"));
 		ListaReunioes reunioes = new ListaReunioes();
 
 		configAgenda(xstream);
 		ParserFetcher.fetchXStream(wsURL.toString(), xstream, reunioes);
-		for (Iterator iterator = reunioes.getReunioes().iterator(); iterator.hasNext();) {
+		for (Iterator<ReuniaoBeanSenado> iterator = reunioes.getReunioes().iterator(); iterator.hasNext();) {
 			ReuniaoBeanSenado pautaReuniaoComissao = (ReuniaoBeanSenado) iterator.next();
 			Comissao comissao = new Comissao();
 			comissao.setSigla(siglaComissao);
 			PautaReuniaoComissao prc = new PautaReuniaoComissao(pautaReuniaoComissao.getDate(), comissao,
 					pautaReuniaoComissao.getCodigo());
+			prc.setOrigem(Origem.SENADO);
 			prc.setTipo(pautaReuniaoComissao.getTipo());
 			prc.setTitulo(pautaReuniaoComissao.getTitulo());
 
-			Set<ProposicaoPautaComissao> ps = pautaReuniaoComissao.getProposioesPauta(prc);
+			Set<ProposicaoPautaComissao> ps = pautaReuniaoComissao.getProposicoesPauta(prc);
 
 			if (ps.size() > 0) {
 				pautas.add(prc);
@@ -105,30 +108,6 @@ public class ParserPautaSenado {
 		}
 
 		return pautas;
-	}
-
-	public List<Proposicao> getProposicoes(String siglaComissao, String datIni) throws Exception {
-		List<Proposicao> proposicoes = new ArrayList<Proposicao>();
-
-		XStream xstreamReuniao = new XStream();
-		xstreamReuniao.ignoreUnknownElements();
-
-		configReuniao(xstreamReuniao);
-
-		for (ReuniaoBeanSenado bean : getReunioes(siglaComissao, datIni)) {
-
-			String wsURLReuniao = "http://legis.senado.leg.br/dadosabertos/reuniao/" + bean.getCodigo();
-			ReuniaoBeanSenado reuniao = new ReuniaoBeanSenado();
-			ParserFetcher.fetchXStream(wsURLReuniao, xstreamReuniao, reuniao);
-
-			// proposicoes.addAll(reuniao.getProposicoes());
-		}
-
-		return proposicoes;
-	}
-
-	public List<ReuniaoBeanSenado> getReunioes(String siglaComissao, String datIni) throws Exception {
-		return getReunioes(siglaComissao, datIni, null);
 	}
 
 	public List<ReuniaoBeanSenado> getReunioes(String siglaComissao, String datIni, String dataFim) throws Exception {

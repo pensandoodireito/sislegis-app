@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 import com.thoughtworks.xstream.XStream;
@@ -34,55 +35,107 @@ public class Materia {
 
 	public String getRelator() {
 		if (relatoria != null && relatoria.relatores != null && !relatoria.relatores.isEmpty()) {
-			return relatoria.relatores.get(0).tratamento + " " + relatoria.relatores.get(0).nome;
+			Relator relator = relatoria.relatores.get(0);
+			String desc = "";
+			if (relator.tratamento != null && relator.tratamento.length() > 0) {
+				desc = relator.tratamento + " ";
+			}
+			if (relator.nome != null && relator.nome.length() > 0) {
+				desc += relator.nome;
+			}
+			return desc;
+		} else if (nomeRelator != null && nomeRelator.length() > 0) {
+			return nomeRelator;
 		}
-		return "";
+		return ProposicaoSearcher.SEM_RELATOR_DEFINIDO;
 	}
+
+	// Cada webservice tem uma estrutura, a abaixo é para a pauta. Acima é para
+	// proposicao direto, o mais abaixo é para o ws de reuniao do pleanrio
+	@XStreamAlias("autoria")
+	Autoria autoria;
+
+	@XStreamAlias("Situacoes")
+	Situacoes situacoes;
+
 	@XStreamAlias("Ano")
 	String ano;
 	@XStreamAlias("Codigo")
 	Integer codigo;
 	@XStreamAlias("Numero")
 	String numero;
+
 	@XStreamAlias("Subtipo")
 	String subtipo;
+	@XStreamAlias("Ementa")
+	String ementa;
+
+	@XStreamAlias("AnoMateria")
+	String anoMateria;
+	@XStreamAlias("NumeroMateria")
+	String numeroMateria;
+	@XStreamAlias("SiglaMateria")
+	String siglaMateria;
+	@XStreamAlias("CodigoMateria")
+	Integer codigoMateria;
+	@XStreamAlias("NomeRelator")
+	String nomeRelator;
+	@XStreamAlias("SequenciaOrdem")
+	Integer sequenciaOrdem;
+
+	public Integer getSequenciaOrdem() {
+		return sequenciaOrdem;
+	}
+
 	public Proposicao toProposicao() {
 		Proposicao p = new Proposicao();
-		if(identificacaoMateria==null){
-			identificacaoMateria=new IdentificacaoMateria();
-			identificacaoMateria.AnoMateria=ano;
-			identificacaoMateria.CodigoMateria=codigo;
-			identificacaoMateria.NumeroMateria=numero;
-			identificacaoMateria.SiglaSubtipoMateria=subtipo;
-			System.err.println("identificacaoMateria nula "+this);
+		if (identificacaoMateria == null) {
+			identificacaoMateria = new IdentificacaoMateria();
+			if (ano == null) {
+				identificacaoMateria.AnoMateria = anoMateria;
+				identificacaoMateria.NumeroMateria = numeroMateria;
+				identificacaoMateria.SiglaSubtipoMateria = siglaMateria;
+				identificacaoMateria.CodigoMateria = codigoMateria;
+			} else {
+				identificacaoMateria.AnoMateria = ano;
+				identificacaoMateria.CodigoMateria = codigo;
+				identificacaoMateria.NumeroMateria = numero;
+				identificacaoMateria.SiglaSubtipoMateria = subtipo;
+			}
+
 		}
 		p.setIdProposicao(identificacaoMateria.CodigoMateria);
 		p.setNumero(identificacaoMateria.NumeroMateria);
 		p.setAno(identificacaoMateria.AnoMateria);
 		p.setTipo(identificacaoMateria.SiglaSubtipoMateria);
-		
+
 		if (autoresPrincipais != null && !autoresPrincipais.autores.isEmpty()) {
-			p.setAutor(autoresPrincipais.autores.get(0).NomeAutor);
+			AutorPrincipal autor = autoresPrincipais.autores.get(0);
+			p.setAutor(autor.getDescricao());
+		} else if (autoria != null && autoria.Autor != null) {
+			p.setAutor(autoria.Autor.getDescricao());
 		}
 		p.setOrigem(Origem.SENADO);
 		if (situacaoAtual == null) {
-			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING, "Nao carregou a situacao atual");
+			if (situacoes == null || situacoes.situacao == null) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINEST, "Nao carregou a situacao atual ");
+			}
 		} else if (situacaoAtual.autuacoes == null) {
-			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
-					"Nao carregou autuacoes da situacao atual");
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER)
+					.log(Level.FINEST, "Nao carregou autuacoes da situacao atual");
 		} else if (situacaoAtual.autuacoes.autuacoes == null) {
-			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
-					"Nao carregou autuacoes da situacao atual");
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER)
+					.log(Level.FINEST, "Nao carregou autuacoes da situacao atual");
 		} else if (!situacaoAtual.autuacoes.autuacoes.isEmpty()) {
 			p.setComissao(situacaoAtual.autuacoes.autuacoes.get(0).Local.SiglaLocal);
 			p.setSituacao(situacaoAtual.autuacoes.autuacoes.get(0).Situacao.SiglaSituacao);
 		}
-		if(DadosBasicosMateria!=null){
-		p.setEmenta(DadosBasicosMateria.EmentaMateria);
+		if (DadosBasicosMateria != null) {
+			p.setEmenta(DadosBasicosMateria.EmentaMateria);
+		} else {
+			p.setEmenta(ementa);
 		}
-		
 
-		
 		p.setOrigem(Origem.SENADO);
 		p.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate=" + p.getIdProposicao());
 		return p;
@@ -96,7 +149,7 @@ public class Materia {
 		xstream.processAnnotations(AutoresPrincipais.class);
 		xstream.processAnnotations(AutorPrincipal.class);
 		Relatoria.configXstream(xstream);
-		
+
 		SituacaoAtual.configXstream(xstream);
 
 	}
