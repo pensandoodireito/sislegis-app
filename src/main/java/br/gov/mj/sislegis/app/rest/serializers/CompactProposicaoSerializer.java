@@ -14,12 +14,17 @@ public class CompactProposicaoSerializer extends JsonSerializer<Proposicao> {
 	public void serialize(Proposicao value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
 			JsonProcessingException {
 		jgen.writeStartObject();
-		jgen.writeNumberField("id", value.getId());
+		if (value.getId() != null) {
+			jgen.writeNumberField("id", value.getId());
+		}
 		jgen.writeStringField("ementa", value.getEmenta());
 		jgen.writeStringField("tipo", value.getTipo());
 		jgen.writeStringField("numero", value.getNumero());
 		jgen.writeStringField("ano", value.getAno());
 		jgen.writeStringField("sigla", value.getSigla());
+		jgen.writeStringField("comissao", value.getComissao());
+		jgen.writeNumberField("idProposicao", value.getIdProposicao());
+		jgen.writeStringField("origem", value.getOrigem().name());
 		jgen.writeEndObject();
 	}
 }

@@ -13,9 +13,8 @@ import javax.persistence.Table;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.rest.serializers.CompactPautaReuniaoComissao;
-import br.gov.mj.sislegis.app.rest.serializers.CompactProposicao;
+import br.gov.mj.sislegis.app.rest.serializers.CompactProposicaoSerializer;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
@@ -73,7 +72,7 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 		this.relator = relator;
 	}
 
-	@JsonSerialize(using = CompactProposicao.class)
+	@JsonSerialize(using = CompactProposicaoSerializer.class)
 	public Proposicao getProposicao() {
 		if (proposicao != null && proposicao.getId() != proposicaoId) {
 			proposicaoId = proposicao.getId();

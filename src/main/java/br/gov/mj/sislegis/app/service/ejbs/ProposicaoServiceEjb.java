@@ -367,6 +367,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			}
 
 		}
+		popularTotalComentariosEncaminhamentos(proposicoes);
 
 		return proposicoes;
 	}

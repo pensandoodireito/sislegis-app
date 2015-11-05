@@ -122,4 +122,9 @@ public class Tarefa extends AbstractEntity {
 		return encaminhamento;
 	}
 
+	public void setEncaminhamentoProposicao(EncaminhamentoProposicao ent) {
+
+		encaminhamento = ent;
+	}
+
 }

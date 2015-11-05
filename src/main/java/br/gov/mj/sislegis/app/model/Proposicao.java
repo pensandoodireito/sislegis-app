@@ -98,8 +98,7 @@ public class Proposicao extends AbstractEntity {
 	@Column(length = 2000)
 	private String resultadoASPAR;
 
-	@Column(name="ultima_comissao")
-//	@Transient
+	@Column(name = "ultima_comissao")
 	private String comissao;
 
 	@Transient
