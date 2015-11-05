@@ -67,6 +67,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	@Inject
 	private UsuarioService usuarioService;
 
+	@Inject
+	private ComissaoService comissaoService;
+
 	@PersistenceContext
 	private EntityManager em;
 
@@ -533,24 +536,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				props = buscarProposicoesPautaSenadoWS(proposicaoLocal.getComissao(), initialMonday, nextMonday);
 				break;
 			case CAMARA:
-				List<Comissao> comissoes = new ParserComissoesCamara().getComissoes();
-				Comissao comissao = null;
-				String silga = proposicaoLocal.getComissao();
-				if (silga != null && silga.indexOf("-") > 0) {
-					silga = proposicaoLocal.getComissao().substring(0, proposicaoLocal.getComissao().indexOf("-"))
-							.trim();
-				}
 
-				for (Iterator<Comissao> iterator = comissoes.iterator(); iterator.hasNext();) {
-					Comissao c = (Comissao) iterator.next();
-					// Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINEST,
-					// "Comissao retornada " + c.getSigla() + " " + c.getId() +
-					// " === " + silga);
-					if (c.getSigla().trim().equals(silga)) {
-						comissao = c;
-						break;
-					}
-				}
+				Comissao comissao = comissaoService.getBySigla(proposicaoLocal.getComissao());
+
 				if (comissao == null) {
 					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
 							Level.SEVERE,
@@ -624,25 +612,65 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public boolean syncDadosPautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissaoRemoto){
-
-		PautaReuniaoComissao pautaReuniaoComissaoLocal = null;
+	public boolean syncDadosPautaReuniaoComissao(PautaReuniaoComissao prcLocal){
 
 		try {
-			pautaReuniaoComissaoLocal = findPautaReuniao(pautaReuniaoComissaoRemoto.getComissao(), pautaReuniaoComissaoRemoto.getData(), pautaReuniaoComissaoRemoto.getCodigoReuniao());
+			Set<PautaReuniaoComissao> prcRemotoList = null;
+			Comissao comissao = comissaoService.getBySigla(prcLocal.getComissao());
+			boolean retorno = false;
 
-			if (checadorAlteracoesPautaReuniao.compare(pautaReuniaoComissaoRemoto, pautaReuniaoComissaoLocal) > 0) {
-				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "encontrou diferencas " + pautaReuniaoComissaoRemoto + " e " + pautaReuniaoComissaoLocal);
-				savePautaReuniaoComissao(pautaReuniaoComissaoLocal);
-				return true;
-			} else {
-				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "nenhuma diff encontrada ");
-				return false;
+			switch (prcLocal.getOrigem()) {
+
+				//TODO Rever as datas a serem utilizadas
+
+				case CAMARA:
+					prcRemotoList = buscarProposicoesPautaCamaraWS(comissao.getId(), prcLocal.getData(), prcLocal.getData());
+					break;
+
+				case SENADO:
+					prcRemotoList = buscarProposicoesPautaSenadoWS(prcLocal.getComissao(), prcLocal.getData(), prcLocal.getData());
+					break;
+
+				default:
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Falhou ao sincronizar pauta da reuniao pois origem e desconhecida  " + prcLocal);
+					return false;
+
 			}
 
-		} catch (IOException e) {
+			for (PautaReuniaoComissao prcRemoto : prcRemotoList){
+				if (Objects.equals(prcRemoto.getCodigoReuniao(), prcLocal.getCodigoReuniao())) {
+					if (checadorAlteracoesPautaReuniao.compare(prcLocal, prcRemoto) > 0) {
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "encontrou diferencas " + prcLocal + " e " + prcRemoto);
+						savePautaReuniaoComissao(prcLocal);
+						retorno = true;
+
+					} else {
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "nenhuma diferenca encontrada entre " + prcLocal + " e " + prcRemoto);
+					}
+
+					for (ProposicaoPautaComissao ppcLocal : prcLocal.getProposicoesDaPauta()){
+						for (ProposicaoPautaComissao ppcRemoto : prcRemoto.getProposicoesDaPauta()){
+							if (Objects.equals(ppcLocal.getProposicao().getIdProposicao(), ppcRemoto.getProposicao().getIdProposicao())){
+
+								if (checadorAlteracoesPauta.compare(ppcLocal, ppcRemoto) > 0){
+									Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "encontrou diferencas " + ppcLocal + " e " + ppcRemoto);
+									savePautaReuniaoComissao(prcLocal);
+									retorno = true;
+								} else {
+									Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "nenhuma diferenca encontrada entre " + ppcLocal + " e " + ppcRemoto);
+								}
+
+							}
+						}
+					}
+				}
+			}
+
+			return retorno;
+
+		} catch (Exception e) {
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
-					"Falhou ao sincronizar pautaReuniaoComissao " + pautaReuniaoComissaoLocal, e);
+					"Falhou ao sincronizar pautaReuniaoComissao " + prcLocal, e);
 		}
 
 		return false;

@@ -1,5 +1,6 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
+import java.util.Iterator;
 import java.util.List;
 
 import javax.ejb.Stateless;
@@ -55,6 +56,23 @@ public class ComissaoServiceEjb extends AbstractPersistence<Comissao, Long> impl
 			dataCacher.updateDataCache(CACHE_KEY_COMISSOES_SENADO, parserComissoesSenado.getComissoes());
 		}
 		return (List<Comissao>) dataCacher.getReferenceData(CACHE_KEY_COMISSOES_SENADO);
+	}
+
+	@Override
+	public Comissao getBySigla(String sigla) throws Exception {
+		if (sigla != null && sigla.indexOf("-") > 0) {
+			sigla = sigla.substring(0,sigla.indexOf("-"))
+					.trim();
+		}
+
+		for (Iterator<Comissao> iterator = listarComissoesCamara().iterator(); iterator.hasNext();) {
+			Comissao c = iterator.next();
+			if (c.getSigla().trim().equals(sigla)) {
+				return c;
+			}
+		}
+		return null;
+
 	}
 
 }
