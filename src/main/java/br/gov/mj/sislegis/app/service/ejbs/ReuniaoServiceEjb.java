@@ -1,6 +1,5 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
-
 import java.util.Date;
 
 import javax.ejb.Stateless;
@@ -12,16 +11,14 @@ import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ReuniaoService;
 
 @Stateless
-public class ReuniaoServiceEjb extends AbstractPersistence<Reuniao, Long>
-implements ReuniaoService{
+public class ReuniaoServiceEjb extends AbstractPersistence<Reuniao, Long> implements ReuniaoService, EJBUnitTestable {
 
 	@PersistenceContext
-    private EntityManager em;
-	
-	public ReuniaoServiceEjb(){
+	private EntityManager em;
+
+	public ReuniaoServiceEjb() {
 		super(Reuniao.class);
 	}
-
 
 	@Override
 	protected EntityManager getEntityManager() {
@@ -36,5 +33,11 @@ implements ReuniaoService{
 		} catch (Exception ex) {
 			return null;
 		}
+	}
+
+	@Override
+	public void setInjectedEntities(Object... injections) {
+		em = (EntityManager) injections[0];
+
 	}
 }

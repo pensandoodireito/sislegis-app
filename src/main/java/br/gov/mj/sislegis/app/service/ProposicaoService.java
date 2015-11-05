@@ -5,33 +5,37 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.Local;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 
 
 @Local
 public interface ProposicaoService extends Service<Proposicao> {
 
-	List<Proposicao> buscarProposicoesPautaCamaraWS(Map parametros) throws Exception;
+	Set<PautaReuniaoComissao> buscarProposicoesPautaCamaraWS(Map parametros) throws Exception;
 
-	List<Proposicao> buscarProposicoesPautaSenadoWS(Map parametros) throws Exception;
+	Set<PautaReuniaoComissao> buscarProposicoesPautaSenadoWS(Map parametros) throws Exception;
 
 	Proposicao detalharProposicaoCamaraWS(Long id) throws Exception;
 
 	Proposicao detalharProposicaoSenadoWS(Long id) throws Exception;
 
-	void salvarListaProposicao(List<Proposicao> lista);
+	//void salvarListaProposicao(List<Proposicao> lista);
+	
 
 	List<Proposicao> listarTodos();
 
 	Proposicao buscarPorId(Integer id);
 
-	List<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao);
+	Collection<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao);
 
 	List<Proposicao> buscarPorSufixo(String sufixo);
 
@@ -94,4 +98,16 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @return
 	 */
 	List<Proposicao> listProposicoesSeguidas();
+
+	PautaReuniaoComissao savePautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao) throws IOException;
+
+
+	PautaReuniaoComissao findPautaReuniao(String comissao, Date date, Integer codigoReuniao);
+
+	PautaReuniaoComissao retrievePautaReuniao(Integer codigoReuniao);
+
+	void adicionaProposicoesReuniao(Set<PautaReuniaoComissao> pautaReunioes, Reuniao reuniao) throws IOException;
+
+
+	
 }
