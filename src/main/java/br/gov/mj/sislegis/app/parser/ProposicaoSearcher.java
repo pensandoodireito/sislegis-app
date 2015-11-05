@@ -32,4 +32,13 @@ public interface ProposicaoSearcher {
 	 * @throws IOException
 	 */
 	public List<TipoProposicao> listaTipos() throws IOException;
+
+	/**
+	 * Busca uma proposição pelo seu ID.
+	 * 
+	 * @param idProposicao
+	 * @return
+	 * @throws Exception
+	 */
+	public Proposicao getProposicao(Long idProposicao) throws IOException;
 }

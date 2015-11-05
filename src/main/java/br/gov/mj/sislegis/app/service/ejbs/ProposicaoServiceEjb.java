@@ -3,6 +3,7 @@ package br.gov.mj.sislegis.app.service.ejbs;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,15 +18,19 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
-import br.gov.mj.sislegis.app.json.ComentarioJSON;
-import br.gov.mj.sislegis.app.json.EncaminhamentoProposicaoJSON;
-import br.gov.mj.sislegis.app.json.ProposicaoJSON;
-import br.gov.mj.sislegis.app.json.TagJSON;
-import br.gov.mj.sislegis.app.model.*;
+import br.gov.mj.sislegis.app.model.AlteracaoProposicao;
+import br.gov.mj.sislegis.app.model.Comentario;
+import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Reuniao;
+import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
+import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
+import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
+import br.gov.mj.sislegis.app.parser.ProposicaoSearcherFactory;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
 import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
@@ -123,10 +128,16 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
+	public List<Proposicao> listProposicoesSeguidas() {
+		List<Proposicao> seguidas = em.createNamedQuery("getAllProposicoesSeguidas", Proposicao.class).getResultList();
+		return seguidas;
+	}
+
+	@Override
 	public int salvarProposicaoIndependente(Proposicao proposicaoFromBusca) {
 		// Agora vamos salvar/associar as proposições na reunião
 		try {
-			Proposicao proposicao = buscarPorIdProposicao(proposicaoFromBusca.getIdProposicao());
+			Proposicao proposicao = buscarPorId(proposicaoFromBusca.getIdProposicao());
 
 			// Caso a proposição não exista, salvamos ela e associamos a
 			// reunião
@@ -171,7 +182,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		// Agora vamos salvar/associar as proposições na reunião
 		for (Proposicao proposicaoFromBusca : listaProposicao) {
 			try {
-				Proposicao proposicao = buscarPorIdProposicao(proposicaoFromBusca.getIdProposicao());
+				Proposicao proposicao = buscarPorId(proposicaoFromBusca.getIdProposicao());
 
 				// Caso a proposição não exista, salvamos ela e associamos a
 				// reunião
@@ -227,20 +238,14 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public List<ProposicaoJSON> listarTodos() {
-		List<Proposicao> lista = listAll();
-
-		List<ProposicaoJSON> listaProposicaoJSON = new ArrayList<ProposicaoJSON>();
-		for (Proposicao proposicao : lista) {
-			ProposicaoJSON proposicaoJSON = populaProposicaoJSON(proposicao);
-			listaProposicaoJSON.add(proposicaoJSON);
-		}
-
-		return listaProposicaoJSON;
+	public List<Proposicao> listarTodos() {
+		List<Proposicao> proposicoes = listAll();
+		popularTotalComentariosEncaminhamentos(proposicoes);
+		return proposicoes;
 	}
 
 	@Override
-	public List<ProposicaoJSON> consultar(String sigla, String autor, String ementa, String origem, String isFavorita,
+	public List<Proposicao> consultar(String sigla, String autor, String ementa, String origem, String isFavorita,
 			Integer offset, Integer limit) {
 		StringBuilder query = new StringBuilder("SELECT p FROM Proposicao p WHERE 1=1");
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
@@ -276,59 +281,25 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (Objects.nonNull(isFavorita) && !isFavorita.equals("")) {
 			findByIdQuery.setParameter("isFavorita", new Boolean(isFavorita));
 		}
-		List<Proposicao> lista = findByIdQuery.setFirstResult(offset) // offset
-				.setMaxResults(limit) // limit
-				.getResultList();
 
-		List<ProposicaoJSON> listaProposicaoJSON = new ArrayList<ProposicaoJSON>();
-		for (Proposicao proposicao : lista) {
-			ProposicaoJSON proposicaoJSON = populaProposicaoJSON(proposicao);
-			listaProposicaoJSON.add(proposicaoJSON);
-		}
+		List<Proposicao> proposicoes = findByIdQuery.setFirstResult(offset).setMaxResults(limit).getResultList();
+		popularTotalComentariosEncaminhamentos(proposicoes);
 
-		return listaProposicaoJSON;
-	}
-
-	public ProposicaoJSON populaProposicaoJSON(Proposicao proposicao) {
-		ProposicaoJSON proposicaoJSON = new ProposicaoJSON(proposicao.getId(), proposicao.getIdProposicao(),
-				proposicao.getTipo(), proposicao.getAno(), proposicao.getNumero(), proposicao.getAutor(),
-				proposicao.getEmenta(), proposicao.getOrigem(), proposicao.getSigla(), proposicao.getComissao(),
-				proposicao.getSeqOrdemPauta(), proposicao.getLinkProposicao(), proposicao.getLinkPauta(),
-				proposicao.getResultadoASPAR(), proposicao.isFavorita(), proposicao.getReuniao() == null ? null
-						: proposicao.getReuniao().getId(), comentarioService.findByProposicao(proposicao.getId()),
-				encaminhamentoProposicaoService.findByProposicao(proposicao.getId()), proposicao.getPosicionamento(),
-				tagService.populaListaTagsProposicaoJSON(proposicao.getTags()), proposicao.getResponsavel(),
-				populaProposicoesFilhasJSON(proposicao.getProposicoesFilha()), proposicao.getElaboracoesNormativas());
-
-		return proposicaoJSON;
-	}
-
-	public Set<ProposicaoJSON> populaProposicoesFilhasJSON(Set<Proposicao> proposicaoList) {
-		Set<ProposicaoJSON> proposicaoJsonList = new HashSet<ProposicaoJSON>();
-
-		for (Proposicao proposicao : proposicaoList) {
-			ProposicaoJSON proposicaoJSON = new ProposicaoJSON();
-			proposicaoJSON.setId(proposicao.getId());
-			proposicaoJSON.setIdProposicao(proposicao.getIdProposicao());
-			proposicaoJSON.setSigla(proposicao.getSigla());
-
-			proposicaoJsonList.add(proposicaoJSON);
-		}
-
-		return proposicaoJsonList;
+		return proposicoes;
 	}
 
 	@Override
-	public ProposicaoJSON buscarPorId(Long id) {
-		Proposicao proposicao = findById(id);
-		ProposicaoJSON proposicaoJSON = populaProposicaoJSON(proposicao);
-		populaComentarioProposicao(proposicao, proposicaoJSON);
-		return proposicaoJSON;
+	public Proposicao buscarPorId(Integer id) {
+		Proposicao proposicao = findById(id.longValue());
+		if (proposicao != null) {
+			popularTotalComentariosEncaminhamentos(proposicao);
+		}
+		return proposicao;
 	}
 
 	@Override
-	public List<ProposicaoJSON> buscarProposicoesPorDataReuniao(Date dataReuniao) {
-		List<ProposicaoJSON> listaProposicaoJSON = new ArrayList<ProposicaoJSON>();
+	public List<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao) {
+		List<Proposicao> proposicoes = new ArrayList<>();
 		Reuniao reuniao = reuniaoService.buscaReuniaoPorData(dataReuniao);
 
 		if (!Objects.isNull(reuniao)) {
@@ -343,26 +314,13 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				proposicao.setLinkPauta(reuniaoProposicao.getLinkPauta());
 				proposicao.setReuniao(reuniaoProposicao.getReuniao());
 
-				ProposicaoJSON proposicaoJSON = populaProposicaoJSON(proposicao);
-				populaComentarioProposicao(proposicao, proposicaoJSON);
-				listaProposicaoJSON.add(proposicaoJSON);
+				popularTotalComentariosEncaminhamentos(proposicao);
+
+				proposicoes.add(proposicao);
 			}
 		}
 
-		return listaProposicaoJSON;
-
-	}
-
-	private void populaComentarioProposicao(Proposicao proposicao, ProposicaoJSON proposicaoJSON) {
-		proposicaoJSON.setListaComentario(comentarioService.findByProposicao(proposicao.getId()));
-	}
-
-	@Override
-	public void atualizarProposicaoJSON(ProposicaoJSON proposicaoJSON) {
-		processaExclusaoTagProposicao(proposicaoJSON);
-		Proposicao proposicao = proposicaoJsonToProposicao(proposicaoJSON);
-
-		save(proposicao);
+		return proposicoes;
 	}
 
 	@Override
@@ -370,108 +328,17 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		return super.save(entity);
 	}
 
-	private void processaExclusaoTagProposicao(ProposicaoJSON proposicaoJSON) {
-		if (!Objects.isNull(proposicaoJSON.getId())) {
-			Query query = em.createNativeQuery(
-					"SELECT tp.* FROM TagProposicao tp WHERE tp.proposicao_id = :idProposicao", TagProposicao.class);
-			query.setParameter("idProposicao", proposicaoJSON.getId());
-			List<TagProposicao> listaTagsProposicao = query.getResultList();
-
-			c: for (TagProposicao tagProposicao : listaTagsProposicao) {
-				for (TagJSON tagJSON : proposicaoJSON.getTags()) {
-					if (tagJSON.getText().equals(tagProposicao.getTag().getTag()))
-						continue c;
-				}
-				em.createNativeQuery(
-						"delete FROM TagProposicao tp WHERE " + "tp.proposicao_id = :idProposicao "
-								+ "and tp.tag_id = :tag", TagProposicao.class)
-						.setParameter("idProposicao", tagProposicao.getProposicao().getId())
-						.setParameter("tag", tagProposicao.getTag()).executeUpdate();
-			}
-		}
-	}
-
-	private Proposicao proposicaoJsonToProposicao(ProposicaoJSON proposicaoJSON) {
-		Proposicao proposicao = findById(proposicaoJSON.getId());
-		proposicao.setAno(proposicaoJSON.getAno());
-		proposicao.setIdProposicao(proposicaoJSON.getIdProposicao());
-		proposicao.setNumero(proposicaoJSON.getNumero());
-		proposicao.setSigla(proposicaoJSON.getSigla());
-		proposicao.setAutor(proposicaoJSON.getAutor());
-		proposicao.setOrigem(proposicaoJSON.getOrigem());
-		proposicao.setComissao(proposicaoJSON.getComissao());
-		proposicao.setSeqOrdemPauta(proposicaoJSON.getSeqOrdemPauta());
-		proposicao.setPosicionamento(proposicaoJSON.getPosicionamento());
-		proposicao.setResponsavel(proposicaoJSON.getResponsavel());
-		proposicao.setResultadoASPAR(proposicaoJSON.getResultadoASPAR());
-		proposicao.setFavorita(proposicaoJSON.isFavorita());
-		proposicao.setProposicoesFilha(populaProposicoesFilha(proposicaoJSON, proposicao));
-		proposicao.setElaboracoesNormativas(proposicaoJSON.getElaboracoesNormativas());
-		Set<TagProposicao> tags = populaTagsProposicao(proposicaoJSON, proposicao);
-		proposicao.setTags(tags);
-		return proposicao;
-	}
-
-	private Set<TagProposicao> populaTagsProposicao(ProposicaoJSON proposicaoJSON, Proposicao proposicao) {
-		Set<TagProposicao> tagsProposicao = new HashSet<TagProposicao>();
-		for (TagJSON tagJSON : proposicaoJSON.getTags()) {
-			TagProposicaoPK tagProposicaoPK = new TagProposicaoPK();
-			TagProposicao tagProposicao = new TagProposicao();
-			Tag tag = new Tag();
-			tagProposicaoPK.setIdProposicao(proposicaoJSON.getId());
-			tagProposicaoPK.setTag(tagJSON.getText());
-			tagProposicao.setTagProposicaoPK(tagProposicaoPK);
-			tagProposicao.setProposicao(proposicao);
-			tag.setTag(tagJSON.getText());
-			tagProposicao.setTag(tag);
-			tagsProposicao.add(tagProposicao);
-		}
-		return tagsProposicao;
-	}
-
-	private Set<Proposicao> populaProposicoesFilha(ProposicaoJSON proposicaoJSON, Proposicao proposicao) {
-		Set<Proposicao> proposicoesFilhas = new HashSet<Proposicao>();
-
-		for (ProposicaoJSON proposicaoFilha : proposicaoJSON.getProposicoesFilha()) {
-			Proposicao proposicaoFilhaTemp = new Proposicao();
-			proposicaoFilhaTemp.setId(proposicaoFilha.getId());
-			proposicaoFilhaTemp.setIdProposicao(proposicaoFilha.getIdProposicao());
-
-			if (proposicaoFilhaTemp.getProposicoesPai() == null) {
-				proposicaoFilhaTemp.setProposicoesPai(new HashSet<Proposicao>());
-			}
-			proposicaoFilhaTemp.getProposicoesPai().add(proposicao);
-
-			proposicoesFilhas.add(proposicaoFilhaTemp);
-		}
-
-		return proposicoesFilhas;
-	}
-
-	@Override
-	public Proposicao buscarPorIdProposicao(Integer idProposicao) {
-		TypedQuery<Proposicao> findByIdQuery = em.createQuery(
-				"SELECT p FROM Proposicao p WHERE p.idProposicao = :idProposicao", Proposicao.class);
-		findByIdQuery.setParameter("idProposicao", idProposicao);
-		final List<Proposicao> results = findByIdQuery.getResultList();
-		if (!Objects.isNull(results) && !results.isEmpty()) {
-			return results.get(0);
-		} else {
-			return null;
-		}
-	}
-
 	@Override
 	public void deleteById(Long id) {
-		List<EncaminhamentoProposicaoJSON> listaEnc = encaminhamentoProposicaoService.findByProposicao(id);
-		for (Iterator<EncaminhamentoProposicaoJSON> iterator = listaEnc.iterator(); iterator.hasNext();) {
-			EncaminhamentoProposicaoJSON ep = iterator.next();
+		List<EncaminhamentoProposicao> listaEnc = encaminhamentoProposicaoService.findByProposicao(id);
+		for (Iterator<EncaminhamentoProposicao> iterator = listaEnc.iterator(); iterator.hasNext();) {
+			EncaminhamentoProposicao ep = iterator.next();
 			encaminhamentoProposicaoService.deleteById(ep.getId());
 		}
 
-		List<ComentarioJSON> listaCom = comentarioService.findByProposicao(id);
-		for (Iterator<ComentarioJSON> iterator = listaCom.iterator(); iterator.hasNext();) {
-			ComentarioJSON c = iterator.next();
+		List<Comentario> listaCom = comentarioService.findByIdProposicao(id);
+		for (Iterator<Comentario> iterator = listaCom.iterator(); iterator.hasNext();) {
+			Comentario c = iterator.next();
 			comentarioService.deleteById(c.getId());
 		}
 
@@ -480,11 +347,13 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	@Override
 	public List<Proposicao> buscarPorSufixo(String sufixo) {
-		TypedQuery<Proposicao> findByIdQuery = getEntityManager().createQuery(
+		TypedQuery<Proposicao> query = getEntityManager().createQuery(
 				"SELECT p FROM Proposicao p WHERE upper(CONCAT(p.tipo,' ',p.numero,'/',p.ano)) like upper(:sigla)",
 				Proposicao.class);
-		findByIdQuery.setParameter("sigla", "%" + sufixo + "%");
-		return findByIdQuery.getResultList();
+		query.setParameter("sigla", "%" + sufixo + "%");
+		List<Proposicao> proposicoes = query.getResultList();
+		popularTotalComentariosEncaminhamentos(proposicoes);
+		return proposicoes;
 	}
 
 	@Override
@@ -517,4 +386,146 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 
 	}
+
+	/**
+	 * Este comparador checa por alterações na proposição.
+	 */
+	class ChecaAlteracoesProposicao implements Comparator<Proposicao> {
+
+		StringBuilder descricaoAlteracao;
+
+		@Override
+		public int compare(Proposicao local, Proposicao remote) {
+			descricaoAlteracao = new StringBuilder();
+			if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.FINE)) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Comparando Proposicoes ");
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Local:  " + local);
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Remota: " + remote);
+			}
+			if ((local.getAno() == null && remote.getAno() != null)
+					|| (remote.getAno() != null && !local.getAno().equals(remote.getAno()))) {
+				descricaoAlteracao.append("Alterado ano: ").append(local.getAno()).append("=>").append(remote.getAno())
+						.append("\n");
+				local.setAno(remote.getAno());
+			}
+
+			if ((local.getAutor() == null && remote.getAutor() != null)
+					|| (remote.getAutor() != null && !local.getAutor().equals(remote.getAutor()))) {
+				descricaoAlteracao.append("Alterado autor: '").append(local.getAutor()).append("' => '")
+						.append(remote.getAutor()).append("'\n");
+				local.setAutor(remote.getAutor());
+			}
+
+			if ((local.getEmenta() == null && remote.getEmenta() != null)
+					|| !local.getEmenta().equals(remote.getEmenta())) {
+
+				String ementaLocal = null;
+				if (local.getEmenta() != null && local.getEmenta().length() > 100) {
+					ementaLocal = local.getEmenta().substring(0, 100);
+				} else {
+					ementaLocal = local.getEmenta();
+				}
+
+				String ementaRemota = null;
+				if (remote.getEmenta() != null && remote.getEmenta().length() > 100) {
+					ementaRemota = remote.getEmenta().substring(0, 100);
+				} else {
+					ementaRemota = remote.getEmenta();
+				}
+				descricaoAlteracao.append("Alterada ementa: '").append(ementaLocal).append("' => '")
+						.append(ementaRemota).append("'\n");
+				local.setEmenta(remote.getEmenta());
+			}
+
+			if ((local.getNumero() == null && remote.getNumero() != null)
+					|| !local.getNumero().equals(remote.getNumero())) {
+				descricaoAlteracao.append("Alterado número: '").append(local.getNumero()).append("' => '")
+						.append(remote.getNumero()).append("'\n");
+				local.setNumero(remote.getNumero());
+			}
+
+			if ((local.getTipo() == null && remote.getTipo() != null) || !local.getTipo().equals(remote.getTipo())) {
+				descricaoAlteracao.append("Alterado tipo: '").append(local.getTipo()).append("' => '")
+						.append(remote.getTipo()).append("'\n");
+				local.setTipo(remote.getTipo());
+			}
+
+			if ((local.getSituacao() == null && remote.getSituacao() != null)
+					|| !local.getSituacao().equals(remote.getSituacao())) {
+				descricaoAlteracao.append("Alterado situação: '").append(local.getSituacao()).append("' => '")
+						.append(remote.getSituacao()).append("' \n");
+				local.setSituacao(remote.getSituacao());
+			}
+
+			return descricaoAlteracao.length();
+		}
+
+		public String getDescricaoAlteracao() {
+			return descricaoAlteracao.toString();
+		}
+	};
+
+	private ChecaAlteracoesProposicao checadorAlteracoes = new ChecaAlteracoesProposicao();
+
+	@Override
+	public boolean syncDadosProposicao(Proposicao proposicaoLocal) throws IOException {
+		try {
+			ProposicaoSearcher parser = ProposicaoSearcherFactory.getInstance(proposicaoLocal);
+			Proposicao proposicaoRemota = parser.getProposicao(proposicaoLocal.getIdProposicao().longValue());
+
+			if (checadorAlteracoes.compare(proposicaoLocal, proposicaoRemota) != 0) {
+				AlteracaoProposicao altera = new AlteracaoProposicao(proposicaoLocal,
+						checadorAlteracoes.getDescricaoAlteracao(), new Date());
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine(
+						"Houve alteração da proposicao " + proposicaoLocal.getSigla() + ". A alteração foi "
+								+ altera.getDescricaoAlteracao());
+				proposicaoLocal.addAlteracao(altera);
+				save(proposicaoLocal);
+				return true;
+
+			}
+		} catch (Exception e) {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+					"Falhou ao sincronizar proposicao " + proposicaoLocal, e);
+		}
+		return false;
+	}
+
+	@Override
+	public void followProposicao(Usuario user, Long idProposicao) {
+		user = usuarioService.findById(user.getId());
+		Proposicao prop = findById(idProposicao);
+		user.getProposicoesSeguidas().add(prop);
+		usuarioService.save(user);
+
+	}
+
+	@Override
+	public void unfollowProposicao(Usuario user, Long idProposicao) {
+		user = usuarioService.findById(user.getId());
+		Proposicao prop = findById(idProposicao);
+		user.getProposicoesSeguidas().remove(prop);
+		usuarioService.save(user);
+
+	}
+
+	private void popularTotalComentariosEncaminhamentos(Proposicao proposicao) {
+		if (proposicao != null) {
+			proposicao.setTotalComentarios(comentarioService.totalByProposicao(proposicao.getId()));
+			proposicao.setTotalEncaminhamentos(encaminhamentoProposicaoService.totalByProposicao(proposicao.getId()));
+
+			// TODO Remover o carregamento da lista quando tiver a nova
+			// implementacao do carregamento por demanda
+			Set<EncaminhamentoProposicao> encaminhamentos = new HashSet<>(
+					encaminhamentoProposicaoService.findByProposicao(proposicao.getId()));
+			proposicao.setListaEncaminhamentoProposicao(encaminhamentos);
+		}
+	}
+
+	private void popularTotalComentariosEncaminhamentos(List<Proposicao> proposicoes) {
+		for (Proposicao proposicao : proposicoes) {
+			popularTotalComentariosEncaminhamentos(proposicao);
+		}
+	}
+
 }

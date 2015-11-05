@@ -1,14 +1,8 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
-import br.gov.mj.sislegis.app.json.ProposicaoJSON;
-import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Tarefa;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.TarefaService;
-import br.gov.mj.sislegis.app.util.PropertiesUtil;
-import org.apache.commons.mail.DefaultAuthenticator;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.HtmlEmail;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -35,58 +29,9 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 	@Override
 	public Tarefa save(Tarefa entity, String referer){
 		entity = super.save(entity);
-		//sendEmailNotification(entity, referer);
 		return entity;
 	}
 	
-	private void sendEmailNotification(Tarefa entity, String referer) {
-		final HtmlEmail htmlEmail = new HtmlEmail();
-
-		try {
-			String emailFrom = PropertiesUtil.getProperties().getProperty("email");
-			
-			htmlEmail.setHostName(PropertiesUtil.getProperties().getProperty("host"));
-			htmlEmail.setSmtpPort(Integer.parseInt(PropertiesUtil.getProperties().getProperty("port")));
-			htmlEmail.setTLS(true);
-			
-			htmlEmail.setAuthenticator(new DefaultAuthenticator(
-					emailFrom, 
-					PropertiesUtil.getProperties().getProperty("password")));
-			
-			String linkTarefa = referer+"#/Tarefas";
-			String linkTodasTarefas = linkTarefa+"/edit/"+entity.getId();
-			
-			String body = "<h2> A tarefa <i>"+entity.getEncaminhamentoProposicao().getEncaminhamento().getNome()
-					+ "</i> foi atribuída a você</h2>"
-					+ "</br></br>"
-					+ "Prezado(a) "+entity.getUsuario().getNome()+","
-					+ "</br></br>"
-					+ "<p>Você foi definido como o(a) responsável pela tarefa <b>"+entity.getEncaminhamentoProposicao().getEncaminhamento().getNome() + "</b>.</p>"
-					+ "<p>Acompanhe <a href='"+linkTarefa +"'>essa tarefa</a>, ou veja o quadro de <a href='"+ linkTodasTarefas +"'>todas as suas tarefas</a> no SISLEGIS.</p>"
-					+ "</br></br>"
-					+ "Atenciosamente,"
-					+ "</br></br>"
-					+ "</br></br>"
-					+ "<p><b>SISLEGIS - acompanhamento legislativo</b></p>";
-
-
-			htmlEmail.setFrom(emailFrom, PropertiesUtil.getProperties().getProperty("username"));
-
-			htmlEmail.setSubject("[SISLEGIS] Nova tarefa atribuída a você");
-
-			htmlEmail.addTo(entity.getUsuario().getEmail(), entity.getUsuario().getNome());
-
-			htmlEmail.setHtmlMsg(body);
-
-			htmlEmail.setCharset("UTF-8");
-			htmlEmail.setSocketTimeout(Integer.parseInt(PropertiesUtil.getProperties().getProperty("emailTimeout")));
-			htmlEmail.send();
-
-		} catch (EmailException e) {
-			e.printStackTrace();
-		}
-	}
-
 	@Override
 	public Tarefa buscarPorId(Long idTarefa) {
 		TypedQuery<Tarefa> findByIdQuery = em.createQuery("SELECT t FROM Tarefa t WHERE t.id = :idTarefa", Tarefa.class);
@@ -106,34 +51,18 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 
 	@Override
 	public List<Tarefa> buscarPorUsuario(Long idUsuario) {
-		TypedQuery<Tarefa> findByIdQuery = em.createQuery("SELECT t FROM Tarefa t "
-				+ "WHERE t.usuario.id = :idUsuario", Tarefa.class);
+		TypedQuery<Tarefa> findByIdQuery = em.createQuery(
+				"SELECT t FROM Tarefa t WHERE t.usuario.id = :idUsuario", Tarefa.class);
 		findByIdQuery.setParameter("idUsuario", idUsuario);
 		List<Tarefa> resultList = findByIdQuery.getResultList();
 
 		for (Tarefa tarefa : resultList) {
 			if (tarefa.getEncaminhamentoProposicao() != null) {
-				Proposicao prop = em.find(Proposicao.class, tarefa.getEncaminhamentoProposicao().getProposicao().getId());
-				tarefa.setProposicao(populaProposicaoJSON(prop));
+				tarefa.setProposicao(tarefa.getEncaminhamentoProposicao().getProposicao());
 			}
 		}
 		
 		return resultList;
-	}
-	
-	public ProposicaoJSON populaProposicaoJSON(Proposicao proposicao) {	
-		ProposicaoJSON proposicaoJSON = new ProposicaoJSON(proposicao.getId(), 
-				proposicao.getIdProposicao(), 
-				proposicao.getTipo(), 
-				proposicao.getAno(),
-				proposicao.getNumero(), 
-				proposicao.getAutor(), 
-				proposicao.getEmenta(), 
-				proposicao.getOrigem(), 
-				proposicao.getSigla(),
-				proposicao.getComissao());
-
-		return proposicaoJSON;
 	}
 	
 	@Override

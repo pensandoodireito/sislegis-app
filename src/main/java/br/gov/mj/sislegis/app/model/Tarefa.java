@@ -1,25 +1,10 @@
 package br.gov.mj.sislegis.app.model;
 
-import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import br.gov.mj.sislegis.app.enumerated.TipoTarefa;
-import br.gov.mj.sislegis.app.json.ProposicaoJSON;
+
+import javax.persistence.*;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Date;
 
 @Entity
 @Table(name = "tarefa")
@@ -50,7 +35,7 @@ public class Tarefa extends AbstractEntity {
 	private Usuario usuario;
 
 	@Transient
-	private ProposicaoJSON proposicao;
+	private Proposicao proposicao;
 
 	private boolean isVisualizada;
 
@@ -102,11 +87,11 @@ public class Tarefa extends AbstractEntity {
 		this.usuario = usuario;
 	}
 
-	public ProposicaoJSON getProposicao() {
+	public Proposicao getProposicao() {
 		return proposicao;
 	}
 
-	public void setProposicao(ProposicaoJSON proposicao) {
+	public void setProposicao(Proposicao proposicao) {
 		this.proposicao = proposicao;
 	}
 

@@ -35,8 +35,21 @@ public class Usuario extends AbstractEntity {
 	private String nome;
 
 	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(name = "Usuario_ProposicaoSeguida")
+	private Set<Proposicao> proposicoesSeguidas = new HashSet<Proposicao>();
+
+	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "Usuario_Agendas")
 	private Set<AgendaComissao> agendasSeguidas = new HashSet<AgendaComissao>();
+
+	@JsonIgnore
+	public Set<Proposicao> getProposicoesSeguidas() {
+		if (proposicoesSeguidas == null) {
+			return new HashSet<Proposicao>();
+		} else {
+			return proposicoesSeguidas;
+		}
+	}
 
 	@JsonIgnore
 	public Set<AgendaComissao> getAgendasSeguidas() {
@@ -84,7 +97,7 @@ public class Usuario extends AbstractEntity {
 
 	@Override
 	public String toString() {
-		String result = getClass().getSimpleName() + " ";
+		String result = getClass().getSimpleName() + " " + getId() + ":";
 		if (nome != null && !nome.trim().isEmpty())
 			result += "nome: " + nome;
 		if (email != null && !email.trim().isEmpty())

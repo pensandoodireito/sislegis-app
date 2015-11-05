@@ -33,12 +33,12 @@ public class ParserFetcher {
 		return input;
 	}
 
-	public static void fetchXStream(String wsURL, XStream xstream, Object comissoes) throws IOException {
+	public static void fetchXStream(String wsURL, XStream xstream, Object object) throws IOException {
 		InputStream in = null;
 
 		try {
 			in = ParserFetcher.getWebServiceInputStream(wsURL);
-			xstream.fromXML(in, comissoes);
+			xstream.fromXML(in, object);
 		} finally {
 			if (in != null) {
 				try {
