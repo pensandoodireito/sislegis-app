@@ -62,8 +62,12 @@ class ProposicaoWS {
 		proposicao.setEmenta(txtEmenta);
 		proposicao.setOrigem(Origem.CAMARA);
 		proposicao.setAutor(autor1.txtNomeAutor);
-		if (orgaoNumerador != null) {
-			proposicao.setComissao(orgaoNumerador.sigla.trim());
+		if (situacao != null) {
+			proposicao.setComissao(situacao.orgao.siglaOrgaoEstado.trim());
+		} else {
+			if (orgaoNumerador != null) {
+				proposicao.setComissao(orgaoNumerador.sigla.trim());
+			}
 		}
 		proposicao.setSituacao(situacao.getDescricao());
 		proposicao.setLinkProposicao("http://www2.camara.leg.br/proposicoesWeb/fichadetramitacao?idProposicao="

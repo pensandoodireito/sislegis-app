@@ -52,9 +52,9 @@ public class ParserProposicaoCamara implements ProposicaoSearcher {
 	public static void main(String[] args) throws Exception {
 		ParserProposicaoCamara parser = new ParserProposicaoCamara();
 		Long idProposicao = 1197825l; // TODO: Informação que vem do filtro
-		System.out.println(parser.getProposicao(idProposicao).toString());
-		System.out.println(parser.listaTipos());
-		Collection<Proposicao> prop = parser.searchProposicao("INC", 1, 2015);
+//		System.out.println(parser.getProposicao(idProposicao).toString());
+//		System.out.println(parser.listaTipos());
+		Collection<Proposicao> prop = parser.searchProposicao("PL", 5965, 2013);
 		for (Iterator iterator = prop.iterator(); iterator.hasNext();) {
 			Proposicao proposicaoLista = (Proposicao) iterator.next();
 			Proposicao proposicaoId = parser.getProposicao(proposicaoLista.getIdProposicao().longValue());
@@ -74,11 +74,11 @@ public class ParserProposicaoCamara implements ProposicaoSearcher {
 	 * http://www.camara.gov.br/SitCamaraWS/Proposicoes.asmx?op=
 	 * ListarProposicoes
 	 */
-	public Collection<Proposicao> searchProposicao(String sigla, Integer numero, Integer ano) throws IOException {
+	public Collection<Proposicao> searchProposicao(String tipo, Integer numero, Integer ano) throws IOException {
 		// http://www.camara.gov.br/SitCamaraWS/Proposicoes.asmx/ListarProposicoes?sigla=DIS&numero=&ano=2015&datApresentacaoIni=&datApresentacaoFim=&idTipoAutor=&parteNomeAutor=&siglaPartidoAutor=&siglaUFAutor=&generoAutor=&codEstado=&codOrgaoEstado=&emTramitacao=
 		StringBuilder wsURL = new StringBuilder(
 				"http://www.camara.gov.br/SitCamaraWS/Proposicoes.asmx/ListarProposicoes?");
-		wsURL.append("sigla=").append(sigla);
+		wsURL.append("sigla=").append(tipo);
 		wsURL.append("&numero=").append(numero);
 		wsURL.append("&ano=").append(ano);
 		wsURL.append("&datApresentacaoIni=&datApresentacaoFim=&idTipoAutor=&parteNomeAutor=&siglaPartidoAutor=&siglaUFAutor=&generoAutor=&codEstado=&codOrgaoEstado=&emTramitacao=&v=4");

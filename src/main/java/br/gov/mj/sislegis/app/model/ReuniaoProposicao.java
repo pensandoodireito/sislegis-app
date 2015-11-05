@@ -95,4 +95,17 @@ public class ReuniaoProposicao extends AbstractEntity {
 		return result;
 	}
 
+	public Integer getCodigoReuniao() {
+		Integer codigoReuniao = -1;
+		if (linkPauta != null) {
+			if (linkPauta.indexOf("?codReuniao=") > -1) {
+				codigoReuniao = Integer.parseInt(linkPauta.substring(linkPauta.indexOf("?codReuniao=") + 12));
+			} else if (linkPauta.indexOf("?reuniao=") > -1) {
+				codigoReuniao = Integer.parseInt(linkPauta.substring(linkPauta.indexOf("?reuniao=") + 9));
+
+			}
+		}
+		return codigoReuniao;
+	}
+
 }
