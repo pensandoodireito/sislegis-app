@@ -51,7 +51,7 @@ class CamaraWSParserSpec extends Specification{
         then:
         proposicao.getAutor() == "PRESIDÊNCIA DA CÂMARA DOS DEPUTADOS"
         proposicao.getAno() == "2012"
-        proposicao.getComissao() == null
+        proposicao.getComissao() == "PLEN"
 
     }
 }
