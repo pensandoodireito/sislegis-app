@@ -2,6 +2,7 @@ package br.gov.mj.sislegis.app.service;
 
 import java.util.List;
 
+import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
 import br.gov.mj.sislegis.app.model.Tarefa;
 
 public interface TarefaService extends Service<Tarefa> {
@@ -15,5 +16,7 @@ public interface TarefaService extends Service<Tarefa> {
 	Tarefa buscarPorEncaminhamentoProposicaoId(Long idEncaminhamentoProposicao);
 
 	void marcarComoVisualizadas(List<Long> idTarefas);
+
+	void updateTarefa(EncaminhamentoProposicao savedEntity);
 
 }
