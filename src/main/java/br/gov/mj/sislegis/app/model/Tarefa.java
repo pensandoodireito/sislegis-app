@@ -1,15 +1,33 @@
 package br.gov.mj.sislegis.app.model;
 
-import br.gov.mj.sislegis.app.enumerated.TipoTarefa;
-
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import br.gov.mj.sislegis.app.enumerated.TipoTarefa;
 
 @Entity
 @Table(name = "tarefa")
 @XmlRootElement
 public class Tarefa extends AbstractEntity {
+	public static Tarefa createTarefaEncaminhamento(Usuario usuario, EncaminhamentoProposicao encaminhamento) {
+		Tarefa tarefa = new Tarefa(TipoTarefa.ENCAMINHAMENTO, usuario);
+		tarefa.encaminhamento = encaminhamento;
+		return tarefa;
+	}
 
 	private static final long serialVersionUID = -806063711060116952L;
 
@@ -26,15 +44,28 @@ public class Tarefa extends AbstractEntity {
 	@Enumerated(EnumType.ORDINAL)
 	private TipoTarefa tipoTarefa;
 
+	@Column
+	private boolean isVisualizada;
+	@Column
 	private boolean isFinalizada;
 
-	@OneToOne(fetch = FetchType.EAGER)
-	private EncaminhamentoProposicao encaminhamentoProposicao;
+	@ManyToOne(fetch = FetchType.EAGER)
+	EncaminhamentoProposicao encaminhamento = new EncaminhamentoProposicao();
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Usuario usuario;
 
-	private boolean isVisualizada;
+	@Transient
+	private Proposicao proposicao;
+
+	Tarefa() {
+	}
+
+	Tarefa(TipoTarefa tipo, Usuario user) {
+		this.tipoTarefa = tipo;
+		this.usuario = user;
+		this.data = new Date();
+	}
 
 	public Long getId() {
 		return this.id;
@@ -68,14 +99,6 @@ public class Tarefa extends AbstractEntity {
 		this.isFinalizada = isFinalizada;
 	}
 
-	public EncaminhamentoProposicao getEncaminhamentoProposicao() {
-		return encaminhamentoProposicao;
-	}
-
-	public void setEncaminhamentoProposicao(EncaminhamentoProposicao encaminhamentoProposicao) {
-		this.encaminhamentoProposicao = encaminhamentoProposicao;
-	}
-
 	public Usuario getUsuario() {
 		return usuario;
 	}
@@ -90,6 +113,13 @@ public class Tarefa extends AbstractEntity {
 
 	public void setVisualizada(boolean isVisualizada) {
 		this.isVisualizada = isVisualizada;
+	}
+
+	public EncaminhamentoProposicao getEncaminhamentoProposicao() {
+		if (!TipoTarefa.ENCAMINHAMENTO.equals(tipoTarefa)) {
+			throw new IllegalArgumentException("Esta tarefa nao foi criada a partir de um encaminhamento");
+		}
+		return encaminhamento;
 	}
 
 }
