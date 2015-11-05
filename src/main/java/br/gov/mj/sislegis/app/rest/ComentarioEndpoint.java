@@ -110,4 +110,16 @@ public class ComentarioEndpoint {
 
 		return Response.noContent().build();
 	}
+
+	@GET
+	@Path("/ocultar/{id:[0-9][0-9]*}")
+	public Response ocultar(@PathParam("id") Long id){
+		try {
+			comentarioService.ocultar(id);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+		}
+		return Response.ok().build();
+	}
 }
