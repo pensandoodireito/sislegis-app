@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.*;
@@ -12,8 +14,8 @@ import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.ParserFetcher;
 import br.gov.mj.sislegis.app.parser.senado.xstream.*;
+import br.gov.mj.sislegis.app.util.SislegisUtil;
 
-import br.gov.mj.sislegis.app.parser.senado.xstream.Resultado;
 import com.thoughtworks.xstream.XStream;
 
 public class ParserPautaSenado {
@@ -53,7 +55,7 @@ public class ParserPautaSenado {
 		xstream.alias("Comissao", ComissaoBean.class);
 		xstream.alias("Parte", ParteBean.class);
 		xstream.alias("Item", ItemBean.class);
-		xstream.alias("Evento", EventoBean.class);
+		// xstream.alias("Evento", EventoBean.class);
 		xstream.alias("Resultado", Resultado.class);
 		Materias.configXstream(xstream);
 		xstream.aliasField("Partes", ReuniaoBeanSenado.class, "partes");
@@ -65,7 +67,7 @@ public class ParserPautaSenado {
 		xstream.aliasField("Tipo", ReuniaoBeanSenado.class, "tipo");
 
 		xstream.aliasField("Itens", ParteBean.class, "itens");
-		xstream.aliasField("Eventos", ParteBean.class, "eventos");
+		// xstream.aliasField("Eventos", ParteBean.class, "eventos");
 		xstream.aliasField("Materia", ItemBean.class, "materia");
 		xstream.aliasField("Resultado", ItemBean.class, "resultado");
 		xstream.aliasAttribute(ItemBean.class, "tipo", "tipo");
@@ -78,6 +80,7 @@ public class ParserPautaSenado {
 		wsURL.append("/");
 		wsURL.append(datFim);
 		wsURL.append("/detalhe?colegiado=").append(URLEncoder.encode(siglaComissao, "UTF-8"));
+		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.INFO, "getPautaComissao url=" + wsURL.toString());
 		ListaReunioes reunioes = new ListaReunioes();
 
 		configAgenda(xstream);
