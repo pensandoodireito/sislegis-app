@@ -1,27 +1,35 @@
 package br.gov.mj.sislegis.app.rest;
 
+import java.io.IOException;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.persistence.OptimisticLockException;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+
 import br.gov.mj.sislegis.app.model.Tarefa;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.Service;
 import br.gov.mj.sislegis.app.service.TarefaService;
-import org.apache.commons.lang.StringUtils;
-
-import javax.inject.Inject;
-import javax.persistence.OptimisticLockException;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-import java.io.IOException;
-import java.util.List;
-
 
 @Path("/tarefas")
 public class TarefaEndpoint {
 	@Inject
 	private Service<Tarefa> service;
-	
+
 	@Inject
 	private TarefaService tarefaService;
 
@@ -30,9 +38,10 @@ public class TarefaEndpoint {
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response create(Tarefa entity, @HeaderParam("Referer") String referer) {
-		tarefaService.save(entity, referer);
-		return Response.created(UriBuilder.fromResource(TarefaEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
+	public Response create(Tarefa entity) {
+		tarefaService.save(entity);
+		return Response.created(
+				UriBuilder.fromResource(TarefaEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
 	}
 
 	@DELETE
@@ -51,7 +60,7 @@ public class TarefaEndpoint {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Tarefa> listAll(@QueryParam("start") Integer startPosition,	@QueryParam("max") Integer maxResult) {
+	public List<Tarefa> listAll(@QueryParam("start") Integer startPosition, @QueryParam("max") Integer maxResult) {
 		return service.listAll();
 	}
 
@@ -74,13 +83,12 @@ public class TarefaEndpoint {
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response update(Tarefa entity, @HeaderParam("Referer") String referer) {
+	public Response update(Tarefa entity) {
 		try {
-			tarefaService.save(entity, referer);
+			tarefaService.save(entity);
 
 		} catch (OptimisticLockException e) {
-			return Response.status(Response.Status.CONFLICT)
-					.entity(e.getEntity()).build();
+			return Response.status(Response.Status.CONFLICT).entity(e.getEntity()).build();
 		}
 
 		return Response.noContent().build();
@@ -89,7 +97,7 @@ public class TarefaEndpoint {
 	@POST
 	@Path("/marcarVisualizadas")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response marcarComoVisualizadas(List<Long> idTarefas, @HeaderParam("Referer") String referer){
+	public Response marcarComoVisualizadas(List<Long> idTarefas, @HeaderParam("Referer") String referer) {
 		tarefaService.marcarComoVisualizadas(idTarefas);
 		return Response.noContent().build();
 	}
