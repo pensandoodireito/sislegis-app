@@ -91,6 +91,8 @@ public class ParserPautaSenado {
 			prc.setOrigem(Origem.SENADO);
 			prc.setTipo(pautaReuniaoComissao.getTipo());
 			prc.setTitulo(pautaReuniaoComissao.getTitulo());
+			prc.setLinkPauta("http://legis.senado.leg.br/comissoes/reuniao?reuniao=" + prc.getCodigoReuniao());
+			prc.converterSituacao(pautaReuniaoComissao.getSituacao());
 
 			Set<ProposicaoPautaComissao> ps = pautaReuniaoComissao.getProposicoesPauta(prc);
 

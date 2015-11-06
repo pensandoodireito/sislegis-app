@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,6 +26,8 @@ import javax.persistence.UniqueConstraint;
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.AbstractEntity;
 import br.gov.mj.sislegis.app.model.Comissao;
+import br.gov.mj.sislegis.app.parser.senado.xstream.ReuniaoBeanSenado;
+import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 @Entity
 @Table(name = "PautaReuniaoComissao", uniqueConstraints = @UniqueConstraint(columnNames = { "comissao", "data",	"codigoReuniao" }))
@@ -31,7 +35,7 @@ import br.gov.mj.sislegis.app.model.Comissao;
 		@NamedQuery(name = "findByCodigoReuniao", query = "select p from PautaReuniaoComissao p where p.codigoReuniao=:codigoReuniao"),
 		@NamedQuery(name = "findByComissaoDataOrigem", query = "select p from PautaReuniaoComissao p where p.comissao=:comissao and p.data=:data and p.codigoReuniao=:codigoReuniao  "),
 		@NamedQuery(name = "findByIntervaloDatas", query = "select p from PautaReuniaoComissao p where p.data between :dataInicial and :dataFinal"),
-		@NamedQuery(name = "findPendentes", query = "select p from PautaReuniaoComissao p where p.data < current_date() and situacao in :situacoesPendente ")
+		@NamedQuery(name = "findPendentes", query = "select p from PautaReuniaoComissao p where p.data < current_date() and situacao in :situacoesEmAberto order by p.data desc ")
 
 })
 public class PautaReuniaoComissao extends AbstractEntity implements Serializable, Comparable<PautaReuniaoComissao> {
@@ -62,8 +66,11 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 
 	@Column
 	protected String titulo;
+
 	@Column
-	protected String situacao;
+	@Enumerated(EnumType.STRING)
+	protected SituacaoSessao situacao = SituacaoSessao.Desconhecido;
+
 	@Column
 	protected String tipo;
 	@Transient
@@ -132,11 +139,11 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 		this.titulo = titulo;
 	}
 
-	public String getSituacao() {
+	public SituacaoSessao getSituacao() {
 		return situacao;
 	}
 
-	public void setSituacao(String situacao) {
+	public void setSituacao(SituacaoSessao situacao) {
 		this.situacao = situacao;
 	}
 
@@ -170,6 +177,60 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 
 	public Long getId() {
 		return id;
+	}
+
+	// Converte situacao do tipo String, da Camara ou do Senado
+	public void converterSituacao(String situacao){
+
+		switch (origem){
+			case CAMARA:
+				try {
+					situacao = situacao.replace("(Final)", "").trim();
+					switch (SituacaoCamara.valueOf(situacao)) {
+                        case Encerrada:
+                            setSituacao(SituacaoSessao.Realizada);
+                            break;
+                        case Convocada:
+                            setSituacao(SituacaoSessao.Agendada);
+                            break;
+                        default:
+                            setSituacao(SituacaoSessao.Desconhecido);
+                            break;
+                    }
+				} catch (IllegalArgumentException e) {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Falha ao converter a situacao da Camara: " + situacao, e);
+				}
+
+			case SENADO:
+				try {
+					switch (SituacaoSenado.valueOf(situacao)) {
+                        case Encerrada:
+						case Realizada:
+                            setSituacao(SituacaoSessao.Realizada);
+                            break;
+                        case Agendada:
+						case Convocada:
+                            setSituacao(SituacaoSessao.Agendada);
+                            break;
+                        case Cancelada:
+                            setSituacao(SituacaoSessao.Cancelada);
+                            break;
+                        default:
+                            setSituacao(SituacaoSessao.Desconhecido);
+                            break;
+                    }
+				} catch (IllegalArgumentException e) {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Falha ao converter a situacao da Senado: " + situacao, e);
+				}
+		}
+	}
+
+	protected enum SituacaoCamara {
+		Encerrada, Convocada
+	}
+
+	protected enum SituacaoSenado {
+		Encerrada, Realizada, Agendada, Cancelada, Convocada
 	}
 
 	@Override

@@ -56,7 +56,7 @@ public class ParserPlenarioSenado {
 					+ sessao.getCodigoSessao());
 			pauta.setOrigem(Origem.SENADO);
 			pauta.setTipo(sessao.tipo);
-			pauta.setSituacao(sessao.situacaoSessao);
+			pauta.converterSituacao(sessao.situacaoSessao);
 			pauta.setTitulo(sessao.numeroSessao);
 
 			if (sessao.materias != null) {

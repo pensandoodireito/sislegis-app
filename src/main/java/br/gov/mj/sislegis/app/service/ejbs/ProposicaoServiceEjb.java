@@ -4,6 +4,7 @@ import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.*;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
+import br.gov.mj.sislegis.app.model.pautacomissao.SituacaoSessao;
 import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
 import br.gov.mj.sislegis.app.parser.ProposicaoSearcherFactory;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
@@ -673,12 +674,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 								if (checadorAlteracoesPauta.compare(ppcLocal, ppcRemoto) > 0){
 									Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "encontrou diferencas " + ppcLocal + " e " + ppcRemoto);
-									savePautaReuniaoComissao(prcLocal);
+									em.merge(ppcLocal);
 									retorno = true;
 								} else {
 									Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "nenhuma diferenca encontrada entre " + ppcLocal + " e " + ppcRemoto);
 								}
-
+								break;
 							}
 						}
 					}
@@ -700,11 +701,13 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 		//TODO verificar as condicoes pendentes corretas
 
-		List<String> situacoesPendente = new ArrayList<>();
-		situacoesPendente.add("AGUARDANDO ");
+		List<SituacaoSessao> situacoesEmAberto = new ArrayList<>();
+		situacoesEmAberto.add(SituacaoSessao.Agendada);
+		situacoesEmAberto.add(SituacaoSessao.Desconhecido);
 
 		Query q = em.createNamedQuery("findPendentes", PautaReuniaoComissao.class);
-		q.setParameter("situacoesPendente", situacoesPendente);
+		q.setParameter("situacoesEmAberto", situacoesEmAberto);
+		q.setMaxResults(200);
 
 		List<PautaReuniaoComissao> prcList = q.getResultList();
 

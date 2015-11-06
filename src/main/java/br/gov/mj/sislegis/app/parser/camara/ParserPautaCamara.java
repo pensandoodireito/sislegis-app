@@ -107,7 +107,7 @@ public class ParserPautaCamara {
 			pautaReuniaoComissao
 					.setLinkPauta("http://www.camara.leg.br/internet/ordemdodia/ordemDetalheReuniaoCom.asp?codReuniao="
 							+ reuniao.getCodigo().toString());
-			pautaReuniaoComissao.setSituacao(reuniao.getSituacao());
+			pautaReuniaoComissao.converterSituacao(reuniao.getSituacao());
 			pautaReuniaoComissao.setTipo(reuniao.getTipo());
 			pautaReuniaoComissao.setTitulo(reuniao.getTitulo());
 

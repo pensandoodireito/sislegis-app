@@ -12,7 +12,7 @@ class SenadoWSParserSpec extends Specification{
 
         given:
         def parserPlenarioSenado = new ParserPlenarioSenado()
-        def datIni = "20140801"
+        def datIni = "20150801"
         def proposicoes
 
         when:
@@ -44,9 +44,10 @@ class SenadoWSParserSpec extends Specification{
         def proposicoes
         def siglaComissao = "CDH"
         def datIni = "20150801"
+        def datFim = "20150830"
 
         when:
-        proposicoes = parserPautaSenado.getProposicoes(siglaComissao, datIni)
+        proposicoes = parserPautaSenado.getPautaComissao(siglaComissao, datIni, datFim)
 
         then:
         assert proposicoes.size() >= 0

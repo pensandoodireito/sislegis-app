@@ -42,6 +42,7 @@ class ReuniaoBeanCamara extends ReuniaoBean {
 			break;
 
 		default:
+			sessao.setSituacao(SituacaoSessao.Desconhecido);
 			break;
 		}
 		return sessao;

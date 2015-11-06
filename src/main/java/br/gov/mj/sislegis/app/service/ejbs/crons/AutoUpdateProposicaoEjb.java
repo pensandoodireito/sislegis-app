@@ -68,6 +68,7 @@ public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService {
 	@Override
 	@Schedule(dayOfWeek = "*", hour = "4", persistent = false, info = "Atualiza pautas das reunioes passadas e suas proposicoes")
 	public void atualizaPautaReuniaoEProposicoes() {
+		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Atualiza pautas das reunioes anteriores e suas proposicoes");
 
 		List<PautaReuniaoComissao> prcLocalList = proposicaoService.findPautaReuniaoPendentes();
 
