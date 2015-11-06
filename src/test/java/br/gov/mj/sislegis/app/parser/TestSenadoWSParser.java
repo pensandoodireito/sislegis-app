@@ -20,8 +20,7 @@ public class TestSenadoWSParser {
 		try {
 			Proposicao proposicaoSenado = parser.getProposicao(idProposicao);
 			Assert.assertNotNull("Autor nulo", proposicaoSenado.getAutor());
-			Assert.assertFalse("Autor vazio", proposicaoSenado.getAutor()
-					.isEmpty());
+			Assert.assertFalse("Autor vazio", proposicaoSenado.getAutor().isEmpty());
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -34,22 +33,22 @@ public class TestSenadoWSParser {
 		ParserPlenarioSenado parser = new ParserPlenarioSenado();
 
 		String datIni = "20140801";
+		String datFim = "20140809";
 
-		try {
-			List<Proposicao> proposicoes = parser.getProposicoes(datIni);
-
-			Assert.assertNotNull("Nenhuma proposicao encontrada", proposicoes);
-			Assert.assertEquals("Total de proposicoes errado", 28,
-					proposicoes.size());
-
-			// TODO Deve haver um método que faça a validação de uma proposição
-			// que deve ser utilizado pelo testParserProposicaoSenado e aqui.
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception " + e.getMessage());
-
-		}
+//		try {
+//			List<Proposicao> proposicoes = parser.getProposicoes(datIni, datFim);
+//
+//			Assert.assertNotNull("Nenhuma proposicao encontrada", proposicoes);
+//			Assert.assertEquals("Total de proposicoes errado", 28, proposicoes.size());
+//
+//			// TODO Deve haver um método que faça a validação de uma proposição
+//			// que deve ser utilizado pelo testParserProposicaoSenado e aqui.
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			fail("Exception " + e.getMessage());
+//
+//		}
 	}
 
 	@Test

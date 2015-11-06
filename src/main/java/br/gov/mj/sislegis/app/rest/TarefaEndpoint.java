@@ -14,7 +14,6 @@ import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.util.List;
 
-
 @Path("/tarefas")
 public class TarefaEndpoint {
 
@@ -26,9 +25,10 @@ public class TarefaEndpoint {
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response create(Tarefa entity, @HeaderParam("Referer") String referer) {
-		tarefaService.save(entity, referer);
-		return Response.created(UriBuilder.fromResource(TarefaEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
+	public Response create(Tarefa entity) {
+		tarefaService.save(entity);
+		return Response.created(
+				UriBuilder.fromResource(TarefaEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
 	}
 
 	@DELETE
@@ -70,13 +70,12 @@ public class TarefaEndpoint {
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response update(Tarefa entity, @HeaderParam("Referer") String referer) {
+	public Response update(Tarefa entity) {
 		try {
-			tarefaService.save(entity, referer);
+			tarefaService.save(entity);
 
 		} catch (OptimisticLockException e) {
-			return Response.status(Response.Status.CONFLICT)
-					.entity(e.getEntity()).build();
+			return Response.status(Response.Status.CONFLICT).entity(e.getEntity()).build();
 		}
 
 		return Response.noContent().build();
@@ -85,7 +84,7 @@ public class TarefaEndpoint {
 	@POST
 	@Path("/marcarVisualizadas")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response marcarComoVisualizadas(List<Long> idTarefas, @HeaderParam("Referer") String referer){
+	public Response marcarComoVisualizadas(List<Long> idTarefas, @HeaderParam("Referer") String referer) {
 		tarefaService.marcarComoVisualizadas(idTarefas);
 		return Response.noContent().build();
 	}

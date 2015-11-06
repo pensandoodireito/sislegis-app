@@ -8,7 +8,7 @@ import java.util.List;
 @Local
 public interface EncaminhamentoProposicaoService extends Service<EncaminhamentoProposicao> {
 
-	EncaminhamentoProposicao salvarEncaminhamentoProposicao(EncaminhamentoProposicao encaminhamentoProposicao, String referer);
+	EncaminhamentoProposicao salvarEncaminhamentoProposicao(EncaminhamentoProposicao encaminhamentoProposicao);
 
 	List<EncaminhamentoProposicao> findByProposicao(Long idProposicao);
 

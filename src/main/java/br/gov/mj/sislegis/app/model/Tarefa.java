@@ -1,15 +1,21 @@
 package br.gov.mj.sislegis.app.model;
 
-import br.gov.mj.sislegis.app.enumerated.TipoTarefa;
+import java.util.Date;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Date;
+
+import br.gov.mj.sislegis.app.enumerated.TipoTarefa;
 
 @Entity
 @Table(name = "tarefa")
 @XmlRootElement
 public class Tarefa extends AbstractEntity {
+	public static Tarefa createTarefaEncaminhamento(Usuario usuario, EncaminhamentoProposicao encaminhamento) {
+		Tarefa tarefa = new Tarefa(TipoTarefa.ENCAMINHAMENTO, usuario);
+		tarefa.encaminhamentoProposicao = encaminhamento;
+		return tarefa;
+	}
 
 	private static final long serialVersionUID = -806063711060116952L;
 
@@ -26,6 +32,9 @@ public class Tarefa extends AbstractEntity {
 	@Enumerated(EnumType.ORDINAL)
 	private TipoTarefa tipoTarefa;
 
+	@Column
+	private boolean isVisualizada;
+	@Column
 	private boolean isFinalizada;
 
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
@@ -37,10 +46,17 @@ public class Tarefa extends AbstractEntity {
 	@Transient
 	private Proposicao proposicao;
 
-	private boolean isVisualizada;
+	Tarefa() {
+	}
 
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private Comentario comentarioFinalizacao;
+
+	Tarefa(TipoTarefa tipo, Usuario user) {
+		this.tipoTarefa = tipo;
+		this.usuario = user;
+		this.data = new Date();
+	}
 
 	public Long getId() {
 		return this.id;
@@ -74,14 +90,6 @@ public class Tarefa extends AbstractEntity {
 		this.isFinalizada = isFinalizada;
 	}
 
-	public EncaminhamentoProposicao getEncaminhamentoProposicao() {
-		return encaminhamentoProposicao;
-	}
-
-	public void setEncaminhamentoProposicao(EncaminhamentoProposicao encaminhamentoProposicao) {
-		this.encaminhamentoProposicao = encaminhamentoProposicao;
-	}
-
 	public Usuario getUsuario() {
 		return usuario;
 	}
@@ -104,6 +112,18 @@ public class Tarefa extends AbstractEntity {
 
 	public void setVisualizada(boolean isVisualizada) {
 		this.isVisualizada = isVisualizada;
+	}
+
+	public EncaminhamentoProposicao getEncaminhamentoProposicao() {
+		if (!TipoTarefa.ENCAMINHAMENTO.equals(tipoTarefa)) {
+			throw new IllegalArgumentException("Esta tarefa nao foi criada a partir de um encaminhamento");
+		}
+		return encaminhamentoProposicao;
+	}
+
+	public void setEncaminhamentoProposicao(EncaminhamentoProposicao ent) {
+
+		encaminhamentoProposicao = ent;
 	}
 
 	public Comentario getComentarioFinalizacao() {
