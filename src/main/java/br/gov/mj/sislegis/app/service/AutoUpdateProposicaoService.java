@@ -10,5 +10,5 @@ public interface AutoUpdateProposicaoService {
 
 	void atualizaProposicoesDaReuniao();
 
-	void atualizaResultadosDasPautas();
+	void atualizaPautaReuniaoEProposicoes();
 }

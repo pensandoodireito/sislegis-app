@@ -487,7 +487,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		public String getDescricaoAlteracao() {
 			return descricaoAlteracao.toString();
 		}
-	};
+	}
 
 	private ChecaAlteracoesProposicao checadorAlteracoes = new ChecaAlteracoesProposicao();
 
@@ -612,7 +612,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public boolean syncDadosPautaReuniaoComissao(PautaReuniaoComissao prcLocal){
+	public boolean syncDadosPautaReuniaoComissao(PautaReuniaoComissao prcLocal) throws IOException{
 
 		try {
 			Set<PautaReuniaoComissao> prcRemotoList = null;
@@ -674,6 +674,23 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 
 		return false;
+	}
+
+	@Override
+	public List<PautaReuniaoComissao> findPautaReuniaoPendentes() {
+
+		//TODO verificar as condicoes pendentes corretas
+
+		List<String> situacoesPendente = new ArrayList<>();
+		situacoesPendente.add("AGUARDANDO ");
+
+		Query q = em.createNamedQuery("findPendentes", PautaReuniaoComissao.class);
+		q.setParameter("situacoesPendente", situacoesPendente);
+
+		List<PautaReuniaoComissao> prcList = q.getResultList();
+
+		return prcList;
+
 	}
 
 	/**

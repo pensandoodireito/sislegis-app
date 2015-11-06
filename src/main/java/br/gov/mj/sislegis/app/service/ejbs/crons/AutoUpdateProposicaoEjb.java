@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,6 +13,7 @@ import javax.ejb.Singleton;
 import javax.inject.Inject;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.service.AutoUpdateProposicaoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
@@ -64,8 +66,25 @@ public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService {
 	}
 
 	@Override
-	public void atualizaResultadosDasPautas() {
-		// TODO Implementar
+	@Schedule(dayOfWeek = "*", hour = "4", persistent = false, info = "Atualiza pautas das reunioes passadas e suas proposicoes")
+	public void atualizaPautaReuniaoEProposicoes() {
+
+		List<PautaReuniaoComissao> prcLocalList = proposicaoService.findPautaReuniaoPendentes();
+
+		for (PautaReuniaoComissao prcLocal : prcLocalList){
+			try {
+				if (proposicaoService.syncDadosPautaReuniaoComissao(prcLocal)){
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Dados da pauta Reuniao e/ou Proposicao alterados");
+				} else{
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Dados pauta Reuniao e/ou Proposicao sem alteracao");
+				}
+
+			} catch (IOException e) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
+						"Falhou ao atualizar pauta reuniao e/ou proposicao " + prcLocal.getTitulo(), e);
+			}
+		}
+
 	}
 
 }
