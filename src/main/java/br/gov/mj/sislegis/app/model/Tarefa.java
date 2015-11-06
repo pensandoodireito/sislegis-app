@@ -2,6 +2,7 @@ package br.gov.mj.sislegis.app.model;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -11,6 +12,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -25,7 +27,7 @@ import br.gov.mj.sislegis.app.enumerated.TipoTarefa;
 public class Tarefa extends AbstractEntity {
 	public static Tarefa createTarefaEncaminhamento(Usuario usuario, EncaminhamentoProposicao encaminhamento) {
 		Tarefa tarefa = new Tarefa(TipoTarefa.ENCAMINHAMENTO, usuario);
-		tarefa.encaminhamento = encaminhamento;
+		tarefa.encaminhamentoProposicao = encaminhamento;
 		return tarefa;
 	}
 
@@ -49,8 +51,8 @@ public class Tarefa extends AbstractEntity {
 	@Column
 	private boolean isFinalizada;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	EncaminhamentoProposicao encaminhamento = new EncaminhamentoProposicao();
+	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+	private EncaminhamentoProposicao encaminhamentoProposicao;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Usuario usuario;
@@ -60,6 +62,9 @@ public class Tarefa extends AbstractEntity {
 
 	Tarefa() {
 	}
+
+	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	private Comentario comentarioFinalizacao;
 
 	Tarefa(TipoTarefa tipo, Usuario user) {
 		this.tipoTarefa = tipo;
@@ -107,6 +112,14 @@ public class Tarefa extends AbstractEntity {
 		this.usuario = usuario;
 	}
 
+	public Proposicao getProposicao() {
+		return proposicao;
+	}
+
+	public void setProposicao(Proposicao proposicao) {
+		this.proposicao = proposicao;
+	}
+
 	public boolean isVisualizada() {
 		return isVisualizada;
 	}
@@ -119,12 +132,19 @@ public class Tarefa extends AbstractEntity {
 		if (!TipoTarefa.ENCAMINHAMENTO.equals(tipoTarefa)) {
 			throw new IllegalArgumentException("Esta tarefa nao foi criada a partir de um encaminhamento");
 		}
-		return encaminhamento;
+		return encaminhamentoProposicao;
 	}
 
 	public void setEncaminhamentoProposicao(EncaminhamentoProposicao ent) {
 
-		encaminhamento = ent;
+		encaminhamentoProposicao = ent;
 	}
 
+	public Comentario getComentarioFinalizacao() {
+		return comentarioFinalizacao;
+	}
+
+	public void setComentarioFinalizacao(Comentario comentarioFinalizacao) {
+		this.comentarioFinalizacao = comentarioFinalizacao;
+	}
 }

@@ -1,15 +1,12 @@
 package br.gov.mj.sislegis.app.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @XmlRootElement
-public class Encaminhamento extends AbstractEntity {
+@Table(name = "tipo_encaminhamento")
+public class TipoEncaminhamento extends AbstractEntity {
 
 	private static final long serialVersionUID = -678638303472923926L;
 

@@ -13,4 +13,6 @@ public interface EncaminhamentoProposicaoService extends Service<EncaminhamentoP
 	List<EncaminhamentoProposicao> findByProposicao(Long idProposicao);
 
 	Integer totalByProposicao(Long idProposicao);
+
+	void finalizar(Long idEncaminhamentoProposicao, String descricaoComentario);
 }

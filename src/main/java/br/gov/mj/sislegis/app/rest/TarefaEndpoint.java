@@ -1,12 +1,15 @@
 package br.gov.mj.sislegis.app.rest;
 
-import java.io.IOException;
-import java.util.List;
+import br.gov.mj.sislegis.app.model.Tarefa;
+import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
+import br.gov.mj.sislegis.app.service.TarefaService;
 
 import javax.inject.Inject;
 import javax.persistence.OptimisticLockException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -18,17 +21,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-
-import br.gov.mj.sislegis.app.model.Tarefa;
-import br.gov.mj.sislegis.app.model.Usuario;
-import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
-import br.gov.mj.sislegis.app.service.Service;
-import br.gov.mj.sislegis.app.service.TarefaService;
+import java.io.IOException;
+import java.util.List;
 
 @Path("/tarefas")
 public class TarefaEndpoint {
-	@Inject
-	private Service<Tarefa> service;
 
 	@Inject
 	private TarefaService tarefaService;
@@ -47,7 +44,7 @@ public class TarefaEndpoint {
 	@DELETE
 	@Path("/{id:[0-9][0-9]*}")
 	public Response deleteById(@PathParam("id") Long id) {
-		service.deleteById(id);
+		tarefaService.deleteById(id);
 		return Response.noContent().build();
 	}
 
@@ -60,8 +57,8 @@ public class TarefaEndpoint {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Tarefa> listAll(@QueryParam("start") Integer startPosition, @QueryParam("max") Integer maxResult) {
-		return service.listAll();
+	public List<Tarefa> listAll(@QueryParam("start") Integer startPosition,	@QueryParam("max") Integer maxResult) {
+		return tarefaService.listAll();
 	}
 
 	@GET
@@ -100,5 +97,13 @@ public class TarefaEndpoint {
 	public Response marcarComoVisualizadas(List<Long> idTarefas, @HeaderParam("Referer") String referer) {
 		tarefaService.marcarComoVisualizadas(idTarefas);
 		return Response.noContent().build();
+	}
+
+	@POST
+	@Path("/finalizar")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Response finalizar(@FormParam("idTarefa") Long idTarefa, @FormParam("descricaoComentario") String descricaoComentario){
+		tarefaService.finalizar(idTarefa, descricaoComentario);
+		return Response.ok().build();
 	}
 }

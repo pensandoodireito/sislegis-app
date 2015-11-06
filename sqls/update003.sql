@@ -1,0 +1,2 @@
+ALTER TABLE encaminhamento RENAME TO tipo_encaminhamento;
+ALTER TABLE encaminhamentoproposicao RENAME COLUMN encaminhamento_id TO tipo_encaminhamento_id;
