@@ -1,6 +1,5 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
-import br.gov.mj.sislegis.app.enumerated.TipoTarefa;
 import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
 import br.gov.mj.sislegis.app.model.Tarefa;
@@ -18,11 +17,6 @@ import javax.persistence.TypedQuery;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
-
-import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
-import br.gov.mj.sislegis.app.service.AbstractPersistence;
-import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
-import br.gov.mj.sislegis.app.service.TarefaService;
 
 @Stateless
 public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<EncaminhamentoProposicao, Long> implements
@@ -71,7 +65,7 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 	public List<EncaminhamentoProposicao> findByProposicao2(Long idProposicao) {
 		TypedQuery<EncaminhamentoProposicao> findByIdQuery = em.createQuery("SELECT c FROM EncaminhamentoProposicao c "
 				+ "INNER JOIN FETCH c.responsavel res " + "INNER JOIN FETCH c.comentario com "
-				+ "INNER JOIN FETCH c.encaminhamento enc " + "INNER JOIN FETCH c.proposicao p WHERE p.id = :entityId",
+				+ "INNER JOIN FETCH c.tipoEncaminhamento enc " + "INNER JOIN FETCH c.proposicao p WHERE p.id = :entityId",
 				EncaminhamentoProposicao.class);
 		findByIdQuery.setParameter("entityId", idProposicao);
 		final List<EncaminhamentoProposicao> results = findByIdQuery.getResultList();

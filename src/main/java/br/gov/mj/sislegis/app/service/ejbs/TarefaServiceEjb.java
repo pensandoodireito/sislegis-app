@@ -14,9 +14,6 @@ import java.util.Date;
 import java.util.List;
 
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
-import br.gov.mj.sislegis.app.model.Tarefa;
-import br.gov.mj.sislegis.app.service.AbstractPersistence;
-import br.gov.mj.sislegis.app.service.TarefaService;
 
 @Stateless
 public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implements TarefaService {
@@ -76,7 +73,7 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 	@Override
 	public Tarefa buscarPorEncaminhamentoProposicaoId(Long idEncaminhamentoProposicao) {
 		TypedQuery<Tarefa> findByIdQuery = em.createQuery(
-				"SELECT t FROM Tarefa t WHERE t.encaminhamento.id = :idEncaminhamentoProposicao", Tarefa.class);
+				"SELECT t FROM Tarefa t WHERE t.encaminhamentoProposicao.id = :idEncaminhamentoProposicao", Tarefa.class);
 		findByIdQuery.setParameter("idEncaminhamentoProposicao", idEncaminhamentoProposicao);
 		List<Tarefa> resultList = findByIdQuery.getResultList();
 
