@@ -229,6 +229,13 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public String getComissao() {
+		if (comissao == null || comissao.length() == 0) {
+			if (!pautasComissoes.isEmpty()) {
+				//para algumas proposicoes da camara o campo com dados da comissao atual está vazio.
+				//por exemplo: http://www.camara.gov.br/SitCamaraWS/Proposicoes.asmx/ListarProposicoes?sigla=PL&numero=2323&ano=2011&datApresentacaoIni=&datApresentacaoFim=&idTipoAutor=&parteNomeAutor=&siglaPartidoAutor=&siglaUFAutor=&generoAutor=&codEstado=&codOrgaoEstado=&emTramitacao=&v=4
+				return pautasComissoes.first().getPautaReuniaoComissao().getComissao();
+			}
+		}
 		return comissao;
 	}
 
