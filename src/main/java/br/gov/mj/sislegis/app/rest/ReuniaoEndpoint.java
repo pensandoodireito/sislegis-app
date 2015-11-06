@@ -1,20 +1,34 @@
 package br.gov.mj.sislegis.app.rest;
 
-
-import br.gov.mj.sislegis.app.model.Proposicao;
-import br.gov.mj.sislegis.app.model.Reuniao;
-import br.gov.mj.sislegis.app.service.ProposicaoService;
-import br.gov.mj.sislegis.app.service.Service;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.persistence.OptimisticLockException;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import java.util.Date;
-import java.util.List;
 
+import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Reuniao;
+import br.gov.mj.sislegis.app.rest.serializers.MonthDayYearDeSerializer;
+import br.gov.mj.sislegis.app.service.ProposicaoService;
+import br.gov.mj.sislegis.app.service.Service;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Path("/reuniaos")
 public class ReuniaoEndpoint {
@@ -24,14 +38,13 @@ public class ReuniaoEndpoint {
 
 	@Inject
 	private ProposicaoService proposicaoService;
-	
+
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(Reuniao entity) {
 		service.save(entity);
 		return Response.created(
-				UriBuilder.fromResource(ReuniaoEndpoint.class)
-						.path(String.valueOf(entity.getId())).build()).build();
+				UriBuilder.fromResource(ReuniaoEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
 	}
 
 	@DELETE
@@ -48,11 +61,12 @@ public class ReuniaoEndpoint {
 		return Response.ok(service.findById(id)).build();
 	}
 
+
 	@GET
 	@Path("/findByData")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Proposicao> findByData(@QueryParam("data") Date data) throws Exception {
-		List<Proposicao> lista = proposicaoService.buscarProposicoesPorDataReuniao(data);
+	public Collection<Proposicao> findByData(@QueryParam("data") Date data) throws Exception {
+		Collection<Proposicao> lista = proposicaoService.buscarProposicoesPorDataReuniao(data);
 		return lista;
 	}
 
@@ -70,10 +84,109 @@ public class ReuniaoEndpoint {
 		try {
 			entity = service.save(entity);
 		} catch (OptimisticLockException e) {
-			return Response.status(Response.Status.CONFLICT)
-					.entity(e.getEntity()).build();
+			return Response.status(Response.Status.CONFLICT).entity(e.getEntity()).build();
 		}
 
 		return Response.noContent().build();
+	}
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class CompactReuniao {
+
+	Long id;
+	@JsonDeserialize(using = MonthDayYearDeSerializer.class)
+	Date data;
+	List<CompactProposicao> proposicoes;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Date getData() {
+		return data;
+	}
+
+	public void setData(Date data) {
+		this.data = data;
+	}
+
+	public List<CompactProposicao> getProposicoes() {
+		return proposicoes;
+	}
+
+	public void setProposicoes(List<CompactProposicao> proposicoes) {
+		this.proposicoes = proposicoes;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("id:{" + id + "} data:{" + data + "}\n");
+		for (Iterator iterator = proposicoes.iterator(); iterator.hasNext();) {
+			CompactProposicao compactProposicao = (CompactProposicao) iterator.next();
+			sb.append(compactProposicao).append("\n");
+		}
+		return sb.toString();
+	}
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+class CompactProposicao {
+
+	Long id;
+	Integer idProposicao;
+	Origem origem;
+	String comissao;
+	Integer codigoReuniao;
+
+	public Integer getIdProposicao() {
+		return idProposicao;
+	}
+
+	public void setIdProposicao(Integer idProposicao) {
+		this.idProposicao = idProposicao;
+	}
+
+	public Origem getOrigem() {
+		return origem;
+	}
+
+	public void setOrigem(Origem origem) {
+		this.origem = origem;
+	}
+
+	public String getComissao() {
+		return comissao;
+	}
+
+	public void setComissao(String comissao) {
+		this.comissao = comissao;
+	}
+
+	public Integer getCodigoReuniao() {
+		return codigoReuniao;
+	}
+
+	public void setCodigoReuniao(Integer codigoReuniao) {
+		this.codigoReuniao = codigoReuniao;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	@Override
+	public String toString() {
+
+		return "id:{" + idProposicao + "} Origem:{" + origem.name() + "} comissao:{" + comissao + "} codigoReuniao:{"
+				+ codigoReuniao + "}";
 	}
 }

@@ -10,10 +10,12 @@ import br.gov.mj.sislegis.app.model.Usuario;
 @Local
 public interface ComentarioService extends Service<Comentario> {
 
-	public List<Comentario> findByIdProposicao(Long id);
+	List<Comentario> findByIdProposicao(Long id);
 
-	public void salvarComentario(Comentario comentario, Usuario usuario) throws IllegalAccessException;
+	void salvarComentario(Comentario comentario, Usuario usuario) throws IllegalAccessException;
 
 	Integer totalByProposicao(Long idProposicao);
+
+	void ocultar(Long idComentario);
 
 }

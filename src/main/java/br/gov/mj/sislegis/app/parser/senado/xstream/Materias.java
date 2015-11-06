@@ -7,11 +7,11 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 
 @XStreamAlias("Materias")
-class Materias {
+public class Materias {
 	@XStreamImplicit(itemFieldName = "Materia")
-	List<Materia> materias;
+	public List<Materia> materias;
 
-	static void configXstream(XStream xstream) {
+	public static void configXstream(XStream xstream) {
 		xstream.processAnnotations(Materias.class);
 		Materia.configXstream(xstream);
 

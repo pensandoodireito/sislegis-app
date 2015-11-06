@@ -2,10 +2,26 @@ package br.gov.mj.sislegis.app.parser.senado;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
+import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.ParserFetcher;
+import br.gov.mj.sislegis.app.parser.senado.xstream.ComissaoBean;
+import br.gov.mj.sislegis.app.parser.senado.xstream.EventoBean;
+import br.gov.mj.sislegis.app.parser.senado.xstream.ItemBean;
+import br.gov.mj.sislegis.app.parser.senado.xstream.ListaProposicoes;
+import br.gov.mj.sislegis.app.parser.senado.xstream.ListaReunioes;
+import br.gov.mj.sislegis.app.parser.senado.xstream.Materia;
+import br.gov.mj.sislegis.app.parser.senado.xstream.Materias;
+import br.gov.mj.sislegis.app.parser.senado.xstream.ParteBean;
+import br.gov.mj.sislegis.app.parser.senado.xstream.ReuniaoBeanSenado;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -15,34 +31,83 @@ public class ParserPautaSenado {
 		ParserPautaSenado parser = new ParserPautaSenado();
 
 		// TODO: Informação que vem do filtro
-		String siglaComissao = "CDH";
-		String datIni = "20141201";
-		System.out.println(parser.getReunioes(siglaComissao, datIni).toString());
-		System.out.println(parser.getProposicoes(siglaComissao, datIni).toString());
-	}
+		String siglaComissao = "CAE";
+		String datIni = "20151001";
+		String datFim = "20151008";
+		Set<PautaReuniaoComissao> pautas = parser.getPautaComissao(siglaComissao, datIni, datFim);
 
-	public List<Proposicao> getProposicoes(String siglaComissao, String datIni) throws Exception {
-		List<Proposicao> proposicoes = new ArrayList<Proposicao>();
+		for (Iterator iterator = pautas.iterator(); iterator.hasNext();) {
+			PautaReuniaoComissao pautaReuniaoComissao = (PautaReuniaoComissao) iterator.next();
+			System.out.println(pautaReuniaoComissao);
+			for (Iterator iterator2 = pautaReuniaoComissao.getProposicoesDaPauta().iterator(); iterator2.hasNext();) {
+				ProposicaoPautaComissao ppc = (ProposicaoPautaComissao) iterator2.next();
+				System.out.println("\t" + ppc.getProposicao().getEmenta());
 
-		XStream xstreamReuniao = new XStream();
-		xstreamReuniao.ignoreUnknownElements();
+			}
 
-		configReuniao(xstreamReuniao);
-
-		for (ReuniaoBeanSenado bean : getReunioes(siglaComissao, datIni)) {
-
-			String wsURLReuniao = "http://legis.senado.leg.br/dadosabertos/reuniao/" + bean.getCodigo();
-			ReuniaoBeanSenado reuniao = new ReuniaoBeanSenado();
-			ParserFetcher.fetchXStream(wsURLReuniao, xstreamReuniao, reuniao);
-
-			proposicoes.addAll(reuniao.getProposicoes());
 		}
 
-		return proposicoes;
 	}
 
-	public List<ReuniaoBeanSenado> getReunioes(String siglaComissao, String datIni) throws Exception {
-		return getReunioes(siglaComissao, datIni, null);
+	public Set<PautaReuniaoComissao> getPautaComissao(String siglaComissao, String datIni, String datFim)
+			throws Exception {
+
+		Set<PautaReuniaoComissao> pautas = new HashSet<PautaReuniaoComissao>();
+
+		XStream xstream = new XStream();
+		xstream.ignoreUnknownElements();
+
+		xstream.alias("Reuniao", ReuniaoBeanSenado.class);
+		xstream.alias("Comissao", ComissaoBean.class);
+		xstream.alias("Parte", ParteBean.class);
+		xstream.alias("Item", ItemBean.class);
+		xstream.alias("Evento", EventoBean.class);
+		Materias.configXstream(xstream);
+		xstream.aliasField("Partes", ReuniaoBeanSenado.class, "partes");
+		xstream.aliasField("Comissoes", ReuniaoBeanSenado.class, "comissoes");
+		xstream.aliasField("Codigo", ReuniaoBeanSenado.class, "codigo");
+		xstream.aliasField("Titulo", ReuniaoBeanSenado.class, "titulo");
+		xstream.aliasField("Data", ReuniaoBeanSenado.class, "data");
+		xstream.aliasField("Hora", ReuniaoBeanSenado.class, "hora");
+		xstream.aliasField("Tipo", ReuniaoBeanSenado.class, "tipo");
+
+		xstream.aliasField("Itens", ParteBean.class, "itens");
+		xstream.aliasField("Eventos", ParteBean.class, "eventos");
+		xstream.aliasField("Materia", ItemBean.class, "materia");
+		xstream.aliasAttribute(ItemBean.class, "tipo", "tipo");
+
+		xstream.aliasField("MateriasRelacionadas", EventoBean.class, "materiasRelacionadas");
+
+		xstream.aliasField("SeqOrdemPauta", ItemBean.class, "seqOrdemPauta");
+
+		StringBuilder wsURL = new StringBuilder("http://legis.senado.leg.br/dadosabertos/agenda/");
+		wsURL.append(datIni);
+		wsURL.append("/");
+		wsURL.append(datFim);
+		wsURL.append("/detalhe?colegiado=").append(URLEncoder.encode(siglaComissao, "UTF-8"));
+		ListaReunioes reunioes = new ListaReunioes();
+
+		configAgenda(xstream);
+		ParserFetcher.fetchXStream(wsURL.toString(), xstream, reunioes);
+		for (Iterator<ReuniaoBeanSenado> iterator = reunioes.getReunioes().iterator(); iterator.hasNext();) {
+			ReuniaoBeanSenado pautaReuniaoComissao = (ReuniaoBeanSenado) iterator.next();
+			Comissao comissao = new Comissao();
+			comissao.setSigla(siglaComissao);
+			PautaReuniaoComissao prc = new PautaReuniaoComissao(pautaReuniaoComissao.getDate(), comissao,
+					pautaReuniaoComissao.getCodigo());
+			prc.setOrigem(Origem.SENADO);
+			prc.setTipo(pautaReuniaoComissao.getTipo());
+			prc.setTitulo(pautaReuniaoComissao.getTitulo());
+
+			Set<ProposicaoPautaComissao> ps = pautaReuniaoComissao.getProposicoesPauta(prc);
+
+			if (ps.size() > 0) {
+				pautas.add(prc);
+			}
+
+		}
+
+		return pautas;
 	}
 
 	public List<ReuniaoBeanSenado> getReunioes(String siglaComissao, String datIni, String dataFim) throws Exception {
@@ -105,87 +170,5 @@ public class ParserPautaSenado {
 		xstream.aliasField("Numero", Proposicao.class, "numero");
 		xstream.aliasField("Ano", Proposicao.class, "ano");
 		xstream.aliasField("Ementa", Proposicao.class, "ementa");
-	}
-}
-
-class ListaReunioes {
-	protected List<ReuniaoBeanSenado> reunioes = new ArrayList<ReuniaoBeanSenado>();
-
-	protected List<ReuniaoBeanSenado> getReunioes() {
-		return reunioes;
-	}
-}
-
-class ComissaoBean {
-	protected String sigla;
-	protected String nome;
-
-	protected String getSigla() {
-		return sigla;
-	}
-
-	protected String getNome() {
-		return nome;
-	}
-}
-
-class ParteBean {
-	protected List<ItemBean> itens = new ArrayList<ItemBean>();
-	protected List<EventoBean> eventos = new ArrayList<EventoBean>();
-
-	protected List<ItemBean> getItens() {
-		return itens;
-	}
-
-	protected void setItens(List<ItemBean> itens) {
-		this.itens = itens;
-	}
-
-	public List<EventoBean> getEventos() {
-		return eventos;
-	}
-
-	public void setEventos(List<EventoBean> eventos) {
-		this.eventos = eventos;
-	}
-}
-
-class ItemBean {
-	protected Integer seqOrdemPauta;
-	protected Proposicao proposicao;
-	protected String tipo;
-
-	protected Proposicao getProposicao() {
-		proposicao.setSeqOrdemPauta(seqOrdemPauta);
-		return proposicao;
-	}
-
-	protected Integer getSeqOrdemPauta() {
-		return seqOrdemPauta;
-	}
-}
-
-class EventoBean {
-	protected Integer seqOrdemPauta;
-	protected List<Proposicao> proposicoes;
-
-	public List<Proposicao> getProposicoes() {
-		return proposicoes;
-	}
-
-	public void setProposicoes(List<Proposicao> proposicoes) {
-		this.proposicoes = proposicoes;
-	}
-}
-
-class ListaProposicoes {
-	protected Proposicao proposicao;
-
-	public Proposicao getProposicao() {
-		return proposicao;
-	}
-
-	public void setProposicao(Proposicao proposicao) {
-		this.proposicao = proposicao;
 	}
 }

@@ -1,12 +1,20 @@
-package br.gov.mj.sislegis.app.parser.senado;
+package br.gov.mj.sislegis.app.parser.senado.xstream;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamImplicit;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
+import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.Sessao;
 import br.gov.mj.sislegis.app.model.pautacomissao.SituacaoSessao;
 
@@ -18,6 +26,7 @@ public class ReuniaoBeanSenado extends br.gov.mj.sislegis.app.parser.ReuniaoBean
 	}
 
 	protected List<ComissaoBean> comissoes = new ArrayList<ComissaoBean>();
+
 	protected List<ParteBean> partes = new ArrayList<ParteBean>();
 
 	protected List<ParteBean> getPartes() {
@@ -28,45 +37,36 @@ public class ReuniaoBeanSenado extends br.gov.mj.sislegis.app.parser.ReuniaoBean
 		return comissoes;
 	}
 
-	protected List<Proposicao> getProposicoes() {
-		List<Proposicao> materias = new ArrayList<Proposicao>();
+	public Set<ProposicaoPautaComissao> getProposicoesPauta(PautaReuniaoComissao reuniao) {
 
 		for (ParteBean parteBean : this.getPartes()) {
 			List<ItemBean> itens = parteBean.getItens();
-			List<EventoBean> eventos = parteBean.getEventos(); // tipicamente
-																// aparece em
-																// audiencias
-																// publicas
+			for (Iterator iterator = itens.iterator(); iterator.hasNext();) {
+				ItemBean itemBean = (ItemBean) iterator.next();
 
-			for (ItemBean itemBean : itens) {
 				// Não adicionamos por exemplo, os requerimentos, pois não são
 				// tratados como proposições
 				if (itemBean.tipo.equalsIgnoreCase(MATERIA)) {
-					Proposicao prop = itemBean.getProposicao();
+
+					Materia mat = itemBean.getMateria();
+					Proposicao prop = mat.toProposicao();
 					prop.setComissao(comissoes.get(0).getSigla() + " - " + comissoes.get(0).getNome());
 					prop.setOrigem(Origem.SENADO);
 					prop.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate="
 							+ prop.getIdProposicao());
-					prop.setLinkPauta("http://legis.senado.leg.br/comissoes/reuniao?reuniao=" + getCodigo());
-					materias.add(prop);
+					ProposicaoPautaComissao propPauta = new ProposicaoPautaComissao(reuniao, prop);
+					propPauta.setOrdemPauta(itemBean.getSeqOrdemPauta());
+					propPauta.setRelator(itemBean.getMateria().getRelator());
+
+					reuniao.addProposicaoPauta(propPauta);
 				}
 			}
 
-			for (EventoBean eventoBean : eventos) {
-				List<Proposicao> proposicoes = eventoBean.getProposicoes();
+			// Eventos não deve aparecer na lista de proposicoes discutidas
 
-				for (Proposicao prop : proposicoes) {
-					prop.setComissao(comissoes.get(0).getSigla() + " - " + comissoes.get(0).getNome());
-					prop.setOrigem(Origem.SENADO);
-					prop.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate="
-							+ prop.getIdProposicao());
-					prop.setLinkPauta("http://legis.senado.leg.br/comissoes/reuniao?reuniao=" + getCodigo());
-					materias.add(prop);
-				}
-			}
 		}
 
-		return materias;
+		return reuniao.getProposicoesDaPauta();
 	}
 
 	@Override
@@ -81,9 +81,8 @@ public class ReuniaoBeanSenado extends br.gov.mj.sislegis.app.parser.ReuniaoBean
 
 	public Sessao getSessao() {
 		Sessao sessao = new Sessao();
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy kk:mm");
 		try {
-			sessao.setData(sdf.parse(data + " " + hora));
+			sessao.setData(getDate());
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
@@ -104,6 +103,11 @@ public class ReuniaoBeanSenado extends br.gov.mj.sislegis.app.parser.ReuniaoBean
 			break;
 		}
 		return sessao;
+	}
+
+	public Date getDate() throws ParseException {
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy kk:mm");
+		return sdf.parse(data + " " + hora);
 	}
 
 }

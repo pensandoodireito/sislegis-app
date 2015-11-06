@@ -1,26 +1,19 @@
 package br.gov.mj.sislegis.app.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @XmlRootElement
-public class Reuniao extends AbstractEntity {
+public class Reuniao extends AbstractEntity implements Comparable<Reuniao> {
 
 	private static final long serialVersionUID = -3187796439185752162L;
 
@@ -32,10 +25,6 @@ public class Reuniao extends AbstractEntity {
 	@Column(nullable = false, unique = true)
 	@Temporal(TemporalType.DATE)
 	private Date data;
-
-	@JsonIgnore
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "reuniao")
-	private Set<ReuniaoProposicao> listaReuniaoProposicoes = new HashSet<ReuniaoProposicao>();
 
 	public Long getId() {
 		return this.id;
@@ -53,14 +42,6 @@ public class Reuniao extends AbstractEntity {
 		this.data = data;
 	}
 
-	public Set<ReuniaoProposicao> getListaReuniaoProposicoes() {
-		return listaReuniaoProposicoes;
-	}
-
-	public void setListaReuniaoProposicoes(Set<ReuniaoProposicao> listaReuniaoProposicoes) {
-		this.listaReuniaoProposicoes = listaReuniaoProposicoes;
-	}
-
 	@Override
 	public String toString() {
 		String result = getClass().getSimpleName() + " ";
@@ -69,6 +50,16 @@ public class Reuniao extends AbstractEntity {
 		if (data != null)
 			result += ", data: " + data;
 		return result;
+	}
+
+	@Override
+	public int compareTo(Reuniao o) {
+		if (o.data.before(data)) {
+			return 1;
+		} else if (o.data.after(data)) {
+			return -1;
+		}
+		return 0;
 	}
 
 }

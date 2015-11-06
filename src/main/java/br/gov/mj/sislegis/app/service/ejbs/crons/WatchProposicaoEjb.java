@@ -1,4 +1,4 @@
-package br.gov.mj.sislegis.app.service.ejbs;
+package br.gov.mj.sislegis.app.service.ejbs.crons;
 
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -39,7 +39,7 @@ public class WatchProposicaoEjb implements WatchProposicaoService {
 	UsuarioService usuarioService;
 
 	@Override
-	@Schedule(minute = "*", hour = "*", persistent = false, info = "Atualiza status proposicoes")
+	@Schedule(hour = "*", persistent = false, info = "Atualiza status proposicoes")
 	public void atualizaProposicoesSeguidas() {
 		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Atualizando proposicoes seguidas");
 		List<Proposicao> proposicoesSeguidas = proposicaoService.listProposicoesSeguidas();
