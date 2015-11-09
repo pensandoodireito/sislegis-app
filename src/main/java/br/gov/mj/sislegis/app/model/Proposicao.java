@@ -33,7 +33,6 @@ import br.gov.mj.sislegis.app.enumerated.Origem;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-
 @Entity
 //@formatter:off
 @NamedNativeQueries({
@@ -99,6 +98,18 @@ public class Proposicao extends AbstractEntity {
 	@Transient
 	private String linkPauta;
 
+	@ManyToOne(fetch = FetchType.EAGER)
+	private Posicionamento posicao;
+
+	
+	public Posicionamento getPosicao() {
+		return posicao;
+	}
+
+	public void setPosicao(Posicionamento posicao) {
+		this.posicao = posicao;
+	}
+
 	@Column
 	private Posicionamento posicionamento;
 
@@ -120,7 +131,6 @@ public class Proposicao extends AbstractEntity {
 	@Column(nullable = false)
 	private boolean isFavorita;
 
-
 	@OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "proposicao")
 	@OrderBy("data ASC")
 	private SortedSet<AlteracaoProposicao> alteracoesProposicao = new TreeSet<AlteracaoProposicao>();
@@ -130,7 +140,6 @@ public class Proposicao extends AbstractEntity {
 
 	@Transient
 	private Integer totalEncaminhamentos = 0;
-
 
 	@ManyToMany(fetch = FetchType.EAGER, mappedBy = "proposicoesFilha")
 	private Set<Proposicao> proposicoesPai;
@@ -253,11 +262,11 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public Posicionamento getPosicionamento() {
-		return posicionamento;
+		return posicao;
 	}
 
 	public void setPosicionamento(Posicionamento posicionamento) {
-		this.posicionamento = posicionamento;
+		this.posicao = posicionamento;
 	}
 
 	public Set<Comentario> getListaComentario() {
@@ -317,7 +326,7 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public Integer getTotalComentarios() {
-		if (CollectionUtils.isNotEmpty(listaComentario)){
+		if (CollectionUtils.isNotEmpty(listaComentario)) {
 			totalComentarios = listaComentario.size();
 		}
 		return totalComentarios;
@@ -328,7 +337,7 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public Integer getTotalEncaminhamentos() {
-		if (CollectionUtils.isNotEmpty(listaEncaminhamentoProposicao)){
+		if (CollectionUtils.isNotEmpty(listaEncaminhamentoProposicao)) {
 			totalEncaminhamentos = listaEncaminhamentoProposicao.size();
 		}
 		return totalEncaminhamentos;
