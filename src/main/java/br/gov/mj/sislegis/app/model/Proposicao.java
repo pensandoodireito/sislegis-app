@@ -113,8 +113,11 @@ public class Proposicao extends AbstractEntity {
 	@Column
 	private String linkProposicao;
 
-	@Column
-	private Posicionamento posicionamento;
+	@Transient
+	private String linkPauta;
+
+	@ManyToOne(fetch = FetchType.EAGER)
+	private Posicionamento posicao;
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	private Usuario responsavel;
@@ -125,9 +128,6 @@ public class Proposicao extends AbstractEntity {
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "proposicao")
 	private Set<TagProposicao> tags;
-
-	@Transient
-	private String linkPauta;
 
 	@Transient
 	private Set<Comentario> listaComentario = new HashSet<>();
@@ -231,8 +231,10 @@ public class Proposicao extends AbstractEntity {
 	public String getComissao() {
 		if (comissao == null || comissao.length() == 0) {
 			if (!pautasComissoes.isEmpty()) {
-				//para algumas proposicoes da camara o campo com dados da comissao atual está vazio.
-				//por exemplo: http://www.camara.gov.br/SitCamaraWS/Proposicoes.asmx/ListarProposicoes?sigla=PL&numero=2323&ano=2011&datApresentacaoIni=&datApresentacaoFim=&idTipoAutor=&parteNomeAutor=&siglaPartidoAutor=&siglaUFAutor=&generoAutor=&codEstado=&codOrgaoEstado=&emTramitacao=&v=4
+				// para algumas proposicoes da camara o campo com dados da
+				// comissao atual está vazio.
+				// por exemplo:
+				// http://www.camara.gov.br/SitCamaraWS/Proposicoes.asmx/ListarProposicoes?sigla=PL&numero=2323&ano=2011&datApresentacaoIni=&datApresentacaoFim=&idTipoAutor=&parteNomeAutor=&siglaPartidoAutor=&siglaUFAutor=&generoAutor=&codEstado=&codOrgaoEstado=&emTramitacao=&v=4
 				return pautasComissoes.first().getPautaReuniaoComissao().getComissao();
 			}
 		}
@@ -276,11 +278,11 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public Posicionamento getPosicionamento() {
-		return posicionamento;
+		return posicao;
 	}
 
 	public void setPosicionamento(Posicionamento posicionamento) {
-		this.posicionamento = posicionamento;
+		this.posicao = posicionamento;
 	}
 
 	public Set<Comentario> getListaComentario() {
