@@ -158,7 +158,18 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 
 	}
-
+	@Override
+	public Proposicao buscarPorIdProposicao(Integer idProposicao) {
+		TypedQuery<Proposicao> findByIdQuery = em.createQuery(
+				"SELECT p FROM Proposicao p WHERE p.idProposicao = :idProposicao", Proposicao.class);
+		findByIdQuery.setParameter("idProposicao", idProposicao);
+		final List<Proposicao> results = findByIdQuery.getResultList();
+		if (!Objects.isNull(results) && !results.isEmpty()) {
+			return results.get(0);
+		} else {
+			return null;
+		}
+	}
 	@Override
 	public void salvarListaProposicao(List<Proposicao> listaProposicao) {
 		Reuniao reuniao = null;
@@ -182,7 +193,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		// Agora vamos salvar/associar as proposições na reunião
 		for (Proposicao proposicaoFromBusca : listaProposicao) {
 			try {
-				Proposicao proposicao = buscarPorId(proposicaoFromBusca.getIdProposicao());
+				Proposicao proposicao = buscarPorIdProposicao(proposicaoFromBusca.getIdProposicao());
 
 				// Caso a proposição não exista, salvamos ela e associamos a
 				// reunião
