@@ -94,4 +94,6 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @return
 	 */
 	List<Proposicao> listProposicoesSeguidas();
+
+	Proposicao buscarPorIdProposicao(Integer idProposicao);
 }
