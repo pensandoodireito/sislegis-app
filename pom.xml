@@ -178,22 +178,6 @@
 		</dependency>
 
 
-		<dependency>
-			<groupId>org.liquibase</groupId>
-			<artifactId>liquibase-core</artifactId>
-			<version>3.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.liquibase</groupId>
-			<artifactId>liquibase-cdi</artifactId>
-			<version>3.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mattbertolini</groupId>
-			<artifactId>liquibase-slf4j</artifactId>
-			<version>1.2.1</version>
-		</dependency>
-
 	</dependencies>
 
 	<build>
@@ -394,7 +378,7 @@
 										<input message="Arquivo de mudanças (changelogfile): "
 											addproperty="liquibase-chglog" defaultvalue="dbupdate/sislegisdb.postinstall.changelog.xml" />
 										<input message="Diretório para armazenar o arquivo de backup: "
-											addproperty="backup-dir" defaultvalue="/home/sislegis/backups/" />
+											addproperty="backup-dir" defaultvalue="/home/sislegis/backups" />
 
 									</target>
 									<exportAntProperties>true</exportAntProperties>
@@ -408,12 +392,12 @@
 								<phase>validate</phase>
 								<configuration>
 									<target>
-										<echo>Criando backup em
-											${backup-dir}/backup_${tstamped-file-name}.gz</echo>
 										<tstamp>
 											<format property="tstamped-file-name" pattern="ddMMMyy_kkmm"
 												locale="pt,BR" />
 										</tstamp>
+										<echo>Criando backup em	${backup-dir}/backup_${tstamped-file-name}.gz</echo>
+
 										<exec executable="pg_dump"
 											output="${backup-dir}/backup_${tstamped-file-name}"
 											failonerror="true">
