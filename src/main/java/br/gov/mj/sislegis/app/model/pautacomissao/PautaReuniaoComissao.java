@@ -209,6 +209,7 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
                             setSituacao(SituacaoSessao.Realizada);
                             break;
                         case Agendada:
+                        case Aberta:
 						case Convocada:
                             setSituacao(SituacaoSessao.Agendada);
                             break;
@@ -230,7 +231,7 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 	}
 
 	protected enum SituacaoSenado {
-		Encerrada, Realizada, Agendada, Cancelada, Convocada
+		Encerrada, Realizada, Agendada, Cancelada, Convocada, Aberta
 	}
 
 	@Override
