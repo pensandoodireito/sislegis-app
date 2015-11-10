@@ -1,7 +1,12 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
-import java.math.BigInteger;
-import java.util.List;
+import br.gov.mj.sislegis.app.model.Comentario;
+import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.Tarefa;
+import br.gov.mj.sislegis.app.service.AbstractPersistence;
+import br.gov.mj.sislegis.app.service.ComentarioService;
+import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
+import br.gov.mj.sislegis.app.service.TarefaService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -9,11 +14,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-
-import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
-import br.gov.mj.sislegis.app.service.AbstractPersistence;
-import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
-import br.gov.mj.sislegis.app.service.TarefaService;
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.List;
 
 @Stateless
 public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<EncaminhamentoProposicao, Long> implements
@@ -24,6 +27,9 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 
 	@Inject
 	private TarefaService tarefaService;
+
+	@Inject
+	private ComentarioService comentarioService;
 
 	public EncaminhamentoProposicaoServiceEjb() {
 		super(EncaminhamentoProposicao.class);
@@ -59,7 +65,7 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 	public List<EncaminhamentoProposicao> findByProposicao2(Long idProposicao) {
 		TypedQuery<EncaminhamentoProposicao> findByIdQuery = em.createQuery("SELECT c FROM EncaminhamentoProposicao c "
 				+ "INNER JOIN FETCH c.responsavel res " + "INNER JOIN FETCH c.comentario com "
-				+ "INNER JOIN FETCH c.encaminhamento enc " + "INNER JOIN FETCH c.proposicao p WHERE p.id = :entityId",
+				+ "INNER JOIN FETCH c.tipoEncaminhamento enc " + "INNER JOIN FETCH c.proposicao p WHERE p.id = :entityId",
 				EncaminhamentoProposicao.class);
 		findByIdQuery.setParameter("entityId", idProposicao);
 		final List<EncaminhamentoProposicao> results = findByIdQuery.getResultList();
@@ -74,6 +80,29 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 		query.setParameter("idProposicao", idProposicao);
 		BigInteger total = (BigInteger) query.getSingleResult();
 		return total.intValue();
+	}
+
+	@Override
+	public void finalizar(Long idEncaminhamentoProposicao, String descricaoComentario) {
+		EncaminhamentoProposicao encaminhamento = findById(idEncaminhamentoProposicao);
+		encaminhamento.setFinalizado(true);
+
+		Comentario comentario = new Comentario();
+		comentario.setAutor(encaminhamento.getResponsavel());
+		comentario.setDataCriacao(new Date());
+		comentario.setDescricao(descricaoComentario);
+		comentario.setProposicao(encaminhamento.getProposicao());
+
+		encaminhamento.setComentarioFinalizacao(comentario);
+
+		Tarefa tarefa = tarefaService.buscarPorEncaminhamentoProposicaoId(idEncaminhamentoProposicao);
+		if (tarefa != null) {
+			tarefa.setFinalizada(true);
+			tarefa.setComentarioFinalizacao(comentario);
+			tarefaService.save(tarefa); // tarefa salva tambem o encaminhamento (cascade)
+		} else{
+			save(encaminhamento);
+		}
 	}
 
 }

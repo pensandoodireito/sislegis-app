@@ -119,4 +119,7 @@ public interface ProposicaoService extends Service<Proposicao> {
 
 	boolean syncDadosPautaProposicao(Proposicao proposicaoLocal) throws IOException;
 
+	boolean syncDadosPautaReuniaoComissao(PautaReuniaoComissao prcLocal) throws IOException;
+
+	List<PautaReuniaoComissao> findPautaReuniaoPendentes();
 }

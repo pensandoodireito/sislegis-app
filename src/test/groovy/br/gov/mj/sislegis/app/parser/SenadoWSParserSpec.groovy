@@ -12,14 +12,14 @@ class SenadoWSParserSpec extends Specification{
 
         given:
         def parserPlenarioSenado = new ParserPlenarioSenado()
-        def datIni = "20140801"
+        def datIni = "20150801"
         def proposicoes
 
         when:
         proposicoes = parserPlenarioSenado.getProposicoes(datIni)
 
         then:
-        proposicoes.size() >= 28
+        assert proposicoes.size() >= 0
 
     }
 
@@ -33,7 +33,7 @@ class SenadoWSParserSpec extends Specification{
         comissoes = parserComissoesSenado.getComissoes()
 
         then:
-        comissoes.size() >= 115
+        assert comissoes.size() >= 0
 
     }
 
@@ -44,12 +44,13 @@ class SenadoWSParserSpec extends Specification{
         def proposicoes
         def siglaComissao = "CDH"
         def datIni = "20150801"
+        def datFim = "20150830"
 
         when:
-        proposicoes = parserPautaSenado.getProposicoes(siglaComissao, datIni)
+        proposicoes = parserPautaSenado.getPautaComissao(siglaComissao, datIni, datFim)
 
         then:
-        proposicoes.size() >= 136
+        assert proposicoes.size() >= 0
 
     }
 

@@ -34,7 +34,8 @@ public class ParserPautaCamara {
 			System.out.println(pautaReuniaoComissao);
 			for (Iterator iterator2 = pautaReuniaoComissao.getProposicoesDaPauta().iterator(); iterator2.hasNext();) {
 				ProposicaoPautaComissao ppc = (ProposicaoPautaComissao) iterator2.next();
-				System.out.println("\t" + ppc + " " + ppc.getProposicao() + " ");
+				System.out.println("\t" + ppc + " " + ppc.getProposicao()+" ");
+				System.out.println("\t Resultado: " + ppc.getResultado());
 
 			}
 
@@ -106,7 +107,7 @@ public class ParserPautaCamara {
 			pautaReuniaoComissao
 					.setLinkPauta("http://www.camara.leg.br/internet/ordemdodia/ordemDetalheReuniaoCom.asp?codReuniao="
 							+ reuniao.getCodigo().toString());
-			pautaReuniaoComissao.setSituacao(reuniao.getSituacao());
+			pautaReuniaoComissao.converterSituacao(reuniao.getSituacao());
 			pautaReuniaoComissao.setTipo(reuniao.getTipo());
 			pautaReuniaoComissao.setTitulo(reuniao.getTitulo());
 
@@ -121,6 +122,7 @@ public class ParserPautaCamara {
 				ProposicaoPautaComissao ppc = new ProposicaoPautaComissao(pautaReuniaoComissao, ptemp);
 				ppc.setOrdemPauta(pautaProposicao.numOrdemApreciacao);
 				ppc.setRelator(pautaProposicao.getRelator());
+				ppc.setResultado(pautaProposicao.resultado);
 				pautaReuniaoComissao.addProposicaoPauta(ppc);
 			}
 			if (pautaReuniaoComissao.getProposicoesDaPauta().size() > 0) {
