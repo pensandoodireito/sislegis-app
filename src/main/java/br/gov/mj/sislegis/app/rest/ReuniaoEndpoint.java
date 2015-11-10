@@ -3,6 +3,8 @@ package br.gov.mj.sislegis.app.rest;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.persistence.OptimisticLockException;
@@ -19,10 +21,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import org.jboss.resteasy.annotations.GZIP;
+
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.Service;
+import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 @Path("/reuniaos")
 public class ReuniaoEndpoint {
@@ -58,8 +63,20 @@ public class ReuniaoEndpoint {
 	@GET
 	@Path("/findByData")
 	@Produces(MediaType.APPLICATION_JSON)
+	@GZIP
 	public Collection<Proposicao> findByData(@QueryParam("data") Date data) throws Exception {
+		long start = 0;
+		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.FINEST)) {
+			start = System.currentTimeMillis();
+		}
+
 		Collection<Proposicao> lista = proposicaoService.buscarProposicoesPorDataReuniao(data);
+		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.FINEST)) {
+			long stop = System.currentTimeMillis();
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
+					"Carregamento findByData levou " + (stop-start) + " ms para " + lista.size() + " proposicoes");
+		}
+
 		return lista;
 	}
 
