@@ -33,6 +33,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -330,6 +331,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			// mais antigos do que a criacao dessas entidade, e convertemos na
 			// hora.
 			if (dataReuniao.getTime() < 1446222706000l) {
+
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
 						"Reuniao mais antiga que refactoring, utilizando metodo alternativo");
 				Query query = em.createNativeQuery("select * from reuniaoproposicao r where r.reuniao_id=:rid",
@@ -348,6 +350,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 						ppc.setOrdemPauta(rp.getSeqOrdemPauta());
 						p.getPautasComissoes().add(ppc);
 					}
+					popularTotalComentariosEncaminhamentos(p);
 					proposicoes.add(p);
 
 				}
@@ -359,10 +362,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				query.setParameter("rid", reuniao.getId());
 				List<Proposicao> proposicoesReuniao = query.getResultList();
 				proposicoes.addAll(proposicoesReuniao);
+				popularTotalComentariosEncaminhamentos(proposicoes);
 			}
 
 		}
-		popularTotalComentariosEncaminhamentos(proposicoes);
 
 		return proposicoes;
 	}
@@ -632,7 +635,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public boolean syncDadosPautaReuniaoComissao(PautaReuniaoComissao prcLocal) throws IOException{
+	public boolean syncDadosPautaReuniaoComissao(PautaReuniaoComissao prcLocal) throws IOException {
 
 		try {
 			Set<PautaReuniaoComissao> prcRemotoList = null;
@@ -641,43 +644,50 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 			switch (prcLocal.getOrigem()) {
 
-				//TODO Rever as datas a serem utilizadas
+			// TODO Rever as datas a serem utilizadas
 
-				case CAMARA:
-					prcRemotoList = buscarProposicoesPautaCamaraWS(comissao.getId(), prcLocal.getData(), prcLocal.getData());
-					break;
+			case CAMARA:
+				prcRemotoList = buscarProposicoesPautaCamaraWS(comissao.getId(), prcLocal.getData(), prcLocal.getData());
+				break;
 
-				case SENADO:
-					prcRemotoList = buscarProposicoesPautaSenadoWS(prcLocal.getComissao(), prcLocal.getData(), prcLocal.getData());
-					break;
+			case SENADO:
+				prcRemotoList = buscarProposicoesPautaSenadoWS(prcLocal.getComissao(), prcLocal.getData(),
+						prcLocal.getData());
+				break;
 
-				default:
-					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Falhou ao sincronizar pauta da reuniao pois origem e desconhecida  " + prcLocal);
-					return false;
+			default:
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
+						"Falhou ao sincronizar pauta da reuniao pois origem e desconhecida  " + prcLocal);
+				return false;
 
 			}
 
-			for (PautaReuniaoComissao prcRemoto : prcRemotoList){
+			for (PautaReuniaoComissao prcRemoto : prcRemotoList) {
 				if (Objects.equals(prcRemoto.getCodigoReuniao(), prcLocal.getCodigoReuniao())) {
 					if (checadorAlteracoesPautaReuniao.compare(prcLocal, prcRemoto) > 0) {
-						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "encontrou diferencas " + prcLocal + " e " + prcRemoto);
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+								"encontrou diferencas " + prcLocal + " e " + prcRemoto);
 						savePautaReuniaoComissao(prcLocal);
 						retorno = true;
 
 					} else {
-						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "nenhuma diferenca encontrada entre " + prcLocal + " e " + prcRemoto);
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+								"nenhuma diferenca encontrada entre " + prcLocal + " e " + prcRemoto);
 					}
 
-					for (ProposicaoPautaComissao ppcLocal : prcLocal.getProposicoesDaPauta()){
-						for (ProposicaoPautaComissao ppcRemoto : prcRemoto.getProposicoesDaPauta()){
-							if (Objects.equals(ppcLocal.getProposicao().getIdProposicao(), ppcRemoto.getProposicao().getIdProposicao())){
+					for (ProposicaoPautaComissao ppcLocal : prcLocal.getProposicoesDaPauta()) {
+						for (ProposicaoPautaComissao ppcRemoto : prcRemoto.getProposicoesDaPauta()) {
+							if (Objects.equals(ppcLocal.getProposicao().getIdProposicao(), ppcRemoto.getProposicao()
+									.getIdProposicao())) {
 
-								if (checadorAlteracoesPauta.compare(ppcLocal, ppcRemoto) > 0){
-									Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "encontrou diferencas " + ppcLocal + " e " + ppcRemoto);
+								if (checadorAlteracoesPauta.compare(ppcLocal, ppcRemoto) > 0) {
+									Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+											"encontrou diferencas " + ppcLocal + " e " + ppcRemoto);
 									em.merge(ppcLocal);
 									retorno = true;
 								} else {
-									Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "nenhuma diferenca encontrada entre " + ppcLocal + " e " + ppcRemoto);
+									Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+											"nenhuma diferenca encontrada entre " + ppcLocal + " e " + ppcRemoto);
 								}
 								break;
 							}
@@ -699,7 +709,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	@Override
 	public List<PautaReuniaoComissao> findPautaReuniaoPendentes() {
 
-		//TODO verificar as condicoes pendentes corretas
+		// TODO verificar as condicoes pendentes corretas
 
 		List<SituacaoSessao> situacoesEmAberto = new ArrayList<>();
 		situacoesEmAberto.add(SituacaoSessao.Agendada);

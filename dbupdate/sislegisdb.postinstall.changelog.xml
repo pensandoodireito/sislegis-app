@@ -86,5 +86,22 @@
 			<column name="oculto" type="BOOL" />
 		</addColumn>
 	</changeSet>
+	<changeSet author="sislegis (generated)" id="1447161377822-20">
+		<createIndex tableName="comentario" indexName="idx_totalPorProposicao">
+			<column name="proposicao_id" type="BIGINT"></column>
+			<column name="oculto" type="BOOL"></column>
+		</createIndex>
+	</changeSet>
+	<changeSet author="sislegis (generated)" id="1447161377822-21">
+		<createIndex tableName="encaminhamentoproposicao" indexName="idx_totalEncPorProposicao">
+			<column name="proposicao_id" type="BIGINT"></column>
+		</createIndex>
+	</changeSet>
+	<changeSet author="sislegis (generated)" id="1447161377822-22">
+		<createIndex tableName="reuniaoproposicao" indexName="idx_rpReuniaoId">
+			<column name="reuniao_id" type="BIGINT"></column>
+		</createIndex>
+	</changeSet>
+	
 
 </databaseChangeLog>
