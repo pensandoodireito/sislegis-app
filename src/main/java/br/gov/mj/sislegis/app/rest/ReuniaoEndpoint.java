@@ -30,6 +30,7 @@ import br.gov.mj.sislegis.app.service.Service;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 @Path("/reuniaos")
+@GZIP
 public class ReuniaoEndpoint {
 
 	@Inject
@@ -63,7 +64,6 @@ public class ReuniaoEndpoint {
 	@GET
 	@Path("/findByData")
 	@Produces(MediaType.APPLICATION_JSON)
-	@GZIP
 	public Collection<Proposicao> findByData(@QueryParam("data") Date data) throws Exception {
 		long start = 0;
 		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.FINEST)) {
@@ -74,7 +74,7 @@ public class ReuniaoEndpoint {
 		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.FINEST)) {
 			long stop = System.currentTimeMillis();
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
-					"Carregamento findByData levou " + (stop-start) + " ms para " + lista.size() + " proposicoes");
+					"Carregamento findByData levou " + (stop - start) + " ms para " + lista.size() + " proposicoes");
 		}
 
 		return lista;
