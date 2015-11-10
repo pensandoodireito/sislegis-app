@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	objectQuotingStrategy="QUOTE_ALL_OBJECTS" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+	<include relativeToChangelogFile="true" file="update151002.sql" />
+
+	<!-- Alteracoes pós 151002 e pré 151101 -->
+	<changeSet id="1447161377822-14" author="coutinho">
+		<addColumn tableName="encaminhamentoproposicao">
+			<column name="detalhes" type="VARCHAR(255)" />
+		</addColumn>
+		<addColumn tableName="encaminhamentoproposicao">
+			<column name="finalizado" type="BOOL" />
+		</addColumn>
+		<addColumn tableName="encaminhamentoproposicao">
+			<column name="comentariofinalizacao_id" type="BIGINT" />
+		</addColumn>
+		<addForeignKeyConstraint baseColumnNames="comentariofinalizacao_id"
+			baseTableName="encaminhamentoproposicao" constraintName="fk_l7jf9n93ogu27d6lnq3v7y4bu"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="comentario" />
+	</changeSet>
+
+	<changeSet author="sislegis (generated)" id="1447161377822-15">
+		<createTable tableName="pautareuniaocomissao">
+			<column name="id" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="codigoreuniao" type="INT" />
+			<column name="comissao" type="VARCHAR(255)" />
+			<column name="data" type="TIMESTAMP(29) WITHOUT TIME ZONE" />
+			<column name="linkpauta" type="VARCHAR(255)" />
+			<column name="origem" type="VARCHAR(255)" />
+			<column name="situacao" type="VARCHAR(255)" />
+			<column name="tipo" type="VARCHAR(255)" />
+			<column name="titulo" type="VARCHAR(255)" />
+		</createTable>
+
+		<addPrimaryKey columnNames="id" constraintName="pautareuniaocomissao_pkey"
+			tableName="pautareuniaocomissao" />
+		<addUniqueConstraint columnNames="comissao, data, codigoreuniao"
+			constraintName="uk_6a7e1oya8ql3xsvx00stxttf9" tableName="pautareuniaocomissao" />
+	</changeSet>
+	<changeSet author="sislegis (generated)" id="1447161377822-16">
+		<createTable tableName="proposicao_pautacomissao">
+			<column name="pautareuniaocomissaoid" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="proposicaoid" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ordempauta" type="INT" />
+			<column name="relator" type="VARCHAR(255)" />
+			<column name="resultado" type="VARCHAR(255)" />
+
+		</createTable>
+		<addPrimaryKey columnNames="pautareuniaocomissaoid, proposicaoid"
+			constraintName="proposicao_pautacomissao_pkey" tableName="proposicao_pautacomissao" />
+		<addForeignKeyConstraint baseColumnNames="pautareuniaocomissaoid"
+			baseTableName="proposicao_pautacomissao" constraintName="fk_f6e0561m01ylrth997db42qhl"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="pautareuniaocomissao" />
+		<addForeignKeyConstraint baseColumnNames="proposicaoid"
+			baseTableName="proposicao_pautacomissao" constraintName="fk_3bxb0me6wh80rn60opaae9npp"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="proposicao" />
+	</changeSet>
+	<changeSet author="sislegis (generated)" id="1447161377822-17">
+		<addUniqueConstraint columnNames="email"
+			constraintName="uk_4tdehxj7dh8ghfc68kbwbsbll" tableName="usuario" />
+		<addUniqueConstraint columnNames="idproposicao"
+			constraintName="uk_9ucemfu8k3jy5in8muartyl45" tableName="proposicao" />
+	</changeSet>
+	<changeSet author="sislegis (generated)" id="1447161377822-18">
+		<addColumn tableName="tarefa">
+			<column name="comentariofinalizacao_id" type="BIGINT" />
+		</addColumn>
+		<addForeignKeyConstraint baseColumnNames="comentariofinalizacao_id"
+			baseTableName="tarefa" constraintName="fk_hu4rehdm3abep1skqh4dfy33u"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="comentario" />
+	</changeSet>
+	<changeSet author="sislegis (generated)" id="1447161377822-19">
+		<addColumn tableName="comentario">
+			<column name="oculto" type="BOOL" />
+		</addColumn>
+	</changeSet>
+
+</databaseChangeLog>

@@ -177,6 +177,7 @@
 			<version>0.7.1</version>
 		</dependency>
 
+
 	</dependencies>
 
 	<build>
@@ -346,6 +347,116 @@
 					<scope>test</scope>
 				</dependency>
 			</dependencies>
+		</profile>
+
+		<profile>
+			<id>upgrade</id>
+			<build>
+				<defaultGoal>install</defaultGoal>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.7</version>
+						<configuration>
+							<skipTests>true</skipTests>
+						</configuration>
+						<executions>
+							<execution>
+								<id>catch-properties</id>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<phase>validate</phase>
+								<configuration>
+									<target>
+
+										<input message="Usuário do banco: " addproperty="liquibase-user"
+											defaultvalue="sislegis" />
+										<input message="Senha do banco: " addproperty="liquibase-pwd"
+											defaultvalue="sislegis" />
+										<input message="Arquivo de mudanças (changelogfile): "
+											addproperty="liquibase-chglog" defaultvalue="dbupdate/sislegisdb.postinstall.changelog.xml" />
+										<input message="Diretório para armazenar o arquivo de backup: "
+											addproperty="backup-dir" defaultvalue="/home/sislegis/backups" />
+
+									</target>
+									<exportAntProperties>true</exportAntProperties>
+								</configuration>
+							</execution>
+							<execution>
+								<id>backupdb</id>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<phase>validate</phase>
+								<configuration>
+									<target>
+										<tstamp>
+											<format property="tstamped-file-name" pattern="ddMMMyy_kkmm"
+												locale="pt,BR" />
+										</tstamp>
+										<echo>Criando backup em	${backup-dir}/backup_${tstamped-file-name}.gz</echo>
+
+										<exec executable="pg_dump"
+											output="${backup-dir}/backup_${tstamped-file-name}"
+											failonerror="true">
+											<arg value="sislegis" />
+											<arg value="--quote-all-identifiers" />
+											<arg value="--format=p" />
+										</exec>
+										<gzip destfile="${backup-dir}/backup_${tstamped-file-name}.gz"
+											src="${backup-dir}/backup_${tstamped-file-name}" />
+									</target>
+									<exportAntProperties>true</exportAntProperties>
+								</configuration>
+							</execution>
+
+						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>org.apache.ant</groupId>
+								<artifactId>ant</artifactId>
+								<version>1.8.4</version>
+							</dependency>
+							<dependency>
+								<groupId>org.postgresql</groupId>
+								<artifactId>postgresql</artifactId>
+								<version>9.4-1200-jdbc41</version>
+							</dependency>
+						</dependencies>
+					</plugin>
+					<plugin>
+						<groupId>org.liquibase</groupId>
+						<artifactId>liquibase-maven-plugin</artifactId>
+						<version>3.4.1</version>
+						<configuration>
+							<skipTests>true</skipTests>
+							<changeLogFile>${liquibase-chglog}</changeLogFile>
+							<driver>org.postgresql.Driver</driver>
+							<url>jdbc:postgresql://localhost:5432/sislegis</url>
+							<username>${liquibase-user}</username>
+							<password>${liquibase-pwd}</password>
+						</configuration>
+						<executions>
+							<execution>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>update</goal>
+								</goals>
+							</execution>
+						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>org.postgresql</groupId>
+								<artifactId>postgresql</artifactId>
+								<version>9.4-1200-jdbc41</version>
+							</dependency>
+						</dependencies>
+					</plugin>
+				</plugins>
+			</build>
+
 		</profile>
 
 	</profiles>
