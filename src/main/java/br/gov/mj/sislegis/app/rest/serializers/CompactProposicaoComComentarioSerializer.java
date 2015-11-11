@@ -1,7 +1,9 @@
 package br.gov.mj.sislegis.app.rest.serializers;
 
 import java.io.IOException;
+import java.util.List;
 
+import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.Proposicao;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -14,9 +16,12 @@ public class CompactProposicaoComComentarioSerializer extends CompactProposicaoS
 			JsonProcessingException {
 		jgen.writeStartObject();
 		writeProposicao(value, jgen);
-		if (value.getListaComentario() != null && !value.getListaComentario().isEmpty()) {
-			jgen.writeObjectField("ultimoComentario",
-					value.getListaComentario().get(value.getListaComentario().size() - 1));
+		List<Comentario> comentarios = value.getListaComentario();
+		if (comentarios != null && !comentarios.isEmpty()) {
+			Comentario ultimo = comentarios.get(comentarios.size() - 1);
+			// remove a proposicao dele para não entrar em loop a serializacao
+			ultimo.setProposicao(null);
+			jgen.writeObjectField("ultimoComentario", ultimo);
 		}
 
 		jgen.writeEndObject();

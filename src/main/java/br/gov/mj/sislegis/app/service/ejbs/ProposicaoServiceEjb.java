@@ -132,7 +132,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 		String dataIni = Conversores.dateToString(dataInicial, "yyyyMMdd");
 		String dataFim = Conversores.dateToString(dataFinal, "yyyyMMdd");
-		return parserPautaCamara.getPautaComissao(idComissao, dataIni, dataFim);
+		return populaUltimoComentarioDePauta(parserPautaCamara.getPautaComissao(idComissao, dataIni, dataFim));
 	}
 
 	@Override
@@ -153,25 +153,27 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			return parserPlenarioSenado.getProposicoes(dataIni);
 		}
 
-		return parserPautaSenado.getPautaComissao(siglaComissao, dataIni, dataFim);
+		return populaUltimoComentarioDePauta(parserPautaSenado.getPautaComissao(siglaComissao, dataIni, dataFim));
 	}
 
-	private void populaUltimoComentarioDePauta(Set<PautaReuniaoComissao> pautas) {
+	private Set<PautaReuniaoComissao> populaUltimoComentarioDePauta(Set<PautaReuniaoComissao> pautas) {
 		for (Iterator<PautaReuniaoComissao> iterator = pautas.iterator(); iterator.hasNext();) {
 			PautaReuniaoComissao pautaReuniaoComissao = (PautaReuniaoComissao) iterator.next();
 			SortedSet<ProposicaoPautaComissao> ppcs = pautaReuniaoComissao.getProposicoesDaPauta();
 			for (Iterator<ProposicaoPautaComissao> iterator2 = ppcs.iterator(); iterator2.hasNext();) {
 				ProposicaoPautaComissao proposicaoPautaComissao = (ProposicaoPautaComissao) iterator2.next();
 				Proposicao proposicaoPauta = proposicaoPautaComissao.getProposicao();
-				List<Comentario> comentarios = comentarioService.findByIdProposicao(proposicaoPauta.getIdProposicao()
-						.longValue());
-				if (comentarios != null) {
-					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
-							"Proposicao já existente no siselgis, atualizando comentarios " + comentarios.size());
+				List<Comentario> comentarios = comentarioService.findByIdProposicao(proposicaoPauta.getIdProposicao());
+				if (comentarios != null && !comentarios.isEmpty()) {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
+							Level.WARNING,
+							"Proposicao " + proposicaoPauta.getIdProposicao()
+									+ " já existente no siselgis, atualizando comentarios " + comentarios.size());
 					proposicaoPauta.setListaComentario(comentarios);
 				}
 			}
 		}
+		return pautas;
 	}
 
 	@Override
@@ -368,7 +370,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			encaminhamentoProposicaoService.deleteById(ep.getId());
 		}
 
-		List<Comentario> listaCom = comentarioService.findByIdProposicao(id);
+		List<Comentario> listaCom = comentarioService.findByProposicaoId(id);
 		for (Iterator<Comentario> iterator = listaCom.iterator(); iterator.hasNext();) {
 			Comentario c = iterator.next();
 			comentarioService.deleteById(c.getId());

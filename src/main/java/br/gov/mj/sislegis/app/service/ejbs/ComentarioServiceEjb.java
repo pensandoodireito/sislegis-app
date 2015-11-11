@@ -30,15 +30,39 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> 
 	}
 
 	@Override
-	public List<Comentario> findByIdProposicao(Long id) {
+	public List<Comentario> findByIdProposicao(Integer id) {
+		return findByIdProposicao(id, false);
+	}
 
-		TypedQuery<Comentario> findByIdQuery = em.createQuery("SELECT DISTINCT c FROM Comentario c "
-				+ "INNER JOIN FETCH c.autor a "
-				+ "INNER JOIN FETCH c.proposicao p "
-				+ "WHERE p.id = :entityId "
-				+ "AND c.oculto = FALSE ",
-				Comentario.class);
+	@Override
+	public List<Comentario> findByIdProposicao(Integer id, boolean incluiOcultos) {
+		StringBuilder query = new StringBuilder(
+				"SELECT DISTINCT c FROM Comentario c INNER JOIN FETCH c.autor a INNER JOIN FETCH c.proposicao p WHERE p.idProposicao = :entityId ");
+		if (!incluiOcultos) {
+			query.append("AND c.oculto = FALSE");
+		}
+		TypedQuery<Comentario> findByIdQuery = em.createQuery(query.toString(), Comentario.class);
 
+		findByIdQuery.setParameter("entityId", id);
+		final List<Comentario> results = findByIdQuery.getResultList();
+
+		return results;
+	}
+
+	@Override
+	public List<Comentario> findByProposicaoId(Long id) {
+		return findByProposicaoId(id, false);
+	}
+
+	@Override
+	public List<Comentario> findByProposicaoId(Long id, boolean incluiOcultos) {
+
+		StringBuilder query = new StringBuilder(
+				"SELECT DISTINCT c FROM Comentario c INNER JOIN FETCH c.autor a INNER JOIN FETCH c.proposicao p WHERE p.id = :entityId ");
+		if (!incluiOcultos) {
+			query.append("AND c.oculto = FALSE");
+		}
+		TypedQuery<Comentario> findByIdQuery = em.createQuery(query.toString(), Comentario.class);
 		findByIdQuery.setParameter("entityId", id);
 		final List<Comentario> results = findByIdQuery.getResultList();
 
@@ -60,7 +84,8 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> 
 
 	@Override
 	public Integer totalByProposicao(Long idProposicao) {
-		Query query = em.createNativeQuery("SELECT COUNT(1) FROM comentario WHERE proposicao_id = :idProposicao AND oculto = FALSE ");
+		Query query = em
+				.createNativeQuery("SELECT COUNT(1) FROM comentario WHERE proposicao_id = :idProposicao AND oculto = FALSE ");
 		query.setParameter("idProposicao", idProposicao);
 		BigInteger total = (BigInteger) query.getSingleResult();
 		return total.intValue();
