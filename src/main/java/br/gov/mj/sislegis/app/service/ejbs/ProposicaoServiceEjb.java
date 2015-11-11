@@ -33,6 +33,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -45,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -152,6 +154,24 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 
 		return parserPautaSenado.getPautaComissao(siglaComissao, dataIni, dataFim);
+	}
+
+	private void populaUltimoComentarioDePauta(Set<PautaReuniaoComissao> pautas) {
+		for (Iterator<PautaReuniaoComissao> iterator = pautas.iterator(); iterator.hasNext();) {
+			PautaReuniaoComissao pautaReuniaoComissao = (PautaReuniaoComissao) iterator.next();
+			SortedSet<ProposicaoPautaComissao> ppcs = pautaReuniaoComissao.getProposicoesDaPauta();
+			for (Iterator<ProposicaoPautaComissao> iterator2 = ppcs.iterator(); iterator2.hasNext();) {
+				ProposicaoPautaComissao proposicaoPautaComissao = (ProposicaoPautaComissao) iterator2.next();
+				Proposicao proposicaoPauta = proposicaoPautaComissao.getProposicao();
+				List<Comentario> comentarios = comentarioService.findByIdProposicao(proposicaoPauta.getIdProposicao()
+						.longValue());
+				if (comentarios != null) {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
+							"Proposicao já existente no siselgis, atualizando comentarios " + comentarios.size());
+					proposicaoPauta.setListaComentario(comentarios);
+				}
+			}
+		}
 	}
 
 	@Override
