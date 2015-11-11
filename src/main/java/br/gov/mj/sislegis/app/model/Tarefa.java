@@ -47,8 +47,6 @@ public class Tarefa extends AbstractEntity {
 	private TipoTarefa tipoTarefa;
 
 	@Column
-	private boolean isVisualizada;
-	@Column
 	private boolean isFinalizada;
 
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
@@ -118,14 +116,6 @@ public class Tarefa extends AbstractEntity {
 
 	public void setProposicao(Proposicao proposicao) {
 		this.proposicao = proposicao;
-	}
-
-	public boolean isVisualizada() {
-		return isVisualizada;
-	}
-
-	public void setVisualizada(boolean isVisualizada) {
-		this.isVisualizada = isVisualizada;
 	}
 
 	public EncaminhamentoProposicao getEncaminhamentoProposicao() {
