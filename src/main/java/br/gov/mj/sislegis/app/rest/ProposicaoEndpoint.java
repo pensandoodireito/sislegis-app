@@ -298,15 +298,19 @@ public class ProposicaoEndpoint {
 
 	}
 
-	public Response alterarPosicionamento(Posicionamento posicionamento, Proposicao proposicao, String authorization){
-		PosicionamentoProposicao posicionamentoProposicao = new PosicionamentoProposicao();
-		posicionamentoProposicao.setPosicionamento(posicionamento);
-		posicionamentoProposicao.setProposicao(proposicao);
-		posicionamentoProposicaoService.save(posicionamentoProposicao);
+	@POST
+	@Path("/alterarPosicionamento")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response alterarPosicionamento(Long idProposicao, Long idPosicionamento, String authorization){
+		try {
+			Usuario usuarioLogado = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+			proposicaoService.alterarPosicionamento(idProposicao, idPosicionamento, usuarioLogado);
+			return Response.noContent().build();
 
-		// TODO Adicionar usuario
-
-		return Response.noContent().build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
 	}
 
 }

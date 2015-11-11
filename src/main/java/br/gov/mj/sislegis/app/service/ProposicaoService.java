@@ -122,4 +122,13 @@ public interface ProposicaoService extends Service<Proposicao> {
 	boolean syncDadosPautaReuniaoComissao(PautaReuniaoComissao prcLocal) throws IOException;
 
 	List<PautaReuniaoComissao> findPautaReuniaoPendentes();
+
+	/**
+	 * Altera o posicionamento da proposicao e salva seu historico
+	 *
+	 * @param idProposicao
+	 * @param idPosicionamento
+	 * @param usuario
+	 */
+	void alterarPosicionamento(Long idProposicao, Long idPosicionamento, Usuario usuario);
 }

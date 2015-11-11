@@ -13,15 +13,7 @@ import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
 import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserPlenarioSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
-import br.gov.mj.sislegis.app.service.AbstractPersistence;
-import br.gov.mj.sislegis.app.service.ComentarioService;
-import br.gov.mj.sislegis.app.service.ComissaoService;
-import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
-import br.gov.mj.sislegis.app.service.ProposicaoService;
-import br.gov.mj.sislegis.app.service.ReuniaoProposicaoService;
-import br.gov.mj.sislegis.app.service.ReuniaoService;
-import br.gov.mj.sislegis.app.service.TagService;
-import br.gov.mj.sislegis.app.service.UsuarioService;
+import br.gov.mj.sislegis.app.service.*;
 import br.gov.mj.sislegis.app.util.Conversores;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
@@ -88,6 +80,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	@Inject
 	private ComissaoService comissaoService;
+
+	@Inject
+	private PosicionamentoService posicionamentoService;
 
 	@PersistenceContext
 	private EntityManager em;
@@ -713,6 +708,29 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 		return prcList;
 
+	}
+
+	@Override
+	public void alterarPosicionamento(Long idProposicao, Long idPosicionamento, Usuario usuario) {
+		// somente executa se o posicionamento for alterado
+		Proposicao proposicao = findById(idProposicao);
+		if (!Objects.equals(proposicao.getPosicionamento().getId(), idPosicionamento)){
+			Posicionamento posicionamento = null;
+
+			if (idPosicionamento != null){
+				posicionamento = posicionamentoService.findById(idPosicionamento);
+			}
+
+			proposicao.setPosicionamento(posicionamento);
+
+			PosicionamentoProposicao posicionamentoProposicao = new PosicionamentoProposicao();
+			posicionamentoProposicao.setPosicionamento(posicionamento);
+			posicionamentoProposicao.setProposicao(proposicao);
+			posicionamentoProposicao.setUsuario(usuario);
+
+			em.persist(posicionamentoProposicao);
+			save(proposicao);
+		}
 	}
 
 	/**
