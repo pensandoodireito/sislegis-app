@@ -27,8 +27,6 @@ public interface ProposicaoService extends Service<Proposicao> {
 
 	Proposicao detalharProposicaoSenadoWS(Long id) throws Exception;
 
-	// void salvarListaProposicao(List<Proposicao> lista);
-
 	List<Proposicao> listarTodos();
 
 	Proposicao buscarPorId(Integer id);
@@ -122,4 +120,6 @@ public interface ProposicaoService extends Service<Proposicao> {
 	boolean syncDadosPautaReuniaoComissao(PautaReuniaoComissao prcLocal) throws IOException;
 
 	List<PautaReuniaoComissao> findPautaReuniaoPendentes();
+
+	Proposicao buscarPorIdProposicao(Integer idProposicao);
 }

@@ -197,48 +197,16 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	}
 
-	public void salvarListaProposicao(Reuniao reuniao, List<Proposicao> listaProposicao) {
-
-		// Caso a reunião não exista, salva pela primeira vez
-		if (Objects.isNull(reuniao.getId())) {
-			reuniao = reuniaoService.save(reuniao);
-		}
-
-		// Agora vamos salvar/associar as proposições na reunião
-		for (Proposicao proposicaoFromBusca : listaProposicao) {
-			try {
-				Proposicao proposicao = buscarPorId(proposicaoFromBusca.getIdProposicao());
-
-				// Caso a proposição não exista, salvamos ela e associamos a
-				// reunião
-				if (Objects.isNull(proposicao)) {
-					if (proposicaoFromBusca.getOrigem().equals(Origem.CAMARA)) {
-						proposicao = detalharProposicaoCamaraWS(Long.valueOf(proposicaoFromBusca.getIdProposicao()));
-					} else if (proposicaoFromBusca.getOrigem().equals(Origem.SENADO)) {
-						proposicao = detalharProposicaoSenadoWS(Long.valueOf(proposicaoFromBusca.getIdProposicao()));
-					}
-
-					save(proposicao);
-
-					ReuniaoProposicao rp = getReuniaoProposicao(reuniao, proposicaoFromBusca, proposicao);
-
-					reuniaoProposicaoService.save(rp);
-				} else { // proposição já existe
-					ReuniaoProposicao reuniaoProposicao = reuniaoProposicaoService.findById(reuniao.getId(),
-							proposicao.getId());
-
-					// Se a proposição não existe na reunião, associamos ela
-					if (reuniaoProposicao == null) {
-						ReuniaoProposicao rp = getReuniaoProposicao(reuniao, proposicaoFromBusca, proposicao);
-
-						reuniaoProposicaoService.save(rp);
-					}
-				}
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
+	@Override
+	public Proposicao buscarPorIdProposicao(Integer idProposicao) {
+		TypedQuery<Proposicao> findByIdQuery = em.createQuery(
+				"SELECT p FROM Proposicao p WHERE p.idProposicao = :idProposicao", Proposicao.class);
+		findByIdQuery.setParameter("idProposicao", idProposicao);
+		final List<Proposicao> results = findByIdQuery.getResultList();
+		if (!Objects.isNull(results) && !results.isEmpty()) {
+			return results.get(0);
+		} else {
+			return null;
 		}
 	}
 
