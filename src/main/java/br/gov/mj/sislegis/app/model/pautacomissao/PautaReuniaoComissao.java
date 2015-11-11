@@ -24,9 +24,10 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.enumerated.SituacaoCamara;
+import br.gov.mj.sislegis.app.enumerated.SituacaoSenado;
 import br.gov.mj.sislegis.app.model.AbstractEntity;
 import br.gov.mj.sislegis.app.model.Comissao;
-import br.gov.mj.sislegis.app.parser.senado.xstream.ReuniaoBeanSenado;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 @Entity
@@ -187,64 +188,24 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 		case CAMARA:
 			try {
 				situacao = situacao.replace("(Final)", "").trim();
-				switch (SituacaoCamara.valueOf(situacao)) {
-				case Encerrada:
-					setSituacao(SituacaoSessao.Realizada);
-					break;
-				case Convocada:
-				case EmAndamento:
-					setSituacao(SituacaoSessao.Agendada);
-					break;
-				default:
-					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
-							Level.INFO,
-							"Falha ao associar a situacao da Camara: " + SituacaoCamara.valueOf(situacao)
-									+ " usando Situacao Desconhecido");
-					setSituacao(SituacaoSessao.Desconhecido);
-					break;
-				}
+				setSituacao(SituacaoCamara.valueOf(situacao).situacaoSessaoCorrespondente());
+
 			} catch (IllegalArgumentException e) {
-				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
-						"Falha ao converter a situacao da Camara: " + situacao, e);
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Falha ao converter a situacao da Camara: " + situacao, e);
+				setSituacao(SituacaoSessao.Desconhecido);
 			}
+			break;
 
 		case SENADO:
 			try {
-				switch (SituacaoSenado.valueOf(situacao)) {
-				case Encerrada:
-				case Realizada:
-					setSituacao(SituacaoSessao.Realizada);
-					break;
-				case Agendada:
-				case Aberta:
-				case EmAndamento:
-				case Convocada:
-					setSituacao(SituacaoSessao.Agendada);
-					break;
-				case Cancelada:
-					setSituacao(SituacaoSessao.Cancelada);
-					break;
-				default:
-					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
-							Level.INFO,
-							"Falha ao associar a situacao do Senado: " + SituacaoCamara.valueOf(situacao)
-									+ " usando Situacao Desconhecido");
-					setSituacao(SituacaoSessao.Desconhecido);
-					break;
-				}
+				setSituacao(SituacaoSenado.valueOf(situacao).situacaoSessaoCorrespondente());
+
 			} catch (IllegalArgumentException e) {
-				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
-						"Falha ao converter a situacao da Senado: " + situacao, e);
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Falha ao converter a situacao da Senado: " + situacao, e);
+				setSituacao(SituacaoSessao.Desconhecido);
 			}
+			break;
 		}
-	}
-
-	protected enum SituacaoCamara {
-		Encerrada, Convocada, EmAndamento
-	}
-
-	protected enum SituacaoSenado {
-		Encerrada, Realizada, Agendada, Cancelada, Convocada, Aberta, EmAndamento
 	}
 
 	@Override
