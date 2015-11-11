@@ -291,10 +291,13 @@ public class ProposicaoEndpoint {
 	@POST
 	@Path("/alterarPosicionamento")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response alterarPosicionamento(@FormParam("id") Long id, @FormParam("idPosicionamento") Long idPosicionamento, @HeaderParam("Authorization") String authorization){
+	public Response alterarPosicionamento(@FormParam("id") Long id, @FormParam("idPosicionamento") String idPosicionamento, @HeaderParam("Authorization") String authorization){
 		try {
+			// Conversao necessaria para evitar erro quando o idPosicionamento for vazio/nulo
+			Long idPosicionamentoLong = idPosicionamento.isEmpty() ? null : Long.parseLong(idPosicionamento);
+
 			Usuario usuarioLogado = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
-			proposicaoService.alterarPosicionamento(id, idPosicionamento, usuarioLogado);
+			proposicaoService.alterarPosicionamento(id, idPosicionamentoLong, usuarioLogado);
 			return Response.ok().build();
 
 		} catch (Exception e) {
