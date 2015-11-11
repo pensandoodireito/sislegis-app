@@ -76,7 +76,8 @@ public class ReuniaoBeanSenado extends br.gov.mj.sislegis.app.parser.ReuniaoBean
 	}
 
 	protected enum Situacao {
-		Encerrada, Realizada, Agendada, Cancelada, Convocada
+		Encerrada, Realizada, Agendada, Cancelada, Convocada, EmAndamento;
+
 	}
 
 	public Sessao getSessao() {
@@ -88,23 +89,25 @@ public class ReuniaoBeanSenado extends br.gov.mj.sislegis.app.parser.ReuniaoBean
 		}
 		sessao.setIdentificadorExterno(getCodigo().toString());
 		sessao.setTitulo(titulo);
+		situacao = situacao.replaceAll("\\s", "");
 		switch (Situacao.valueOf(situacao)) {
-			case Encerrada:
-				sessao.setSituacao(SituacaoSessao.Realizada);
-				break;
-			case Realizada:
-				sessao.setSituacao(SituacaoSessao.Realizada);
-				break;
-			case Agendada:
-				sessao.setSituacao(SituacaoSessao.Agendada);
-				break;
-			case Cancelada:
-				sessao.setSituacao(SituacaoSessao.Cancelada);
-				break;
+		case Encerrada:
+			sessao.setSituacao(SituacaoSessao.Realizada);
+			break;
+		case Realizada:
+			sessao.setSituacao(SituacaoSessao.Realizada);
+			break;
+		case Agendada:
+		case EmAndamento:
+			sessao.setSituacao(SituacaoSessao.Agendada);
+			break;
+		case Cancelada:
+			sessao.setSituacao(SituacaoSessao.Cancelada);
+			break;
 
-			default:
-				sessao.setSituacao(SituacaoSessao.Desconhecido);
-				break;
+		default:
+			sessao.setSituacao(SituacaoSessao.Desconhecido);
+			break;
 		}
 		return sessao;
 	}
