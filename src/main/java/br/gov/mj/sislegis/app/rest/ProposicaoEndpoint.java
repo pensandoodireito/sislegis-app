@@ -10,23 +10,15 @@ import java.util.Set;
 
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
-import br.gov.mj.sislegis.app.model.*;
-import br.gov.mj.sislegis.app.service.PosicionamentoProposicaoService;
+import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Reuniao;
+import br.gov.mj.sislegis.app.model.Usuario;
 import org.jboss.resteasy.annotations.cache.Cache;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
@@ -45,9 +37,6 @@ public class ProposicaoEndpoint {
 
 	@Inject
 	private ProposicaoService proposicaoService;
-
-	@Inject
-	private PosicionamentoProposicaoService posicionamentoProposicaoService;
 
 	@GET
 	@Path("/proposicoesPautaCamara")
@@ -300,12 +289,12 @@ public class ProposicaoEndpoint {
 
 	@POST
 	@Path("/alterarPosicionamento")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response alterarPosicionamento(Long idProposicao, Long idPosicionamento, String authorization){
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Response alterarPosicionamento(@FormParam("idProposicao") Long idProposicao, @FormParam("idPosicionamento") Long idPosicionamento, @HeaderParam("Authorization") String authorization){
 		try {
 			Usuario usuarioLogado = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
 			proposicaoService.alterarPosicionamento(idProposicao, idPosicionamento, usuarioLogado);
-			return Response.noContent().build();
+			return Response.ok().build();
 
 		} catch (Exception e) {
 			e.printStackTrace();
