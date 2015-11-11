@@ -1,0 +1,631 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-1">
+        <createSequence sequenceName="hibernate_sequence"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-2">
+        <createTable tableName="agendacomissao">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="casa" type="VARCHAR(255)"/>
+            <column name="comissao" type="VARCHAR(255)"/>
+            <column name="datareferencia" type="date"/>
+            <column name="ultimaatualizacao" type="TIMESTAMP(29) WITHOUT TIME ZONE"/>
+            <column name="ultimaconsulta" type="TIMESTAMP(29) WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-3">
+        <createTable tableName="alteracaoproposicao">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="data" type="TIMESTAMP(29) WITHOUT TIME ZONE"/>
+            <column name="descricaoalteracao" type="VARCHAR(2000)"/>
+            <column name="proposicao_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-4">
+        <createTable tableName="andamento">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="datacriacao" type="TIMESTAMP(29) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="descricao" type="VARCHAR(2000)"/>
+            <column name="proposicao_id" type="BIGINT"/>
+            <column name="usuario_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-5">
+        <createTable tableName="areaconsultada">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="descricao" type="VARCHAR(255)"/>
+            <column name="prazoresposta" type="TIMESTAMP(29) WITHOUT TIME ZONE"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-6">
+        <createTable tableName="comentario">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="datacriacao" type="TIMESTAMP(29) WITHOUT TIME ZONE"/>
+            <column name="descricao" type="VARCHAR(8000)"/>
+            <column name="autor_id" type="BIGINT"/>
+            <column name="proposicao_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-7">
+        <createTable tableName="comissao">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sigla" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-8">
+        <createTable tableName="elaboracao_normativa">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ano" type="INT"/>
+            <column name="arquivomanifestacao" type="VARCHAR(255)"/>
+            <column name="comentario" type="BYTEA"/>
+            <column name="dataassinaturasidof" type="TIMESTAMP(29) WITHOUT TIME ZONE"/>
+            <column name="datadistribuicao" type="TIMESTAMP(29) WITHOUT TIME ZONE"/>
+            <column name="datainclusaosidof" type="TIMESTAMP(29) WITHOUT TIME ZONE"/>
+            <column name="datamanifestacao" type="TIMESTAMP(29) WITHOUT TIME ZONE"/>
+            <column name="dataregistro" type="TIMESTAMP(29) WITHOUT TIME ZONE"/>
+            <column name="elaboracaonormativabotao" type="INT"/>
+            <column name="elaboracaonormativanorma" type="INT"/>
+            <column name="elaboracaonormativasituacao" type="INT"/>
+            <column name="ementa" type="VARCHAR(255)"/>
+            <column name="ementamanifestacao" type="VARCHAR(255)"/>
+            <column name="ementapreliminar" type="VARCHAR(255)"/>
+            <column name="identificacao" type="INT"/>
+            <column name="normageradaano" type="INT"/>
+            <column name="normageradalink" type="VARCHAR(255)"/>
+            <column name="normageradanumero" type="VARCHAR(255)"/>
+            <column name="numero" type="VARCHAR(255)"/>
+            <column name="nup" type="VARCHAR(255)"/>
+            <column name="subtipo" type="INT"/>
+            <column name="tipo" type="INT"/>
+            <column name="areaconsultada_id" type="BIGINT"/>
+            <column name="coautor_id" type="BIGINT"/>
+            <column name="equipe_id" type="BIGINT"/>
+            <column name="origem_id" type="BIGINT"/>
+            <column name="parecerista_id" type="BIGINT"/>
+            <column name="statussidof_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-9">
+        <createTable tableName="elaboracao_normativa_comentario">
+            <column name="elaboracao_normativa_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="listacomentario_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-10">
+        <createTable tableName="elaboracao_normativa_consulta">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="arquivo" type="VARCHAR(255)"/>
+            <column name="comentario" type="VARCHAR(255)"/>
+            <column name="prazoresposta" type="TIMESTAMP(29) WITHOUT TIME ZONE"/>
+            <column name="areaconsultada_id" type="BIGINT"/>
+            <column name="elaboracaonormativa_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-11">
+        <createTable tableName="elaboracaonormativacoautores">
+            <column name="elaboracaonormativa_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="orgao_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-12">
+        <createTable tableName="elaboracaonormativatiposmarcados">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="subtipo" type="INT"/>
+            <column name="tipo" type="INT"/>
+            <column name="elaboracaonormativa_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-13">
+        <createTable tableName="encaminhamento">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="nome" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-14">
+        <createTable tableName="encaminhamentoproposicao">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="datahoralimite" type="TIMESTAMP(29) WITHOUT TIME ZONE"/>
+            <column name="comentario_id" type="BIGINT"/>
+            <column name="encaminhamento_id" type="BIGINT"/>
+            <column name="proposicao_id" type="BIGINT"/>
+            <column name="responsavel_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-15">
+        <createTable tableName="equipe">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="nome" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-16">
+        <createTable tableName="equipe_usuario">
+            <column name="iscoordenador" type="BOOL"/>
+            <column name="equipe_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="usuario_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-17">
+        <createTable tableName="orgao">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="nome" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-18">
+        <createTable tableName="origemelaboracaonormativa">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="descricao" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-19">
+        <createTable tableName="posicionamento">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="nome" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-20">
+        <createTable tableName="proposicao">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ano" type="VARCHAR(255)"/>
+            <column name="autor" type="VARCHAR(255)"/>
+            <column name="ementa" type="VARCHAR(2000)"/>
+            <column name="idproposicao" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="isfavorita" type="BOOL">
+                <constraints nullable="false"/>
+            </column>
+            <column name="linkproposicao" type="VARCHAR(255)"/>
+            <column name="numero" type="VARCHAR(255)"/>
+            <column name="origem" type="VARCHAR(255)"/>
+            <column name="posicionamento" type="BYTEA"/>
+            <column name="resultadoaspar" type="VARCHAR(2000)"/>
+            <column name="tipo" type="VARCHAR(255)"/>
+            <column name="responsavel_id" type="BIGINT"/>
+            <column name="situacao" type="VARCHAR(255)"/>
+            <column name="posicao_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-21">
+        <createTable tableName="proposicao_elaboracao_normativa">
+            <column name="proposicao_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="elaboracao_normativa_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-22">
+        <createTable tableName="proposicao_proposicao">
+            <column name="proposicao_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="proposicao_id_filha" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-23">
+        <createTable tableName="reuniao">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="data" type="date">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-24">
+        <createTable tableName="reuniaoproposicao">
+            <column name="linkpauta" type="VARCHAR(255)"/>
+            <column name="seqordempauta" type="INT"/>
+            <column name="siglacomissao" type="VARCHAR(255)"/>
+            <column name="proposicao_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reuniao_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-25">
+        <createTable tableName="sessao">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="data" type="TIMESTAMP(29) WITHOUT TIME ZONE"/>
+            <column name="identificadorexterno" type="VARCHAR(255)"/>
+            <column name="situacao" type="VARCHAR(255)"/>
+            <column name="titulo" type="VARCHAR(255)"/>
+            <column name="agenda_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-26">
+        <createTable tableName="statussidof">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="descricao" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-27">
+        <createTable tableName="tag">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-28">
+        <createTable tableName="tagelaboracaonormativa">
+            <column name="elaboracaonormativa_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-29">
+        <createTable tableName="tagproposicao">
+            <column name="proposicao_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tag_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-30">
+        <createTable tableName="tarefa">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="data" type="TIMESTAMP(29) WITHOUT TIME ZONE"/>
+            <column name="isfinalizada" type="BOOL">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tipotarefa" type="INT"/>
+            <column name="encaminhamentoproposicao_id" type="BIGINT"/>
+            <column name="usuario_id" type="BIGINT"/>
+            <column name="isvisualizada" type="BOOL">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-31">
+        <createTable tableName="usuario">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)"/>
+            <column name="nome" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-32">
+        <createTable tableName="usuario_agendas">
+            <column name="usuario_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="agendasseguidas_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-33">
+        <createTable tableName="usuario_proposicaoseguida">
+            <column name="usuario_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="proposicoesseguidas_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-34">
+        <addPrimaryKey columnNames="id" constraintName="agendacomissao_pkey" tableName="agendacomissao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-35">
+        <addPrimaryKey columnNames="id" constraintName="alteracaoproposicao_pkey" tableName="alteracaoproposicao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-36">
+        <addPrimaryKey columnNames="id" constraintName="andamento_pkey" tableName="andamento"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-37">
+        <addPrimaryKey columnNames="id" constraintName="areaconsultada_pkey" tableName="areaconsultada"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-38">
+        <addPrimaryKey columnNames="id" constraintName="comentario_pkey" tableName="comentario"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-39">
+        <addPrimaryKey columnNames="id" constraintName="comissao_pkey" tableName="comissao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-40">
+        <addPrimaryKey columnNames="id" constraintName="elaboracao_normativa_consulta_pkey" tableName="elaboracao_normativa_consulta"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-41">
+        <addPrimaryKey columnNames="id" constraintName="elaboracao_normativa_pkey" tableName="elaboracao_normativa"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-42">
+        <addPrimaryKey columnNames="elaboracaonormativa_id, orgao_id" constraintName="elaboracaonormativacoautores_pkey" tableName="elaboracaonormativacoautores"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-43">
+        <addPrimaryKey columnNames="id" constraintName="elaboracaonormativatiposmarcados_pkey" tableName="elaboracaonormativatiposmarcados"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-44">
+        <addPrimaryKey columnNames="id" constraintName="encaminhamento_pkey" tableName="encaminhamento"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-45">
+        <addPrimaryKey columnNames="id" constraintName="encaminhamentoproposicao_pkey" tableName="encaminhamentoproposicao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-46">
+        <addPrimaryKey columnNames="id" constraintName="equipe_pkey" tableName="equipe"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-47">
+        <addPrimaryKey columnNames="equipe_id, usuario_id" constraintName="equipe_usuario_pkey" tableName="equipe_usuario"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-48">
+        <addPrimaryKey columnNames="id" constraintName="orgao_pkey" tableName="orgao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-49">
+        <addPrimaryKey columnNames="id" constraintName="origemelaboracaonormativa_pkey" tableName="origemelaboracaonormativa"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-50">
+        <addPrimaryKey columnNames="id" constraintName="posicionamento_pkey" tableName="posicionamento"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-51">
+        <addPrimaryKey columnNames="proposicao_id, elaboracao_normativa_id" constraintName="proposicao_elaboracao_normativa_pkey" tableName="proposicao_elaboracao_normativa"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-52">
+        <addPrimaryKey columnNames="id" constraintName="proposicao_pkey" tableName="proposicao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-53">
+        <addPrimaryKey columnNames="proposicao_id, proposicao_id_filha" constraintName="proposicao_proposicao_pkey" tableName="proposicao_proposicao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-54">
+        <addPrimaryKey columnNames="id" constraintName="reuniao_pkey" tableName="reuniao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-55">
+        <addPrimaryKey columnNames="proposicao_id, reuniao_id" constraintName="reuniaoproposicao_pkey" tableName="reuniaoproposicao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-56">
+        <addPrimaryKey columnNames="id" constraintName="sessao_pkey" tableName="sessao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-57">
+        <addPrimaryKey columnNames="id" constraintName="statussidof_pkey" tableName="statussidof"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-58">
+        <addPrimaryKey columnNames="id" constraintName="tag_pkey" tableName="tag"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-59">
+        <addPrimaryKey columnNames="elaboracaonormativa_id, tag_id" constraintName="tagelaboracaonormativa_pkey" tableName="tagelaboracaonormativa"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-60">
+        <addPrimaryKey columnNames="proposicao_id, tag_id" constraintName="tagproposicao_pkey" tableName="tagproposicao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-61">
+        <addPrimaryKey columnNames="id" constraintName="tarefa_pkey" tableName="tarefa"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-62">
+        <addPrimaryKey columnNames="usuario_id, agendasseguidas_id" constraintName="usuario_agendas_pkey" tableName="usuario_agendas"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-63">
+        <addPrimaryKey columnNames="id" constraintName="usuario_pkey" tableName="usuario"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-64">
+        <addPrimaryKey columnNames="usuario_id, proposicoesseguidas_id" constraintName="usuario_proposicaoseguida_pkey" tableName="usuario_proposicaoseguida"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-65">
+        <addUniqueConstraint columnNames="data" constraintName="uk_3fefxkcsd7pl0v5r6bkrg9ewp" tableName="reuniao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-66">
+        <addUniqueConstraint columnNames="nome" constraintName="uk_8fo21uhlje6l6x10eecopobln" tableName="posicionamento"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-67">
+        <addUniqueConstraint columnNames="descricao" constraintName="uk_d6xsm7bcuqfk1mik9k20rsnyk" tableName="areaconsultada"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-68">
+        <addUniqueConstraint columnNames="comissao, casa" constraintName="uk_i5280vkx2yuvub02i3vo48t40" tableName="agendacomissao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-69">
+        <addUniqueConstraint columnNames="descricao" constraintName="uk_o3wh8nwvdr8notdktn1ps667h" tableName="origemelaboracaonormativa"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-70">
+        <addUniqueConstraint columnNames="nome" constraintName="uk_p7vlyh1buo3xnc56r1nm8t9y4" tableName="orgao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-71">
+        <addUniqueConstraint columnNames="listacomentario_id" constraintName="uk_tmwa1kid92ocjg5nchr3302if" tableName="elaboracao_normativa_comentario"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-72">
+        <createIndex indexName="proposicao_autor" tableName="proposicao">
+            <column name="autor"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-73">
+        <createIndex indexName="proposicao_origem" tableName="proposicao">
+            <column name="origem"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-74">
+        <createIndex indexName="proposicao_origem_autor" tableName="proposicao">
+            <column name="origem"/>
+            <column name="autor"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-75">
+        <addForeignKeyConstraint baseColumnNames="usuario_id" baseTableName="usuario_proposicaoseguida" constraintName="fk_191og3no34p933ep36302l9x3" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="usuario"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-76">
+        <addForeignKeyConstraint baseColumnNames="agenda_id" baseTableName="sessao" constraintName="fk_19yrei3hee38opns95l1oi4cc" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="agendacomissao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-77">
+        <addForeignKeyConstraint baseColumnNames="elaboracao_normativa_id" baseTableName="proposicao_elaboracao_normativa" constraintName="fk_21timckc2g02c1n6ci0bysjsw" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="elaboracao_normativa"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-78">
+        <addForeignKeyConstraint baseColumnNames="origem_id" baseTableName="elaboracao_normativa" constraintName="fk_26ip2iq04kjmpogy9md7umx5n" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="orgao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-79">
+        <addForeignKeyConstraint baseColumnNames="orgao_id" baseTableName="elaboracaonormativacoautores" constraintName="fk_36bgah2tx4lsmma26mceth5rg" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="orgao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-80">
+        <addForeignKeyConstraint baseColumnNames="proposicao_id" baseTableName="comentario" constraintName="fk_3nx6udwfyw5cuteoso7397je7" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="proposicao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-81">
+        <addForeignKeyConstraint baseColumnNames="comentario_id" baseTableName="encaminhamentoproposicao" constraintName="fk_3xmt13ruudesk5b71ii0mie7b" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="comentario"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-82">
+        <addForeignKeyConstraint baseColumnNames="encaminhamento_id" baseTableName="encaminhamentoproposicao" constraintName="fk_5nbi57suhl2m1ael4ko0cuy6n" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="encaminhamento"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-83">
+        <addForeignKeyConstraint baseColumnNames="agendasseguidas_id" baseTableName="usuario_agendas" constraintName="fk_69ej12hxn9kb40k5njh4d5k38" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="agendacomissao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-84">
+        <addForeignKeyConstraint baseColumnNames="coautor_id" baseTableName="elaboracao_normativa" constraintName="fk_6vp8xvc42mix40mjmxw3m2vn4" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="orgao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-85">
+        <addForeignKeyConstraint baseColumnNames="usuario_id" baseTableName="andamento" constraintName="fk_6vq1vwip7lhxm9e3hqu0ey4td" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="usuario"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-86">
+        <addForeignKeyConstraint baseColumnNames="proposicao_id" baseTableName="proposicao_elaboracao_normativa" constraintName="fk_8csojrr8m2hcw9x7ig2l12qq8" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="proposicao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-87">
+        <addForeignKeyConstraint baseColumnNames="equipe_id" baseTableName="elaboracao_normativa" constraintName="fk_bi7l2nhnq15np8bjft7nvqjn1" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="equipe"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-88">
+        <addForeignKeyConstraint baseColumnNames="parecerista_id" baseTableName="elaboracao_normativa" constraintName="fk_brqesiokip5jm108kq7piojub" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="usuario"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-89">
+        <addForeignKeyConstraint baseColumnNames="equipe_id" baseTableName="equipe_usuario" constraintName="fk_c4prefpvhdiu0koqrt3vi20xi" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="equipe"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-90">
+        <addForeignKeyConstraint baseColumnNames="elaboracao_normativa_id" baseTableName="elaboracao_normativa_comentario" constraintName="fk_d25r3mkitwi7sv6oth8kwyxgw" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="elaboracao_normativa"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-91">
+        <addForeignKeyConstraint baseColumnNames="proposicao_id" baseTableName="proposicao_proposicao" constraintName="fk_dqasx3cmfpwow0vlika41mg6r" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="proposicao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-92">
+        <addForeignKeyConstraint baseColumnNames="encaminhamentoproposicao_id" baseTableName="tarefa" constraintName="fk_dwwhwgs84tsnb2cvr1122g8tf" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="encaminhamentoproposicao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-93">
+        <addForeignKeyConstraint baseColumnNames="proposicao_id" baseTableName="encaminhamentoproposicao" constraintName="fk_e2qnm5xus1xy5by8ylf801m1e" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="proposicao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-94">
+        <addForeignKeyConstraint baseColumnNames="areaconsultada_id" baseTableName="elaboracao_normativa_consulta" constraintName="fk_efcb5wbw3l1xnpgjffng1y037" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="areaconsultada"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-95">
+        <addForeignKeyConstraint baseColumnNames="reuniao_id" baseTableName="reuniaoproposicao" constraintName="fk_g8kmfrpib4s0aqok3omfddaec" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="reuniao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-96">
+        <addForeignKeyConstraint baseColumnNames="proposicao_id" baseTableName="alteracaoproposicao" constraintName="fk_ilr8qxymh5wrmesfpi2r41ul9" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="proposicao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-97">
+        <addForeignKeyConstraint baseColumnNames="usuario_id" baseTableName="equipe_usuario" constraintName="fk_ix26ih64kw5nnokaude5kg7mu" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="usuario"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-98">
+        <addForeignKeyConstraint baseColumnNames="responsavel_id" baseTableName="proposicao" constraintName="fk_kbbk2wlm2gx3cw2t8phlw6rly" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="usuario"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-99">
+        <addForeignKeyConstraint baseColumnNames="proposicao_id" baseTableName="reuniaoproposicao" constraintName="fk_lfa3w671sp485cy56agxyclif" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="proposicao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-100">
+        <addForeignKeyConstraint baseColumnNames="proposicao_id_filha" baseTableName="proposicao_proposicao" constraintName="fk_ll130tfyunfucscgqocflv7vg" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="proposicao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-101">
+        <addForeignKeyConstraint baseColumnNames="elaboracaonormativa_id" baseTableName="elaboracaonormativacoautores" constraintName="fk_lqk6fw0hldw9rht79okqtpxs7" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="elaboracao_normativa"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-102">
+        <addForeignKeyConstraint baseColumnNames="proposicao_id" baseTableName="andamento" constraintName="fk_mg6268cenj9qrih65eib58k12" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="proposicao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-103">
+        <addForeignKeyConstraint baseColumnNames="usuario_id" baseTableName="tarefa" constraintName="fk_moqgaovtbmeumh2mmlahj9d42" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="usuario"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-104">
+        <addForeignKeyConstraint baseColumnNames="tag_id" baseTableName="tagproposicao" constraintName="fk_mppgiboc0i9riw5opnqh77wnb" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="tag"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-105">
+        <addForeignKeyConstraint baseColumnNames="posicao_id" baseTableName="proposicao" constraintName="fk_mwwhh0cplgu6h6f79a0smk76x" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="posicionamento"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-106">
+        <addForeignKeyConstraint baseColumnNames="usuario_id" baseTableName="usuario_agendas" constraintName="fk_n65lkgbnwuyq6msevvgp7p1cf" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="usuario"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-107">
+        <addForeignKeyConstraint baseColumnNames="elaboracaonormativa_id" baseTableName="elaboracao_normativa_consulta" constraintName="fk_nmrchlx8vjhi51fyq1w4ckl1l" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="elaboracao_normativa"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-108">
+        <addForeignKeyConstraint baseColumnNames="proposicoesseguidas_id" baseTableName="usuario_proposicaoseguida" constraintName="fk_ovwjhf83n4g7d1xfjn0dsnt12" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="proposicao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-109">
+        <addForeignKeyConstraint baseColumnNames="autor_id" baseTableName="comentario" constraintName="fk_p6xd7rh248gxfpvdobwsrk9rb" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="usuario"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-110">
+        <addForeignKeyConstraint baseColumnNames="areaconsultada_id" baseTableName="elaboracao_normativa" constraintName="fk_pwenu3j398r1s2g8ua3lvky7u" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="areaconsultada"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-111">
+        <addForeignKeyConstraint baseColumnNames="elaboracaonormativa_id" baseTableName="elaboracaonormativatiposmarcados" constraintName="fk_pxmdkc2vw2mhj30kb051ksiii" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="elaboracao_normativa"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-112">
+        <addForeignKeyConstraint baseColumnNames="elaboracaonormativa_id" baseTableName="tagelaboracaonormativa" constraintName="fk_qbmqumvtdhwymsfka4gt7ulb9" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="elaboracao_normativa"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-113">
+        <addForeignKeyConstraint baseColumnNames="tag_id" baseTableName="tagelaboracaonormativa" constraintName="fk_s8fobcv9tcjh9wkdehiilhaao" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="tag"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-114">
+        <addForeignKeyConstraint baseColumnNames="responsavel_id" baseTableName="encaminhamentoproposicao" constraintName="fk_sturljadwdielipkx43gtxmby" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="usuario"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-115">
+        <addForeignKeyConstraint baseColumnNames="statussidof_id" baseTableName="elaboracao_normativa" constraintName="fk_t7qj4t124tmmtdtb74rtcxfrl" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="statussidof"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-116">
+        <addForeignKeyConstraint baseColumnNames="proposicao_id" baseTableName="tagproposicao" constraintName="fk_th09tvksfu7igkg3tkto919xu" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="proposicao"/>
+    </changeSet>
+    <changeSet author="sislegis (generated)" context="legacy" id="1447106279783-117">
+        <addForeignKeyConstraint baseColumnNames="listacomentario_id" baseTableName="elaboracao_normativa_comentario" constraintName="fk_tmwa1kid92ocjg5nchr3302if" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="comentario"/>
+    </changeSet>
+</databaseChangeLog>
