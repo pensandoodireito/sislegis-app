@@ -1,5 +1,7 @@
 package br.gov.mj.sislegis.app.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -15,6 +17,7 @@ public class PosicionamentoProposicao extends AbstractEntity{
     @ManyToOne
     private Posicionamento posicionamento;
 
+    @JsonIgnore
     @ManyToOne
     private Proposicao proposicao;
 

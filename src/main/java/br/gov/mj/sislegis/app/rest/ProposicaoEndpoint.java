@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
+import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
@@ -290,16 +291,23 @@ public class ProposicaoEndpoint {
 	@POST
 	@Path("/alterarPosicionamento")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response alterarPosicionamento(@FormParam("idProposicao") Long idProposicao, @FormParam("idPosicionamento") Long idPosicionamento, @HeaderParam("Authorization") String authorization){
+	public Response alterarPosicionamento(@FormParam("id") Long id, @FormParam("idPosicionamento") Long idPosicionamento, @HeaderParam("Authorization") String authorization){
 		try {
 			Usuario usuarioLogado = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
-			proposicaoService.alterarPosicionamento(idProposicao, idPosicionamento, usuarioLogado);
+			proposicaoService.alterarPosicionamento(id, idPosicionamento, usuarioLogado);
 			return Response.ok().build();
 
 		} catch (Exception e) {
 			e.printStackTrace();
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		}
+	}
+
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/historicoPosicionamentos/{id:[0-9]+}")
+	public List<PosicionamentoProposicao> historicoPosicionamentos(@PathParam("id") Long id){
+		return proposicaoService.listarHistoricoPosicionamentos(id);
 	}
 
 }

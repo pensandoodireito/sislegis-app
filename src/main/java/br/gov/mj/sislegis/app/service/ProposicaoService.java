@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.ejb.Local;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
@@ -45,7 +46,7 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * tendo a necessidade delas estarem no banco do sislegis.
 	 * 
 	 * @param tipo
-	 * @param numer
+	 * @param numero
 	 * @param ano
 	 * @return Lista de proposicoes encontradas na origem
 	 */
@@ -126,9 +127,16 @@ public interface ProposicaoService extends Service<Proposicao> {
 	/**
 	 * Altera o posicionamento da proposicao e salva seu historico
 	 *
-	 * @param idProposicao
+	 * @param id
 	 * @param idPosicionamento
 	 * @param usuario
 	 */
-	void alterarPosicionamento(Long idProposicao, Long idPosicionamento, Usuario usuario);
+	void alterarPosicionamento(Long id, Long idPosicionamento, Usuario usuario);
+
+	/**
+	 * Retorna o historico de alteracoes de posicionamento por id da proposicao
+	 * @param id
+	 * @return
+	 */
+	List<PosicionamentoProposicao> listarHistoricoPosicionamentos(Long id);
 }

@@ -711,8 +711,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public void alterarPosicionamento(Long idProposicao, Long idPosicionamento, Usuario usuario) {
-		Proposicao proposicao = findById(idProposicao);
+	public void alterarPosicionamento(Long id, Long idPosicionamento, Usuario usuario) {
+		Proposicao proposicao = findById(id);
 
 		// somente executa se o posicionamento for alterado
 		if (proposicao.getPosicionamento() == null || !proposicao.getPosicionamento().getId().equals(idPosicionamento)){
@@ -732,6 +732,17 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			em.persist(posicionamentoProposicao);
 			save(proposicao);
 		}
+	}
+
+	@Override
+	public List<PosicionamentoProposicao> listarHistoricoPosicionamentos(Long id) {
+		TypedQuery<PosicionamentoProposicao> query = em.createQuery(
+				"FROM PosicionamentoProposicao pp WHERE pp.proposicao.id = :id ORDER BY pp.dataCriacao ", PosicionamentoProposicao.class);
+
+		query.setParameter("id", id);
+
+		List<PosicionamentoProposicao> posicionamentosProposicao = query.getResultList();
+		return posicionamentosProposicao;
 	}
 
 	/**
