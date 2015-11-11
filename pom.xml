@@ -402,7 +402,6 @@
 											output="${backup-dir}/backup_${tstamped-file-name}"
 											failonerror="true">
 											<arg value="sislegis" />
-											<arg value="--quote-all-identifiers" />
 											<arg value="--format=p" />
 										</exec>
 										<gzip destfile="${backup-dir}/backup_${tstamped-file-name}.gz"

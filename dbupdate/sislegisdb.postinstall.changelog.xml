@@ -103,5 +103,5 @@
 		</createIndex>
 	</changeSet>
 	
-
+	<include relativeToChangelogFile="true" file="update151101.sql" />
 </databaseChangeLog>
