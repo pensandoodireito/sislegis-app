@@ -290,14 +290,11 @@ public class ProposicaoEndpoint {
 
 	@POST
 	@Path("/alterarPosicionamento")
-	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response alterarPosicionamento(@FormParam("id") Long id, @FormParam("idPosicionamento") String idPosicionamento, @HeaderParam("Authorization") String authorization){
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response alterarPosicionamento(PosicionamentoProposicaoWrapper posicionamentoProposicaoWrapper, @HeaderParam("Authorization") String authorization){
 		try {
-			// Conversao necessaria para evitar erro quando o idPosicionamento for vazio/nulo
-			Long idPosicionamentoLong = idPosicionamento.isEmpty() ? null : Long.parseLong(idPosicionamento);
-
 			Usuario usuarioLogado = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
-			proposicaoService.alterarPosicionamento(id, idPosicionamentoLong, usuarioLogado);
+			proposicaoService.alterarPosicionamento(posicionamentoProposicaoWrapper.getId(), posicionamentoProposicaoWrapper.getIdPosicionamento(), usuarioLogado);
 			return Response.ok().build();
 
 		} catch (Exception e) {
@@ -335,4 +332,25 @@ class AddProposicaoPautaWrapper {
 		this.reuniaoDate = reuniaoDate;
 	}
 
+}
+
+class PosicionamentoProposicaoWrapper {
+	Long id;
+	Long idPosicionamento;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Long getIdPosicionamento() {
+		return idPosicionamento;
+	}
+
+	public void setIdPosicionamento(Long idPosicionamento) {
+		this.idPosicionamento = idPosicionamento;
+	}
 }
