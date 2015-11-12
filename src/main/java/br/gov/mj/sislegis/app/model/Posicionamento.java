@@ -21,6 +21,9 @@ public class Posicionamento extends AbstractEntity {
 	@Column(unique = true)
 	private String nome;
 
+	@Column
+	private Boolean preliminar = false;
+
 	public Long getId() {
 		return this.id;
 	}
@@ -35,6 +38,14 @@ public class Posicionamento extends AbstractEntity {
 
 	public void setNome(String nome) {
 		this.nome = nome;
+	}
+
+	public Boolean isPreliminar() {
+		return preliminar;
+	}
+
+	public void setPreliminar(Boolean preliminar) {
+		this.preliminar = preliminar;
 	}
 
 	@Override
