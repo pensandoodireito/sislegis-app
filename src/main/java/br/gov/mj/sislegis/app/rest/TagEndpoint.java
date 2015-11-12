@@ -69,7 +69,7 @@ public class TagEndpoint {
 	@GET
 	@Path("/buscarPorSufixo")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<TagJSON> buscarPorSufixo(@QueryParam("sufixo")String sufixo) {
+	public List<Tag> buscarPorSufixo(@QueryParam("sufixo")String sufixo) {
 		return tagService.buscaPorSufixo(sufixo);
 	}
 
@@ -95,8 +95,8 @@ public class TagEndpoint {
 		List<DropdownMultiselectStringJSON> listaDropdownMultiselectJSON = new ArrayList<DropdownMultiselectStringJSON>();
 		for(TagJSON tag:results){
 			DropdownMultiselectStringJSON dropdownMultiselectJSON = new DropdownMultiselectStringJSON();
-			dropdownMultiselectJSON.setLabel(tag.getText());
-			dropdownMultiselectJSON.setId(tag.getText());
+			dropdownMultiselectJSON.setLabel(tag.getTag());
+			dropdownMultiselectJSON.setId(tag.getTag());
 			listaDropdownMultiselectJSON.add(dropdownMultiselectJSON);
 		}
 		return listaDropdownMultiselectJSON;

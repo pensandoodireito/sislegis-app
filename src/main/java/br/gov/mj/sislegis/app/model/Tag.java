@@ -27,6 +27,13 @@ public class Tag extends AbstractEntity {
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "tag")
 	private Set<TagElaboracaoNormativa> listaTagElaboracaoNormativa = new HashSet<TagElaboracaoNormativa>();
 
+	public Tag() {
+	}
+
+	public Tag(String tag) {
+		this.tag = tag;
+	}
+
 	@Override
 	public Number getId() {
 		return tag.hashCode();

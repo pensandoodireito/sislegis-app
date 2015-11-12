@@ -37,9 +37,9 @@ implements TagService{
 	}
 	
 	@Override
-	public List<TagJSON> buscaPorSufixo(String sufixo) {
+	public List<Tag> buscaPorSufixo(String sufixo) {
 		List<Tag> lista = findByProperty("tag", sufixo, "ASC");
-		return populaListaTagsJSON(lista);
+		return lista;
 	}
 
 	public List<TagJSON> populaListaTagsJSON(Collection<Tag> listaTags) {

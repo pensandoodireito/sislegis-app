@@ -279,7 +279,7 @@ public class ElaboracaoNormativaServiceEjb extends AbstractPersistence<Elaboraca
 			List<TagElaboracaoNormativa> lista = tagElaboracaoNormativaService.buscaTagsElaboracaoNormativa(elaboracaoNormativa.getId());
 			c:for(TagElaboracaoNormativa tagElaboracaoNormativa:lista){
 				for(TagJSON tagJSON:elaboracaoNormativa.getTags()){
-					if(tagJSON.getText().equals(tagElaboracaoNormativa.getTag().getTag()))
+					if(tagJSON.getTag().equals(tagElaboracaoNormativa.getTag().getTag()))
 						continue c;
 				}
 				tagElaboracaoNormativaService.deleteTagElaboracaoNormativa(tagElaboracaoNormativa);
@@ -316,20 +316,20 @@ public class ElaboracaoNormativaServiceEjb extends AbstractPersistence<Elaboraca
 		
 		c: for (TagJSON tagJSON : elaboracaoNormativa.getTags()) {
 			for(TagElaboracaoNormativa tagElaboracaoNormativa:lista){
-				if(tagJSON.getText().equals(tagElaboracaoNormativa.getTag().toString())){
+				if(tagJSON.getTag().equals(tagElaboracaoNormativa.getTag().toString())){
 					continue c;
 				}
 			}
 			TagElaboracaoNormativaPK tagElaboracaoNormativaPK = new TagElaboracaoNormativaPK();
 			TagElaboracaoNormativa tagElaboracaoNormativa = new TagElaboracaoNormativa();
 			tagElaboracaoNormativaPK.setId(elaboracaoNormativa.getId());
-			tagElaboracaoNormativaPK.setTag(tagJSON.getText());
+			tagElaboracaoNormativaPK.setTag(tagJSON.getTag());
 			tagElaboracaoNormativa.setTagElaboracaoNormativaPK(tagElaboracaoNormativaPK);
 			tagElaboracaoNormativa.setElaboracaoNormativa(elaboracaoNormativa);
-			Tag tag = getEntityManager().find(Tag.class, tagJSON.getText());
+			Tag tag = getEntityManager().find(Tag.class, tagJSON.getTag());
 			if(Objects.isNull(tag)){
 				tag=new Tag();
-				tag.setTag(tagJSON.getText());
+				tag.setTag(tagJSON.getTag());
 			}
 			tagElaboracaoNormativa.setTag(tag);
 			tagsElaboracaoNormativa.add(tagElaboracaoNormativa);
