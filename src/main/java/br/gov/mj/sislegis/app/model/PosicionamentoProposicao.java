@@ -26,10 +26,10 @@ public class PosicionamentoProposicao extends AbstractEntity{
     private Posicionamento posicionamento;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Proposicao proposicao;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Usuario usuario;
 
     @Temporal(TemporalType.TIMESTAMP)
