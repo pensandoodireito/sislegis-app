@@ -1,7 +1,17 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
-import br.gov.mj.sislegis.app.model.*;
+import br.gov.mj.sislegis.app.model.AlteracaoProposicao;
+import br.gov.mj.sislegis.app.model.Comentario;
+import br.gov.mj.sislegis.app.model.Comissao;
+import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.Posicionamento;
+import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
+import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Reuniao;
+import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
+import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
+import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.SituacaoSessao;
@@ -13,7 +23,16 @@ import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
 import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserPlenarioSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
-import br.gov.mj.sislegis.app.service.*;
+import br.gov.mj.sislegis.app.service.AbstractPersistence;
+import br.gov.mj.sislegis.app.service.ComentarioService;
+import br.gov.mj.sislegis.app.service.ComissaoService;
+import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
+import br.gov.mj.sislegis.app.service.PosicionamentoService;
+import br.gov.mj.sislegis.app.service.ProposicaoService;
+import br.gov.mj.sislegis.app.service.ReuniaoProposicaoService;
+import br.gov.mj.sislegis.app.service.ReuniaoService;
+import br.gov.mj.sislegis.app.service.TagService;
+import br.gov.mj.sislegis.app.service.UsuarioService;
 import br.gov.mj.sislegis.app.util.Conversores;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
