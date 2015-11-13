@@ -1,7 +1,9 @@
 package br.gov.mj.sislegis.app.model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
@@ -130,7 +132,7 @@ public class Proposicao extends AbstractEntity {
 	private Set<TagProposicao> tags;
 
 	@Transient
-	private Set<Comentario> listaComentario = new HashSet<>();
+	private List<Comentario> listaComentario = new ArrayList<>();
 
 	@Transient
 	private Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao = new HashSet<>();
@@ -285,11 +287,11 @@ public class Proposicao extends AbstractEntity {
 		this.posicao = posicionamento;
 	}
 
-	public Set<Comentario> getListaComentario() {
+	public List<Comentario> getListaComentario() {
 		return this.listaComentario;
 	}
 
-	public void setListaComentario(final Set<Comentario> listaComentario) {
+	public void setListaComentario(final List<Comentario> listaComentario) {
 		this.listaComentario = listaComentario;
 	}
 
