@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.inject.Inject;
@@ -32,6 +33,7 @@ import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
+import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
@@ -94,12 +96,7 @@ public class ProposicaoEndpoint {
 	@Path("/salvarProposicoes")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response salvarProposicoes(List<Proposicao> listaProposicoesSelecionados) {
-		// try {
-		// proposicaoService.salvarListaProposicao(listaProposicoesSelecionados);
-		// } catch (EJBTransactionRolledbackException e) {
-		// return Response.status(Response.Status.CONFLICT).build();
-		// }
-		// return Response.noContent().build();
+		// nao é usada mais
 		return Response.status(Status.SERVICE_UNAVAILABLE).build();
 	}
 
@@ -294,6 +291,14 @@ public class ProposicaoEndpoint {
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		}
 
+	}
+
+	@GET
+	@Path("/{id:[0-9]+}/pautas")
+	@Cache(maxAge = 24, noStore = false, isPrivate = false, sMaxAge = 24)
+	@Produces(MediaType.APPLICATION_JSON)
+	public SortedSet<ProposicaoPautaComissao> listPautasProposicao(@PathParam("id") Long id) throws Exception {
+		return proposicaoService.findById(id).getPautasComissoes();
 	}
 
 }
