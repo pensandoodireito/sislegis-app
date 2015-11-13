@@ -33,9 +33,11 @@ import org.apache.commons.collections.CollectionUtils;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
+import br.gov.mj.sislegis.app.rest.serializers.CompactSetProposicaoSerializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
 //@formatter:off
@@ -355,10 +357,12 @@ public class Proposicao extends AbstractEntity {
 		this.totalEncaminhamentos = totalEncaminhamentos;
 	}
 
+	@JsonSerialize(using = CompactSetProposicaoSerializer.class)
 	public Set<Proposicao> getProposicoesPai() {
 		return proposicoesPai;
 	}
 
+	@JsonSerialize(using = CompactSetProposicaoSerializer.class)
 	public Set<Proposicao> getProposicoesFilha() {
 		return proposicoesFilha;
 	}
