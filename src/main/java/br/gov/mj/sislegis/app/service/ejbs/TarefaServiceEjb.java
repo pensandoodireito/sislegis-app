@@ -1,25 +1,32 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
-import br.gov.mj.sislegis.app.model.Comentario;
-import br.gov.mj.sislegis.app.model.Tarefa;
-import br.gov.mj.sislegis.app.service.AbstractPersistence;
-import br.gov.mj.sislegis.app.service.TarefaService;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import java.util.Date;
-import java.util.List;
 
+import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.Notificacao;
+import br.gov.mj.sislegis.app.model.Tarefa;
+import br.gov.mj.sislegis.app.service.AbstractPersistence;
+import br.gov.mj.sislegis.app.service.NotificacaoService;
+import br.gov.mj.sislegis.app.service.TarefaService;
 
 @Stateless
 public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implements TarefaService {
 
+	private static final String CATEGORIA_TAREFAS = "TAREFAS";
 	@PersistenceContext
 	private EntityManager em;
+	@Inject
+	NotificacaoService notificacaoService;
 
 	public TarefaServiceEjb() {
 		super(Tarefa.class);
@@ -32,7 +39,27 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 
 	@Override
 	public Tarefa save(Tarefa entity) {
+		boolean criando = (entity.getId() == null);
+
 		entity = super.save(entity);
+		if (criando) {
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM kk:mm");
+			// cria notificacao
+			EncaminhamentoProposicao enc = entity.getEncaminhamentoProposicao();
+			String notTxt = enc.getTipoEncaminhamento().getNome();
+			if (enc.getDetalhes() != null && !enc.getDetalhes().isEmpty()) {
+				notTxt += enc.getDetalhes();
+			}
+			if (enc.getDataHoraLimite() != null) {
+				notTxt += " - " + sdf.format(enc.getDataHoraLimite());
+			}
+			Notificacao not = new Notificacao(entity.getUsuario(), notTxt, entity.getId().toString(), CATEGORIA_TAREFAS);
+
+			notificacaoService.save(not);
+		} else if (entity.isFinalizada()) {
+			deleteNotificacaoAssociada(entity.getId());
+		}
+
 		return entity;
 	}
 
@@ -61,19 +88,14 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 		findByIdQuery.setParameter("idUsuario", idUsuario);
 		List<Tarefa> resultList = findByIdQuery.getResultList();
 
-//		for (Tarefa tarefa : resultList) {
-//			if (tarefa.getEncaminhamentoProposicao() != null) {
-//				tarefa.setProposicao(tarefa.getEncaminhamentoProposicao().getProposicao());
-//			}
-//		}
-
 		return resultList;
 	}
 
 	@Override
 	public Tarefa buscarPorEncaminhamentoProposicaoId(Long idEncaminhamentoProposicao) {
 		TypedQuery<Tarefa> findByIdQuery = em.createQuery(
-				"SELECT t FROM Tarefa t WHERE t.encaminhamentoProposicao.id = :idEncaminhamentoProposicao", Tarefa.class);
+				"SELECT t FROM Tarefa t WHERE t.encaminhamentoProposicao.id = :idEncaminhamentoProposicao",
+				Tarefa.class);
 		findByIdQuery.setParameter("idEncaminhamentoProposicao", idEncaminhamentoProposicao);
 		List<Tarefa> resultList = findByIdQuery.getResultList();
 
@@ -91,6 +113,19 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 			query.setParameter("id", id);
 			query.executeUpdate();
 		}
+	}
+
+	private void deleteNotificacaoAssociada(Long idTarefa) {
+		Notificacao n = notificacaoService.buscarPorCategoriaEntidade(CATEGORIA_TAREFAS, idTarefa.toString());
+		if (n != null) {
+			notificacaoService.deleteById(n.getId().longValue());
+		}
+	}
+
+	@Override
+	public void deleteById(Long id) {
+		deleteNotificacaoAssociada(id);
+		super.deleteById(id);
 	}
 
 	@Override
@@ -120,6 +155,7 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 		Tarefa tarefa = findById(idTarefa);
 		tarefa.setFinalizada(true);
 		tarefa.getEncaminhamentoProposicao().setFinalizado(true);
+		deleteNotificacaoAssociada(idTarefa);
 
 		Comentario comentario = new Comentario();
 		comentario.setProposicao(tarefa.getEncaminhamentoProposicao().getProposicao());
