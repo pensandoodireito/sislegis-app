@@ -26,3 +26,19 @@ insert into notificacao (id,categoria,usuario_id,criada_em,vista_em,descricao,id
 
 --changeset release151101:151101-7
 alter table tarefa drop isvisualizada
+--changeset release151101:151101-8
+CREATE TABLE posicionamento_proposicao (
+  id                BIGINT PRIMARY KEY NOT NULL,
+  datacriacao       TIMESTAMP NOT NULL,
+  posicionamento_id BIGINT,
+  proposicao_id     BIGINT NOT NULL,
+  usuario_id        BIGINT NOT NULL,
+  FOREIGN KEY (posicionamento_id) REFERENCES posicionamento (id),
+  FOREIGN KEY (proposicao_id) REFERENCES proposicao (id),
+  FOREIGN KEY (usuario_id) REFERENCES usuario (id)
+);
+--rollback drop table posicionamento_proposicao
+
+--changeset release151101:151101-9
+insert into posicionamento_proposicao (id,datacriacao,posicionamento_id,proposicao_id,usuario_id) select nextval ('hibernate_sequence'),now(),p.posicao_id,p.id,(select id as idUsuario from Usuario where email='marco.konopacki@mj.gov.br') as idUser from proposicao   p where p.posicao_id is not null
+--rollback delete from posicionamento_proposicao

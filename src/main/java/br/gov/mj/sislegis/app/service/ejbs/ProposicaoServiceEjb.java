@@ -1,7 +1,17 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
-import br.gov.mj.sislegis.app.model.*;
+import br.gov.mj.sislegis.app.model.AlteracaoProposicao;
+import br.gov.mj.sislegis.app.model.Comentario;
+import br.gov.mj.sislegis.app.model.Comissao;
+import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.Posicionamento;
+import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
+import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Reuniao;
+import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
+import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
+import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.SituacaoSessao;
@@ -17,6 +27,7 @@ import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
+import br.gov.mj.sislegis.app.service.PosicionamentoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.ReuniaoProposicaoService;
 import br.gov.mj.sislegis.app.service.ReuniaoService;
@@ -90,6 +101,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	@Inject
 	private ComissaoService comissaoService;
+
+	@Inject
+	private PosicionamentoService posicionamentoService;
 
 	@PersistenceContext
 	private EntityManager em;
@@ -712,6 +726,41 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 		return prcList;
 
+	}
+
+	@Override
+	public void alterarPosicionamento(Long id, Long idPosicionamento, Usuario usuario) {
+		Proposicao proposicao = findById(id);
+
+		// somente executa se o posicionamento for alterado
+		if (proposicao.getPosicionamento() == null || !proposicao.getPosicionamento().getId().equals(idPosicionamento)){
+			Posicionamento posicionamento = null;
+
+			if (idPosicionamento != null){
+				posicionamento = posicionamentoService.findById(idPosicionamento);
+			}
+
+			proposicao.setPosicionamento(posicionamento);
+
+			PosicionamentoProposicao posicionamentoProposicao = new PosicionamentoProposicao();
+			posicionamentoProposicao.setPosicionamento(posicionamento);
+			posicionamentoProposicao.setProposicao(proposicao);
+			posicionamentoProposicao.setUsuario(usuario);
+
+			em.persist(posicionamentoProposicao);
+			save(proposicao);
+		}
+	}
+
+	@Override
+	public List<PosicionamentoProposicao> listarHistoricoPosicionamentos(Long id) {
+		TypedQuery<PosicionamentoProposicao> query = em.createQuery(
+				"FROM PosicionamentoProposicao pp WHERE pp.proposicao.id = :id ORDER BY pp.dataCriacao ", PosicionamentoProposicao.class);
+
+		query.setParameter("id", id);
+
+		List<PosicionamentoProposicao> posicionamentosProposicao = query.getResultList();
+		return posicionamentosProposicao;
 	}
 
 	/**
