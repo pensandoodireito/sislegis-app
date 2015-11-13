@@ -7,7 +7,11 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import br.gov.mj.sislegis.app.enumerated.SituacaoSenado;
+import br.gov.mj.sislegis.app.util.SislegisUtil;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 
@@ -75,11 +79,6 @@ public class ReuniaoBeanSenado extends br.gov.mj.sislegis.app.parser.ReuniaoBean
 		return titulo + ":" + tipo + " " + situacao + "@" + data + " " + hora;
 	}
 
-	protected enum Situacao {
-		Encerrada, Realizada, Agendada, Cancelada, Convocada, EmAndamento;
-
-	}
-
 	public Sessao getSessao() {
 		Sessao sessao = new Sessao();
 		try {
@@ -90,25 +89,15 @@ public class ReuniaoBeanSenado extends br.gov.mj.sislegis.app.parser.ReuniaoBean
 		sessao.setIdentificadorExterno(getCodigo().toString());
 		sessao.setTitulo(titulo);
 		situacao = situacao.replaceAll("\\s", "");
-		switch (Situacao.valueOf(situacao)) {
-		case Encerrada:
-			sessao.setSituacao(SituacaoSessao.Realizada);
-			break;
-		case Realizada:
-			sessao.setSituacao(SituacaoSessao.Realizada);
-			break;
-		case Agendada:
-		case EmAndamento:
-			sessao.setSituacao(SituacaoSessao.Agendada);
-			break;
-		case Cancelada:
-			sessao.setSituacao(SituacaoSessao.Cancelada);
-			break;
 
-		default:
+		try {
+			sessao.setSituacao(SituacaoSenado.valueOf(situacao).situacaoSessaoCorrespondente());
+
+		} catch (IllegalArgumentException e) {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Falha ao converter a situacao da Senado: " + situacao, e);
 			sessao.setSituacao(SituacaoSessao.Desconhecido);
-			break;
 		}
+
 		return sessao;
 	}
 
