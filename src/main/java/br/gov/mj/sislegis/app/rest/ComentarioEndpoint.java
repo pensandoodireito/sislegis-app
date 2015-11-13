@@ -20,12 +20,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
+import org.jboss.resteasy.annotations.GZIP;
+
 import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 
 @Path("/comentarios")
+@GZIP
 public class ComentarioEndpoint {
 
 	@Inject
@@ -79,7 +82,7 @@ public class ComentarioEndpoint {
 	@Path("/proposicao/{id:[0-9][0-9]*}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Comentario> findByProposicao(@PathParam("id") Long id) {
-		final List<Comentario> results = comentarioService.findByIdProposicao(id);
+		final List<Comentario> results = comentarioService.findByProposicaoId(id);
 		return results;
 	}
 
@@ -113,7 +116,7 @@ public class ComentarioEndpoint {
 
 	@GET
 	@Path("/ocultar/{id:[0-9][0-9]*}")
-	public Response ocultar(@PathParam("id") Long id){
+	public Response ocultar(@PathParam("id") Long id) {
 		try {
 			comentarioService.ocultar(id);
 		} catch (Exception e) {

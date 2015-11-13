@@ -1,7 +1,17 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
-import br.gov.mj.sislegis.app.model.*;
+import br.gov.mj.sislegis.app.model.AlteracaoProposicao;
+import br.gov.mj.sislegis.app.model.Comentario;
+import br.gov.mj.sislegis.app.model.Comissao;
+import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.Posicionamento;
+import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
+import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Reuniao;
+import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
+import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
+import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.SituacaoSessao;
@@ -17,6 +27,7 @@ import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
+import br.gov.mj.sislegis.app.service.PosicionamentoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.ReuniaoProposicaoService;
 import br.gov.mj.sislegis.app.service.ReuniaoService;
@@ -33,6 +44,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -45,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -89,6 +102,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	@Inject
 	private ComissaoService comissaoService;
 
+	@Inject
+	private PosicionamentoService posicionamentoService;
+
 	@PersistenceContext
 	private EntityManager em;
 
@@ -130,7 +146,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 		String dataIni = Conversores.dateToString(dataInicial, "yyyyMMdd");
 		String dataFim = Conversores.dateToString(dataFinal, "yyyyMMdd");
-		return parserPautaCamara.getPautaComissao(idComissao, dataIni, dataFim);
+		return populaUltimoComentarioDePauta(parserPautaCamara.getPautaComissao(idComissao, dataIni, dataFim));
 	}
 
 	@Override
@@ -151,7 +167,27 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			return parserPlenarioSenado.getProposicoes(dataIni);
 		}
 
-		return parserPautaSenado.getPautaComissao(siglaComissao, dataIni, dataFim);
+		return populaUltimoComentarioDePauta(parserPautaSenado.getPautaComissao(siglaComissao, dataIni, dataFim));
+	}
+
+	private Set<PautaReuniaoComissao> populaUltimoComentarioDePauta(Set<PautaReuniaoComissao> pautas) {
+		for (Iterator<PautaReuniaoComissao> iterator = pautas.iterator(); iterator.hasNext();) {
+			PautaReuniaoComissao pautaReuniaoComissao = (PautaReuniaoComissao) iterator.next();
+			SortedSet<ProposicaoPautaComissao> ppcs = pautaReuniaoComissao.getProposicoesDaPauta();
+			for (Iterator<ProposicaoPautaComissao> iterator2 = ppcs.iterator(); iterator2.hasNext();) {
+				ProposicaoPautaComissao proposicaoPautaComissao = (ProposicaoPautaComissao) iterator2.next();
+				Proposicao proposicaoPauta = proposicaoPautaComissao.getProposicao();
+				List<Comentario> comentarios = comentarioService.findByIdProposicao(proposicaoPauta.getIdProposicao());
+				if (comentarios != null && !comentarios.isEmpty()) {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
+							Level.WARNING,
+							"Proposicao " + proposicaoPauta.getIdProposicao()
+									+ " já existente no siselgis, atualizando comentarios " + comentarios.size());
+					proposicaoPauta.setListaComentario(comentarios);
+				}
+			}
+		}
+		return pautas;
 	}
 
 	@Override
@@ -255,7 +291,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (Objects.nonNull(isFavorita) && !isFavorita.equals("")) {
 			query.append(" AND p.isFavorita = :isFavorita");
 		}
-
+		query.append(" order by tipo,ano,numero");
 		TypedQuery<Proposicao> findByIdQuery = getEntityManager().createQuery(query.toString(), Proposicao.class);
 
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
@@ -273,7 +309,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (Objects.nonNull(isFavorita) && !isFavorita.equals("")) {
 			findByIdQuery.setParameter("isFavorita", new Boolean(isFavorita));
 		}
-
+		
 		List<Proposicao> proposicoes = findByIdQuery.setFirstResult(offset).setMaxResults(limit).getResultList();
 		popularTotalComentariosEncaminhamentos(proposicoes);
 
@@ -298,6 +334,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			// mais antigos do que a criacao dessas entidade, e convertemos na
 			// hora.
 			if (dataReuniao.getTime() < 1446222706000l) {
+
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
 						"Reuniao mais antiga que refactoring, utilizando metodo alternativo");
 				Query query = em.createNativeQuery("select * from reuniaoproposicao r where r.reuniao_id=:rid",
@@ -316,6 +353,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 						ppc.setOrdemPauta(rp.getSeqOrdemPauta());
 						p.getPautasComissoes().add(ppc);
 					}
+					popularTotalComentariosEncaminhamentos(p);
 					proposicoes.add(p);
 
 				}
@@ -327,10 +365,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				query.setParameter("rid", reuniao.getId());
 				List<Proposicao> proposicoesReuniao = query.getResultList();
 				proposicoes.addAll(proposicoesReuniao);
+				popularTotalComentariosEncaminhamentos(proposicoes);
 			}
 
 		}
-		popularTotalComentariosEncaminhamentos(proposicoes);
 
 		return proposicoes;
 	}
@@ -348,7 +386,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			encaminhamentoProposicaoService.deleteById(ep.getId());
 		}
 
-		List<Comentario> listaCom = comentarioService.findByIdProposicao(id);
+		List<Comentario> listaCom = comentarioService.findByProposicaoId(id);
 		for (Iterator<Comentario> iterator = listaCom.iterator(); iterator.hasNext();) {
 			Comentario c = iterator.next();
 			comentarioService.deleteById(c.getId());
@@ -688,6 +726,41 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 		return prcList;
 
+	}
+
+	@Override
+	public void alterarPosicionamento(Long id, Long idPosicionamento, Usuario usuario) {
+		Proposicao proposicao = findById(id);
+
+		// somente executa se o posicionamento for alterado
+		if (proposicao.getPosicionamento() == null || !proposicao.getPosicionamento().getId().equals(idPosicionamento)){
+			Posicionamento posicionamento = null;
+
+			if (idPosicionamento != null){
+				posicionamento = posicionamentoService.findById(idPosicionamento);
+			}
+
+			proposicao.setPosicionamento(posicionamento);
+
+			PosicionamentoProposicao posicionamentoProposicao = new PosicionamentoProposicao();
+			posicionamentoProposicao.setPosicionamento(posicionamento);
+			posicionamentoProposicao.setProposicao(proposicao);
+			posicionamentoProposicao.setUsuario(usuario);
+
+			em.persist(posicionamentoProposicao);
+			save(proposicao);
+		}
+	}
+
+	@Override
+	public List<PosicionamentoProposicao> listarHistoricoPosicionamentos(Long id) {
+		TypedQuery<PosicionamentoProposicao> query = em.createQuery(
+				"FROM PosicionamentoProposicao pp WHERE pp.proposicao.id = :id ORDER BY pp.dataCriacao ", PosicionamentoProposicao.class);
+
+		query.setParameter("id", id);
+
+		List<PosicionamentoProposicao> posicionamentosProposicao = query.getResultList();
+		return posicionamentosProposicao;
 	}
 
 	/**
