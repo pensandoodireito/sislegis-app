@@ -33,6 +33,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -298,6 +299,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			// mais antigos do que a criacao dessas entidade, e convertemos na
 			// hora.
 			if (dataReuniao.getTime() < 1446222706000l) {
+
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
 						"Reuniao mais antiga que refactoring, utilizando metodo alternativo");
 				Query query = em.createNativeQuery("select * from reuniaoproposicao r where r.reuniao_id=:rid",
@@ -316,6 +318,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 						ppc.setOrdemPauta(rp.getSeqOrdemPauta());
 						p.getPautasComissoes().add(ppc);
 					}
+					popularTotalComentariosEncaminhamentos(p);
 					proposicoes.add(p);
 
 				}
@@ -327,10 +330,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				query.setParameter("rid", reuniao.getId());
 				List<Proposicao> proposicoesReuniao = query.getResultList();
 				proposicoes.addAll(proposicoesReuniao);
+				popularTotalComentariosEncaminhamentos(proposicoes);
 			}
 
 		}
-		popularTotalComentariosEncaminhamentos(proposicoes);
 
 		return proposicoes;
 	}
