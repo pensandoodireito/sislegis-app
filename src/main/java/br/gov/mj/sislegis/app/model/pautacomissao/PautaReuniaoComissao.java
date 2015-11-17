@@ -187,7 +187,7 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 		switch (origem) {
 		case CAMARA:
 			try {
-				situacao = situacao.replace("(Final)", "").trim();
+				situacao = situacao.replaceAll("\\(\\w+\\)", "").trim();
 				setSituacao(SituacaoCamara.valueOf(situacao).situacaoSessaoCorrespondente());
 
 			} catch (IllegalArgumentException e) {
@@ -211,7 +211,7 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(comissao);
-		sb.append(" Código:{").append(codigoReuniao).append("}").append(" contém ").append(proposicoesDaPauta.size())
+		sb.append(" Código:{").append(codigoReuniao).append("}").append(getSituacao()).append(" contém ").append(proposicoesDaPauta.size())
 				.append(" proposicoes na pauta");
 		return sb.toString();
 	}

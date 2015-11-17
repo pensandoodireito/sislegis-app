@@ -647,13 +647,13 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				if (Objects.equals(prcRemoto.getCodigoReuniao(), prcLocal.getCodigoReuniao())) {
 					if (checadorAlteracoesPautaReuniao.compare(prcLocal, prcRemoto) > 0) {
 						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
-								"encontrou diferencas " + prcLocal + " e " + prcRemoto);
+								"encontrou diferencas nas pautas " + prcLocal + " e " + prcRemoto);
 						savePautaReuniaoComissao(prcLocal);
 						retorno = true;
 
 					} else {
-						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
-								"nenhuma diferenca encontrada entre " + prcLocal + " e " + prcRemoto);
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.ALL,
+								"nenhuma diferenca encontrada entre pautas " + prcLocal + " e " + prcRemoto);
 					}
 
 					for (ProposicaoPautaComissao ppcLocal : prcLocal.getProposicoesDaPauta()) {
@@ -662,12 +662,14 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 									.getIdProposicao())) {
 
 								if (checadorAlteracoesPauta.compare(ppcLocal, ppcRemoto) > 0) {
-									Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
-											"encontrou diferencas " + ppcLocal + " e " + ppcRemoto);
+									Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER)
+											.log(Level.FINE,
+													"encontrou diferencas em proposicao da pauta "
+															+ ppcLocal.getProposicaoId());
 									em.merge(ppcLocal);
 									retorno = true;
 								} else {
-									Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+									Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.ALL,
 											"nenhuma diferenca encontrada entre " + ppcLocal + " e " + ppcRemoto);
 								}
 								break;
@@ -680,7 +682,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			return retorno;
 
 		} catch (Exception e) {
-			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
 					"Falhou ao sincronizar pautaReuniaoComissao " + prcLocal, e);
 		}
 

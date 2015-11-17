@@ -65,7 +65,7 @@ public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService {
 	}
 
 	@Override
-	@Schedule(dayOfWeek = "*", hour = "*", minute="*", persistent = false, info = "Atualiza pautas das reunioes passadas e suas proposicoes")
+	@Schedule(dayOfWeek = "*", hour = "*", minute="*/10", persistent = false, info = "Atualiza pautas das reunioes passadas e suas proposicoes")
 	public void atualizaPautaReuniaoEProposicoes() {
 		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Atualiza pautas das reunioes anteriores e suas proposicoes");
 
@@ -76,7 +76,7 @@ public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService {
 				if (proposicaoService.syncDadosPautaReuniaoComissao(prcLocal)){
 					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Dados da pauta Reuniao e/ou Proposicao alterados");
 				} else{
-					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Dados pauta Reuniao e/ou Proposicao sem alteracao");
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).finest("Dados pauta Reuniao e/ou Proposicao sem alteracao");
 				}
 
 			} catch (IOException e) {
