@@ -1,7 +1,9 @@
 package br.gov.mj.sislegis.app.model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
@@ -33,9 +35,11 @@ import org.apache.commons.collections.CollectionUtils;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
+import br.gov.mj.sislegis.app.rest.serializers.CompactSetProposicaoSerializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
 //@formatter:off
@@ -130,7 +134,7 @@ public class Proposicao extends AbstractEntity {
 	private Set<TagProposicao> tags;
 
 	@Transient
-	private Set<Comentario> listaComentario = new HashSet<>();
+	private List<Comentario> listaComentario = new ArrayList<>();
 
 	@Transient
 	private Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao = new HashSet<>();
@@ -285,11 +289,11 @@ public class Proposicao extends AbstractEntity {
 		this.posicao = posicionamento;
 	}
 
-	public Set<Comentario> getListaComentario() {
+	public List<Comentario> getListaComentario() {
 		return this.listaComentario;
 	}
 
-	public void setListaComentario(final Set<Comentario> listaComentario) {
+	public void setListaComentario(final List<Comentario> listaComentario) {
 		this.listaComentario = listaComentario;
 	}
 
@@ -355,10 +359,12 @@ public class Proposicao extends AbstractEntity {
 		this.totalEncaminhamentos = totalEncaminhamentos;
 	}
 
+	@JsonSerialize(using = CompactSetProposicaoSerializer.class)
 	public Set<Proposicao> getProposicoesPai() {
 		return proposicoesPai;
 	}
 
+	@JsonSerialize(using = CompactSetProposicaoSerializer.class)
 	public Set<Proposicao> getProposicoesFilha() {
 		return proposicoesFilha;
 	}
