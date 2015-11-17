@@ -14,7 +14,6 @@ import javax.inject.Inject;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
-import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.service.AutoUpdateProposicaoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.UsuarioService;
@@ -66,7 +65,7 @@ public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService {
 	}
 
 	@Override
-	@Schedule(dayOfWeek = "*", hour = "4", persistent = false, info = "Atualiza pautas das reunioes passadas e suas proposicoes")
+	@Schedule(dayOfWeek = "*", hour = "*", minute="*", persistent = false, info = "Atualiza pautas das reunioes passadas e suas proposicoes")
 	public void atualizaPautaReuniaoEProposicoes() {
 		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Atualiza pautas das reunioes anteriores e suas proposicoes");
 

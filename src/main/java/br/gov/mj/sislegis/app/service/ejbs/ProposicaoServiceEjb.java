@@ -1,5 +1,31 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.AlteracaoProposicao;
 import br.gov.mj.sislegis.app.model.Comentario;
@@ -31,36 +57,9 @@ import br.gov.mj.sislegis.app.service.PosicionamentoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.ReuniaoProposicaoService;
 import br.gov.mj.sislegis.app.service.ReuniaoService;
-import br.gov.mj.sislegis.app.service.TagService;
 import br.gov.mj.sislegis.app.service.UsuarioService;
 import br.gov.mj.sislegis.app.util.Conversores;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
-
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @Stateless
 public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> implements ProposicaoService,
@@ -92,9 +91,6 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	@Inject
 	private EncaminhamentoProposicaoService encaminhamentoProposicaoService;
-
-	@Inject
-	private TagService tagService;
 
 	@Inject
 	private UsuarioService usuarioService;
@@ -245,22 +241,6 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 	}
 
-	private ReuniaoProposicao getReuniaoProposicao(Reuniao reuniao, Proposicao proposicaoFromBusca,
-			Proposicao proposicao) {
-		ReuniaoProposicao rp = new ReuniaoProposicao();
-		ReuniaoProposicaoPK reuniaoProposicaoPK = new ReuniaoProposicaoPK();
-		reuniaoProposicaoPK.setIdReuniao(reuniao.getId());
-		reuniaoProposicaoPK.setIdProposicao(proposicao.getId());
-
-		rp.setReuniaoProposicaoPK(reuniaoProposicaoPK);
-		rp.setSiglaComissao(proposicaoFromBusca.getComissao());
-		rp.setSeqOrdemPauta(proposicaoFromBusca.getSeqOrdemPauta());
-		rp.setLinkPauta(proposicaoFromBusca.getLinkPauta());
-		rp.setReuniao(reuniao);
-		rp.setProposicao(proposicao);
-		return rp;
-	}
-
 	public boolean isNull(Object obj) {
 		return obj == null ? true : false;
 	}
@@ -309,7 +289,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (Objects.nonNull(isFavorita) && !isFavorita.equals("")) {
 			findByIdQuery.setParameter("isFavorita", new Boolean(isFavorita));
 		}
-		
+
 		List<Proposicao> proposicoes = findByIdQuery.setFirstResult(offset).setMaxResults(limit).getResultList();
 		popularTotalComentariosEncaminhamentos(proposicoes);
 
@@ -647,8 +627,6 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 			switch (prcLocal.getOrigem()) {
 
-			// TODO Rever as datas a serem utilizadas
-
 			case CAMARA:
 				prcRemotoList = buscarProposicoesPautaCamaraWS(comissao.getId(), prcLocal.getData(), prcLocal.getData());
 				break;
@@ -712,14 +690,13 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	@Override
 	public List<PautaReuniaoComissao> findPautaReuniaoPendentes() {
 
-		// TODO verificar as condicoes pendentes corretas
-
 		List<SituacaoSessao> situacoesEmAberto = new ArrayList<>();
 		situacoesEmAberto.add(SituacaoSessao.Agendada);
 		situacoesEmAberto.add(SituacaoSessao.Desconhecido);
 
 		Query q = em.createNamedQuery("findPendentes", PautaReuniaoComissao.class);
 		q.setParameter("situacoesEmAberto", situacoesEmAberto);
+		q.setParameter("date", new Date());
 		q.setMaxResults(200);
 
 		List<PautaReuniaoComissao> prcList = q.getResultList();
@@ -733,10 +710,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		Proposicao proposicao = findById(id);
 
 		// somente executa se o posicionamento for alterado
-		if (proposicao.getPosicionamento() == null || !proposicao.getPosicionamento().getId().equals(idPosicionamento)){
+		if (proposicao.getPosicionamento() == null || !proposicao.getPosicionamento().getId().equals(idPosicionamento)) {
 			Posicionamento posicionamento = null;
 
-			if (idPosicionamento != null){
+			if (idPosicionamento != null) {
 				posicionamento = posicionamentoService.findById(idPosicionamento);
 			}
 
@@ -755,7 +732,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	@Override
 	public List<PosicionamentoProposicao> listarHistoricoPosicionamentos(Long id) {
 		TypedQuery<PosicionamentoProposicao> query = em.createQuery(
-				"FROM PosicionamentoProposicao pp WHERE pp.proposicao.id = :id ORDER BY pp.dataCriacao ", PosicionamentoProposicao.class);
+				"FROM PosicionamentoProposicao pp WHERE pp.proposicao.id = :id ORDER BY pp.dataCriacao ",
+				PosicionamentoProposicao.class);
 
 		query.setParameter("id", id);
 

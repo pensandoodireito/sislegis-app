@@ -8,6 +8,7 @@ import br.gov.mj.sislegis.app.model.pautacomissao.SituacaoSessao;
 public enum SituacaoCamara {
     Encerrada,
     Convocada,
+    Cancelada,
     EmAndamento;
 
     public SituacaoSessao situacaoSessaoCorrespondente(){
@@ -17,6 +18,8 @@ public enum SituacaoCamara {
             case Convocada:
             case EmAndamento:
                 return SituacaoSessao.Agendada;
+            case Cancelada:
+            	return SituacaoSessao.Cancelada;
             default:
                 return SituacaoSessao.Desconhecido;
         }
