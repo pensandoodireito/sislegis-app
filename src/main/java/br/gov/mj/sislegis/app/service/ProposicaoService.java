@@ -139,4 +139,8 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @return
 	 */
 	List<PosicionamentoProposicao> listarHistoricoPosicionamentos(Long id);
+
+//	void adicionarTag(Long id, String tagId);
+//
+//	void removerTag(Long id, String tagId);
 }

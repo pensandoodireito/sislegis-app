@@ -20,7 +20,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import br.gov.mj.sislegis.app.json.DropdownMultiselectStringJSON;
-import br.gov.mj.sislegis.app.json.TagJSON;
 import br.gov.mj.sislegis.app.model.Tag;
 import br.gov.mj.sislegis.app.service.TagService;
 
@@ -62,7 +61,7 @@ public class TagEndpoint {
 	@GET
 	@Path("/listarTodos")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<TagJSON> listAll() {
+	public List<Tag> listAll() {
 		return tagService.listarTodasTags();
 	}
 	
@@ -91,9 +90,9 @@ public class TagEndpoint {
 	@Path("/listAllDropdownMultiple")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<DropdownMultiselectStringJSON> listAllDropdownMultiple() {
-		final List<TagJSON> results = tagService.listarTodasTags();
+		final List<Tag> results = tagService.listarTodasTags();
 		List<DropdownMultiselectStringJSON> listaDropdownMultiselectJSON = new ArrayList<DropdownMultiselectStringJSON>();
-		for(TagJSON tag:results){
+		for(Tag tag:results){
 			DropdownMultiselectStringJSON dropdownMultiselectJSON = new DropdownMultiselectStringJSON();
 			dropdownMultiselectJSON.setLabel(tag.getTag());
 			dropdownMultiselectJSON.setId(tag.getTag());

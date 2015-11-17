@@ -130,8 +130,11 @@ public class Proposicao extends AbstractEntity {
 	@OrderBy("pautaReuniaoComissao")
 	private SortedSet<ProposicaoPautaComissao> pautasComissoes = new TreeSet<ProposicaoPautaComissao>();
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "proposicao")
-	private Set<TagProposicao> tags;
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+	@JoinTable(name = "tagproposicao",
+			joinColumns = {@JoinColumn(name = "proposicao_id", referencedColumnName = "id")},
+			inverseJoinColumns = {@JoinColumn(name = "tag_id", referencedColumnName = "id")})
+	private List<Tag> tags;
 
 	@Transient
 	private List<Comentario> listaComentario = new ArrayList<>();
@@ -305,11 +308,11 @@ public class Proposicao extends AbstractEntity {
 		this.listaEncaminhamentoProposicao = listaEncaminhamentoProposicao;
 	}
 
-	public Set<TagProposicao> getTags() {
+	public List<Tag> getTags() {
 		return tags;
 	}
 
-	public void setTags(Set<TagProposicao> tags) {
+	public void setTags(List<Tag> tags) {
 		this.tags = tags;
 	}
 

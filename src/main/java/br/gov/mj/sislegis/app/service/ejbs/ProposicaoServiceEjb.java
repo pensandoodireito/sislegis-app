@@ -1,17 +1,7 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
-import br.gov.mj.sislegis.app.model.AlteracaoProposicao;
-import br.gov.mj.sislegis.app.model.Comentario;
-import br.gov.mj.sislegis.app.model.Comissao;
-import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
-import br.gov.mj.sislegis.app.model.Posicionamento;
-import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
-import br.gov.mj.sislegis.app.model.Proposicao;
-import br.gov.mj.sislegis.app.model.Reuniao;
-import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
-import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
-import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.model.*;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.SituacaoSessao;
@@ -762,6 +752,31 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		List<PosicionamentoProposicao> posicionamentosProposicao = query.getResultList();
 		return posicionamentosProposicao;
 	}
+
+//	@Override
+//	public void adicionarTag(Long id, String tagId) {
+//		Proposicao proposicao = findById(id);
+//		Tag tag = tagService.findById(tagId);
+//		if (proposicao != null && tag != null){
+//			TagProposicao tagProposicao = new TagProposicao();
+//			tagProposicao.setProposicao(proposicao);
+//			tagProposicao.setTag(tag);
+//			TagProposicaoPK tagProposicaoPK = new TagProposicaoPK();
+//			tagProposicaoPK.setIdProposicao(id);
+//			tagProposicaoPK.setTag(tagId);
+//			tagProposicao.setTagProposicaoPK(tagProposicaoPK);
+//			em.persist(tagProposicao);
+//		}
+//	}
+//
+//	@Override
+//	public void removerTag(Long id, String tagId) {
+//		Proposicao proposicao = findById(id);
+//		for (Tag tag : proposicao.getTags()){
+//
+//		}
+//
+//	}
 
 	/**
 	 * Este comparador checa por alterações na proposição.
