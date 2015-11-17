@@ -8,21 +8,21 @@ public class TagJSON implements Serializable {
 
 	public TagJSON(String tag){
 		this.id = tag.hashCode();
-		this.tag =tag;
+		this.text=tag;
 	}
 	
 	private Number id;
 	
 	public TagJSON(){}
 	
-	private String tag;
+	private String text;
 	
-	public String getTag() {
-		return tag;
+	public String getText() {
+		return text;
 	}
 
-	public void setTag(String tag) {
-		this.tag = tag;
+	public void setText(String text) {
+		this.text = text;
 	}
 
 	public Number getId() {
