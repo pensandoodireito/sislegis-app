@@ -1,18 +1,13 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import br.gov.mj.sislegis.app.model.Tag;
+import br.gov.mj.sislegis.app.service.AbstractPersistence;
+import br.gov.mj.sislegis.app.service.TagService;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-
-import br.gov.mj.sislegis.app.json.TagJSON;
-import br.gov.mj.sislegis.app.model.Tag;
-import br.gov.mj.sislegis.app.model.TagProposicao;
-import br.gov.mj.sislegis.app.service.AbstractPersistence;
-import br.gov.mj.sislegis.app.service.TagService;
+import java.util.List;
 
 @Stateless
 public class TagServiceEjb extends AbstractPersistence<Tag, Long>
@@ -31,31 +26,19 @@ implements TagService{
 	}
 
 	@Override
-	public List<TagJSON> listarTodasTags() {
-		List<TagJSON> listaTagsJson = populaListaTagsJSON(listAll());
-		return listaTagsJson;
+	public Tag findById(String id) {
+		return findByProperty("tag", id);
+	}
+
+	@Override
+	public List<Tag> listarTodasTags() {
+		return listAll();
 	}
 	
 	@Override
-	public List<TagJSON> buscaPorSufixo(String sufixo) {
+	public List<Tag> buscaPorSufixo(String sufixo) {
 		List<Tag> lista = findByProperty("tag", sufixo, "ASC");
-		return populaListaTagsJSON(lista);
-	}
-
-	public List<TagJSON> populaListaTagsJSON(Collection<Tag> listaTags) {
-		List<TagJSON> listaTagsJson = new ArrayList<TagJSON>();
-		for(Tag tag :listaTags){
-			listaTagsJson.add(new TagJSON(tag.toString()));
-		}
-		return listaTagsJson;
-	}
-	
-	public List<TagJSON> populaListaTagsProposicaoJSON(Collection<TagProposicao> listaTags) {
-		List<TagJSON> listaTagsJson = new ArrayList<TagJSON>();
-		for(TagProposicao tp :listaTags){
-			listaTagsJson.add(new TagJSON(tp.getTag().toString()));
-		}
-		return listaTagsJson;
+		return lista;
 	}
 
 }

@@ -133,8 +133,11 @@ public class Proposicao extends AbstractEntity {
 	@OrderBy("pautaReuniaoComissao")
 	private SortedSet<ProposicaoPautaComissao> pautasComissoes = new TreeSet<ProposicaoPautaComissao>();
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "proposicao")
-	private Set<TagProposicao> tags;
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+	@JoinTable(name = "tagproposicao",
+			joinColumns = {@JoinColumn(name = "proposicao_id", referencedColumnName = "id")},
+			inverseJoinColumns = {@JoinColumn(name = "tag_id", referencedColumnName = "id")})
+	private List<Tag> tags;
 
 	@Transient
 	private List<Comentario> listaComentario = new ArrayList<>();
@@ -322,6 +325,14 @@ public class Proposicao extends AbstractEntity {
 		this.listaEncaminhamentoProposicao = listaEncaminhamentoProposicao;
 	}
 
+	public List<Tag> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<Tag> tags) {
+		this.tags = tags;
+	}
+
 	public List<ProposicaoPautaComissao> getListaPautasComissao() {
 		return listaPautasComissao;
 	}
@@ -329,15 +340,7 @@ public class Proposicao extends AbstractEntity {
 	public void setListaPautasComissao(List<ProposicaoPautaComissao> listaPautasComissao) {
 		this.listaPautasComissao = listaPautasComissao;
 	}
-
-	public Set<TagProposicao> getTags() {
-		return tags;
-	}
-
-	public void setTags(Set<TagProposicao> tags) {
-		this.tags = tags;
-	}
-
+	
 	public Usuario getResponsavel() {
 		return responsavel;
 	}

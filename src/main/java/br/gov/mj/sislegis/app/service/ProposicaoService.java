@@ -139,4 +139,5 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @return
 	 */
 	List<PosicionamentoProposicao> listarHistoricoPosicionamentos(Long id);
+
 }
