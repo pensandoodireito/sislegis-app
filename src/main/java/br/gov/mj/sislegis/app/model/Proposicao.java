@@ -120,8 +120,11 @@ public class Proposicao extends AbstractEntity {
 	@Transient
 	private String linkPauta;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	private Posicionamento posicao;
+	@Transient
+	private Posicionamento posicionamento;
+
+	@Transient
+	private Boolean posicionamentoPreliminar;
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	private Usuario responsavel;
@@ -288,11 +291,19 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public Posicionamento getPosicionamento() {
-		return posicao;
+		return posicionamento;
 	}
 
 	public void setPosicionamento(Posicionamento posicionamento) {
-		this.posicao = posicionamento;
+		this.posicionamento = posicionamento;
+	}
+
+	public Boolean isPosicionamentoPreliminar() {
+		return posicionamentoPreliminar;
+	}
+
+	public void setPosicionamentoPreliminar(Boolean posicionamentoPreliminar) {
+		this.posicionamentoPreliminar = posicionamentoPreliminar;
 	}
 
 	public List<Comentario> getListaComentario() {
