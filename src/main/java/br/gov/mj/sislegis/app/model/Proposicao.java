@@ -139,6 +139,9 @@ public class Proposicao extends AbstractEntity {
 	@Transient
 	private Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao = new HashSet<>();
 
+	@Transient
+	private List<ProposicaoPautaComissao> listaPautasComissao = new ArrayList<>();
+
 	@Column(nullable = false)
 	private boolean isFavorita;
 
@@ -151,6 +154,9 @@ public class Proposicao extends AbstractEntity {
 
 	@Transient
 	private Integer totalEncaminhamentos = 0;
+
+	@Transient
+	private Integer totalPautasComissao = 0;
 
 	@ManyToMany(fetch = FetchType.EAGER, mappedBy = "proposicoesFilha")
 	private Set<Proposicao> proposicoesPai;
@@ -305,6 +311,14 @@ public class Proposicao extends AbstractEntity {
 		this.listaEncaminhamentoProposicao = listaEncaminhamentoProposicao;
 	}
 
+	public List<ProposicaoPautaComissao> getListaPautasComissao() {
+		return listaPautasComissao;
+	}
+
+	public void setListaPautasComissao(List<ProposicaoPautaComissao> listaPautasComissao) {
+		this.listaPautasComissao = listaPautasComissao;
+	}
+
 	public Set<TagProposicao> getTags() {
 		return tags;
 	}
@@ -357,6 +371,17 @@ public class Proposicao extends AbstractEntity {
 
 	public void setTotalEncaminhamentos(Integer totalEncaminhamentos) {
 		this.totalEncaminhamentos = totalEncaminhamentos;
+	}
+
+	public Integer getTotalPautasComissao() {
+		if (CollectionUtils.isNotEmpty(listaPautasComissao)){
+			totalPautasComissao = listaPautasComissao.size();
+		}
+		return totalPautasComissao;
+	}
+
+	public void setTotalPautasComissao(Integer totalPautasComissao) {
+		this.totalPautasComissao = totalPautasComissao;
 	}
 
 	@JsonSerialize(using = CompactSetProposicaoSerializer.class)
