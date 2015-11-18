@@ -47,6 +47,7 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -856,10 +857,19 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	}
 
+	private Integer totalProposicaoPautaComissaoByProposicao(Long idProposicao){
+		Query query = em
+				.createNativeQuery("SELECT COUNT(1) FROM proposicao_pautacomissao WHERE proposicaoid = :idProposicao ");
+		query.setParameter("idProposicao", idProposicao);
+		BigInteger total = (BigInteger) query.getSingleResult();
+		return total.intValue();
+	}
+
 	private void popularDadosTransientes(Proposicao proposicao){
 		if (proposicao != null) {
 			proposicao.setTotalComentarios(comentarioService.totalByProposicao(proposicao.getId()));
 			proposicao.setTotalEncaminhamentos(encaminhamentoProposicaoService.totalByProposicao(proposicao.getId()));
+			proposicao.setTotalPautasComissao(totalProposicaoPautaComissaoByProposicao(proposicao.getId()));
 
 			PosicionamentoProposicao posicionamentoProposicao;
 			try {
