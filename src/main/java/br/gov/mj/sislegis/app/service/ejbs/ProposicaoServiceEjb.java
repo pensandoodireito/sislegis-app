@@ -22,6 +22,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
@@ -60,6 +61,7 @@ import br.gov.mj.sislegis.app.service.ReuniaoService;
 import br.gov.mj.sislegis.app.service.UsuarioService;
 import br.gov.mj.sislegis.app.util.Conversores;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
+
 
 @Stateless
 public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> implements ProposicaoService,
@@ -248,7 +250,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	@Override
 	public List<Proposicao> listarTodos() {
 		List<Proposicao> proposicoes = listAll();
-		popularTotalComentariosEncaminhamentos(proposicoes);
+		popularDadosTransientes(proposicoes);
 		return proposicoes;
 	}
 
@@ -291,7 +293,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 
 		List<Proposicao> proposicoes = findByIdQuery.setFirstResult(offset).setMaxResults(limit).getResultList();
-		popularTotalComentariosEncaminhamentos(proposicoes);
+		popularDadosTransientes(proposicoes);
 
 		return proposicoes;
 	}
@@ -300,7 +302,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	public Proposicao buscarPorId(Integer id) {
 		Proposicao proposicao = findById(id.longValue());
 		if (proposicao != null) {
-			popularTotalComentariosEncaminhamentos(proposicao);
+			popularDadosTransientes(proposicao);
 		}
 		return proposicao;
 	}
@@ -333,9 +335,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 						ppc.setOrdemPauta(rp.getSeqOrdemPauta());
 						p.getPautasComissoes().add(ppc);
 					}
-					popularTotalComentariosEncaminhamentos(p);
+					popularDadosTransientes(p);
 					proposicoes.add(p);
-
 				}
 			} else {
 				Query query = em
@@ -345,7 +346,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				query.setParameter("rid", reuniao.getId());
 				List<Proposicao> proposicoesReuniao = query.getResultList();
 				proposicoes.addAll(proposicoesReuniao);
-				popularTotalComentariosEncaminhamentos(proposicoes);
+				popularDadosTransientes(proposicoes);
 			}
 
 		}
@@ -382,7 +383,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				Proposicao.class);
 		query.setParameter("sigla", "%" + sufixo + "%");
 		List<Proposicao> proposicoes = query.getResultList();
-		popularTotalComentariosEncaminhamentos(proposicoes);
+		popularDadosTransientes(proposicoes);
 		return proposicoes;
 	}
 
@@ -708,7 +709,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public void alterarPosicionamento(Long id, Long idPosicionamento, Usuario usuario) {
+	public void alterarPosicionamento(Long id, Long idPosicionamento, boolean preliminar, Usuario usuario) {
 		Proposicao proposicao = findById(id);
 
 		// somente executa se o posicionamento for alterado
@@ -724,6 +725,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			PosicionamentoProposicao posicionamentoProposicao = new PosicionamentoProposicao();
 			posicionamentoProposicao.setPosicionamento(posicionamento);
 			posicionamentoProposicao.setProposicao(proposicao);
+			posicionamentoProposicao.setPreliminar(preliminar);
 			posicionamentoProposicao.setUsuario(usuario);
 
 			em.persist(posicionamentoProposicao);
@@ -836,16 +838,36 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	}
 
-	private void popularTotalComentariosEncaminhamentos(Proposicao proposicao) {
+	private void popularDadosTransientes(Proposicao proposicao){
 		if (proposicao != null) {
 			proposicao.setTotalComentarios(comentarioService.totalByProposicao(proposicao.getId()));
 			proposicao.setTotalEncaminhamentos(encaminhamentoProposicaoService.totalByProposicao(proposicao.getId()));
+
+			PosicionamentoProposicao posicionamentoProposicao;
+			try {
+				TypedQuery<PosicionamentoProposicao> query = em.createQuery(
+                        "FROM PosicionamentoProposicao WHERE proposicao.id = :id ORDER BY dataCriacao DESC ", PosicionamentoProposicao.class);
+
+				query.setParameter("id", proposicao.getId());
+				query.setMaxResults(1);
+
+				posicionamentoProposicao = query.getSingleResult();
+			} catch (NoResultException e) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+						"Nenhum posicionamento encontrado no historico, para a proposicao id: " + proposicao.getId());
+				posicionamentoProposicao = null;
+			}
+
+			if (posicionamentoProposicao != null) {
+				proposicao.setPosicionamento(posicionamentoProposicao.getPosicionamento());
+				proposicao.setPosicionamentoPreliminar(posicionamentoProposicao.isPreliminar());
+			}
 		}
 	}
 
-	private void popularTotalComentariosEncaminhamentos(List<Proposicao> proposicoes) {
+	private void popularDadosTransientes(List<Proposicao> proposicoes){
 		for (Proposicao proposicao : proposicoes) {
-			popularTotalComentariosEncaminhamentos(proposicao);
+			popularDadosTransientes(proposicao);
 		}
 	}
 

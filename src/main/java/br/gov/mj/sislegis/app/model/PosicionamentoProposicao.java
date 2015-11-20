@@ -35,6 +35,9 @@ public class PosicionamentoProposicao extends AbstractEntity{
     @Temporal(TemporalType.TIMESTAMP)
     private Date dataCriacao = new Date();
 
+    @Column
+    private Boolean preliminar = false;
+
     @Override
     public Long getId() {
         return id;
@@ -74,5 +77,13 @@ public class PosicionamentoProposicao extends AbstractEntity{
 
     public void setDataCriacao(Date dataCriacao) {
         this.dataCriacao = dataCriacao;
+    }
+
+    public Boolean isPreliminar() {
+        return preliminar;
+    }
+
+    public void setPreliminar(Boolean preliminar) {
+        this.preliminar = preliminar;
     }
 }
