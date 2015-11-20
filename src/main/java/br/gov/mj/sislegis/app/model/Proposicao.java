@@ -120,8 +120,11 @@ public class Proposicao extends AbstractEntity {
 	@Transient
 	private String linkPauta;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	private Posicionamento posicao;
+	@Transient
+	private Posicionamento posicionamento;
+
+	@Transient
+	private Boolean posicionamentoPreliminar;
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	private Usuario responsavel;
@@ -130,8 +133,11 @@ public class Proposicao extends AbstractEntity {
 	@OrderBy("pautaReuniaoComissao")
 	private SortedSet<ProposicaoPautaComissao> pautasComissoes = new TreeSet<ProposicaoPautaComissao>();
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "proposicao")
-	private Set<TagProposicao> tags;
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+	@JoinTable(name = "tagproposicao",
+			joinColumns = {@JoinColumn(name = "proposicao_id", referencedColumnName = "id")},
+			inverseJoinColumns = {@JoinColumn(name = "tag_id", referencedColumnName = "id")})
+	private List<Tag> tags;
 
 	@Transient
 	private List<Comentario> listaComentario = new ArrayList<>();
@@ -282,11 +288,19 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public Posicionamento getPosicionamento() {
-		return posicao;
+		return posicionamento;
 	}
 
 	public void setPosicionamento(Posicionamento posicionamento) {
-		this.posicao = posicionamento;
+		this.posicionamento = posicionamento;
+	}
+
+	public Boolean isPosicionamentoPreliminar() {
+		return posicionamentoPreliminar;
+	}
+
+	public void setPosicionamentoPreliminar(Boolean posicionamentoPreliminar) {
+		this.posicionamentoPreliminar = posicionamentoPreliminar;
 	}
 
 	public List<Comentario> getListaComentario() {
@@ -305,11 +319,11 @@ public class Proposicao extends AbstractEntity {
 		this.listaEncaminhamentoProposicao = listaEncaminhamentoProposicao;
 	}
 
-	public Set<TagProposicao> getTags() {
+	public List<Tag> getTags() {
 		return tags;
 	}
 
-	public void setTags(Set<TagProposicao> tags) {
+	public void setTags(List<Tag> tags) {
 		this.tags = tags;
 	}
 
