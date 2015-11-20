@@ -165,6 +165,6 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 	@Override
 	public String toString() {
 
-		return proposicaoId + ":" + pautaReuniaoComissaoId + "@" + super.hashCode();
+		return proposicaoId + ":" + pautaReuniaoComissaoId + " (" + resultado + ")@" + super.hashCode();
 	}
 }

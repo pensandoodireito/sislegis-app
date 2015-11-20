@@ -116,9 +116,16 @@ public class Materia {
 			p.setAutor(autoria.Autor.getDescricao());
 		}
 		p.setOrigem(Origem.SENADO);
+		p.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate=" + p.getIdProposicao());
 		if (situacaoAtual == null) {
 			if (situacoes == null || situacoes.situacao == null) {
-				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINEST, "Nao carregou a situacao atual ");
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINEST,
+						"Nao carregou a situacao atual " + p.getLinkProposicao());
+			} else {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
+						Level.FINEST,
+						"Nao carregou a situacao atual mas situacao foi carregada " + situacoes + " "
+								+ situacoes.situacao);
 			}
 		} else if (situacaoAtual.autuacoes == null) {
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER)
@@ -136,8 +143,6 @@ public class Materia {
 			p.setEmenta(ementa);
 		}
 
-		p.setOrigem(Origem.SENADO);
-		p.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate=" + p.getIdProposicao());
 		return p;
 
 	}

@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -34,6 +38,7 @@ public class ParserFetcher {
 	}
 
 	public static void fetchXStream(String wsURL, XStream xstream, Object object) throws IOException {
+		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.ALL, wsURL);
 		InputStream in = null;
 
 		try {

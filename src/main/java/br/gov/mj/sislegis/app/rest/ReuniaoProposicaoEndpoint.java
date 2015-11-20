@@ -1,5 +1,6 @@
 package br.gov.mj.sislegis.app.rest;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -12,12 +13,15 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
 import br.gov.mj.sislegis.app.service.ReuniaoProposicaoService;
+import br.gov.mj.sislegis.app.service.ReuniaoService;
 
 @Path("/reuniaoProposicao")
 public class ReuniaoProposicaoEndpoint {
@@ -25,6 +29,8 @@ public class ReuniaoProposicaoEndpoint {
 	@Inject
 	private ReuniaoProposicaoService service;
 	
+	@Inject 
+	private ReuniaoService reuniaoService;
 	
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -36,9 +42,10 @@ public class ReuniaoProposicaoEndpoint {
 	}
 	
 	@DELETE
-	@Path("/{idReuniao:[0-9][0-9]*}/{idProposicao:[0-9][0-9]*}")
-	public Response deleteById(@PathParam("idReuniao") Long idReuniao, @PathParam("idProposicao") Long idProposicao) {
-		service.deleteById(idReuniao, idProposicao);
+	@Path("/{idProposicao:[0-9][0-9]*}")
+	public Response deleteById(@QueryParam("data") Date data, @PathParam("idProposicao") Long idProposicao) {
+		Reuniao reuniao = reuniaoService.buscaReuniaoPorData(data);
+		service.deleteById(reuniao.getId(), idProposicao);
 		return Response.noContent().build();
 	}
 

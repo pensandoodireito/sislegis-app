@@ -302,7 +302,7 @@ public class ProposicaoEndpoint {
 		try {
 			Usuario usuarioLogado = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
 			proposicaoService.alterarPosicionamento(posicionamentoProposicaoWrapper.getId(),
-					posicionamentoProposicaoWrapper.getIdPosicionamento(), usuarioLogado);
+					posicionamentoProposicaoWrapper.getIdPosicionamento(), posicionamentoProposicaoWrapper.preliminar, usuarioLogado);
 			return Response.ok().build();
 
 		} catch (Exception e) {
