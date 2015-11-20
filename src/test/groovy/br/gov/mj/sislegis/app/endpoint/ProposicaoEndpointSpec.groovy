@@ -1,11 +1,12 @@
 package br.gov.mj.sislegis.app.endpoint
 
+import groovyx.net.http.ContentType
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
 
 class ProposicaoEndpointSpec extends Specification{
 
-    def token = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJkZTgxMmRmNi0zYWM1LTQ0ZDEtOTMxNC1mYjJhOGNhNDk1MzQiLCJleHAiOjE0NDc0NDczNzgsIm5iZiI6MCwiaWF0IjoxNDQ3NDQ3MDc4LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2F1dGgvcmVhbG1zL3Npc2xlZ2lzIiwiYXVkIjoic2lzbGVnaXMiLCJzdWIiOiJkZjFiMDE5My03ZDc2LTRmMTUtYWFlNy1hY2NlNzY2ZjA2N2MiLCJhenAiOiJzaXNsZWdpcyIsInNlc3Npb25fc3RhdGUiOiJkNzMyM2FkMC0zYzM4LTQzMDItOTBkZi1jYzgyY2Q3MjIwZWMiLCJjbGllbnRfc2Vzc2lvbiI6IjZkYjU4M2MzLTA2MzEtNDU1NC1hYWVhLTM1NGVlNTEwNGFlNyIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vc2lzbGVnaXMubG9jYWwiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50Iiwidmlldy1wcm9maWxlIl19fSwibmFtZSI6Ikd1c3Rhdm8gRGVsZ2FkbyIsInByZWZlcnJlZF91c2VybmFtZSI6Imd1c3Rhdm8iLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiRGVsZ2FkbyIsImVtYWlsIjoiZ2NkZWxnYWRvQGdtYWlsLmNvbSJ9.MN1zxKLobtcaBUTvGmO1Ke4LuxP-5wI5NiSdBdNyImag0NN1kYvyC91nzMN_q8jlWBlO7EU3Lk0Z4RNg70LmH8toZZmXX5inmfRL70U_0uwLH1sjJ7vHgmJfWivP3nIOndC423Vr5jFwrN9NLYAfYnzPBvVaFS7U1A8Nuzrp_JSi4hL2vS1LDeNwVbFgUzVD8yp-HEKFN-lVDyc4KbOXNQ4Iz6sMckEy9-GHKhI5S8cuW04UkPVpbuze44xHrqNSKohaEr2yE6UurFDmDPMKAjMYkGqWOLVpp0nspEWY6JnYrGBYOITfxWYo76-k4cw6F1YMJyVAkyjp0R_Q7rHGag"
+    def token = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiI1NzA0NDA4MC01MTE1LTQwY2QtYTNkYS0zY2ExYzYwZjE1MzQiLCJleHAiOjE0NDgwMjAyNDUsIm5iZiI6MCwiaWF0IjoxNDQ4MDE5OTQ1LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2F1dGgvcmVhbG1zL3Npc2xlZ2lzIiwiYXVkIjoic2lzbGVnaXMiLCJzdWIiOiJkZjFiMDE5My03ZDc2LTRmMTUtYWFlNy1hY2NlNzY2ZjA2N2MiLCJhenAiOiJzaXNsZWdpcyIsInNlc3Npb25fc3RhdGUiOiI2ZDcyZjM5MS02NWI5LTRiYWEtODU5OS04OTBiYWFlMWE3YzciLCJjbGllbnRfc2Vzc2lvbiI6ImFmNTQ1ZDI3LTlmZjItNDI4MS1iYWZkLWJmNDJlZWRhOGZiNSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vc2lzbGVnaXMubG9jYWwiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50Iiwidmlldy1wcm9maWxlIl19fSwibmFtZSI6Ikd1c3Rhdm8gRGVsZ2FkbyIsInByZWZlcnJlZF91c2VybmFtZSI6Imd1c3Rhdm8iLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiRGVsZ2FkbyIsImVtYWlsIjoiZ2NkZWxnYWRvQGdtYWlsLmNvbSJ9.Q7mXvnZvlueteSmZvVPBYzeSt2Ybaf2YouL2W-rEdAWlVoIs0Q-4kZVoAkaEwC9DhNNggjkG5K84g9YMHLHhBMtRD2XGuDNDXJObZnNiyYyi2g_f6rmAI7DlOaiaoWEJgpupDy02AxF-zcxhlfydpkY9AHkbkE1qbmRkpPD_duMJxuJQN8FOyoBSdWrX8C44fh9CkDmVK0z1kQagHrhK-qsuIIQcrS2giEKAHArFXN7H3brj4Mo0ZJhK9jXA9gd1-xvdwZ7lQmMTY52k26POT43hOZbnolj4wf_zgqNJZmIiXT0hD6pysaCRXEyTSYnsHk81jKBabCj8qtv8zomKLA"
     def client = new RESTClient("http://localhost:8080/")
     def cabecalho = [Authorization: token]
 
@@ -13,12 +14,13 @@ class ProposicaoEndpointSpec extends Specification{
 
         given:
         def caminho = "/sislegis/rest/proposicaos/alterarPosicionamento"
-        def id = 35
-        def idPosicionamento = 5
-        def dados = [id: id, idPosicionamento: idPosicionamento]
+        def id = 47
+        def idPosicionamento = 7
+        def preliminar = true
+        def dados = [id: id, idPosicionamento: idPosicionamento, preliminar: preliminar]
 
         when:
-        def resp = client.post(path: caminho, body: dados, headers: cabecalho, requestContentType: "application/x-www-form-urlencoded; charset=utf-8")
+        def resp = client.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
 
         then:
         assert resp.status == 200 // status 200 = Ok
