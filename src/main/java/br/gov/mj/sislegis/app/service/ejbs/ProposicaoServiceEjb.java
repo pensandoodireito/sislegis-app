@@ -729,7 +729,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public void alterarPosicionamento(Long id, Long idPosicionamento, Usuario usuario) {
+	public void alterarPosicionamento(Long id, Long idPosicionamento, boolean preliminar, Usuario usuario) {
 		Proposicao proposicao = findById(id);
 
 		// somente executa se o posicionamento for alterado
@@ -745,6 +745,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			PosicionamentoProposicao posicionamentoProposicao = new PosicionamentoProposicao();
 			posicionamentoProposicao.setPosicionamento(posicionamento);
 			posicionamentoProposicao.setProposicao(proposicao);
+			posicionamentoProposicao.setPreliminar(preliminar);
 			posicionamentoProposicao.setUsuario(usuario);
 
 			em.persist(posicionamentoProposicao);
