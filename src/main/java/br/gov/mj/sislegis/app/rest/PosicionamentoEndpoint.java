@@ -18,14 +18,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import br.gov.mj.sislegis.app.model.Posicionamento;
-import br.gov.mj.sislegis.app.service.Service;
+import br.gov.mj.sislegis.app.service.PosicionamentoService;
 
 
 @Path("/posicionamentos")
 public class PosicionamentoEndpoint {
 	
 	@Inject
-	private Service<Posicionamento> service;
+	private PosicionamentoService service;
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -52,9 +52,7 @@ public class PosicionamentoEndpoint {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Posicionamento> listAll(
-			@QueryParam("start") Integer startPosition,
-			@QueryParam("max") Integer maxResult) {
+	public List<Posicionamento> listAll(@QueryParam("start") Integer startPosition,	@QueryParam("max") Integer maxResult) {
 		return service.listAll();
 	}
 

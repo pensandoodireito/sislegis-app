@@ -302,7 +302,7 @@ public class ProposicaoEndpoint {
 		try {
 			Usuario usuarioLogado = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
 			proposicaoService.alterarPosicionamento(posicionamentoProposicaoWrapper.getId(),
-					posicionamentoProposicaoWrapper.getIdPosicionamento(), usuarioLogado);
+					posicionamentoProposicaoWrapper.getIdPosicionamento(), posicionamentoProposicaoWrapper.preliminar, usuarioLogado);
 			return Response.ok().build();
 
 		} catch (Exception e) {
@@ -353,6 +353,7 @@ class AddProposicaoPautaWrapper {
 class PosicionamentoProposicaoWrapper {
 	Long id;
 	Long idPosicionamento;
+	boolean preliminar;
 
 	public Long getId() {
 		return id;
@@ -368,5 +369,13 @@ class PosicionamentoProposicaoWrapper {
 
 	public void setIdPosicionamento(Long idPosicionamento) {
 		this.idPosicionamento = idPosicionamento;
+	}
+
+	public boolean isPreliminar() {
+		return preliminar;
+	}
+
+	public void setPreliminar(boolean preliminar) {
+		this.preliminar = preliminar;
 	}
 }
