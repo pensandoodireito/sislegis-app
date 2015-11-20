@@ -53,3 +53,28 @@ ALTER TABLE public.proposicao DROP posicionamento;
 
 --changeset release151101:151101-12
 ALTER TABLE public.proposicao DROP posicao_id;
+
+--changeset release151101:151101-13
+update posicionamento_proposicao set posicionamento_id = 3, preliminar = TRUE where posicionamento_id = 11;
+--rollback update posicionamento_proposicao set posicionamento_id = 11, preliminar = FALSE where posicionamento_id = 3
+
+--changeset release151101:151101-14
+update posicionamento_proposicao set posicionamento_id = 6, preliminar = TRUE where posicionamento_id = 12;
+--rollback update posicionamento_proposicao set posicionamento_id = 12, preliminar = FALSE where posicionamento_id = 6
+
+--changeset release151101:151101-15
+update posicionamento_proposicao set posicionamento_id = 8, preliminar = TRUE where posicionamento_id = 13;
+--rollback update posicionamento_proposicao set posicionamento_id = 13, preliminar = FALSE where posicionamento_id = 8
+
+--changeset release151101:151101-16
+update posicionamento_proposicao set posicionamento_id = 9, preliminar = TRUE where posicionamento_id = 14;
+--rollback update posicionamento_proposicao set posicionamento_id = 14, preliminar = FALSE where posicionamento_id = 9
+
+--changeset release151101:151101-17
+update posicionamento_proposicao set posicionamento_id = 10, preliminar = TRUE where posicionamento_id = 15;
+--rollback update posicionamento_proposicao set posicionamento_id = 15, preliminar = FALSE where posicionamento_id = 10
+
+--changeset release151101:151101-18
+delete from posicionamento where id in (11, 12, 13, 14, 15);
+--rollback INSERT INTO posicionamento (id, nome) VALUES (11, 'Previamente Contrário'), (12, 'Previamente Favorável'), (13, 'Previamente Indiferente'), (14, 'Previamente Nada a Opor'), (15, 'Previamente Não é Tema do MJ')
+
