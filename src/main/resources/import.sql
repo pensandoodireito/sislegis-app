@@ -8,13 +8,7 @@ insert into Posicionamento (nome, id) values ('Favorável com Emendas', nextval 
 insert into Posicionamento (nome, id) values ('Indiferente', nextval ('hibernate_sequence'));
 insert into Posicionamento (nome, id) values ('Nada a opor', nextval ('hibernate_sequence'));
 insert into Posicionamento (nome, id) values ('Não é tema do MJ', nextval ('hibernate_sequence'));
-insert into Posicionamento (nome, id) values ('Previamente Contrário', nextval ('hibernate_sequence'));
-insert into Posicionamento (nome, id) values ('Previamente Favorável', nextval ('hibernate_sequence'));
-insert into Posicionamento (nome, id) values ('Previamente Indiferente', nextval ('hibernate_sequence'));
-insert into Posicionamento (nome, id) values ('Previamente Nada a opor', nextval ('hibernate_sequence'));
-insert into Posicionamento (nome, id) values ('Previamente Não é tema do MJ', nextval ('hibernate_sequence'));
 insert into Posicionamento (nome, id) values ('Seguir pela Rejeição', nextval ('hibernate_sequence'));
-
 
 insert into tipo_encaminhamento (nome, id) values ('Agendar Reunião', nextval ('hibernate_sequence'));
 insert into tipo_encaminhamento (nome, id) values ('Apenas Monitorar', nextval ('hibernate_sequence'));
