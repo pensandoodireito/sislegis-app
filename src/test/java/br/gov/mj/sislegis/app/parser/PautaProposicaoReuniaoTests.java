@@ -82,7 +82,7 @@ public class PautaProposicaoReuniaoTests {
 			Long idComissao = 2002L;
 			String datIni = "20151014";
 			String datFim = "20151015";
-			Set<PautaReuniaoComissao> pautas = parser.getPautaComissao(idComissao, datIni, datFim);
+			Set<PautaReuniaoComissao> pautas = parser.getPautaComissao("",idComissao, datIni, datFim);
 			Reuniao reuniao = new Reuniao();
 			reuniao.setData(new Date());
 			proposicaoService.adicionaProposicoesReuniao(pautas, reuniao);
