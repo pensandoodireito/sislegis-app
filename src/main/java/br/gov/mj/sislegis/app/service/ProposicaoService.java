@@ -131,7 +131,7 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @param idPosicionamento
 	 * @param usuario
 	 */
-	void alterarPosicionamento(Long id, Long idPosicionamento, Usuario usuario);
+	void alterarPosicionamento(Long id, Long idPosicionamento, boolean preliminar, Usuario usuario);
 
 	/**
 	 * Retorna o historico de alteracoes de posicionamento por id da proposicao
@@ -139,4 +139,5 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @return
 	 */
 	List<PosicionamentoProposicao> listarHistoricoPosicionamentos(Long id);
+
 }

@@ -37,7 +37,7 @@ import br.gov.mj.sislegis.app.util.SislegisUtil;
 		@NamedQuery(name = "findByCodigoReuniao", query = "select p from PautaReuniaoComissao p where p.codigoReuniao=:codigoReuniao"),
 		@NamedQuery(name = "findByComissaoDataOrigem", query = "select p from PautaReuniaoComissao p where p.comissao=:comissao and p.data=:data and p.codigoReuniao=:codigoReuniao  "),
 		@NamedQuery(name = "findByIntervaloDatas", query = "select p from PautaReuniaoComissao p where p.data between :dataInicial and :dataFinal"),
-		@NamedQuery(name = "findPendentes", query = "select p from PautaReuniaoComissao p where p.data < current_date() and p.situacao in :situacoesEmAberto order by p.data desc ")
+		@NamedQuery(name = "findPendentes", query = "select p from PautaReuniaoComissao p where p.data < :date and p.situacao in :situacoesEmAberto order by p.data desc ")
 
 })
 public class PautaReuniaoComissao extends AbstractEntity implements Serializable, Comparable<PautaReuniaoComissao> {
@@ -187,7 +187,7 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 		switch (origem) {
 		case CAMARA:
 			try {
-				situacao = situacao.replace("(Final)", "").trim();
+				situacao = situacao.replaceAll("\\(\\w+\\)", "").trim();
 				setSituacao(SituacaoCamara.valueOf(situacao).situacaoSessaoCorrespondente());
 
 			} catch (IllegalArgumentException e) {
@@ -211,7 +211,7 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(comissao);
-		sb.append(" Código:{").append(codigoReuniao).append("}").append(" contém ").append(proposicoesDaPauta.size())
+		sb.append(" Código:{").append(codigoReuniao).append("}").append(getSituacao()).append(" contém ").append(proposicoesDaPauta.size())
 				.append(" proposicoes na pauta");
 		return sb.toString();
 	}

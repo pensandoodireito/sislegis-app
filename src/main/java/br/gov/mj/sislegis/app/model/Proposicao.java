@@ -120,8 +120,11 @@ public class Proposicao extends AbstractEntity {
 	@Transient
 	private String linkPauta;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	private Posicionamento posicao;
+	@Transient
+	private Posicionamento posicionamento;
+
+	@Transient
+	private Boolean posicionamentoPreliminar;
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	private Usuario responsavel;
@@ -130,14 +133,20 @@ public class Proposicao extends AbstractEntity {
 	@OrderBy("pautaReuniaoComissao")
 	private SortedSet<ProposicaoPautaComissao> pautasComissoes = new TreeSet<ProposicaoPautaComissao>();
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "proposicao")
-	private Set<TagProposicao> tags;
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+	@JoinTable(name = "tagproposicao",
+			joinColumns = {@JoinColumn(name = "proposicao_id", referencedColumnName = "id")},
+			inverseJoinColumns = {@JoinColumn(name = "tag_id", referencedColumnName = "id")})
+	private List<Tag> tags;
 
 	@Transient
 	private List<Comentario> listaComentario = new ArrayList<>();
 
 	@Transient
 	private Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao = new HashSet<>();
+
+	@Transient
+	private List<ProposicaoPautaComissao> listaPautasComissao = new ArrayList<>();
 
 	@Column(nullable = false)
 	private boolean isFavorita;
@@ -151,6 +160,9 @@ public class Proposicao extends AbstractEntity {
 
 	@Transient
 	private Integer totalEncaminhamentos = 0;
+
+	@Transient
+	private Integer totalPautasComissao = 0;
 
 	@ManyToMany(fetch = FetchType.EAGER, mappedBy = "proposicoesFilha")
 	private Set<Proposicao> proposicoesPai;
@@ -282,11 +294,19 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public Posicionamento getPosicionamento() {
-		return posicao;
+		return posicionamento;
 	}
 
 	public void setPosicionamento(Posicionamento posicionamento) {
-		this.posicao = posicionamento;
+		this.posicionamento = posicionamento;
+	}
+
+	public Boolean isPosicionamentoPreliminar() {
+		return posicionamentoPreliminar;
+	}
+
+	public void setPosicionamentoPreliminar(Boolean posicionamentoPreliminar) {
+		this.posicionamentoPreliminar = posicionamentoPreliminar;
 	}
 
 	public List<Comentario> getListaComentario() {
@@ -305,14 +325,22 @@ public class Proposicao extends AbstractEntity {
 		this.listaEncaminhamentoProposicao = listaEncaminhamentoProposicao;
 	}
 
-	public Set<TagProposicao> getTags() {
+	public List<Tag> getTags() {
 		return tags;
 	}
 
-	public void setTags(Set<TagProposicao> tags) {
+	public void setTags(List<Tag> tags) {
 		this.tags = tags;
 	}
 
+	public List<ProposicaoPautaComissao> getListaPautasComissao() {
+		return listaPautasComissao;
+	}
+
+	public void setListaPautasComissao(List<ProposicaoPautaComissao> listaPautasComissao) {
+		this.listaPautasComissao = listaPautasComissao;
+	}
+	
 	public Usuario getResponsavel() {
 		return responsavel;
 	}
@@ -357,6 +385,17 @@ public class Proposicao extends AbstractEntity {
 
 	public void setTotalEncaminhamentos(Integer totalEncaminhamentos) {
 		this.totalEncaminhamentos = totalEncaminhamentos;
+	}
+
+	public Integer getTotalPautasComissao() {
+		if (CollectionUtils.isNotEmpty(listaPautasComissao)){
+			totalPautasComissao = listaPautasComissao.size();
+		}
+		return totalPautasComissao;
+	}
+
+	public void setTotalPautasComissao(Integer totalPautasComissao) {
+		this.totalPautasComissao = totalPautasComissao;
 	}
 
 	@JsonSerialize(using = CompactSetProposicaoSerializer.class)

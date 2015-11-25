@@ -66,14 +66,14 @@ public class ReuniaoEndpoint {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Collection<Proposicao> findByData(@QueryParam("data") Date data) throws Exception {
 		long start = 0;
-		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.FINEST)) {
+		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.ALL)) {
 			start = System.currentTimeMillis();
 		}
 
 		Collection<Proposicao> lista = proposicaoService.buscarProposicoesPorDataReuniao(data);
-		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.FINEST)) {
+		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.ALL)) {
 			long stop = System.currentTimeMillis();
-			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.ALL,
 					"Carregamento findByData levou " + (stop - start) + " ms para " + lista.size() + " proposicoes");
 		}
 
