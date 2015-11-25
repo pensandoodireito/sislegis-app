@@ -27,7 +27,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import br.gov.mj.sislegis.app.model.*;
-import br.gov.mj.sislegis.app.service.EtapaRoadmapService;
+import br.gov.mj.sislegis.app.service.RoadmapComissaoService;
 import org.jboss.resteasy.annotations.cache.Cache;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
@@ -49,7 +49,7 @@ public class ProposicaoEndpoint {
 	private ProposicaoService proposicaoService;
 
 	@Inject
-	private EtapaRoadmapService etapaRoadmapService;
+	private RoadmapComissaoService roadmapComissaoService;
 
 	@GET
 	@Path("/proposicoesPautaCamara")
@@ -319,6 +319,7 @@ public class ProposicaoEndpoint {
 		return proposicaoService.listarHistoricoPosicionamentos(id);
 	}
 
+
 	@GET
 	@Path("/{id:[0-9]+}/pautas")
 	@Cache(maxAge = 24, noStore = false, isPrivate = false, sMaxAge = 24)
@@ -327,17 +328,17 @@ public class ProposicaoEndpoint {
 		return proposicaoService.findById(id).getPautasComissoes();
 	}
 
-	public EtapaRoadmap inserirEtapaRoadmap(Long idComissao, Long idProposicao){
-		return etapaRoadmapService.inserir(idComissao, idProposicao);
+	public RoadmapComissao inserirEtapaRoadmap(Long idComissao, Long idProposicao){
+		return roadmapComissaoService.inserir(idComissao, idProposicao);
 	}
 
-	public Response reordenarRoadmap(List<EtapaRoadmap> etapasRoadmap){
-		etapaRoadmapService.reordenar(etapasRoadmap);
+	public Response reordenarRoadmap(List<RoadmapComissao> etapasRoadmap){
+		roadmapComissaoService.reordenar(etapasRoadmap);
 		return Response.ok().build();
 	}
 
 	public Response removerEtapaRoadmap(Long idEtapaRoadmap){
-		etapaRoadmapService.remover(idEtapaRoadmap);
+		roadmapComissaoService.remover(idEtapaRoadmap);
 		return Response.ok().build();
 	}
 

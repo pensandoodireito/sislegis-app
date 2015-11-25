@@ -4,7 +4,7 @@ package br.gov.mj.sislegis.app.model;
  * Etapa do Roadmap (roteiro) de Comissoes por onde uma Proposicao deve tramitar
  */
 
-public class EtapaRoadmap {
+public class RoadmapComissao {
 
     private Long id;
 
