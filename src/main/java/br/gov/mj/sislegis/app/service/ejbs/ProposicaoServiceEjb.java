@@ -144,7 +144,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 		String dataIni = Conversores.dateToString(dataInicial, "yyyyMMdd");
 		String dataFim = Conversores.dateToString(dataFinal, "yyyyMMdd");
-		return populaUltimoComentarioDePauta(parserPautaCamara.getPautaComissao(idComissao, dataIni, dataFim));
+		return populaUltimoComentarioDePauta(parserPautaCamara.getPautaComissao(
+				comissaoService.getComissaoCamara(idComissao), idComissao, dataIni, dataFim));
 	}
 
 	@Override
@@ -838,7 +839,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	}
 
-	private Integer totalProposicaoPautaComissaoByProposicao(Long idProposicao){
+	private Integer totalProposicaoPautaComissaoByProposicao(Long idProposicao) {
 		Query query = em
 				.createNativeQuery("SELECT COUNT(1) FROM proposicao_pautacomissao WHERE proposicaoid = :idProposicao ");
 		query.setParameter("idProposicao", idProposicao);
@@ -846,7 +847,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		return total.intValue();
 	}
 
-	private void popularDadosTransientes(Proposicao proposicao){
+	private void popularDadosTransientes(Proposicao proposicao) {
 		if (proposicao != null) {
 			proposicao.setTotalComentarios(comentarioService.totalByProposicao(proposicao.getId()));
 			proposicao.setTotalEncaminhamentos(encaminhamentoProposicaoService.totalByProposicao(proposicao.getId()));
@@ -855,7 +856,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			PosicionamentoProposicao posicionamentoProposicao;
 			try {
 				TypedQuery<PosicionamentoProposicao> query = em.createQuery(
-                        "FROM PosicionamentoProposicao WHERE proposicao.id = :id ORDER BY dataCriacao DESC ", PosicionamentoProposicao.class);
+						"FROM PosicionamentoProposicao WHERE proposicao.id = :id ORDER BY dataCriacao DESC ",
+						PosicionamentoProposicao.class);
 
 				query.setParameter("id", proposicao.getId());
 				query.setMaxResults(1);
@@ -874,7 +876,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 	}
 
-	private void popularDadosTransientes(List<Proposicao> proposicoes){
+	private void popularDadosTransientes(List<Proposicao> proposicoes) {
 		for (Proposicao proposicao : proposicoes) {
 			popularDadosTransientes(proposicao);
 		}
