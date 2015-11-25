@@ -41,6 +41,8 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> 
 		if (!incluiOcultos) {
 			query.append("AND c.oculto = FALSE");
 		}
+		query.append(" ORDER BY c.dataCriacao ");
+
 		TypedQuery<Comentario> findByIdQuery = em.createQuery(query.toString(), Comentario.class);
 
 		findByIdQuery.setParameter("entityId", id);
