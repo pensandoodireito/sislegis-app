@@ -61,8 +61,7 @@ public class ComissaoServiceEjb extends AbstractPersistence<Comissao, Long> impl
 	@Override
 	public Comissao getBySigla(String sigla) throws Exception {
 		if (sigla != null && sigla.indexOf("-") > 0) {
-			sigla = sigla.substring(0,sigla.indexOf("-"))
-					.trim();
+			sigla = sigla.substring(0, sigla.indexOf("-")).trim();
 		}
 
 		for (Iterator<Comissao> iterator = listarComissoesCamara().iterator(); iterator.hasNext();) {
@@ -73,6 +72,18 @@ public class ComissaoServiceEjb extends AbstractPersistence<Comissao, Long> impl
 		}
 		return null;
 
+	}
+
+	@Override
+	public String getComissaoCamara(Long idComissao) throws Exception {
+
+		for (Iterator<Comissao> iterator = listarComissoesCamara().iterator(); iterator.hasNext();) {
+			Comissao c = iterator.next();
+			if (c.getId() == idComissao) {
+				return c.getSigla();
+			}
+		}
+		return null;
 	}
 
 }
