@@ -135,9 +135,13 @@ public interface ProposicaoService extends Service<Proposicao> {
 
 	/**
 	 * Retorna o historico de alteracoes de posicionamento por id da proposicao
+	 * 
 	 * @param id
 	 * @return
 	 */
 	List<PosicionamentoProposicao> listarHistoricoPosicionamentos(Long id);
+
+	Collection<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao, String comissao, Long idResponsavel,
+			String origem, String isFavorita, Long idPosicionamento, Integer limit, Integer offset);
 
 }

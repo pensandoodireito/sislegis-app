@@ -120,8 +120,9 @@ public class Proposicao extends AbstractEntity {
 	@Transient
 	private String linkPauta;
 
-	@Transient
-	private Posicionamento posicionamento;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "posicionamento_atual_id", nullable = true)
+	private PosicionamentoProposicao posicionamentoAtual;
 
 	@Transient
 	private Boolean posicionamentoPreliminar;
@@ -134,9 +135,7 @@ public class Proposicao extends AbstractEntity {
 	private SortedSet<ProposicaoPautaComissao> pautasComissoes = new TreeSet<ProposicaoPautaComissao>();
 
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-	@JoinTable(name = "tagproposicao",
-			joinColumns = {@JoinColumn(name = "proposicao_id", referencedColumnName = "id")},
-			inverseJoinColumns = {@JoinColumn(name = "tag_id", referencedColumnName = "id")})
+	@JoinTable(name = "tagproposicao", joinColumns = { @JoinColumn(name = "proposicao_id", referencedColumnName = "id") }, inverseJoinColumns = { @JoinColumn(name = "tag_id", referencedColumnName = "id") })
 	private List<Tag> tags;
 
 	@Transient
@@ -293,12 +292,12 @@ public class Proposicao extends AbstractEntity {
 		this.linkPauta = linkPauta;
 	}
 
-	public Posicionamento getPosicionamento() {
-		return posicionamento;
+	public PosicionamentoProposicao getPosicionamentoAtual() {
+		return posicionamentoAtual;
 	}
 
-	public void setPosicionamento(Posicionamento posicionamento) {
-		this.posicionamento = posicionamento;
+	public void setPosicionamentoAtual(PosicionamentoProposicao posicionamento) {
+		this.posicionamentoAtual = posicionamento;
 	}
 
 	public Boolean isPosicionamentoPreliminar() {
@@ -340,7 +339,7 @@ public class Proposicao extends AbstractEntity {
 	public void setListaPautasComissao(List<ProposicaoPautaComissao> listaPautasComissao) {
 		this.listaPautasComissao = listaPautasComissao;
 	}
-	
+
 	public Usuario getResponsavel() {
 		return responsavel;
 	}
@@ -388,7 +387,7 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public Integer getTotalPautasComissao() {
-		if (CollectionUtils.isNotEmpty(listaPautasComissao)){
+		if (CollectionUtils.isNotEmpty(listaPautasComissao)) {
 			totalPautasComissao = listaPautasComissao.size();
 		}
 		return totalPautasComissao;

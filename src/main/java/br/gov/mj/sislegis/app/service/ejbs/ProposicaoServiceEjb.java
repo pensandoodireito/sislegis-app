@@ -256,29 +256,37 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
+	public Proposicao buscarPorId(Integer id) {
+		Proposicao proposicao = findById(id.longValue());
+		if (proposicao != null) {
+			popularDadosTransientes(proposicao);
+		}
+		return proposicao;
+	}
+
+	@Override
 	public List<Proposicao> consultar(String sigla, String autor, String ementa, String origem, String isFavorita,
 			Integer offset, Integer limit) {
 		StringBuilder query = new StringBuilder("SELECT p FROM Proposicao p WHERE 1=1");
-		if (Objects.nonNull(sigla) && !sigla.equals("")) {
-			query.append(" AND upper(CONCAT(p.tipo,' ',p.numero,'/',p.ano)) like upper(:sigla)");
-		}
-		if (Objects.nonNull(ementa) && !ementa.equals("")) {
-			query.append(" AND upper(p.ementa) like upper(:ementa)");
-		}
-		if (Objects.nonNull(autor) && !autor.equals("")) {
-			query.append(" AND upper(p.autor) like upper(:autor)");
-		}
-		if (Objects.nonNull(origem) && !origem.equals("")) {
-			query.append(" AND p.origem = :origem");
-		}
-		if (Objects.nonNull(isFavorita) && !isFavorita.equals("")) {
-			query.append(" AND p.isFavorita = :isFavorita");
-		}
+		query.append(createWhereClause(sigla, null, autor, ementa, origem, isFavorita, null, null));
 		query.append(" order by tipo,ano,numero");
 		TypedQuery<Proposicao> findByIdQuery = getEntityManager().createQuery(query.toString(), Proposicao.class);
 
+		setParams(sigla, null, autor, ementa, origem, isFavorita, null, null, findByIdQuery);
+
+		List<Proposicao> proposicoes = findByIdQuery.setFirstResult(offset).setMaxResults(limit).getResultList();
+		popularDadosTransientes(proposicoes);
+
+		return proposicoes;
+	}
+
+	private void setParams(String sigla, String comissao, String autor, String ementa, String origem,
+			String isFavorita, Long idPosicionamento, Long idResponsavel, TypedQuery findByIdQuery) {
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			findByIdQuery.setParameter("sigla", "%" + sigla + "%");
+		}
+		if (Objects.nonNull(comissao) && !comissao.equals("")) {
+			findByIdQuery.setParameter("comissao", comissao + "%");
 		}
 		if (Objects.nonNull(ementa) && !ementa.equals("")) {
 			findByIdQuery.setParameter("ementa", "%" + ementa + "%");
@@ -292,24 +300,52 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (Objects.nonNull(isFavorita) && !isFavorita.equals("")) {
 			findByIdQuery.setParameter("isFavorita", new Boolean(isFavorita));
 		}
-
-		List<Proposicao> proposicoes = findByIdQuery.setFirstResult(offset).setMaxResults(limit).getResultList();
-		popularDadosTransientes(proposicoes);
-
-		return proposicoes;
+		if (Objects.nonNull(idPosicionamento)) {
+			findByIdQuery.setParameter("idPosicionamento", idPosicionamento);
+		}
+		if (Objects.nonNull(idResponsavel)) {
+			findByIdQuery.setParameter("idResponsavel", idResponsavel);
+		}
 	}
 
-	@Override
-	public Proposicao buscarPorId(Integer id) {
-		Proposicao proposicao = findById(id.longValue());
-		if (proposicao != null) {
-			popularDadosTransientes(proposicao);
+	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem,
+			String isFavorita, Long idResponsavel, Long idPosicionamento) {
+		StringBuilder query = new StringBuilder();
+		if (Objects.nonNull(sigla) && !sigla.equals("")) {
+			query.append(" AND upper(CONCAT(p.tipo,' ',p.numero,'/',p.ano)) like upper(:sigla)");
 		}
-		return proposicao;
+		if (Objects.nonNull(comissao) && !comissao.equals("")) {
+			query.append(" AND upper(p.comissao) like upper(:comissao)");
+		}
+		if (Objects.nonNull(ementa) && !ementa.equals("")) {
+			query.append(" AND upper(p.ementa) like upper(:ementa)");
+		}
+		if (Objects.nonNull(autor) && !autor.equals("")) {
+			query.append(" AND upper(p.autor) like upper(:autor)");
+		}
+		if (Objects.nonNull(origem) && !origem.equals("")) {
+			query.append(" AND p.origem = :origem");
+		}
+		if (Objects.nonNull(isFavorita) && !isFavorita.equals("")) {
+			query.append(" AND p.isFavorita = :isFavorita");
+		}
+		if (Objects.nonNull(idResponsavel)) {
+			query.append(" AND p.responsavel.id = :idResponsavel");
+		}
+		if (Objects.nonNull(idPosicionamento)) {
+			query.append(" AND p.posicionamento.id = :idPosicionamento");
+		}
+		return query;
 	}
 
 	@Override
 	public Collection<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao) {
+		return buscarProposicoesPorDataReuniao(dataReuniao, null, null, null, null, null, null, null);
+	}
+
+	@Override
+	public Collection<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao, String comissao,
+			Long idResponsavel, String origem, String isFavorita, Long idPosicionamento, Integer limit, Integer offset) {
 		List<Proposicao> proposicoes = new ArrayList<>();
 		Reuniao reuniao = reuniaoService.buscaReuniaoPorData(dataReuniao);
 		if (!Objects.isNull(reuniao)) {
@@ -320,11 +356,23 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
 						"Reuniao mais antiga que refactoring, utilizando metodo alternativo");
-				Query query = em.createNativeQuery("select * from reuniaoproposicao r where r.reuniao_id=:rid",
-						ReuniaoProposicao.class);
+				StringBuilder queryBuffer = new StringBuilder(
+						"select r from Proposicao p, ReuniaoProposicao r where r.reuniao.id=:rid and r.proposicao=p");
+				queryBuffer.append(createWhereClause(null, comissao, null, null, origem, isFavorita, idResponsavel,
+						idPosicionamento));
+				queryBuffer.append(" order by p.comissao, p.tipo, p.ano, p.numero");
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINEST, "Query '" + queryBuffer.toString());
+				TypedQuery<ReuniaoProposicao> query = em.createQuery(queryBuffer.toString(), ReuniaoProposicao.class);
 				query.setParameter("rid", reuniao.getId());
-				List<ReuniaoProposicao> proposicoesReuniao = query.getResultList();
+				setParams(null, comissao, null, null, origem, isFavorita, idResponsavel, idPosicionamento, query);
+				if (limit != null) {
+					query.setMaxResults(limit);
+				}
+				if (offset != null) {
+					query.setFirstResult(offset);
+				}
 
+				List<ReuniaoProposicao> proposicoesReuniao = query.getResultList();
 				for (Iterator<ReuniaoProposicao> iterator = proposicoesReuniao.iterator(); iterator.hasNext();) {
 					ReuniaoProposicao rp = (ReuniaoProposicao) iterator.next();
 					Proposicao p = rp.getProposicao();
@@ -339,6 +387,31 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 					popularDadosTransientes(p);
 					proposicoes.add(p);
 				}
+
+				// Query query =
+				// em.createNativeQuery("select * from reuniaoproposicao r where r.reuniao_id=:rid",
+				// ReuniaoProposicao.class);
+				// query.setParameter("rid", reuniao.getId());
+				// List<ReuniaoProposicao> proposicoesReuniao =
+				// query.getResultList();
+				//
+				// for (Iterator<ReuniaoProposicao> iterator =
+				// proposicoesReuniao.iterator(); iterator.hasNext();) {
+				// ReuniaoProposicao rp = (ReuniaoProposicao) iterator.next();
+				// Proposicao p = rp.getProposicao();
+				// if (p.getPautaComissaoAtual() == null) {
+				// PautaReuniaoComissao pr = new
+				// PautaReuniaoComissao(dataReuniao, rp.getSiglaComissao(),
+				// rp.getCodigoReuniao());
+				// pr.setManual(true);
+				// ProposicaoPautaComissao ppc = new ProposicaoPautaComissao(pr,
+				// p);
+				// ppc.setOrdemPauta(rp.getSeqOrdemPauta());
+				// p.getPautasComissoes().add(ppc);
+				// }
+				// popularDadosTransientes(p);
+				// proposicoes.add(p);
+				// }
 			} else {
 				Query query = em
 						.createNativeQuery(
@@ -714,22 +787,22 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		Proposicao proposicao = findById(id);
 
 		// somente executa se o posicionamento for alterado
-		if (proposicao.getPosicionamento() == null || !proposicao.getPosicionamento().getId().equals(idPosicionamento)) {
+		if (proposicao.getPosicionamentoAtual() == null
+				|| !proposicao.getPosicionamentoAtual().getPosicionamento().getId().equals(idPosicionamento)) {
 			Posicionamento posicionamento = null;
 
 			if (idPosicionamento != null) {
 				posicionamento = posicionamentoService.findById(idPosicionamento);
+				PosicionamentoProposicao posicionamentoProposicao = new PosicionamentoProposicao();
+				posicionamentoProposicao.setPosicionamento(posicionamento);
+				posicionamentoProposicao.setProposicao(proposicao);
+				posicionamentoProposicao.setPreliminar(preliminar);
+				posicionamentoProposicao.setUsuario(usuario);
+				em.persist(posicionamentoProposicao);
+				proposicao.setPosicionamentoAtual(posicionamentoProposicao);
+			} else {
+				proposicao.setPosicionamentoAtual(null);
 			}
-
-			proposicao.setPosicionamento(posicionamento);
-
-			PosicionamentoProposicao posicionamentoProposicao = new PosicionamentoProposicao();
-			posicionamentoProposicao.setPosicionamento(posicionamento);
-			posicionamentoProposicao.setProposicao(proposicao);
-			posicionamentoProposicao.setPreliminar(preliminar);
-			posicionamentoProposicao.setUsuario(usuario);
-
-			em.persist(posicionamentoProposicao);
 			save(proposicao);
 		}
 	}
@@ -870,7 +943,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			}
 
 			if (posicionamentoProposicao != null) {
-				proposicao.setPosicionamento(posicionamentoProposicao.getPosicionamento());
+				// proposicao.setPosicionamento(posicionamentoProposicao.getPosicionamento());
 				proposicao.setPosicionamentoPreliminar(posicionamentoProposicao.isPreliminar());
 			}
 		}

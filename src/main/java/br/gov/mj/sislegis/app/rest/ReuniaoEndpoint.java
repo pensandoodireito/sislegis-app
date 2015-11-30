@@ -64,13 +64,18 @@ public class ReuniaoEndpoint {
 	@GET
 	@Path("/findByData")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Collection<Proposicao> findByData(@QueryParam("data") Date data) throws Exception {
+	public Collection<Proposicao> findByData(@QueryParam("data") Date data,
+			@QueryParam("responsavel") Long idResponsavel, @QueryParam("idPosicionameto") Long idPosicionameto,
+			@QueryParam("comissao") String comissao, @QueryParam("origem") String origem,
+			@QueryParam("isFavorita") String isFavorita, @QueryParam("limit") Integer limit,
+			@QueryParam("offset") Integer offset) throws Exception {
 		long start = 0;
 		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.ALL)) {
 			start = System.currentTimeMillis();
 		}
 
-		Collection<Proposicao> lista = proposicaoService.buscarProposicoesPorDataReuniao(data);
+		Collection<Proposicao> lista = proposicaoService.buscarProposicoesPorDataReuniao(data, comissao, idResponsavel,
+				origem, isFavorita, idPosicionameto, limit, offset);
 		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.ALL)) {
 			long stop = System.currentTimeMillis();
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.ALL,
