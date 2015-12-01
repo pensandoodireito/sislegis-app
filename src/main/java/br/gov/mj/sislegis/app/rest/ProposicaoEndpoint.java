@@ -27,7 +27,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import br.gov.mj.sislegis.app.model.*;
-import br.gov.mj.sislegis.app.service.RoadmapComissaoService;
+import br.gov.mj.sislegis.app.service.EtapaRoadmapComissaoService;
 import org.jboss.resteasy.annotations.cache.Cache;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
@@ -49,7 +49,7 @@ public class ProposicaoEndpoint {
 	private ProposicaoService proposicaoService;
 
 	@Inject
-	private RoadmapComissaoService roadmapComissaoService;
+	private EtapaRoadmapComissaoService etapaRoadmapComissaoService;
 
 	@GET
 	@Path("/proposicoesPautaCamara")
@@ -328,17 +328,38 @@ public class ProposicaoEndpoint {
 		return proposicaoService.findById(id).getPautasComissoes();
 	}
 
-	public RoadmapComissao inserirEtapaRoadmap(Long idComissao, Long idProposicao){
-		return roadmapComissaoService.inserir(idComissao, idProposicao);
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/inserirEtapaRoadmap")
+	public Response inserirEtapaRoadmap(AddEtapaRoadmapWrapper addEtapaRoadmapWrapper){
+		try {
+			EtapaRoadmapComissao etapaRoadmapComissao = etapaRoadmapComissaoService.inserir(addEtapaRoadmapWrapper.getIdProposicao(), addEtapaRoadmapWrapper.getIdComissao());
+			return Response.ok(etapaRoadmapComissao).build();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
 	}
 
-	public Response reordenarRoadmap(List<RoadmapComissao> etapasRoadmap){
-		roadmapComissaoService.reordenar(etapasRoadmap);
-		return Response.ok().build();
+	@POST
+	@Path("/alterarOrdemEtapaRoadmap")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response reordenarRoadmap(List<EtapaRoadmapComissao> etapasRoadmap){
+		try {
+			etapaRoadmapComissaoService.reordenar(etapasRoadmap);
+			return Response.ok().build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
 	}
 
-	public Response removerEtapaRoadmap(Long idEtapaRoadmap){
-		roadmapComissaoService.remover(idEtapaRoadmap);
+	@DELETE
+	@Path("/removerEtapaRoadmap/{idEtapaRoadmap:[0-9][0-9]*}")
+	public Response removerEtapaRoadmap(@PathParam("idEtapaRoadmap") Long idEtapaRoadmap){
+		etapaRoadmapComissaoService.remover(idEtapaRoadmap);
 		return Response.ok().build();
 	}
 
@@ -393,5 +414,26 @@ class PosicionamentoProposicaoWrapper {
 
 	public void setPreliminar(boolean preliminar) {
 		this.preliminar = preliminar;
+	}
+}
+
+class AddEtapaRoadmapWrapper {
+	Long idProposicao;
+	Long idComissao;
+
+	public Long getIdProposicao() {
+		return idProposicao;
+	}
+
+	public void setIdProposicao(Long idProposicao) {
+		this.idProposicao = idProposicao;
+	}
+
+	public Long getIdComissao() {
+		return idComissao;
+	}
+
+	public void setIdComissao(Long idComissao) {
+		this.idComissao = idComissao;
 	}
 }

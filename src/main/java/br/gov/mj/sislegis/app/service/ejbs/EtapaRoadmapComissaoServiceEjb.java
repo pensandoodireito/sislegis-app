@@ -1,0 +1,100 @@
+package br.gov.mj.sislegis.app.service.ejbs;
+
+import br.gov.mj.sislegis.app.model.Comissao;
+import br.gov.mj.sislegis.app.model.EtapaRoadmapComissao;
+import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.service.AbstractPersistence;
+import br.gov.mj.sislegis.app.service.ComissaoService;
+import br.gov.mj.sislegis.app.service.EtapaRoadmapComissaoService;
+import br.gov.mj.sislegis.app.service.ProposicaoService;
+import br.gov.mj.sislegis.app.util.SislegisUtil;
+
+import javax.inject.Inject;
+import javax.persistence.*;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class EtapaRoadmapComissaoServiceEjb extends AbstractPersistence<EtapaRoadmapComissao, Long> implements EtapaRoadmapComissaoService {
+
+    @Inject
+    private ProposicaoService proposicaoService;
+
+    @Inject
+    private ComissaoService comissaoService;
+
+    @PersistenceContext
+    private EntityManager em;
+
+    public EtapaRoadmapComissaoServiceEjb() {
+        super(EtapaRoadmapComissao.class);
+    }
+
+    public EntityManager getEntityManager() {
+        return em;
+    }
+
+    @Override
+    public EtapaRoadmapComissao inserir(Long idProposicao, Long idComissao) {
+        Proposicao proposicao = proposicaoService.findById(idProposicao);
+        Comissao comissao = comissaoService.findById(idComissao);
+
+        if (proposicao != null && comissao != null) {
+            EtapaRoadmapComissao etapaRoadmapComissao = new EtapaRoadmapComissao();
+            etapaRoadmapComissao.setProposicao(proposicao);
+            etapaRoadmapComissao.setComissao(comissao);
+
+            EtapaRoadmapComissao ultimaEtapa = buscarUltimaEtapa(idProposicao, idComissao);
+            Integer proximaOrdem = ultimaEtapa == null ? 1 : ultimaEtapa.getOrdem() + 1;
+            etapaRoadmapComissao.setOrdem(proximaOrdem);
+
+            save(etapaRoadmapComissao);
+            return etapaRoadmapComissao;
+
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public List<EtapaRoadmapComissao> listarPorProposicao(Long idProposicao) {
+        TypedQuery<EtapaRoadmapComissao> query = em.createQuery("FROM EtapaRoadmapComissao WHERE proposicao.id = :idProposicao ORDER BY ordem DESC ", EtapaRoadmapComissao.class);
+        query.setParameter("idProposicao", idProposicao);
+        return query.getResultList();
+    }
+
+    @Override
+    public void reordenar(List<EtapaRoadmapComissao> etapasReordenadas) {
+
+        for (EtapaRoadmapComissao etapaRoadmapComissao : etapasReordenadas){
+            TypedQuery<EtapaRoadmapComissao> query = em.createQuery("UPDATE EtapaRoadmapComissao SET ordem = :ordem WHERE id = :id ", EtapaRoadmapComissao.class);
+            query.setParameter("id", etapaRoadmapComissao.getId());
+            query.setParameter("ordem", etapaRoadmapComissao.getOrdem());
+            query.executeUpdate();
+        }
+
+    }
+
+    @Override
+    public void remover(Long idEtapa) {
+        TypedQuery<EtapaRoadmapComissao> query = em.createQuery("DELETE FROM EtapaRoadmapComissao WHERE id = :id ", EtapaRoadmapComissao.class);
+        query.setParameter("id", idEtapa);
+        query.executeUpdate();
+    }
+
+    private EtapaRoadmapComissao buscarUltimaEtapa(Long idProposicao, Long idComissao) {
+        try {
+            TypedQuery<EtapaRoadmapComissao> query = em.createQuery("FROM EtapaRoadmapComissao WHERE proposicao.id = :idProposicao AND comissao.id = :idComissao ORDER BY ordem DESC ", EtapaRoadmapComissao.class);
+
+            query.setParameter("idProposicao", idProposicao);
+            query.setParameter("idComissao", idComissao);
+            query.setMaxResults(1);
+
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+                    "Nenhuma etapa encontrada no roadmap, para a proposicao id: " + idProposicao);
+            return null;
+        }
+    }
+}
