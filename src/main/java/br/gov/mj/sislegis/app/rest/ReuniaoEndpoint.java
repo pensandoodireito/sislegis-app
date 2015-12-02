@@ -1,20 +1,28 @@
 package br.gov.mj.sislegis.app.rest;
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.persistence.OptimisticLockException;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.Service;
-
-import javax.inject.Inject;
-import javax.persistence.OptimisticLockException;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-import java.util.Date;
-import java.util.List;
-
 
 @Path("/reuniaos")
 public class ReuniaoEndpoint {
@@ -24,14 +32,13 @@ public class ReuniaoEndpoint {
 
 	@Inject
 	private ProposicaoService proposicaoService;
-	
+
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(Reuniao entity) {
 		service.save(entity);
 		return Response.created(
-				UriBuilder.fromResource(ReuniaoEndpoint.class)
-						.path(String.valueOf(entity.getId())).build()).build();
+				UriBuilder.fromResource(ReuniaoEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
 	}
 
 	@DELETE
@@ -51,8 +58,8 @@ public class ReuniaoEndpoint {
 	@GET
 	@Path("/findByData")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Proposicao> findByData(@QueryParam("data") Date data) throws Exception {
-		List<Proposicao> lista = proposicaoService.buscarProposicoesPorDataReuniao(data);
+	public Collection<Proposicao> findByData(@QueryParam("data") Date data) throws Exception {
+		Collection<Proposicao> lista = proposicaoService.buscarProposicoesPorDataReuniao(data);
 		return lista;
 	}
 
@@ -70,8 +77,7 @@ public class ReuniaoEndpoint {
 		try {
 			entity = service.save(entity);
 		} catch (OptimisticLockException e) {
-			return Response.status(Response.Status.CONFLICT)
-					.entity(e.getEntity()).build();
+			return Response.status(Response.Status.CONFLICT).entity(e.getEntity()).build();
 		}
 
 		return Response.noContent().build();

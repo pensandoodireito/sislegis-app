@@ -21,20 +21,20 @@ class CamaraWSParserSpec extends Specification{
 
     }
 
-    def "ParserPautaCamara - deve retornar n proposicoes para determinada comissao (por id) dentro de um intervalo de tempo"(){
+    def "ParserPautaCamara - deve retornar n reunioes para determinada comissao (por id) dentro de um intervalo de tempo"(){
 
         given:
         def parserPautaCamara = new ParserPautaCamara()
-        def proposicoes
+        def reunioes
         def idComissao = 2003L
         def datIni = "20140702"
         def datFim = "20140702"
 
         when:
-        proposicoes = parserPautaCamara.getProposicoes(idComissao, datIni, datFim)
+        reunioes = parserPautaCamara.getReunioes(idComissao, datIni, datFim)
 
         then:
-        proposicoes.size() == 35
+        reunioes.size() == 2
 
     }
 
@@ -51,7 +51,6 @@ class CamaraWSParserSpec extends Specification{
         then:
         proposicao.getAutor() == "PRESIDÊNCIA DA CÂMARA DOS DEPUTADOS"
         proposicao.getAno() == "2012"
-        proposicao.getComissao() == null
 
     }
 }

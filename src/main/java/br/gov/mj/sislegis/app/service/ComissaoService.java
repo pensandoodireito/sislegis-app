@@ -12,5 +12,6 @@ public interface ComissaoService extends Service<Comissao> {
 	
 	public List<Comissao> listarComissoesCamara()throws Exception;
 	public List<Comissao> listarComissoesSenado()throws Exception;
+	public  Comissao getBySigla(String sigla) throws Exception;
 
 }

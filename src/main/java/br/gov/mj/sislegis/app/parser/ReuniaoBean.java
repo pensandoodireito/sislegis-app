@@ -3,6 +3,7 @@ package br.gov.mj.sislegis.app.parser;
 import br.gov.mj.sislegis.app.model.pautacomissao.Sessao;
 
 public abstract class ReuniaoBean {
+	protected String comissao;
 	protected Integer codigo;
 	protected String titulo;
 	protected String data;
@@ -29,6 +30,10 @@ public abstract class ReuniaoBean {
 
 	public String getTipo() {
 		return tipo;
+	}
+
+	public String getComissao() {
+		return comissao;
 	}
 
 	public String getSituacao() {
