@@ -359,8 +359,13 @@ public class ProposicaoEndpoint {
 	@DELETE
 	@Path("/removerEtapaRoadmap/{idEtapaRoadmap:[0-9][0-9]*}")
 	public Response removerEtapaRoadmap(@PathParam("idEtapaRoadmap") Long idEtapaRoadmap){
-		etapaRoadmapComissaoService.remover(idEtapaRoadmap);
-		return Response.ok().build();
+		try {
+			etapaRoadmapComissaoService.remover(idEtapaRoadmap);
+			return Response.ok().build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
 	}
 
 }

@@ -9,22 +9,24 @@ import br.gov.mj.sislegis.app.service.EtapaRoadmapComissaoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
+import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Stateless
 public class EtapaRoadmapComissaoServiceEjb extends AbstractPersistence<EtapaRoadmapComissao, Long> implements EtapaRoadmapComissaoService {
+
+    @PersistenceContext
+    private EntityManager em;
 
     @Inject
     private ProposicaoService proposicaoService;
 
     @Inject
     private ComissaoService comissaoService;
-
-    @PersistenceContext
-    private EntityManager em;
 
     public EtapaRoadmapComissaoServiceEjb() {
         super(EtapaRoadmapComissao.class);
@@ -48,7 +50,7 @@ public class EtapaRoadmapComissaoServiceEjb extends AbstractPersistence<EtapaRoa
             Integer proximaOrdem = ultimaEtapa == null ? 1 : ultimaEtapa.getOrdem() + 1;
             etapaRoadmapComissao.setOrdem(proximaOrdem);
 
-            save(etapaRoadmapComissao);
+            em.persist(etapaRoadmapComissao);
             return etapaRoadmapComissao;
 
         } else {
@@ -67,7 +69,7 @@ public class EtapaRoadmapComissaoServiceEjb extends AbstractPersistence<EtapaRoa
     public void reordenar(List<EtapaRoadmapComissao> etapasReordenadas) {
 
         for (EtapaRoadmapComissao etapaRoadmapComissao : etapasReordenadas){
-            TypedQuery<EtapaRoadmapComissao> query = em.createQuery("UPDATE EtapaRoadmapComissao SET ordem = :ordem WHERE id = :id ", EtapaRoadmapComissao.class);
+            Query query = em.createQuery("UPDATE EtapaRoadmapComissao SET ordem = :ordem WHERE id = :id ");
             query.setParameter("id", etapaRoadmapComissao.getId());
             query.setParameter("ordem", etapaRoadmapComissao.getOrdem());
             query.executeUpdate();
@@ -77,7 +79,7 @@ public class EtapaRoadmapComissaoServiceEjb extends AbstractPersistence<EtapaRoa
 
     @Override
     public void remover(Long idEtapa) {
-        TypedQuery<EtapaRoadmapComissao> query = em.createQuery("DELETE FROM EtapaRoadmapComissao WHERE id = :id ", EtapaRoadmapComissao.class);
+        Query query = em.createQuery("DELETE FROM EtapaRoadmapComissao WHERE id = :id ");
         query.setParameter("id", idEtapa);
         query.executeUpdate();
     }
