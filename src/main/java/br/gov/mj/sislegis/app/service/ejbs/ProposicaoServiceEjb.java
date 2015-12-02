@@ -850,6 +850,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 						proposicaoDb = detalharProposicaoSenadoWS((long) proposicao.getIdProposicao());
 						break;
 					}
+                    if (proposicaoDb.getComissao() == null || !proposicaoDb.getComissao().trim().equals(pautaReuniaoComissao.getComissao())) {
+                        proposicaoDb.setComissao(pautaReuniaoComissao.getComissao());
+                    }
 					proposicaoDb = save(proposicaoDb);
 					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
 							"Proposicao criada " + proposicaoDb.getId());
