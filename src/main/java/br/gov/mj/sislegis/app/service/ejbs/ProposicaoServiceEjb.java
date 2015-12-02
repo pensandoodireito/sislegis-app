@@ -297,7 +297,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			// Para evitar ter que migrar muitos dados, interceptamos requests
 			// mais antigos do que a criacao dessas entidade, e convertemos na
 			// hora.
-			if (dataReuniao.getTime() < 1449100800000) {
+			if (dataReuniao.getTime() < 1449100800000l) {
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
 						"Reuniao mais antiga que refactoring, utilizando metodo alternativo");
 				Query query = em.createNativeQuery("select * from reuniaoproposicao r where r.reuniao_id=:rid",
