@@ -50,7 +50,7 @@ public class EtapaRoadmapComissaoServiceEjb extends AbstractPersistence<EtapaRoa
             etapaRoadmapComissao.setProposicao(proposicao);
             etapaRoadmapComissao.setComissao(comissao);
 
-            EtapaRoadmapComissao ultimaEtapa = buscarUltimaEtapa(idProposicao, idComissao);
+            EtapaRoadmapComissao ultimaEtapa = buscarUltimaEtapa(idProposicao);
             Integer proximaOrdem = ultimaEtapa == null ? 1 : ultimaEtapa.getOrdem() + 1;
             etapaRoadmapComissao.setOrdem(proximaOrdem);
 
@@ -58,6 +58,8 @@ public class EtapaRoadmapComissaoServiceEjb extends AbstractPersistence<EtapaRoa
             return etapaRoadmapComissao;
 
         } else {
+            Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
+                    "Tentativa de inserir roadmap para comissao ou proposicao nao encontrada: Comissao: " + idComissao + " Proposicao: " + idProposicao);
             return null;
         }
     }
@@ -81,12 +83,11 @@ public class EtapaRoadmapComissaoServiceEjb extends AbstractPersistence<EtapaRoa
         query.executeUpdate();
     }
 
-    private EtapaRoadmapComissao buscarUltimaEtapa(Long idProposicao, Long idComissao) {
+    private EtapaRoadmapComissao buscarUltimaEtapa(Long idProposicao) {
         try {
-            TypedQuery<EtapaRoadmapComissao> query = em.createQuery("FROM EtapaRoadmapComissao WHERE proposicao.id = :idProposicao AND comissao.id = :idComissao ORDER BY ordem DESC ", EtapaRoadmapComissao.class);
+            TypedQuery<EtapaRoadmapComissao> query = em.createQuery("FROM EtapaRoadmapComissao WHERE proposicao.id = :idProposicao ORDER BY ordem DESC ", EtapaRoadmapComissao.class);
 
             query.setParameter("idProposicao", idProposicao);
-            query.setParameter("idComissao", idComissao);
             query.setMaxResults(1);
 
             return query.getSingleResult();

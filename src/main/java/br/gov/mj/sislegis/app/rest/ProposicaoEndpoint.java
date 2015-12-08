@@ -335,6 +335,10 @@ public class ProposicaoEndpoint {
 	public Response inserirEtapaRoadmap(AddEtapaRoadmapWrapper addEtapaRoadmapWrapper){
 		try {
 			EtapaRoadmapComissao etapaRoadmapComissao = etapaRoadmapComissaoService.inserir(addEtapaRoadmapWrapper.getIdProposicao(), addEtapaRoadmapWrapper.getIdComissao());
+			if (etapaRoadmapComissao == null){
+				return Response.status(Response.Status.BAD_REQUEST).build();
+			}
+
 			return Response.ok(etapaRoadmapComissao).build();
 
 		} catch (Exception e) {
