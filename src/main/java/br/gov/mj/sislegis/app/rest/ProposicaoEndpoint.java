@@ -26,10 +26,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
+import br.gov.mj.sislegis.app.model.EtapaRoadmapComissao;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.service.EtapaRoadmapComissaoService;
 import org.jboss.resteasy.annotations.cache.Cache;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
@@ -49,6 +51,9 @@ public class ProposicaoEndpoint {
 
 	@Inject
 	private ProposicaoService proposicaoService;
+
+	@Inject
+	private EtapaRoadmapComissaoService etapaRoadmapComissaoService;
 
 	@GET
 	@Path("/proposicoesPautaCamara")
@@ -318,12 +323,57 @@ public class ProposicaoEndpoint {
 		return proposicaoService.listarHistoricoPosicionamentos(id);
 	}
 
+
 	@GET
 	@Path("/{id:[0-9]+}/pautas")
 	@Cache(maxAge = 24, noStore = false, isPrivate = false, sMaxAge = 24)
 	@Produces(MediaType.APPLICATION_JSON)
 	public SortedSet<ProposicaoPautaComissao> listPautasProposicao(@PathParam("id") Long id) throws Exception {
 		return proposicaoService.findById(id).getPautasComissoes();
+	}
+
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/inserirEtapaRoadmap")
+	public Response inserirEtapaRoadmap(AddEtapaRoadmapWrapper addEtapaRoadmapWrapper){
+		try {
+			EtapaRoadmapComissao etapaRoadmapComissao = etapaRoadmapComissaoService.inserir(addEtapaRoadmapWrapper.getIdProposicao(), addEtapaRoadmapWrapper.getComissao());
+			if (etapaRoadmapComissao == null){
+				return Response.status(Response.Status.BAD_REQUEST).build();
+			}
+
+			return Response.ok(etapaRoadmapComissao).build();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
+	}
+
+	@POST
+	@Path("/reordenarRoadmap")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response reordenarRoadmap(List<EtapaRoadmapComissao> etapasRoadmap){
+		try {
+			etapaRoadmapComissaoService.reordenar(etapasRoadmap);
+			return Response.ok().build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
+	}
+
+	@DELETE
+	@Path("/removerEtapaRoadmap/{idEtapaRoadmap:[0-9][0-9]*}")
+	public Response removerEtapaRoadmap(@PathParam("idEtapaRoadmap") Long idEtapaRoadmap){
+		try {
+			etapaRoadmapComissaoService.remover(idEtapaRoadmap);
+			return Response.ok().build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
 	}
 
 }
@@ -377,5 +427,26 @@ class PosicionamentoProposicaoWrapper {
 
 	public void setPreliminar(boolean preliminar) {
 		this.preliminar = preliminar;
+	}
+}
+
+class AddEtapaRoadmapWrapper {
+	Long idProposicao;
+	String comissao;
+
+	public Long getIdProposicao() {
+		return idProposicao;
+	}
+
+	public void setIdProposicao(Long idProposicao) {
+		this.idProposicao = idProposicao;
+	}
+
+	public String getComissao() {
+		return comissao;
+	}
+
+	public void setComissao(String comissao) {
+		this.comissao = comissao;
 	}
 }
