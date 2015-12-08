@@ -10,8 +10,6 @@ public interface EtapaRoadmapComissaoService extends Service<EtapaRoadmapComissa
 
     EtapaRoadmapComissao inserir(Long idProposicao, Long idComissao);
 
-    List<EtapaRoadmapComissao> listarPorProposicao(Long idProposicao);
-
     void reordenar(List<EtapaRoadmapComissao> etapasReordenadas);
 
     void remover(Long idEtapa);

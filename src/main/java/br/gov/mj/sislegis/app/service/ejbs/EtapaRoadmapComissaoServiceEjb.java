@@ -11,7 +11,11 @@ import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,13 +60,6 @@ public class EtapaRoadmapComissaoServiceEjb extends AbstractPersistence<EtapaRoa
         } else {
             return null;
         }
-    }
-
-    @Override
-    public List<EtapaRoadmapComissao> listarPorProposicao(Long idProposicao) {
-        TypedQuery<EtapaRoadmapComissao> query = em.createQuery("FROM EtapaRoadmapComissao WHERE proposicao.id = :idProposicao ORDER BY ordem DESC ", EtapaRoadmapComissao.class);
-        query.setParameter("idProposicao", idProposicao);
-        return query.getResultList();
     }
 
     @Override
