@@ -26,7 +26,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
-import br.gov.mj.sislegis.app.model.*;
+import br.gov.mj.sislegis.app.model.EtapaRoadmapComissao;
+import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
+import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Reuniao;
+import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.service.EtapaRoadmapComissaoService;
 import org.jboss.resteasy.annotations.cache.Cache;
 
