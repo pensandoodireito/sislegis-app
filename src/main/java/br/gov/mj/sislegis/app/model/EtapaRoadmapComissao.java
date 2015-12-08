@@ -1,10 +1,18 @@
 package br.gov.mj.sislegis.app.model;
 
 import br.gov.mj.sislegis.app.rest.serializers.CompactProposicaoSerializer;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -14,6 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Entity
 @XmlRootElement
 @Table(name = "etapa_roadmap_comissao")
+@JsonIgnoreProperties({ "proposicao" })
 public class EtapaRoadmapComissao extends AbstractEntity {
 
     @Id
@@ -21,7 +30,6 @@ public class EtapaRoadmapComissao extends AbstractEntity {
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
 
-    @JsonIgnore
     @JoinColumn(name = "proposicao_id")
     @ManyToOne(fetch = FetchType.EAGER)
     private Proposicao proposicao;
