@@ -352,7 +352,7 @@ public class ProposicaoEndpoint {
 	}
 
 	@POST
-	@Path("/alterarOrdemEtapaRoadmap")
+	@Path("/reordenarRoadmap")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response reordenarRoadmap(List<EtapaRoadmapComissao> etapasRoadmap){
 		try {

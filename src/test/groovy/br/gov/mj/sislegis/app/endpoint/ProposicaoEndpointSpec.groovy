@@ -78,7 +78,7 @@ class ProposicaoEndpointSpec extends Specification {
     def "deve reordenar o roadmap de comissoes de uma proposicao"() {
 
         given:
-        def caminho = "/sislegis/rest/proposicaos/alterarOrdemEtapaRoadmap/"
+        def caminho = "/sislegis/rest/proposicaos/reordenarRoadmap/"
         def etapa1 = [id: 8595, ordem: 9]
         def etapa2 = [id: 8596, ordem: 10]
         def dados = [etapa1, etapa2]
