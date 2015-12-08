@@ -1,6 +1,7 @@
 package br.gov.mj.sislegis.app.model;
 
 import br.gov.mj.sislegis.app.rest.serializers.CompactProposicaoSerializer;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -22,7 +23,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Entity
 @XmlRootElement
 @Table(name = "etapa_roadmap_comissao")
-@JsonIgnoreProperties({ "proposicao" })
 public class EtapaRoadmapComissao extends AbstractEntity {
 
     @Id
@@ -30,13 +30,12 @@ public class EtapaRoadmapComissao extends AbstractEntity {
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
 
+    @JsonIgnore
     @JoinColumn(name = "proposicao_id")
     @ManyToOne(fetch = FetchType.EAGER)
     private Proposicao proposicao;
 
-    @JoinColumn(name = "comissao_id")
-    @ManyToOne(fetch = FetchType.EAGER)
-    private Comissao comissao;
+    private String comissao;
 
     private Integer ordem;
 
@@ -48,7 +47,6 @@ public class EtapaRoadmapComissao extends AbstractEntity {
         this.id = id;
     }
 
-    @JsonSerialize(using = CompactProposicaoSerializer.class)
     public Proposicao getProposicao() {
         return proposicao;
     }
@@ -57,11 +55,11 @@ public class EtapaRoadmapComissao extends AbstractEntity {
         this.proposicao = proposicao;
     }
 
-    public Comissao getComissao() {
+    public String getComissao() {
         return comissao;
     }
 
-    public void setComissao(Comissao comissao) {
+    public void setComissao(String comissao) {
         this.comissao = comissao;
     }
 

@@ -334,7 +334,7 @@ public class ProposicaoEndpoint {
 	@Path("/inserirEtapaRoadmap")
 	public Response inserirEtapaRoadmap(AddEtapaRoadmapWrapper addEtapaRoadmapWrapper){
 		try {
-			EtapaRoadmapComissao etapaRoadmapComissao = etapaRoadmapComissaoService.inserir(addEtapaRoadmapWrapper.getIdProposicao(), addEtapaRoadmapWrapper.getIdComissao());
+			EtapaRoadmapComissao etapaRoadmapComissao = etapaRoadmapComissaoService.inserir(addEtapaRoadmapWrapper.getIdProposicao(), addEtapaRoadmapWrapper.getComissao());
 			if (etapaRoadmapComissao == null){
 				return Response.status(Response.Status.BAD_REQUEST).build();
 			}
@@ -428,7 +428,7 @@ class PosicionamentoProposicaoWrapper {
 
 class AddEtapaRoadmapWrapper {
 	Long idProposicao;
-	Long idComissao;
+	String comissao;
 
 	public Long getIdProposicao() {
 		return idProposicao;
@@ -438,11 +438,11 @@ class AddEtapaRoadmapWrapper {
 		this.idProposicao = idProposicao;
 	}
 
-	public Long getIdComissao() {
-		return idComissao;
+	public String getComissao() {
+		return comissao;
 	}
 
-	public void setIdComissao(Long idComissao) {
-		this.idComissao = idComissao;
+	public void setComissao(String comissao) {
+		this.comissao = comissao;
 	}
 }

@@ -6,7 +6,7 @@ import spock.lang.Specification
 
 class ProposicaoEndpointSpec extends Specification {
 
-    def token = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJkYmM1NGUxZC1kODljLTQ1ZjMtOWFiZS0wMzBhMTU4MjExNDYiLCJleHAiOjE0NDk2MDMyMDcsIm5iZiI6MCwiaWF0IjoxNDQ5NjAyOTA3LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2F1dGgvcmVhbG1zL3Npc2xlZ2lzIiwiYXVkIjoic2lzbGVnaXMiLCJzdWIiOiJkZjFiMDE5My03ZDc2LTRmMTUtYWFlNy1hY2NlNzY2ZjA2N2MiLCJhenAiOiJzaXNsZWdpcyIsInNlc3Npb25fc3RhdGUiOiIyOWRkYTI4YS1kOGM2LTRlNGMtYWY4Yi05ODNlOTViZjA1NmUiLCJjbGllbnRfc2Vzc2lvbiI6IjBhMjQ3MDM2LTAzNDYtNDVjYy04ZGM0LTdhNWY4MTIwMDg4YSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vc2lzbGVnaXMubG9jYWwiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50Iiwidmlldy1wcm9maWxlIl19fSwibmFtZSI6Ikd1c3Rhdm8gRGVsZ2FkbyIsInByZWZlcnJlZF91c2VybmFtZSI6Imd1c3Rhdm8iLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiRGVsZ2FkbyIsImVtYWlsIjoiZ2NkZWxnYWRvQGdtYWlsLmNvbSJ9.rBXfTX2FjGBN60uU3AU5IKI7yTn0OMyTUBTLYx7F1BFr31EI5z6Q5uJvmVElrk7xsBtf8qSdOUu54SUfqU4LcxQiTeZRKb_32Fmd7K-Yjml8TZL4kFqmV9NttULMpnwD0XhSXLSPLWdyt07w08SR8-GHdrkut1GzxBmXxImDamqLsy_dnJ1brxZ4Os2TxI188CYu4Sz32DhA4Y-0Co7mql7lto9L-XmZ42LKRL4_NUg9gBO_gQOjuYmvtgUsX57f9SLjyj4Ulz1IGPYl8M0IwlasFFUOhCVJAFxaUFWiu91OvQidQzuc7sF-tD9vdFncVHAPer-OFmsMTzY0VIh0eA"
+    def token = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJmNWEwNDdkZC03NjgwLTRlNzEtYWJkNi0wZjZjM2U2NDdmY2YiLCJleHAiOjE0NDk2MTA1NzUsIm5iZiI6MCwiaWF0IjoxNDQ5NjEwMjc1LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2F1dGgvcmVhbG1zL3Npc2xlZ2lzIiwiYXVkIjoic2lzbGVnaXMiLCJzdWIiOiJkZjFiMDE5My03ZDc2LTRmMTUtYWFlNy1hY2NlNzY2ZjA2N2MiLCJhenAiOiJzaXNsZWdpcyIsInNlc3Npb25fc3RhdGUiOiI1M2VlN2NjMC0wNDI0LTQ4YzMtOTk3ZC04Zjk2ZTZkMGJkMWMiLCJjbGllbnRfc2Vzc2lvbiI6IjViNjY0ZGUzLWU1YWUtNGRkZC1hYzVkLThjMTljNTAzNDRjMiIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vc2lzbGVnaXMubG9jYWwiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50Iiwidmlldy1wcm9maWxlIl19fSwibmFtZSI6Ikd1c3Rhdm8gRGVsZ2FkbyIsInByZWZlcnJlZF91c2VybmFtZSI6Imd1c3Rhdm8iLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiRGVsZ2FkbyIsImVtYWlsIjoiZ2NkZWxnYWRvQGdtYWlsLmNvbSJ9.qzuxDoKgguzJ7URAavKERGHlNbwwU35KurKrnT2x56B4AhSDI1vOdtR9mYgoaNGlBGIsdjZ4ln8UufvEdHQyeO2DU69-UprW5K3JRexYvgihL6Jd8BCTFBihaecVwF8I9SZG4_kT_XPzTwdv431N-kY94rFx-xQFUxOA4rulfOcZdh5AXWuU2xCAvd1lKawIUBvqXiYgA0xNpl9bIZjIgdRWgX6-kSId-xDZ98S0GDMfev54M96W_j1SkvzR_9j6Tjptk-vYpyKDBdlBuDxTc2idY-rv07PIvzmCnm8Vk3R-jeHv88fX0d7mOW1z4ruWS8E5arhC-qIUj4otOF4MaA"
     def client = new RESTClient("http://localhost:8080/")
     def cabecalho = [Authorization: token]
 
@@ -47,8 +47,8 @@ class ProposicaoEndpointSpec extends Specification {
         given:
         def caminho = "/sislegis/rest/proposicaos/inserirEtapaRoadmap"
         def idProposicao = 8585
-        def idComissao = 5
-        def dados = [idProposicao: idProposicao, idComissao: idComissao]
+        def comissao = "PLEN"
+        def dados = [idProposicao: idProposicao, comissao: comissao]
 
         when:
         def resp = client.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
@@ -64,7 +64,7 @@ class ProposicaoEndpointSpec extends Specification {
     def "deve remover uma etapa no roadmap de comissoes"() {
 
         given:
-        def idEtapaRoadmap = 8592
+        def idEtapaRoadmap = 8594
         def caminho = "/sislegis/rest/proposicaos/removerEtapaRoadmap/" + idEtapaRoadmap
 
         when:
@@ -79,8 +79,8 @@ class ProposicaoEndpointSpec extends Specification {
 
         given:
         def caminho = "/sislegis/rest/proposicaos/alterarOrdemEtapaRoadmap/"
-        def etapa1 = [id: 8589, ordem: 1]
-        def etapa2 = [id: 8593, ordem: 10]
+        def etapa1 = [id: 8595, ordem: 9]
+        def etapa2 = [id: 8596, ordem: 10]
         def dados = [etapa1, etapa2]
 
         when:

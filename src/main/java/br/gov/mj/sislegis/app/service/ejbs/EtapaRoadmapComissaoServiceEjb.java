@@ -1,6 +1,5 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
-import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.EtapaRoadmapComissao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
@@ -41,11 +40,10 @@ public class EtapaRoadmapComissaoServiceEjb extends AbstractPersistence<EtapaRoa
     }
 
     @Override
-    public EtapaRoadmapComissao inserir(Long idProposicao, Long idComissao) {
+    public EtapaRoadmapComissao inserir(Long idProposicao, String comissao) {
         Proposicao proposicao = proposicaoService.findById(idProposicao);
-        Comissao comissao = comissaoService.findById(idComissao);
 
-        if (proposicao != null && comissao != null) {
+        if (proposicao != null) {
             EtapaRoadmapComissao etapaRoadmapComissao = new EtapaRoadmapComissao();
             etapaRoadmapComissao.setProposicao(proposicao);
             etapaRoadmapComissao.setComissao(comissao);
@@ -59,7 +57,7 @@ public class EtapaRoadmapComissaoServiceEjb extends AbstractPersistence<EtapaRoa
 
         } else {
             Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
-                    "Tentativa de inserir roadmap para comissao ou proposicao nao encontrada: Comissao: " + idComissao + " Proposicao: " + idProposicao);
+                    "Tentativa de inserir roadmap para proposicao nao encontrada. Id: " + idProposicao);
             return null;
         }
     }
