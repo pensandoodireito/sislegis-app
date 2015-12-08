@@ -216,7 +216,7 @@ public class ProposicaoEndpoint {
 	}
 
 	@GET
-	@Path("/buscaIndependente/{origem:[A-Z]*}/{tipo:[A-Z]*}/{ano:[0-9]{4}}")
+	@Path("/buscaIndependente/{origem:[A-Z]*}/{tipo:[A-Z\\.]*}/{ano:[0-9]{4}}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Collection<Proposicao> buscaIndependente(@PathParam("origem") String origem, @PathParam("tipo") String tipo,
 			@QueryParam("numero") Integer numero, @PathParam("ano") Integer ano) throws Exception {
