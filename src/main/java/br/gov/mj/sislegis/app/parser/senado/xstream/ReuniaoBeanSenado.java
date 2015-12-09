@@ -54,8 +54,8 @@ public class ReuniaoBeanSenado extends br.gov.mj.sislegis.app.parser.ReuniaoBean
 
 					Materia mat = itemBean.getMateria();
 					Proposicao prop = mat.toProposicao();
-//					prop.setComissao(comissoes.get(0).getSigla() + " - " + comissoes.get(0).getNome());
-					prop.setComissao(reuniao.getComissao());
+					//prop.setComissao(comissoes.get(0).getSigla() + " - " + comissoes.get(0).getNome());
+                    prop.setComissao(reuniao.getComissao());
 					prop.setOrigem(Origem.SENADO);
 					prop.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate="
 							+ prop.getIdProposicao());
