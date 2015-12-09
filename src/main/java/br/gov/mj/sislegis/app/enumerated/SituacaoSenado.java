@@ -6,7 +6,7 @@ import br.gov.mj.sislegis.app.model.pautacomissao.SituacaoSessao;
  * Representa as situacoes das pautas de reuniao do Senado
  */
 public enum SituacaoSenado {
-	Encerrada, Realizada, Agendada, Cancelada, Convocada, Adiada, Aberta, EmAndamento;
+	Encerrada, Realizada, Agendada, Cancelada, Convocada, Adiada, Aberta, EmAndamento, Transferida;
 
 	public SituacaoSessao situacaoSessaoCorrespondente() {
 		switch (this) {
@@ -18,6 +18,7 @@ public enum SituacaoSenado {
 		case Convocada:
 		case Aberta:
 		case EmAndamento:
+		case Transferida:
 			return SituacaoSessao.Agendada;
 		case Cancelada:
 			return SituacaoSessao.Cancelada;
