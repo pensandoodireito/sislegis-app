@@ -33,5 +33,6 @@ public class CompactProposicaoSerializer extends JsonSerializer<Proposicao> {
 		jgen.writeStringField("comissao", value.getComissao());
 		jgen.writeNumberField("idProposicao", value.getIdProposicao());
 		jgen.writeStringField("origem", value.getOrigem().name());
+		jgen.writeStringField("linkProposicao", value.getLinkProposicao());
 	}
 }

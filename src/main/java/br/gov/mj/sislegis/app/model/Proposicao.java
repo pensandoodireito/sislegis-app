@@ -134,9 +134,7 @@ public class Proposicao extends AbstractEntity {
 	private SortedSet<ProposicaoPautaComissao> pautasComissoes = new TreeSet<ProposicaoPautaComissao>();
 
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-	@JoinTable(name = "tagproposicao",
-			joinColumns = {@JoinColumn(name = "proposicao_id", referencedColumnName = "id")},
-			inverseJoinColumns = {@JoinColumn(name = "tag_id", referencedColumnName = "id")})
+	@JoinTable(name = "tagproposicao", joinColumns = { @JoinColumn(name = "proposicao_id", referencedColumnName = "id") }, inverseJoinColumns = { @JoinColumn(name = "tag_id", referencedColumnName = "id") })
 	private List<Tag> tags;
 
 	@Transient
@@ -278,6 +276,15 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public String getLinkProposicao() {
+		switch (origem) {
+		case CAMARA:
+			return "http://www2.camara.leg.br/proposicoesWeb/fichadetramitacao?idProposicao=" + getIdProposicao();
+		case SENADO:
+			return "http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate=" + getIdProposicao();
+
+		default:
+			break;
+		}
 		return linkProposicao;
 	}
 
@@ -340,7 +347,7 @@ public class Proposicao extends AbstractEntity {
 	public void setListaPautasComissao(List<ProposicaoPautaComissao> listaPautasComissao) {
 		this.listaPautasComissao = listaPautasComissao;
 	}
-	
+
 	public Usuario getResponsavel() {
 		return responsavel;
 	}
@@ -388,7 +395,7 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public Integer getTotalPautasComissao() {
-		if (CollectionUtils.isNotEmpty(listaPautasComissao)){
+		if (CollectionUtils.isNotEmpty(listaPautasComissao)) {
 			totalPautasComissao = listaPautasComissao.size();
 		}
 		return totalPautasComissao;
