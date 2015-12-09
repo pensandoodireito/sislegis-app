@@ -46,9 +46,13 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @param idsProposicoes
 	 * @return
 	 */
+	Collection<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao, boolean fetchAll);
+
 	Collection<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao);
+
 	Collection<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao, String comissao, Long idResponsavel,
-			String origem, String isFavorita, Long idPosicionameto, Integer limit, Integer offset,Integer[] idsProposicoes);
+			String origem, String isFavorita, Long idPosicionameto, Integer limit, Integer offset,
+			Integer[] idsProposicoes, boolean fetchAll);
 
 	List<Proposicao> buscarPorSufixo(String sufixo);
 
@@ -156,7 +160,5 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @return
 	 */
 	List<PosicionamentoProposicao> listarHistoricoPosicionamentos(Long id);
-
-	
 
 }

@@ -2,6 +2,7 @@ package br.gov.mj.sislegis.app.rest;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,14 +69,16 @@ public class ReuniaoEndpoint {
 			@QueryParam("responsavel") Long idResponsavel, @QueryParam("posicionamento") Long idPosicionameto,
 			@QueryParam("comissao") String comissao, @QueryParam("origem") String origem,
 			@QueryParam("isFavorita") String isFavorita, @QueryParam("limit") Integer limit,
-			@QueryParam("offset") Integer offset, @QueryParam("proposicaoIds") Integer[] idsProposicoes) throws Exception {
+			@QueryParam("offset") Integer offset, @QueryParam("proposicaoIds") Integer[] idsProposicoes,
+			@QueryParam("fetchAll") Boolean fetchAll) throws Exception {
 		long start = 0;
 		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.ALL)) {
 			start = System.currentTimeMillis();
 		}
 
 		Collection<Proposicao> lista = proposicaoService.buscarProposicoesPorDataReuniao(data, comissao, idResponsavel,
-				origem, isFavorita, idPosicionameto, limit, offset, idsProposicoes);
+				origem, isFavorita, idPosicionameto, limit, offset, idsProposicoes, (fetchAll != null && fetchAll));
+
 		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.ALL)) {
 			long stop = System.currentTimeMillis();
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.ALL,
