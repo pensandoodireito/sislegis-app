@@ -21,12 +21,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import br.gov.mj.sislegis.app.service.ReuniaoService;
 import org.jboss.resteasy.annotations.GZIP;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
-import br.gov.mj.sislegis.app.service.Service;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 @Path("/reuniaos")
@@ -34,7 +34,7 @@ import br.gov.mj.sislegis.app.util.SislegisUtil;
 public class ReuniaoEndpoint {
 
 	@Inject
-	private Service<Reuniao> service;
+	private ReuniaoService service;
 
 	@Inject
 	private ProposicaoService proposicaoService;
@@ -85,6 +85,14 @@ public class ReuniaoEndpoint {
 	public List<Reuniao> listAll() {
 		List<Reuniao> results = service.listAll();
 		return results;
+	}
+
+	@GET
+	@Path("/reunioesPorMes")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Reuniao> reunioesPorMes(@QueryParam("mes") Integer mes, @QueryParam("ano") Integer ano){
+		List<Reuniao> reunioes = service.reunioesPorMes(mes, ano);
+		return reunioes;
 	}
 
 	@PUT
