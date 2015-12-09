@@ -26,12 +26,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
-import br.gov.mj.sislegis.app.model.EtapaRoadmapComissao;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
-import br.gov.mj.sislegis.app.service.EtapaRoadmapComissaoService;
 import org.jboss.resteasy.annotations.cache.Cache;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
@@ -51,9 +49,6 @@ public class ProposicaoEndpoint {
 
 	@Inject
 	private ProposicaoService proposicaoService;
-
-	@Inject
-	private EtapaRoadmapComissaoService etapaRoadmapComissaoService;
 
 	@GET
 	@Path("/proposicoesPautaCamara")
@@ -333,42 +328,11 @@ public class ProposicaoEndpoint {
 	}
 
 	@POST
+	@Path("/setRoadmapComissoes")
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/inserirEtapaRoadmap")
-	public Response inserirEtapaRoadmap(AddEtapaRoadmapWrapper addEtapaRoadmapWrapper){
+	public Response setRoadmapComissoes(RoadmapComissoesWrapper roadmapComissoesWrapper){
 		try {
-			EtapaRoadmapComissao etapaRoadmapComissao = etapaRoadmapComissaoService.inserir(addEtapaRoadmapWrapper.getIdProposicao(), addEtapaRoadmapWrapper.getComissao());
-			if (etapaRoadmapComissao == null){
-				return Response.status(Response.Status.BAD_REQUEST).build();
-			}
-
-			return Response.ok(etapaRoadmapComissao).build();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-	}
-
-	@POST
-	@Path("/reordenarRoadmap")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response reordenarRoadmap(List<EtapaRoadmapComissao> etapasRoadmap){
-		try {
-			etapaRoadmapComissaoService.reordenar(etapasRoadmap);
-			return Response.ok().build();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return Response.status(Response.Status.BAD_REQUEST).build();
-		}
-	}
-
-	@DELETE
-	@Path("/removerEtapaRoadmap/{idEtapaRoadmap:[0-9][0-9]*}")
-	public Response removerEtapaRoadmap(@PathParam("idEtapaRoadmap") Long idEtapaRoadmap){
-		try {
-			etapaRoadmapComissaoService.remover(idEtapaRoadmap);
+			proposicaoService.setRoadmapComissoes(roadmapComissoesWrapper.getIdProposicao(), roadmapComissoesWrapper.getComissoes());
 			return Response.ok().build();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -430,9 +394,9 @@ class PosicionamentoProposicaoWrapper {
 	}
 }
 
-class AddEtapaRoadmapWrapper {
-	Long idProposicao;
-	String comissao;
+class RoadmapComissoesWrapper{
+	private Long idProposicao;
+	private List<String> comissoes;
 
 	public Long getIdProposicao() {
 		return idProposicao;
@@ -442,11 +406,11 @@ class AddEtapaRoadmapWrapper {
 		this.idProposicao = idProposicao;
 	}
 
-	public String getComissao() {
-		return comissao;
+	public List<String> getComissoes() {
+		return comissoes;
 	}
 
-	public void setComissao(String comissao) {
-		this.comissao = comissao;
+	public void setComissoes(List<String> comissoes) {
+		this.comissoes = comissoes;
 	}
 }

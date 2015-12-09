@@ -176,7 +176,7 @@ public class Proposicao extends AbstractEntity {
 	private Set<ElaboracaoNormativa> elaboracoesNormativas;
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "proposicao")
-	private List<EtapaRoadmapComissao> etapasRoadmapComissoes;
+	private List<RoadmapComissao> roadmapComissoes;
 
 	public String getSigla() {
 		if (Objects.isNull(sigla))
@@ -427,12 +427,12 @@ public class Proposicao extends AbstractEntity {
 		this.elaboracoesNormativas = elaboracoesNormativas;
 	}
 
-	public List<EtapaRoadmapComissao> getEtapasRoadmapComissoes() {
-		return etapasRoadmapComissoes;
+	public List<RoadmapComissao> getRoadmapComissoes() {
+		return roadmapComissoes;
 	}
 
-	public void setEtapasRoadmapComissoes(List<EtapaRoadmapComissao> etapasRoadmapComissoes) {
-		this.etapasRoadmapComissoes = etapasRoadmapComissoes;
+	public void setRoadmapComissoes(List<RoadmapComissao> etapasRoadmapComissoes) {
+		this.roadmapComissoes = etapasRoadmapComissoes;
 	}
 
 	@JsonIgnore
