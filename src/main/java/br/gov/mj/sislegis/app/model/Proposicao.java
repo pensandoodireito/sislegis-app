@@ -1,7 +1,9 @@
 package br.gov.mj.sislegis.app.model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
@@ -33,9 +35,11 @@ import org.apache.commons.collections.CollectionUtils;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
+import br.gov.mj.sislegis.app.rest.serializers.CompactSetProposicaoSerializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
 //@formatter:off
@@ -116,8 +120,11 @@ public class Proposicao extends AbstractEntity {
 	@Transient
 	private String linkPauta;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	private Posicionamento posicao;
+	@Transient
+	private Posicionamento posicionamento;
+
+	@Transient
+	private Boolean posicionamentoPreliminar;
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	private Usuario responsavel;
@@ -126,14 +133,18 @@ public class Proposicao extends AbstractEntity {
 	@OrderBy("pautaReuniaoComissao")
 	private SortedSet<ProposicaoPautaComissao> pautasComissoes = new TreeSet<ProposicaoPautaComissao>();
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "proposicao")
-	private Set<TagProposicao> tags;
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+	@JoinTable(name = "tagproposicao", joinColumns = { @JoinColumn(name = "proposicao_id", referencedColumnName = "id") }, inverseJoinColumns = { @JoinColumn(name = "tag_id", referencedColumnName = "id") })
+	private List<Tag> tags;
 
 	@Transient
-	private Set<Comentario> listaComentario = new HashSet<>();
+	private List<Comentario> listaComentario = new ArrayList<>();
 
 	@Transient
 	private Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao = new HashSet<>();
+
+	@Transient
+	private List<ProposicaoPautaComissao> listaPautasComissao = new ArrayList<>();
 
 	@Column(nullable = false)
 	private boolean isFavorita;
@@ -147,6 +158,9 @@ public class Proposicao extends AbstractEntity {
 
 	@Transient
 	private Integer totalEncaminhamentos = 0;
+
+	@Transient
+	private Integer totalPautasComissao = 0;
 
 	@ManyToMany(fetch = FetchType.EAGER, mappedBy = "proposicoesFilha")
 	private Set<Proposicao> proposicoesPai;
@@ -262,6 +276,15 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public String getLinkProposicao() {
+		switch (origem) {
+		case CAMARA:
+			return "http://www2.camara.leg.br/proposicoesWeb/fichadetramitacao?idProposicao=" + getIdProposicao();
+		case SENADO:
+			return "http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate=" + getIdProposicao();
+
+		default:
+			break;
+		}
 		return linkProposicao;
 	}
 
@@ -278,18 +301,26 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public Posicionamento getPosicionamento() {
-		return posicao;
+		return posicionamento;
 	}
 
 	public void setPosicionamento(Posicionamento posicionamento) {
-		this.posicao = posicionamento;
+		this.posicionamento = posicionamento;
 	}
 
-	public Set<Comentario> getListaComentario() {
+	public Boolean isPosicionamentoPreliminar() {
+		return posicionamentoPreliminar;
+	}
+
+	public void setPosicionamentoPreliminar(Boolean posicionamentoPreliminar) {
+		this.posicionamentoPreliminar = posicionamentoPreliminar;
+	}
+
+	public List<Comentario> getListaComentario() {
 		return this.listaComentario;
 	}
 
-	public void setListaComentario(final Set<Comentario> listaComentario) {
+	public void setListaComentario(final List<Comentario> listaComentario) {
 		this.listaComentario = listaComentario;
 	}
 
@@ -301,12 +332,20 @@ public class Proposicao extends AbstractEntity {
 		this.listaEncaminhamentoProposicao = listaEncaminhamentoProposicao;
 	}
 
-	public Set<TagProposicao> getTags() {
+	public List<Tag> getTags() {
 		return tags;
 	}
 
-	public void setTags(Set<TagProposicao> tags) {
+	public void setTags(List<Tag> tags) {
 		this.tags = tags;
+	}
+
+	public List<ProposicaoPautaComissao> getListaPautasComissao() {
+		return listaPautasComissao;
+	}
+
+	public void setListaPautasComissao(List<ProposicaoPautaComissao> listaPautasComissao) {
+		this.listaPautasComissao = listaPautasComissao;
 	}
 
 	public Usuario getResponsavel() {
@@ -355,10 +394,23 @@ public class Proposicao extends AbstractEntity {
 		this.totalEncaminhamentos = totalEncaminhamentos;
 	}
 
+	public Integer getTotalPautasComissao() {
+		if (CollectionUtils.isNotEmpty(listaPautasComissao)) {
+			totalPautasComissao = listaPautasComissao.size();
+		}
+		return totalPautasComissao;
+	}
+
+	public void setTotalPautasComissao(Integer totalPautasComissao) {
+		this.totalPautasComissao = totalPautasComissao;
+	}
+
+	@JsonSerialize(using = CompactSetProposicaoSerializer.class)
 	public Set<Proposicao> getProposicoesPai() {
 		return proposicoesPai;
 	}
 
+	@JsonSerialize(using = CompactSetProposicaoSerializer.class)
 	public Set<Proposicao> getProposicoesFilha() {
 		return proposicoesFilha;
 	}

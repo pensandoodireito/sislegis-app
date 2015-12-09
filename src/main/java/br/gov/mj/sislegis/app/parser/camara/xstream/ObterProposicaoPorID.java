@@ -54,7 +54,13 @@ public class ObterProposicaoPorID {
 		Proposicao proposicao = new Proposicao();
 		proposicao.setAno(ano);
 		proposicao.setAutor(autor);
-		// proposicao.setComissao(comissao);
+		if (situacao != null) {
+			if (situacao.indexOf('-') > -1) {
+				situacao = situacao.substring(0, situacao.indexOf('-'));
+			}
+			proposicao.setComissao(situacao.trim());// tentando pegar a comissao
+													// da situacao
+		}
 		proposicao.setEmenta(ementa.trim());
 		proposicao.setIdProposicao(idProposicao);
 		// proposicao.setLinkProposicao(linkInteiroTeor);

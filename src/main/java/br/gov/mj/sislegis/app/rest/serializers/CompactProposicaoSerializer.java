@@ -1,6 +1,8 @@
 package br.gov.mj.sislegis.app.rest.serializers;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
+
+import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -14,6 +16,12 @@ public class CompactProposicaoSerializer extends JsonSerializer<Proposicao> {
 	public void serialize(Proposicao value, JsonGenerator jgen, SerializerProvider provider) throws IOException,
 			JsonProcessingException {
 		jgen.writeStartObject();
+		writeProposicao(value, jgen);
+
+		jgen.writeEndObject();
+	}
+
+	protected void writeProposicao(Proposicao value, JsonGenerator jgen) throws IOException, JsonGenerationException {
 		if (value.getId() != null) {
 			jgen.writeNumberField("id", value.getId());
 		}
@@ -25,6 +33,6 @@ public class CompactProposicaoSerializer extends JsonSerializer<Proposicao> {
 		jgen.writeStringField("comissao", value.getComissao());
 		jgen.writeNumberField("idProposicao", value.getIdProposicao());
 		jgen.writeStringField("origem", value.getOrigem().name());
-		jgen.writeEndObject();
+		jgen.writeStringField("linkProposicao", value.getLinkProposicao());
 	}
 }

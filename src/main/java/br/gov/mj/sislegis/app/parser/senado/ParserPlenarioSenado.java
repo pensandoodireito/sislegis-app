@@ -35,7 +35,7 @@ public class ParserPlenarioSenado {
 
 	// FIXME tem q converter
 	public Set<PautaReuniaoComissao> getProposicoes(String datIni) throws Exception {
-		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "Buscando dados da sessão do plenario");
+
 		Set<PautaReuniaoComissao> pautas = new HashSet<PautaReuniaoComissao>();
 
 		XStream xstreamSessao = new XStream();
@@ -45,6 +45,9 @@ public class ParserPlenarioSenado {
 
 		configAgendaPlenario(xstreamSessao);
 		String wsURLPlenario = "http://legis.senado.leg.br/dadosabertos/plenario/agenda/mes/" + datIni;
+		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "Buscando dados da sessão do plenario");
+		
+
 		ParserFetcher.fetchXStream(wsURLPlenario, xstreamSessao, agendaPlenario);
 		Comissao plenario = new Comissao();
 		plenario.setSigla("PLEN");
@@ -63,11 +66,7 @@ public class ParserPlenarioSenado {
 
 				for (Materia mat : sessao.materias.materias) {
 					Proposicao proposicao = mat.toProposicao();
-					// TODO: qual comissao?
 					proposicao.setComissao("PLEN");
-					proposicao.setOrigem(Origem.SENADO);
-					proposicao.setLinkProposicao("http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate="
-							+ proposicao.getIdProposicao());
 
 					ProposicaoPautaComissao propPauta = new ProposicaoPautaComissao(pauta, proposicao);
 

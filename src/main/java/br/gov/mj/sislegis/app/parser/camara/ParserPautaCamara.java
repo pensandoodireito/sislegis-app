@@ -28,13 +28,13 @@ public class ParserPautaCamara {
 		Long idComissao = 2001L;
 		String datIni = "20151102";
 		String datFim = "20151109";
-		Set<PautaReuniaoComissao> pautas = parser.getPautaComissao(idComissao, datIni, datFim);
+		Set<PautaReuniaoComissao> pautas = parser.getPautaComissao("", idComissao, datIni, datFim);
 		for (Iterator iterator = pautas.iterator(); iterator.hasNext();) {
 			PautaReuniaoComissao pautaReuniaoComissao = (PautaReuniaoComissao) iterator.next();
 			System.out.println(pautaReuniaoComissao);
 			for (Iterator iterator2 = pautaReuniaoComissao.getProposicoesDaPauta().iterator(); iterator2.hasNext();) {
 				ProposicaoPautaComissao ppc = (ProposicaoPautaComissao) iterator2.next();
-				System.out.println("\t" + ppc + " " + ppc.getProposicao()+" ");
+				System.out.println("\t" + ppc + " " + ppc.getProposicao() + " ");
 				System.out.println("\t Resultado: " + ppc.getResultado());
 
 			}
@@ -61,7 +61,7 @@ public class ParserPautaCamara {
 		return pauta;
 	}
 
-	public Set<PautaReuniaoComissao> getPautaComissao(Long idComissao, String datIni, String datFim)
+	public Set<PautaReuniaoComissao> getPautaComissao(String comissaoNome, Long idComissao, String datIni, String datFim)
 			throws IOException, ParseException {
 
 		Set<PautaReuniaoComissao> pautas = new HashSet<PautaReuniaoComissao>();
