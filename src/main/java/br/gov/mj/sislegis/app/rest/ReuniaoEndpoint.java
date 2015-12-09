@@ -2,6 +2,7 @@ package br.gov.mj.sislegis.app.rest;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -64,13 +65,16 @@ public class ReuniaoEndpoint {
 	@GET
 	@Path("/findByData")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Collection<Proposicao> findByData(@QueryParam("data") Date data) throws Exception {
+	public Collection<Proposicao> findByData(@QueryParam("data") Date data, @QueryParam("fetchAll") Boolean fetchAll)
+			throws Exception {
 		long start = 0;
 		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.ALL)) {
 			start = System.currentTimeMillis();
 		}
 
-		Collection<Proposicao> lista = proposicaoService.buscarProposicoesPorDataReuniao(data);
+		Collection<Proposicao> lista = proposicaoService.buscarProposicoesPorDataReuniao(data,
+				(fetchAll != null && fetchAll));
+
 		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.ALL)) {
 			long stop = System.currentTimeMillis();
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.ALL,

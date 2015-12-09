@@ -32,6 +32,7 @@ public interface ProposicaoService extends Service<Proposicao> {
 
 	Proposicao buscarPorId(Integer id);
 
+	Collection<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao, boolean fetchAll);
 	Collection<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao);
 
 	List<Proposicao> buscarPorSufixo(String sufixo);
@@ -135,6 +136,7 @@ public interface ProposicaoService extends Service<Proposicao> {
 
 	/**
 	 * Retorna o historico de alteracoes de posicionamento por id da proposicao
+	 * 
 	 * @param id
 	 * @return
 	 */

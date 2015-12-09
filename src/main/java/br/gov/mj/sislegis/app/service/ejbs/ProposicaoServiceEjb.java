@@ -310,6 +310,11 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	@Override
 	public Collection<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao) {
+		return buscarProposicoesPorDataReuniao(dataReuniao, false);
+	}
+
+	@Override
+	public Collection<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao, boolean fetchAll) {
 		List<Proposicao> proposicoes = new ArrayList<>();
 		Reuniao reuniao = reuniaoService.buscaReuniaoPorData(dataReuniao);
 		if (!Objects.isNull(reuniao)) {
@@ -336,9 +341,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 						ppc.setOrdemPauta(rp.getSeqOrdemPauta());
 						p.getPautasComissoes().add(ppc);
 					}
-					popularDadosTransientes(p);
+					if (!fetchAll) {
+						popularDadosTransientes(p);
+					}
 					proposicoes.add(p);
 				}
+
 			} else {
 				Query query = em
 						.createNativeQuery(
@@ -347,12 +355,28 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				query.setParameter("rid", reuniao.getId());
 				List<Proposicao> proposicoesReuniao = query.getResultList();
 				proposicoes.addAll(proposicoesReuniao);
-				popularDadosTransientes(proposicoes);
+				if (!fetchAll) {
+					popularDadosTransientes(proposicoes);
+				}
 			}
 
 		}
-
+		if (fetchAll) {
+			popularTodosDados(proposicoes);
+		}
 		return proposicoes;
+	}
+
+	private void popularTodosDados(List<Proposicao> proposicoesReuniao) {
+		for (Iterator iterator = proposicoesReuniao.iterator(); iterator.hasNext();) {
+			Proposicao proposicao = (Proposicao) iterator.next();
+			proposicao.setListaComentario(comentarioService.findByProposicaoId(proposicao.getId()));
+			proposicao.setTotalComentarios(proposicao.getListaComentario().size());
+			proposicao.setListaEncaminhamentoProposicao(new HashSet<EncaminhamentoProposicao>(
+					encaminhamentoProposicaoService.findByProposicao(proposicao.getId())));
+			proposicao.setTotalEncaminhamentos(proposicao.getListaEncaminhamentoProposicao().size());
+		}
+
 	}
 
 	@Override
