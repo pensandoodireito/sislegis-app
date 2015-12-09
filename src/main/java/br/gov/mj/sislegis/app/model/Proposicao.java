@@ -276,6 +276,9 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public String getLinkProposicao() {
+		if (origem == null) {
+			return null;
+		}
 		switch (origem) {
 		case CAMARA:
 			return "http://www2.camara.leg.br/proposicoesWeb/fichadetramitacao?idProposicao=" + getIdProposicao();
