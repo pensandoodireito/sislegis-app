@@ -1,6 +1,7 @@
 package br.gov.mj.sislegis.app.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import br.gov.mj.sislegis.app.rest.serializers.CompactProposicaoSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -23,15 +24,14 @@ public class RoadmapComissao implements Serializable {
 
     @Id
     @ManyToOne
-    @JsonIgnore
     @JoinColumn(name = "proposicao_id")
+    @JsonSerialize(using = CompactProposicaoSerializer.class)
     private Proposicao proposicao;
 
     @Id
     private String comissao;
 
     @Id
-    @JsonIgnore
     private Integer ordem;
 
     public Proposicao getProposicao() {

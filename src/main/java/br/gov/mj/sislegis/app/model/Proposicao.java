@@ -176,6 +176,7 @@ public class Proposicao extends AbstractEntity {
 	private Set<ElaboracaoNormativa> elaboracoesNormativas;
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "proposicao")
+	@OrderBy("ordem")
 	private List<RoadmapComissao> roadmapComissoes;
 
 	public String getSigla() {
