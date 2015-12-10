@@ -899,6 +899,11 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				proposicao.setPosicionamento(posicionamentoProposicao.getPosicionamento());
 				proposicao.setPosicionamentoPreliminar(posicionamentoProposicao.isPreliminar());
 			}
+
+			proposicao.setRoadmapComissoesUI(new ArrayList<String>());
+			for (RoadmapComissao roadmapComissao : proposicao.getRoadmapComissoes()){
+				proposicao.getRoadmapComissoesUI().add(roadmapComissao.getComissao());
+			}
 		}
 	}
 

@@ -1,15 +1,11 @@
 package br.gov.mj.sislegis.app.model;
 
-import br.gov.mj.sislegis.app.rest.serializers.CompactProposicaoSerializer;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 /**
@@ -18,14 +14,12 @@ import java.io.Serializable;
 
 @Entity
 @IdClass(RoadmapComissao.class)
-@XmlRootElement
 @Table(name = "roadmap_comissao")
 public class RoadmapComissao implements Serializable {
 
     @Id
     @ManyToOne
     @JoinColumn(name = "proposicao_id")
-    @JsonSerialize(using = CompactProposicaoSerializer.class)
     private Proposicao proposicao;
 
     @Id
