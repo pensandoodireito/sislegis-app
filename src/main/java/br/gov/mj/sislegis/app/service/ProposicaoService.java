@@ -142,4 +142,11 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 */
 	List<PosicionamentoProposicao> listarHistoricoPosicionamentos(Long id);
 
+	/**
+	 * Atualiza o roadmap (roteiro) completo de comissoes por onde uma proposicao deve passar
+	 * @param idProposicao
+	 * @param comissoes
+     */
+	void setRoadmapComissoes(Long idProposicao, List<String> comissoes);
+
 }
