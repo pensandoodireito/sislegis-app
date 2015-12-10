@@ -31,6 +31,7 @@ public class RoadmapComissao implements Serializable {
     private String comissao;
 
     @Id
+    @JsonIgnore
     private Integer ordem;
 
     public Proposicao getProposicao() {
