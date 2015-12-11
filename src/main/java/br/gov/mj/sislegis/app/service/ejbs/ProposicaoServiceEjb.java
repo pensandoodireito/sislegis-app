@@ -23,6 +23,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
@@ -982,27 +983,6 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			proposicao.setTotalComentarios(comentarioService.totalByProposicao(proposicao.getId()));
 			proposicao.setTotalEncaminhamentos(encaminhamentoProposicaoService.totalByProposicao(proposicao.getId()));
 			proposicao.setTotalPautasComissao(totalProposicaoPautaComissaoByProposicao(proposicao.getId()));
-
-			PosicionamentoProposicao posicionamentoProposicao;
-			try {
-				TypedQuery<PosicionamentoProposicao> query = em.createQuery(
-						"FROM PosicionamentoProposicao WHERE proposicao.id = :id ORDER BY dataCriacao DESC ",
-						PosicionamentoProposicao.class);
-
-				query.setParameter("id", proposicao.getId());
-				query.setMaxResults(1);
-
-				posicionamentoProposicao = query.getSingleResult();
-			} catch (NoResultException e) {
-				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
-						"Nenhum posicionamento encontrado no historico, para a proposicao id: " + proposicao.getId());
-				posicionamentoProposicao = null;
-			}
-
-			if (posicionamentoProposicao != null) {
-				proposicao.setPosicionamento(posicionamentoProposicao.getPosicionamento());
-				proposicao.setPosicionamentoPreliminar(posicionamentoProposicao.isPreliminar());
-			}
 
 			proposicao.setRoadmapComissoesUI(new ArrayList<String>());
 			for (RoadmapComissao roadmapComissao : proposicao.getRoadmapComissoes()){

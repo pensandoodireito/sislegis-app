@@ -39,6 +39,7 @@ import br.gov.mj.sislegis.app.rest.serializers.CompactSetProposicaoSerializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
@@ -176,9 +177,9 @@ public class Proposicao extends AbstractEntity {
 
 	@JsonIgnore
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "proposicao")
-	@OrderBy("ordem")
+	@OrderBy("ordem")	
 	private List<RoadmapComissao> roadmapComissoes;
-
+	//TODO tentar no futuro usar serializar e desserializer
 	@Transient
 	private List<String> roadmapComissoesUI;
 
