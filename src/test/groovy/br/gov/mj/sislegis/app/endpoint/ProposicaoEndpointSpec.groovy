@@ -4,13 +4,13 @@ import groovyx.net.http.ContentType
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
 
-class ProposicaoEndpointSpec extends Specification{
+class ProposicaoEndpointSpec extends Specification {
 
-    def token = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiI1NzA0NDA4MC01MTE1LTQwY2QtYTNkYS0zY2ExYzYwZjE1MzQiLCJleHAiOjE0NDgwMjAyNDUsIm5iZiI6MCwiaWF0IjoxNDQ4MDE5OTQ1LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2F1dGgvcmVhbG1zL3Npc2xlZ2lzIiwiYXVkIjoic2lzbGVnaXMiLCJzdWIiOiJkZjFiMDE5My03ZDc2LTRmMTUtYWFlNy1hY2NlNzY2ZjA2N2MiLCJhenAiOiJzaXNsZWdpcyIsInNlc3Npb25fc3RhdGUiOiI2ZDcyZjM5MS02NWI5LTRiYWEtODU5OS04OTBiYWFlMWE3YzciLCJjbGllbnRfc2Vzc2lvbiI6ImFmNTQ1ZDI3LTlmZjItNDI4MS1iYWZkLWJmNDJlZWRhOGZiNSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vc2lzbGVnaXMubG9jYWwiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50Iiwidmlldy1wcm9maWxlIl19fSwibmFtZSI6Ikd1c3Rhdm8gRGVsZ2FkbyIsInByZWZlcnJlZF91c2VybmFtZSI6Imd1c3Rhdm8iLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiRGVsZ2FkbyIsImVtYWlsIjoiZ2NkZWxnYWRvQGdtYWlsLmNvbSJ9.Q7mXvnZvlueteSmZvVPBYzeSt2Ybaf2YouL2W-rEdAWlVoIs0Q-4kZVoAkaEwC9DhNNggjkG5K84g9YMHLHhBMtRD2XGuDNDXJObZnNiyYyi2g_f6rmAI7DlOaiaoWEJgpupDy02AxF-zcxhlfydpkY9AHkbkE1qbmRkpPD_duMJxuJQN8FOyoBSdWrX8C44fh9CkDmVK0z1kQagHrhK-qsuIIQcrS2giEKAHArFXN7H3brj4Mo0ZJhK9jXA9gd1-xvdwZ7lQmMTY52k26POT43hOZbnolj4wf_zgqNJZmIiXT0hD6pysaCRXEyTSYnsHk81jKBabCj8qtv8zomKLA"
+    def token = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiIzMGE4M2ZiNC0wY2NmLTQyZWQtYmM3OS1jYzNmMjE3MTU2NDEiLCJleHAiOjE0NDk3NzMxNjgsIm5iZiI6MCwiaWF0IjoxNDQ5NzcyODY4LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2F1dGgvcmVhbG1zL3Npc2xlZ2lzIiwiYXVkIjoic2lzbGVnaXMiLCJzdWIiOiJkZjFiMDE5My03ZDc2LTRmMTUtYWFlNy1hY2NlNzY2ZjA2N2MiLCJhenAiOiJzaXNsZWdpcyIsInNlc3Npb25fc3RhdGUiOiJjMGI0NDBkYy0zZTYxLTRmMDMtYjM2My0xYzkzOTUxNjY1ZWMiLCJjbGllbnRfc2Vzc2lvbiI6IjNhZTcxZWQ4LWZmN2EtNDBlOC04ODk5LTM4YjM5ODgwNjdlYyIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vc2lzbGVnaXMubG9jYWwiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50Iiwidmlldy1wcm9maWxlIl19fSwibmFtZSI6Ikd1c3Rhdm8gRGVsZ2FkbyIsInByZWZlcnJlZF91c2VybmFtZSI6Imd1c3Rhdm8iLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiRGVsZ2FkbyIsImVtYWlsIjoiZ2NkZWxnYWRvQGdtYWlsLmNvbSJ9.NjZ73I5LeaZCz3prqF08E2_XHyXlIeloEpVg0Rn14rSl7wEEy_gSPthXVV2_roxuVaIsbeT8hnEK4zLiYVJvYABTo6qVR-EADLBl2ERzwUvoohX-LXiqKFStMEimFAqReF--ecTW5Yw7pDtkOIdF0zWHhcg5MfQl3UsgEIh7pO0E-Q4WX8YdZc9-8bKZIIWS6GEAHre9cmqFmge6pZTQkKRYUgKK4Ls918bamaIGxesvx8e6oH8MY5cL4trdLSVdfAj_87P1rnufIvYXl3DPCrP2aaDAuxdW32eeyIsRA_KtQ5Dp-zR6v-pI0XXJ6LRZSkbzf1xFhu3NqNVDasDq6g"
     def client = new RESTClient("http://localhost:8080/")
     def cabecalho = [Authorization: token]
 
-    def "deve alterar o posicionamento de uma proposicao"(){
+    def "deve alterar o posicionamento de uma proposicao"() {
 
         given:
         def caminho = "/sislegis/rest/proposicaos/alterarPosicionamento"
@@ -26,7 +26,7 @@ class ProposicaoEndpointSpec extends Specification{
         assert resp.status == 200 // status 200 = Ok
     }
 
-    def "deve listar o historico de alteracoes de posicionamento"(){
+    def "deve listar o historico de alteracoes de posicionamento"() {
 
         given:
         def id = 35
@@ -36,10 +36,23 @@ class ProposicaoEndpointSpec extends Specification{
         def resp = client.get(path: caminho, headers: cabecalho)
 
         then:
-        resp.data.each{
+        resp.data.each {
             println it
         }
 
+    }
+
+    def "deve atualizar o roadmap completo de comissoes de uma proposicao"(){
+
+        given:
+        def caminho = "/sislegis/rest/proposicaos/setRoadmapComissoes"
+        def dados = [idProposicao: 8585, comissoes: ['PLEN', 'CAPADR', 'XXX']]
+
+        when:
+        def resp = client.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
+
+        then:
+        assert resp.status == 200 // status 200 = Ok
     }
 
 }

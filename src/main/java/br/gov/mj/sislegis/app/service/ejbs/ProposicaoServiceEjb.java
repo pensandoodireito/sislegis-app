@@ -38,6 +38,7 @@ import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
+import br.gov.mj.sislegis.app.model.RoadmapComissao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
@@ -850,6 +851,31 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		return posicionamentosProposicao;
 	}
 
+	@Override
+	public void setRoadmapComissoes(Long idProposicao, List<String> comissoes) {
+		Proposicao proposicao = findById(idProposicao);
+
+		if (proposicao == null) {
+			throw new IllegalArgumentException("Tentativa de inserir roadmap para proposicao nao encontrada. Id: " + idProposicao);
+		}
+
+		for (RoadmapComissao roadmapComissao : proposicao.getRoadmapComissoes()){
+			em.remove(roadmapComissao);
+		}
+
+		RoadmapComissao roadmapComissao;
+		int ordem = 1;
+		for (String comissao : comissoes) {
+			roadmapComissao = new RoadmapComissao();
+			roadmapComissao.setProposicao(proposicao);
+			roadmapComissao.setComissao(comissao);
+			roadmapComissao.setOrdem(ordem);
+
+			em.persist(roadmapComissao);
+			ordem++;
+		}
+	}
+
 	/**
 	 * Este comparador checa por alterações na proposição.
 	 */
@@ -956,6 +982,32 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			proposicao.setTotalComentarios(comentarioService.totalByProposicao(proposicao.getId()));
 			proposicao.setTotalEncaminhamentos(encaminhamentoProposicaoService.totalByProposicao(proposicao.getId()));
 			proposicao.setTotalPautasComissao(totalProposicaoPautaComissaoByProposicao(proposicao.getId()));
+
+			PosicionamentoProposicao posicionamentoProposicao;
+			try {
+				TypedQuery<PosicionamentoProposicao> query = em.createQuery(
+						"FROM PosicionamentoProposicao WHERE proposicao.id = :id ORDER BY dataCriacao DESC ",
+						PosicionamentoProposicao.class);
+
+				query.setParameter("id", proposicao.getId());
+				query.setMaxResults(1);
+
+				posicionamentoProposicao = query.getSingleResult();
+			} catch (NoResultException e) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+						"Nenhum posicionamento encontrado no historico, para a proposicao id: " + proposicao.getId());
+				posicionamentoProposicao = null;
+			}
+
+			if (posicionamentoProposicao != null) {
+				proposicao.setPosicionamento(posicionamentoProposicao.getPosicionamento());
+				proposicao.setPosicionamentoPreliminar(posicionamentoProposicao.isPreliminar());
+			}
+
+			proposicao.setRoadmapComissoesUI(new ArrayList<String>());
+			for (RoadmapComissao roadmapComissao : proposicao.getRoadmapComissoes()){
+				proposicao.getRoadmapComissoesUI().add(roadmapComissao.getComissao());
+			}
 		}
 	}
 

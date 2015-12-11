@@ -174,6 +174,14 @@ public class Proposicao extends AbstractEntity {
 	@JoinTable(name = "proposicao_elaboracao_normativa", joinColumns = { @JoinColumn(name = "proposicao_id") }, inverseJoinColumns = { @JoinColumn(name = "elaboracao_normativa_id") })
 	private Set<ElaboracaoNormativa> elaboracoesNormativas;
 
+	@JsonIgnore
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "proposicao")
+	@OrderBy("ordem")
+	private List<RoadmapComissao> roadmapComissoes;
+
+	@Transient
+	private List<String> roadmapComissoesUI;
+
 	public String getSigla() {
 		if (Objects.isNull(sigla))
 			sigla = getTipo() + " " + getNumero() + "/" + getAno();
@@ -433,6 +441,22 @@ public class Proposicao extends AbstractEntity {
 
 	public void setElaboracoesNormativas(Set<ElaboracaoNormativa> elaboracoesNormativas) {
 		this.elaboracoesNormativas = elaboracoesNormativas;
+	}
+
+	public List<RoadmapComissao> getRoadmapComissoes() {
+		return roadmapComissoes;
+	}
+
+	public void setRoadmapComissoes(List<RoadmapComissao> etapasRoadmapComissoes) {
+		this.roadmapComissoes = etapasRoadmapComissoes;
+	}
+
+	public List<String> getRoadmapComissoesUI() {
+		return roadmapComissoesUI;
+	}
+
+	public void setRoadmapComissoesUI(List<String> roadmapComissoesUI) {
+		this.roadmapComissoesUI = roadmapComissoesUI;
 	}
 
 	@JsonIgnore
