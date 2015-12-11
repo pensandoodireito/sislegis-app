@@ -32,8 +32,27 @@ public interface ProposicaoService extends Service<Proposicao> {
 
 	Proposicao buscarPorId(Integer id);
 
+	/**
+	 * Adicionados filtros
+	 * 
+	 * @param dataReuniao
+	 * @param comissao
+	 * @param idResponsavel
+	 * @param origem
+	 * @param isFavorita
+	 * @param idPosicionameto
+	 * @param limit
+	 * @param offset
+	 * @param idsProposicoes
+	 * @return
+	 */
 	Collection<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao, boolean fetchAll);
+
 	Collection<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao);
+
+	Collection<Proposicao> buscarProposicoesPorDataReuniao(Date dataReuniao, String comissao, Long idResponsavel,
+			String origem, String isFavorita, Long idPosicionameto, Integer limit, Integer offset,
+			Integer[] idsProposicoes, boolean fetchAll);
 
 	List<Proposicao> buscarPorSufixo(String sufixo);
 

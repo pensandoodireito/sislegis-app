@@ -120,8 +120,9 @@ public class Proposicao extends AbstractEntity {
 	@Transient
 	private String linkPauta;
 
-	@Transient
-	private Posicionamento posicionamento;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "posicionamento_atual_id", nullable = true)
+	private PosicionamentoProposicao posicionamentoAtual;
 
 	@Transient
 	private Boolean posicionamentoPreliminar;
@@ -303,12 +304,12 @@ public class Proposicao extends AbstractEntity {
 		this.linkPauta = linkPauta;
 	}
 
-	public Posicionamento getPosicionamento() {
-		return posicionamento;
+	public PosicionamentoProposicao getPosicionamentoAtual() {
+		return posicionamentoAtual;
 	}
 
-	public void setPosicionamento(Posicionamento posicionamento) {
-		this.posicionamento = posicionamento;
+	public void setPosicionamentoAtual(PosicionamentoProposicao posicionamento) {
+		this.posicionamentoAtual = posicionamento;
 	}
 
 	public Boolean isPosicionamentoPreliminar() {
