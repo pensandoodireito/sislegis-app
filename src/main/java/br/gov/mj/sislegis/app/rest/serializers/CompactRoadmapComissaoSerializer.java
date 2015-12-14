@@ -13,6 +13,7 @@ public class CompactRoadmapComissaoSerializer extends JsonSerializer<RoadmapComi
     @Override
     public void serialize(RoadmapComissao roadmapComissao, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException, JsonProcessingException {
         jsonGenerator.writeStartObject();
-        jsonGenerator.writeString(roadmapComissao.getComissao());
+        jsonGenerator.writeStringField("comissao", roadmapComissao.getComissao());
+        jsonGenerator.writeEndObject();
     }
 }
