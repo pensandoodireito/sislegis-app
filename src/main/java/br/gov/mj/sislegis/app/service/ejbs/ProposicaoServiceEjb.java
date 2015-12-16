@@ -1070,17 +1070,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 					}
 					if (proposicaoDb.getComissao() == null
 							|| !proposicaoDb.getComissao().trim().equals(pautaReuniaoComissao.getComissao())) {
-						proposicaoDb.setComissao(pautaReuniaoComissao.getComissao());// garantindo
-																						// que
-																						// a
-																						// proposicao
-																						// é
-																						// salva
-																						// a
-																						// partir
-																						// da
-																						// comissao
-																						// buscada.
+						proposicaoDb.setComissao(pautaReuniaoComissao.getComissao());
 					}
 
 					proposicaoDb = save(proposicaoDb);
@@ -1089,8 +1079,17 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 					proposicaoPautaComissao.setProposicao(proposicaoDb);
 
 				} else {
-					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, "Proposicao ja existia no banco ");
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
+							Level.FINE,
+							"Proposicao ja existia no banco, " + proposicaoDb.getComissao() + ": "
+									+ pautaReuniaoComissao.getComissao());
+					proposicaoDb.setComissao(pautaReuniaoComissao.getComissao());
+					if (proposicaoDb.getComissao() == null
+							|| !proposicaoDb.getComissao().trim().equals(pautaReuniaoComissao.getComissao())) {
+						proposicaoDb.setComissao(pautaReuniaoComissao.getComissao());
+					}
 					proposicaoPautaComissao.setProposicao(proposicaoDb);
+
 				}
 			} else {
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
@@ -1104,10 +1103,6 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 					"Vai persistir proposicaoPautaComissao " + proposicaoPautaComissao + "  == "
 							+ proposicaoPautaComissao.getPautaReuniaoComissaoId() + " -- " + pautaReuniaoComissao);
 
-			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
-					Level.FINE,
-					"Proposicao ja persistida " + proposicaoPautaComissao.getProposicaoId() + " "
-							+ proposicaoPautaComissao.getPautaReuniaoComissaoId());
 			getEntityManager().persist(proposicaoPautaComissao);
 			pautaReuniaoComissao.addProposicaoPauta(proposicaoPautaComissao);
 		}
