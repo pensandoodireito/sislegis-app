@@ -340,9 +340,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 						ppc.setOrdemPauta(rp.getSeqOrdemPauta());
 						p.getPautasComissoes().add(ppc);
 					}
-					if (!fetchAll) {
-						popularDadosTransientes(p);
-					}
+					
+					popularDadosTransientes(p);
+					
 					proposicoes.add(p);
 				}
 
@@ -354,9 +354,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				query.setParameter("rid", reuniao.getId());
 				List<Proposicao> proposicoesReuniao = query.getResultList();
 				proposicoes.addAll(proposicoesReuniao);
-				if (!fetchAll) {
-					popularDadosTransientes(proposicoes);
-				}
+				
+				popularDadosTransientes(proposicoes);
+				
 			}
 
 		}
