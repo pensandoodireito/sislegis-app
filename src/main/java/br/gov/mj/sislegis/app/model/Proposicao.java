@@ -31,6 +31,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import br.gov.mj.sislegis.app.rest.serializers.CompactListRoadmapComissaoSerializer;
 import org.apache.commons.collections.CollectionUtils;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
@@ -175,13 +176,11 @@ public class Proposicao extends AbstractEntity {
 	@JoinTable(name = "proposicao_elaboracao_normativa", joinColumns = { @JoinColumn(name = "proposicao_id") }, inverseJoinColumns = { @JoinColumn(name = "elaboracao_normativa_id") })
 	private Set<ElaboracaoNormativa> elaboracoesNormativas;
 
-	@JsonIgnore
+
+	@OrderBy("ordem")
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "proposicao")
-	@OrderBy("ordem")	
+	@JsonSerialize(using = CompactListRoadmapComissaoSerializer.class)
 	private List<RoadmapComissao> roadmapComissoes;
-	//TODO tentar no futuro usar serializar e desserializer
-	@Transient
-	private List<String> roadmapComissoesUI;
 
 	public String getSigla() {
 		if (Objects.isNull(sigla))
@@ -450,14 +449,6 @@ public class Proposicao extends AbstractEntity {
 
 	public void setRoadmapComissoes(List<RoadmapComissao> etapasRoadmapComissoes) {
 		this.roadmapComissoes = etapasRoadmapComissoes;
-	}
-
-	public List<String> getRoadmapComissoesUI() {
-		return roadmapComissoesUI;
-	}
-
-	public void setRoadmapComissoesUI(List<String> roadmapComissoesUI) {
-		this.roadmapComissoesUI = roadmapComissoesUI;
 	}
 
 	@JsonIgnore
