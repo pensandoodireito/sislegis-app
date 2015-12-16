@@ -318,12 +318,26 @@ public class ProposicaoEndpoint {
 		return proposicaoService.listarHistoricoPosicionamentos(id);
 	}
 
+
 	@GET
 	@Path("/{id:[0-9]+}/pautas")
 	@Cache(maxAge = 24, noStore = false, isPrivate = false, sMaxAge = 24)
 	@Produces(MediaType.APPLICATION_JSON)
 	public SortedSet<ProposicaoPautaComissao> listPautasProposicao(@PathParam("id") Long id) throws Exception {
 		return proposicaoService.findById(id).getPautasComissoes();
+	}
+
+	@POST
+	@Path("/setRoadmapComissoes")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response setRoadmapComissoes(RoadmapComissoesWrapper roadmapComissoesWrapper){
+		try {
+			proposicaoService.setRoadmapComissoes(roadmapComissoesWrapper.getIdProposicao(), roadmapComissoesWrapper.getComissoes());
+			return Response.ok().build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
 	}
 
 }
@@ -377,5 +391,26 @@ class PosicionamentoProposicaoWrapper {
 
 	public void setPreliminar(boolean preliminar) {
 		this.preliminar = preliminar;
+	}
+}
+
+class RoadmapComissoesWrapper{
+	private Long idProposicao;
+	private List<String> comissoes;
+
+	public Long getIdProposicao() {
+		return idProposicao;
+	}
+
+	public void setIdProposicao(Long idProposicao) {
+		this.idProposicao = idProposicao;
+	}
+
+	public List<String> getComissoes() {
+		return comissoes;
+	}
+
+	public void setComissoes(List<String> comissoes) {
+		this.comissoes = comissoes;
 	}
 }
