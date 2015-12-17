@@ -416,7 +416,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 			} else {
 				StringBuilder queryBuffer = new StringBuilder(
-						"SELECT p FROM Proposicao p where p.id in (select proposicao_id from reuniaoproposicao r where  r.reuniao_id=:rid)");
+						"SELECT p FROM Proposicao p where p.id in (select r.proposicao.id from ReuniaoProposicao r where  r.reuniao.id=:rid)");
 
 				queryBuffer.append(createWhereClause(null, comissao, null, null, origem, isFavorita, idResponsavel,
 						idPosicionamento, idProposicoes));
