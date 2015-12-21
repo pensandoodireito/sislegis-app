@@ -185,9 +185,9 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 	 * Se é a 1a vez que essa agenda está sendo seguida, ou houver mudança de
 	 * semana, nenhum email é enviado.
 	 */
-	@Schedule(minute = "*/5", hour = "*", persistent = false, info = "Atualiza status pautas")
+	@Schedule(dayOfMonth = "*", hour = "0", persistent = false, info = "Atualiza status pautas")
 	public void atualizaStatusAgendas() {
-		Set<AgendaComissao> atualizadas = new HashSet<AgendaComissao>();
+		Map<AgendaComissao, List<Sessao>> atualizadas = new HashMap<AgendaComissao, List<Sessao>>();
 		Calendar nextMonday = getNextMonday();
 		Calendar weekEnd = Calendar.getInstance();
 		weekEnd.setTime(nextMonday.getTime());
@@ -239,7 +239,6 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 
 				for (Iterator<ReuniaoBean> iteratorReunioes = reunioes.iterator(); iteratorReunioes.hasNext();) {
 					ReuniaoBean reuniaoBean = (ReuniaoBean) iteratorReunioes.next();
-
 					Sessao sessaoWS = reuniaoBean.getSessao();
 					Sessao sessaoDb = null;
 
@@ -259,19 +258,27 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 						if (changeDetectpr.compare(sessaoWS, sessaoDb) != 0) {
 							Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info(
 									"Mudança detectada em " + agenda.getComissao());
+							SituacaoSessao situacaoDb = sessaoDb.getSituacao();
 							sessaoDb.popula(sessaoWS);
 							agenda.addSessao(sessaoDb);
 							agenda.setPautasAtualizadas();
-							if (SituacaoSessao.Agendada.equals(sessaoWS.getSituacao())) {
-								atualizadas.add(agenda);
+							if (SituacaoSessao.Agendada.equals(sessaoWS.getSituacao())
+									|| (!SituacaoSessao.Agendada.equals(sessaoWS.getSituacao()) && SituacaoSessao.Agendada
+											.equals(situacaoDb))) {
+								List<Sessao> alteradas = atualizadas.get(agenda);
+								if (alteradas == null) {
+									alteradas = new ArrayList<Sessao>();
+								}
+								alteradas.add(sessaoDb);
+								atualizadas.put(agenda, alteradas);
 							}
 						}
 
 					}
 				}
 				agenda.setConsultada();
-				if (atualizadas.contains(agenda)) {
-					notifyUsuariosPautaMudou(agenda);
+				if (atualizadas.keySet().contains(agenda)) {
+					notifyUsuariosPautaMudou(agenda, atualizadas.get(agenda));
 				}
 				save(agenda);
 			}
@@ -316,22 +323,30 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 	 * uma comissão
 	 * 
 	 * @param agenda
+	 * @param list
 	 * @return
 	 */
 	@Asynchronous
-	public Future<String> notifyUsuariosPautaMudou(AgendaComissao agenda) {
+	public Future<String> notifyUsuariosPautaMudou(AgendaComissao agenda, List<Sessao> list) {
 		String status = "";
 		ResourceBundle res = ResourceBundle.getBundle("messages");
 		String assunto = MessageFormat.format(res.getString("email.mudanca_pauta.assunto"), agenda.getComissao());
-
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy kk:mm");
 		List<Usuario> seguidores = usuarioService.listUsuariosSeguidoresDeComissao(agenda);
 		if (seguidores != null && !seguidores.isEmpty()) {
 			for (Iterator<Usuario> iterator = seguidores.iterator(); iterator.hasNext();) {
 				Usuario usuario = (Usuario) iterator.next();
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).warning("Notificando " + usuario.getEmail());
+				StringBuilder links = new StringBuilder();
+				for (Iterator iterator2 = list.iterator(); iterator2.hasNext();) {
+					Sessao sessao = (Sessao) iterator2.next();
+					String link = MessageFormat.format(res.getString("email.mudanca_pauta.sessao"), sessao.getTitulo(),
+							sdf.format(sessao.getData()), sessao.getLinkIntegra());
+					links.append(link);
+				}
 
 				String body = MessageFormat.format(res.getString("email.mudanca_pauta.body"), usuario.getNome(),
-						agenda.getComissao());
+						agenda.getComissao(), links.toString());
 
 				try {
 					SislegisUtil.sendEmail(usuario.getEmail(), usuario.getNome(), assunto, body);
