@@ -1,25 +1,29 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.SituacaoLegislativa;
+import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.SituacaoLegislativaService;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
+@Stateless
 public class SituacaoLegislativaServiceEjb extends AbstractPersistence<SituacaoLegislativa, Long> implements
 		SituacaoLegislativaService {
 	@PersistenceContext
 	private EntityManager em;
 
-	public SituacaoLegislativaServiceEjb(Class<SituacaoLegislativa> entityClass) {
-		super(entityClass);
+	public SituacaoLegislativaServiceEjb() {
+		super(SituacaoLegislativa.class);
 	}
 
 	@Override
@@ -48,10 +52,17 @@ public class SituacaoLegislativaServiceEjb extends AbstractPersistence<SituacaoL
 	protected EntityManager getEntityManager() {
 		return em;
 	}
-	
-	public void updateObsoletos(){
-		
+
+	public void updateObsoletos() {
+
 	}
-	
+
+	@Override
+	public Long save(SituacaoLegislativa sit, Usuario usuario) {
+		sit.setAtualizadoPor(usuario);
+		sit.setAtualizadaEm(new Date());
+		save(sit);
+		return sit.getId().longValue();
+	}
 
 }

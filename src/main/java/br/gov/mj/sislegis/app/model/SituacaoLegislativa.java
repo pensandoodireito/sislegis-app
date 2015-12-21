@@ -20,14 +20,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import br.gov.mj.sislegis.app.enumerated.Origem;
 
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "origem", "idExterno" }) })
-@NamedQueries({ 
-	@NamedQuery(
-			name = "findByOrigem", 
-			query = "select p from SituacaoLegislativa p where p.origem=:origem"),
-			@NamedQuery(
-					name = "findByIdExterno", 
-					query = "select p from SituacaoLegislativa p where p.origem=:origem and p.idExterno=:idExterno")
+@Table(name = "situacao_legislativa", uniqueConstraints = { @UniqueConstraint(columnNames = { "origem", "idExterno" }) })
+@NamedQueries({
+		@NamedQuery(name = "findByOrigem", query = "select p from SituacaoLegislativa p where p.origem=:origem"),
+		@NamedQuery(name = "findByIdExterno", query = "select p from SituacaoLegislativa p where p.origem=:origem and p.idExterno=:idExterno")
 
 })
 @XmlRootElement
@@ -68,7 +64,7 @@ public class SituacaoLegislativa extends AbstractEntity {
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Usuario atualizadoPor;
 
-	@Column
+	@Column(name = "atualizada_em")
 	Date atualizadaEm;
 
 	SituacaoLegislativa() {
