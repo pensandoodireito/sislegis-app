@@ -53,7 +53,7 @@ public class SituacaoLegislativaEndpoint {
 	@Path("/CAMARA/")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<SituacaoLegislativa> listCamara() {
-		return situacaoService.listSituacoes(Origem.SENADO);
+		return situacaoService.listSituacoes(Origem.CAMARA);
 	}
 
 	@PUT

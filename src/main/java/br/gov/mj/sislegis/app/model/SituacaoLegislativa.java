@@ -24,7 +24,7 @@ import br.gov.mj.sislegis.app.enumerated.Origem;
 @Entity
 @Table(name = "situacao_legislativa", uniqueConstraints = { @UniqueConstraint(columnNames = { "origem", "idExterno" }) })
 @NamedQueries({
-		@NamedQuery(name = "findByOrigem", query = "select p from SituacaoLegislativa p where p.origem=:origem"),
+		@NamedQuery(name = "findByOrigem", query = "select p from SituacaoLegislativa p where p.origem=:origem  order by p.descricao"),
 		@NamedQuery(name = "findByIdExterno", query = "select p from SituacaoLegislativa p where p.origem=:origem and p.idExterno=:idExterno")
 
 })
@@ -58,10 +58,10 @@ public class SituacaoLegislativa extends AbstractEntity {
 	private String sigla;
 
 	@Column
-	private Boolean terminativa = Boolean.FALSE;
+	private Boolean terminativa;
 
 	@Column
-	private Boolean obsoleta = Boolean.FALSE;
+	private Boolean obsoleta;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Usuario atualizadoPor;
@@ -71,13 +71,16 @@ public class SituacaoLegislativa extends AbstractEntity {
 	private Date atualizadaEm;
 
 	SituacaoLegislativa() {
-
+		this.terminativa=false;
+		this.obsoleta=false;
 	}
 
 	public SituacaoLegislativa(Origem origem, Long idExterno, String descricao) {
+		this();
 		this.origem = origem;
 		this.idExterno = idExterno;
 		this.descricao = descricao;
+		
 	}
 
 	public String getSigla() {
