@@ -344,9 +344,9 @@ public class AgendaComissaoServiceEjb extends AbstractPersistence<AgendaComissao
 							sdf.format(sessao.getData()), sessao.getLinkIntegra());
 					links.append(link);
 				}
-
+				String dateFormatted = new SimpleDateFormat("ddMMyyyy").format(getNextMonday().getTime());
 				String body = MessageFormat.format(res.getString("email.mudanca_pauta.body"), usuario.getNome(),
-						agenda.getComissao(), links.toString());
+						agenda.getComissao(), links.toString(), dateFormatted);
 
 				try {
 					SislegisUtil.sendEmail(usuario.getEmail(), usuario.getNome(), assunto, body);
