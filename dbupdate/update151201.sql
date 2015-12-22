@@ -9,3 +9,9 @@ CREATE TABLE roadmap_comissao (
   FOREIGN KEY (proposicao_id) REFERENCES proposicao (id)
 );
 --rollback drop table roadmap_comissao
+
+
+--changeset issue336:151201-10
+alter table encaminhamentoproposicao ADD criadoem TIMESTAMP ;
+--rollback alter table encaminhamentoproposicao drop criadoEm  ;
+
