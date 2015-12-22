@@ -51,6 +51,7 @@ public class ParserSituacaoCamara implements SituacaoParser {
 			SituacaoLegislativa situacaoLegislativa = (SituacaoLegislativa) iterator.next();
 			situacaoLegislativa.setOrigem(Origem.CAMARA);
 			situacaoLegislativa.setObsoleta(!situacaoLegislativa.getObsoleta());//é o inverso de ativa
+			situacaoLegislativa.setTerminativa(false);
 
 		}
 

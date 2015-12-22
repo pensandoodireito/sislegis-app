@@ -18,14 +18,14 @@ CREATE TABLE situacao_legislativa (
 	origem VARCHAR(50) not null,
 	idExterno BIGINT not null,
 	atualizada_em TIMESTAMP,
-	atualizada_por BIGINT,	
+	atualizadopor_id BIGINT
 	terminativa BOOLEAN DEFAULT FALSE NOT NULL,
 	obsoleta BOOLEAN DEFAULT FALSE NOT NULL
 );
 --rollback drop table situacao_legislativa
 
 --changeset coutinho:151201-3
-ALTER TABLE situacao_legislativa ADD CONSTRAINT fk_sit_user FOREIGN KEY (atualizada_por) REFERENCES usuario (id);
+ALTER TABLE situacao_legislativa ADD CONSTRAINT fk_sit_user FOREIGN KEY (atualizadopor_id) REFERENCES usuario (id);
 --rollback ALTER TABLE situacao_legislativa drop CONSTRAINT fk_sit_user
 
 --changeset coutinho:151201-4

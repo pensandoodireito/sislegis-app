@@ -22,5 +22,6 @@ public interface SituacaoLegislativaService extends Service<SituacaoLegislativa>
 	List<SituacaoLegislativa> listSituacoes(Origem origem);
 
 	Long save(SituacaoLegislativa sit, Usuario usuario);
+	void updateSituacoes();
 
 }

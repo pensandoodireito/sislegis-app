@@ -14,6 +14,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -56,22 +58,23 @@ public class SituacaoLegislativa extends AbstractEntity {
 	private String sigla;
 
 	@Column
-	private Boolean terminativa = false;
+	private Boolean terminativa = Boolean.FALSE;
 
 	@Column
-	private Boolean obsoleta = false;
+	private Boolean obsoleta = Boolean.FALSE;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	private Usuario atualizadoPor;
 
 	@Column(name = "atualizada_em")
-	Date atualizadaEm;
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date atualizadaEm;
 
 	SituacaoLegislativa() {
 
 	}
 
-	SituacaoLegislativa(Origem origem, Long idExterno, String descricao) {
+	public SituacaoLegislativa(Origem origem, Long idExterno, String descricao) {
 		this.origem = origem;
 		this.idExterno = idExterno;
 		this.descricao = descricao;

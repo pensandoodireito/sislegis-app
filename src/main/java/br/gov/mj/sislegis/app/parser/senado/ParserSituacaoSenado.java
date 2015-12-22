@@ -53,6 +53,8 @@ public class ParserSituacaoSenado implements SituacaoParser {
 			SituacaoLegislativa situacaoLegislativa = (SituacaoLegislativa) iterator.next();
 			situacaoLegislativa.setOrigem(Origem.SENADO);
 			situacaoLegislativa.setObsoleta(false);
+			situacaoLegislativa.setTerminativa(false);
+
 		}
 
 		return situacoes;
