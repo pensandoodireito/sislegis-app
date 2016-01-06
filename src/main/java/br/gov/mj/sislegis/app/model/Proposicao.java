@@ -149,6 +149,9 @@ public class Proposicao extends AbstractEntity {
 	@Transient
 	private List<ProposicaoPautaComissao> listaPautasComissao = new ArrayList<>();
 
+	@Transient
+	private List<Votacao> votacoes = new ArrayList<>();
+
 	@Column(nullable = false)
 	private boolean isFavorita;
 
@@ -358,6 +361,14 @@ public class Proposicao extends AbstractEntity {
 
 	public void setListaPautasComissao(List<ProposicaoPautaComissao> listaPautasComissao) {
 		this.listaPautasComissao = listaPautasComissao;
+	}
+
+	public List<Votacao> getVotacoes() {
+		return votacoes;
+	}
+
+	public void setVotacoes(List<Votacao> votacoes) {
+		this.votacoes = votacoes;
 	}
 
 	public Usuario getResponsavel() {

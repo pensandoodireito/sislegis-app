@@ -3,7 +3,7 @@ package br.gov.mj.sislegis.app.integration
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
 
-class VotosComissaoSenadoWSSpec extends Specification{
+class VotacaoSenadoWSSpec extends Specification{
 
     def "deve listar a votacao de uma proposicao"(){
 

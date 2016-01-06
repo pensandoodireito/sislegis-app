@@ -3,7 +3,7 @@ package br.gov.mj.sislegis.app.integration
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
 
-class VotosComissaoCamaraWSSpec extends Specification {
+class VotacaoCamaraWSSpec extends Specification {
 
     // TODO a chamada do metodo abaixo retorna o erro: Forbidden
 
