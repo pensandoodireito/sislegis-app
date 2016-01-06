@@ -33,6 +33,8 @@ class ReuniaoBeanCamara extends ReuniaoBean {
 		sessao.setIdentificadorExterno(getCodigo().toString());
 		sessao.setTitulo(titulo);
 		situacao = situacao.replace("(Final)", "").trim();
+		situacao = situacao.replace("(Comunicado)", "").trim();
+		situacao = situacao.replace("(Termo)", "").trim();
 
 		try {
 			sessao.setSituacao(SituacaoCamara.valueOf(situacao).situacaoSessaoCorrespondente());

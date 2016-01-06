@@ -74,10 +74,15 @@ public class WatchProposicaoEjb implements WatchProposicaoService {
 			for (Iterator<Usuario> iterator = seguidores.iterator(); iterator.hasNext();) {
 				Usuario usuario = (Usuario) iterator.next();
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Notificando " + usuario.getEmail());
-
-				String body = MessageFormat.format(res.getString("email.mudanca_proposicao.body"), usuario.getNome(),
-						proposicao.getSigla(), proposicao.getLastAlteracoesProposicao().getDescricaoAlteracao(),
-						proposicao.getLinkProposicao());
+				String linkDiretoSislegis = MessageFormat.format(res.getString("link.single.proposicao"),String.valueOf(proposicao.getId())); 
+				String body = MessageFormat.format(res.getString("email.mudanca_proposicao.body"), 
+						usuario.getNome(),
+						proposicao.getSigla(), 
+						proposicao.getLastAlteracoesProposicao().getDescricaoAlteracao(),
+						proposicao.getLinkProposicao(),
+						proposicao.getOrigem().name(),
+						linkDiretoSislegis
+						);
 
 				try {
 					SislegisUtil.sendEmail(usuario.getEmail(), usuario.getNome(), assunto, body);
