@@ -5,7 +5,7 @@ import spock.lang.Specification
 
 class VotacaoCamaraWSSpec extends Specification {
 
-    // TODO a chamada do metodo abaixo retorna o erro: Forbidden
+    // FIXME a chamada do metodo abaixo retorna o erro: Forbidden
 
 /*    def "deve listar a votacao de uma proposicao"(){
 

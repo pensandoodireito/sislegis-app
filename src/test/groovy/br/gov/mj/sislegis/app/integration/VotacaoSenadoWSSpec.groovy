@@ -19,7 +19,6 @@ class VotacaoSenadoWSSpec extends Specification{
 
         then:
             xml.Materia.Votacoes.each{
-                println it
                 it.Votos.each{
                     println it.IdentificacaoParlamentar.NomeParlamentar
                 }
