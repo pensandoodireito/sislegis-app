@@ -3,7 +3,7 @@ package br.gov.mj.sislegis.app.parser
 import br.gov.mj.sislegis.app.parser.senado.ParserVotacaoSenado
 import spock.lang.Specification
 
-class ParserVotacaoSenadoSpec extends Specification{
+class VotacaoSenadoParserSpec extends Specification{
 
     def "deve retornar as votacoes de uma proposicao"(){
         given:
