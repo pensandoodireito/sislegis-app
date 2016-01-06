@@ -1,75 +1,82 @@
 package br.gov.mj.sislegis.app.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.io.Serializable;
 
 /**
  * Roadmap (roteiro) de Comissoes por onde uma Proposicao deve tramitar
  */
 
 @Entity
-@IdClass(RoadmapComissao.class)
+@IdClass(RoadmapComissaoPK.class)
 @Table(name = "roadmap_comissao")
 public class RoadmapComissao implements Serializable {
 
-    @Id
-    @ManyToOne
-    @JoinColumn(name = "proposicao_id")
-    private Proposicao proposicao;
+	@Id
+	private Long proposicaoId;
 
-    @Id
-    private String comissao;
+	@Id
+	private String comissao;
 
-    @Id
-    private Integer ordem;
+	@Id
+	private Integer ordem;
 
-    public Proposicao getProposicao() {
-        return proposicao;
-    }
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "proposicaoId", updatable = false, insertable = false, referencedColumnName = "id", nullable = false)
+	Proposicao proposicao;
 
-    public void setProposicao(Proposicao proposicao) {
-        this.proposicao = proposicao;
-    }
+	public Proposicao getProposicao() {
+		return proposicao;
+	}
 
-    public String getComissao() {
-        return comissao;
-    }
+	public void setProposicao(Proposicao proposicao) {
+		this.proposicao = proposicao;
+	}
 
-    public void setComissao(String comissao) {
-        this.comissao = comissao;
-    }
+	public String getComissao() {
+		return comissao;
+	}
 
-    public Integer getOrdem() {
-        return ordem;
-    }
+	public void setComissao(String comissao) {
+		this.comissao = comissao;
+	}
 
-    public void setOrdem(Integer ordem) {
-        this.ordem = ordem;
-    }
+	public Integer getOrdem() {
+		return ordem;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+	public void setOrdem(Integer ordem) {
+		this.ordem = ordem;
+	}
 
-        RoadmapComissao that = (RoadmapComissao) o;
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
 
-        if (proposicao != null ? !proposicao.equals(that.proposicao) : that.proposicao != null) return false;
-        if (comissao != null ? !comissao.equals(that.comissao) : that.comissao != null) return false;
-        return !(ordem != null ? !ordem.equals(that.ordem) : that.ordem != null);
+		RoadmapComissao that = (RoadmapComissao) o;
+		if (proposicaoId != null ? !proposicaoId.equals(that.proposicaoId) : that.proposicaoId != null)
+			return false;
+		if (comissao != null ? !comissao.equals(that.comissao) : that.comissao != null)
+			return false;
+		return !(ordem != null ? !ordem.equals(that.ordem) : that.ordem != null);
 
-    }
+	}
 
-    @Override
-    public int hashCode() {
-        int result = proposicao != null ? proposicao.hashCode() : 0;
-        result = 31 * result + (comissao != null ? comissao.hashCode() : 0);
-        result = 31 * result + (ordem != null ? ordem.hashCode() : 0);
-        return result;
-    }
+	@Override
+	public int hashCode() {
+		int result = proposicao != null ? proposicao.hashCode() : 0;
+		result = 31 * result + (comissao != null ? comissao.hashCode() : 0);
+		result = 31 * result + (ordem != null ? ordem.hashCode() : 0);
+		return result;
+	}
 }
