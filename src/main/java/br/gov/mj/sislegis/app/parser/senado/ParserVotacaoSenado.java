@@ -14,7 +14,7 @@ import java.util.Locale;
 
 public class ParserVotacaoSenado {
 
-    public List<Votacao> votacoesPorProposicao(Long idProposicao) throws Exception {
+    public List<Votacao> votacoesPorProposicao(Integer idProposicao) throws Exception {
         List<Votacao> votacoes = new ArrayList<>();
         StringBuilder wsURL = new StringBuilder("http://legis.senado.leg.br/dadosabertos/materia/votacoes/").append(idProposicao);
 

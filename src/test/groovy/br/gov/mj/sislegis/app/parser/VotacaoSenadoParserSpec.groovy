@@ -17,6 +17,7 @@ class VotacaoSenadoParserSpec extends Specification{
         then:
         votacoes.each{
             println it.data
+            println it.resultado
         }
     }
 }
