@@ -18,7 +18,7 @@ CREATE TABLE situacao_legislativa (
 	origem VARCHAR(50) not null,
 	idExterno BIGINT not null,
 	atualizada_em TIMESTAMP,
-	atualizadopor_id BIGINT
+	atualizadopor_id BIGINT,
 	terminativa BOOLEAN DEFAULT FALSE NOT NULL,
 	obsoleta BOOLEAN DEFAULT FALSE NOT NULL
 );

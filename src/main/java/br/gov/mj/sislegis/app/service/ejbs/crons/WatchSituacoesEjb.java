@@ -17,7 +17,7 @@ public class WatchSituacoesEjb implements WatchSituacoesService {
 	SituacaoLegislativaService service;
 
 	@Override
-	@Schedule(second = "24", minute = "*", hour = "*", persistent = false, info = "Atualiza situacoes")
+	@Schedule(hour = "0", persistent = false, info = "Atualiza situacoes")
 	public void atualizaSituacoes() {
 		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Atualizando situacoes");
 		service.updateSituacoes();
