@@ -29,7 +29,7 @@ public class RoadmapComissao implements Serializable {
 	private Integer ordem;
 
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "proposicaoId", updatable = false, insertable = false, referencedColumnName = "id", nullable = false)
+	@JoinColumn(name = "proposicao_id", updatable = false, insertable = false, referencedColumnName = "id", nullable = false)
 	Proposicao proposicao;
 
 	public Proposicao getProposicao() {

@@ -7,7 +7,7 @@ import javax.persistence.Column;
 public class RoadmapComissaoPK implements Serializable {
 
 	private static final long serialVersionUID = 2558931643569722888L;
-	@Column(nullable = false)
+	@Column(nullable = false,name="proposicao_id")
 	Long proposicaoId;
 
 	@Column(nullable = false)
