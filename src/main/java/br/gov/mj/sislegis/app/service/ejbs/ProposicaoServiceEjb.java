@@ -1243,7 +1243,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public List<Votacao> listarVotacao(Integer idProposicao, String tipo, String numero, String ano, Origem origem) throws Exception {
+	public List<Votacao> listarVotacoes(Integer idProposicao, String tipo, String numero, String ano, Origem origem) throws Exception {
 
 		if (Origem.CAMARA.equals(origem)){
 			return parserVotacaoCamara.votacoesPorProposicao(numero, ano, tipo);

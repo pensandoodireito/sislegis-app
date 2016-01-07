@@ -178,6 +178,6 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @param ano
 	 * @param origem
      */
-	List<Votacao> listarVotacao(Integer idProposicao, String tipo, String numero, String ano, Origem origem) throws Exception;
+	List<Votacao> listarVotacoes(Integer idProposicao, String tipo, String numero, String ano, Origem origem) throws Exception;
 
 }

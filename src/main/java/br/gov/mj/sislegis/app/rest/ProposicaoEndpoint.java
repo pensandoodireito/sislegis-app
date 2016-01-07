@@ -26,10 +26,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
-import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
-import br.gov.mj.sislegis.app.model.Proposicao;
-import br.gov.mj.sislegis.app.model.Reuniao;
-import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.model.*;
 import org.jboss.resteasy.annotations.cache.Cache;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
@@ -337,6 +334,20 @@ public class ProposicaoEndpoint {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
+	}
+
+	@GET
+	@Path("/listarVotacoes")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Votacao> listarVotacoes(@PathParam("idProposicao") Integer idProposicao, @PathParam("tipo") String tipo, @PathParam("numero") String numero, @PathParam("ano") String ano, @PathParam("origem") Origem origem){
+
+		try {
+			return proposicaoService.listarVotacoes(idProposicao, tipo, numero, ano, origem);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 
