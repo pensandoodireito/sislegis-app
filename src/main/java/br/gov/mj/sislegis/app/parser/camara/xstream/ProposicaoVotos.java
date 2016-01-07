@@ -18,7 +18,7 @@ import java.util.Locale;
 @XStreamAlias("proposicao")
 public class ProposicaoVotos {
 
-    @XStreamImplicit(itemFieldName = "Votacao")
+    @XStreamAlias("Votacoes")
     private List<VotacaoBean> votacoesBean = new ArrayList<>();
 
     public static void configXstream(XStream xStream){
@@ -41,9 +41,10 @@ public class ProposicaoVotos {
         for (VotacaoBean votacaoBean : votacoesBean){
             Votacao votacao = new Votacao();
 
-            DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            DateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             Date date = format.parse(votacaoBean.getData());
             votacao.setData(date);
+
             votacao.setResumo(votacaoBean.getResumo());
 
             List<Voto> votos = new ArrayList<>();
