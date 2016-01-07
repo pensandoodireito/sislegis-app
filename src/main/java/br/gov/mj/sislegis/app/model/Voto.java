@@ -1,11 +1,6 @@
 package br.gov.mj.sislegis.app.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 public class Voto {
-
-    @JsonIgnore
-    private Votacao votacao;
 
     private String nomeParlamentar;
 
@@ -14,14 +9,6 @@ public class Voto {
     private String ufParlamentar;
 
     private String descricaoVoto;
-
-    public Votacao getVotacao() {
-        return votacao;
-    }
-
-    public void setVotacao(Votacao votacao) {
-        this.votacao = votacao;
-    }
 
     public String getNomeParlamentar() {
         return nomeParlamentar;

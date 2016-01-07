@@ -1,16 +1,11 @@
 package br.gov.mj.sislegis.app.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Date;
 import java.util.List;
 
 @XmlRootElement
 public class Votacao {
-
-    @JsonIgnore
-    private Proposicao proposicao;
 
     private Date data;
 
@@ -21,14 +16,6 @@ public class Votacao {
     private String descricao;
 
     private List<Voto> votos;
-
-    public Proposicao getProposicao() {
-        return proposicao;
-    }
-
-    public void setProposicao(Proposicao proposicao) {
-        this.proposicao = proposicao;
-    }
 
     public Date getData() {
         return data;

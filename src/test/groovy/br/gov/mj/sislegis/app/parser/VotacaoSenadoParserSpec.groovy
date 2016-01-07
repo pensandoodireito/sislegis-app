@@ -6,6 +6,7 @@ import spock.lang.Specification
 class VotacaoSenadoParserSpec extends Specification{
 
     def "deve retornar as votacoes de uma proposicao"(){
+
         given:
         def parserVotacaoSenado = new ParserVotacaoSenado()
         def idProposicao = 112464
