@@ -5,7 +5,6 @@ import br.gov.mj.sislegis.app.model.Voto;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -41,9 +40,10 @@ public class ProposicaoVotos {
         for (VotacaoBean votacaoBean : votacoesBean){
             Votacao votacao = new Votacao();
 
-            DateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            Date date = format.parse(votacaoBean.getData());
-            votacao.setData(date);
+            DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+            String dataHora = votacaoBean.getData() + " " + votacaoBean.getHora();
+            Date date = format.parse(dataHora);
+            votacao.setDataHora(date);
 
             votacao.setResumo(votacaoBean.getResumo());
 
@@ -73,6 +73,10 @@ class VotacaoBean {
     private String data;
 
     @XStreamAsAttribute
+    @XStreamAlias("Hora")
+    private String hora;
+
+    @XStreamAsAttribute
     @XStreamAlias("Resumo")
     private String resumo;
 
@@ -84,6 +88,14 @@ class VotacaoBean {
 
     public void setData(String data) {
         this.data = data;
+    }
+
+    public String getHora() {
+        return hora;
+    }
+
+    public void setHora(String hora) {
+        this.hora = hora;
     }
 
     public String getResumo() {

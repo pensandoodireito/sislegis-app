@@ -18,7 +18,7 @@ class VotacaoCamaraParserSpec extends Specification{
 
         then:
         votacoes.each{
-            assert it.data != null
+            assert it.dataHora != null
         }
     }
 }

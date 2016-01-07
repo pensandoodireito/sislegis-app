@@ -37,6 +37,7 @@ public class ParserVotacaoSenado {
         xstream.aliasField("Votos", VotacaoBean.class, "votos");
 
         xstream.aliasField("DataSessao", SessaoPlenariaBean.class, "dataSessao");
+        xstream.aliasField("HoraInicioSessao", SessaoPlenariaBean.class, "horaInicioSessao");
 
         xstream.aliasField("IdentificacaoParlamentar", VotoParlamentarBean.class, "identificacaoParlamentar");
         xstream.aliasField("DescricaoVoto", VotoParlamentarBean.class, "descricaoVoto");
@@ -51,9 +52,10 @@ public class ParserVotacaoSenado {
         for(VotacaoBean votacaoBean : votacaoMateriaBean.getMateria().getVotacoes()){
             Votacao votacao = new Votacao();
 
-            DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            Date date = format.parse(votacaoBean.getSessaoPlenaria().getDataSessao());
-            votacao.setData(date);
+            DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            String dataHora = votacaoBean.getSessaoPlenaria().getDataSessao() + " " + votacaoBean.getSessaoPlenaria().getHoraInicioSessao();
+            Date date = format.parse(dataHora);
+            votacao.setDataHora(date);
 
             votacao.setDescricao(votacaoBean.getDescricaoVotacao());
             votacao.setResultado(votacaoBean.getDescricaoResultado());
@@ -144,12 +146,22 @@ class VotacaoBean{
 class SessaoPlenariaBean{
     private String dataSessao;
 
+    private String horaInicioSessao;
+
     public String getDataSessao() {
         return dataSessao;
     }
 
     public void setDataSessao(String dataSessao) {
         this.dataSessao = dataSessao;
+    }
+
+    public String getHoraInicioSessao() {
+        return horaInicioSessao;
+    }
+
+    public void setHoraInicioSessao(String horaInicioSessao) {
+        this.horaInicioSessao = horaInicioSessao;
     }
 }
 

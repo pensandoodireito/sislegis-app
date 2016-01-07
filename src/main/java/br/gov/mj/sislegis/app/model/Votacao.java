@@ -7,7 +7,7 @@ import java.util.List;
 @XmlRootElement
 public class Votacao {
 
-    private Date data;
+    private Date dataHora;
 
     private String resultado;
 
@@ -17,12 +17,12 @@ public class Votacao {
 
     private List<Voto> votos;
 
-    public Date getData() {
-        return data;
+    public Date getDataHora() {
+        return dataHora;
     }
 
-    public void setData(Date data) {
-        this.data = data;
+    public void setDataHora(Date dataHora) {
+        this.dataHora = dataHora;
     }
 
     public String getResultado() {

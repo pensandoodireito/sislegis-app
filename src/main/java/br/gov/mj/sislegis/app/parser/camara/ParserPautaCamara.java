@@ -25,9 +25,9 @@ public class ParserPautaCamara {
 		ParserPautaCamara parser = new ParserPautaCamara();
 
 		// TODO: Informação que vem do filtro
-		Long idComissao = 2001L;
-		String datIni = "20151102";
-		String datFim = "20151109";
+		Long idComissao = 2014L;
+		String datIni = "20120228";
+		String datFim = "20120301";
 		Set<PautaReuniaoComissao> pautas = parser.getPautaComissao("", idComissao, datIni, datFim);
 		for (Iterator iterator = pautas.iterator(); iterator.hasNext();) {
 			PautaReuniaoComissao pautaReuniaoComissao = (PautaReuniaoComissao) iterator.next();

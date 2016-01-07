@@ -1,13 +1,7 @@
 package br.gov.mj.sislegis.app.rest;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
+import java.util.*;
 
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.inject.Inject;
@@ -340,10 +334,12 @@ public class ProposicaoEndpoint {
 	@GET
 	@Path("/listarVotacoes")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Votacao> listarVotacoes(@PathParam("idProposicao") Integer idProposicao, @PathParam("tipo") String tipo, @PathParam("numero") String numero, @PathParam("ano") String ano, @PathParam("origem") Origem origem){
+	public List<Votacao> listarVotacoes(@QueryParam("idProposicao") String idProposicao, @QueryParam("tipo") String tipo, @QueryParam("numero") String numero, @QueryParam("ano") String ano, @QueryParam("origem") String origem){
 
 		try {
-			return proposicaoService.listarVotacoes(idProposicao, tipo, numero, ano, origem);
+			Integer idProp = (idProposicao == null || "".equals(idProposicao)) ? null : Integer.valueOf(idProposicao);
+			List<Votacao> votacoes = proposicaoService.listarVotacoes(idProp, tipo, numero, ano, Origem.valueOf(origem));
+			return votacoes;
 
 		} catch (Exception e) {
 			e.printStackTrace();
