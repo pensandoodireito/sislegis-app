@@ -52,8 +52,23 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 	@Column
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date dataHoraLimite;
+	@Column
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date criadoEm;
 
 	private Boolean finalizado;
+
+	public EncaminhamentoProposicao() {
+		criadoEm = new Date();
+	}
+
+	public Date getCriadoEm() {
+		return criadoEm;
+	}
+
+	public Boolean getFinalizado() {
+		return finalizado;
+	}
 
 	public Comentario getComentario() {
 		return comentario;

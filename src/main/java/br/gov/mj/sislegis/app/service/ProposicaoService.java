@@ -31,7 +31,7 @@ public interface ProposicaoService extends Service<Proposicao> {
 
 	List<Proposicao> listarTodos();
 
-	Proposicao buscarPorId(Integer id);
+	Proposicao buscarPorId(Integer id, boolean fetchAll);
 
 	/**
 	 * Adicionados filtros
@@ -163,10 +163,12 @@ public interface ProposicaoService extends Service<Proposicao> {
 	List<PosicionamentoProposicao> listarHistoricoPosicionamentos(Long id);
 
 	/**
-	 * Atualiza o roadmap (roteiro) completo de comissoes por onde uma proposicao deve passar
+	 * Atualiza o roadmap (roteiro) completo de comissoes por onde uma
+	 * proposicao deve passar
+	 * 
 	 * @param idProposicao
 	 * @param comissoes
-     */
+	 */
 	void setRoadmapComissoes(Long idProposicao, List<String> comissoes);
 
 	/**

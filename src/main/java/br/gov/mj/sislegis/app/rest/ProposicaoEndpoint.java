@@ -1,7 +1,13 @@
 package br.gov.mj.sislegis.app.rest;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
 
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.inject.Inject;
@@ -20,7 +26,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
-import br.gov.mj.sislegis.app.model.*;
+import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
+import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Reuniao;
+import br.gov.mj.sislegis.app.model.Usuario;
+
 import org.jboss.resteasy.annotations.cache.Cache;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
@@ -168,8 +178,8 @@ public class ProposicaoEndpoint {
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response findById(@PathParam("id") Integer id) {
-		return Response.ok(proposicaoService.buscarPorId(id)).build();
+	public Response findById(@PathParam("id") Integer id,@QueryParam("fetchAll") Boolean fetchAll) {
+		return Response.ok(proposicaoService.buscarPorId(id,(fetchAll != null && fetchAll))).build();
 	}
 
 	@GET
