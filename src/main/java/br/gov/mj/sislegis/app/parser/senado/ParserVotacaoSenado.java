@@ -18,7 +18,6 @@ public class ParserVotacaoSenado {
         List<Votacao> votacoes = new ArrayList<>();
         StringBuilder wsURL = new StringBuilder("http://legis.senado.leg.br/dadosabertos/materia/votacoes/").append(idProposicao);
 
-
         XStream xstream = new XStream();
         xstream.ignoreUnknownElements();
 

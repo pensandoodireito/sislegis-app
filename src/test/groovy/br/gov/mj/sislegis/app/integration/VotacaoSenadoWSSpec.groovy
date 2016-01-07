@@ -10,7 +10,7 @@ class VotacaoSenadoWSSpec extends Specification{
         given:
         def client = new RESTClient("http://legis.senado.leg.br")
         def codigoProposicao = 112464
-        def caminho = "/dadosabertos/materia/votacoes/" + codigoProposicao
+        def caminho = "/dadosabertos/materia/votacoesBean/" + codigoProposicao
         def xml
 
         when:

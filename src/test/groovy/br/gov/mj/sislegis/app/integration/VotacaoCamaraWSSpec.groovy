@@ -7,7 +7,7 @@ class VotacaoCamaraWSSpec extends Specification {
 
     // FIXME a chamada do metodo abaixo retorna o erro: Forbidden
 
-/*    def "deve listar a votacao de uma proposicao"(){
+    def "deve listar a votacao de uma proposicao"(){
 
         given:
         def client = new RESTClient("http://www.camara.gov.br")
@@ -25,6 +25,6 @@ class VotacaoCamaraWSSpec extends Specification {
         then:
         println xml
 
-    }*/
+    }
 
 }
