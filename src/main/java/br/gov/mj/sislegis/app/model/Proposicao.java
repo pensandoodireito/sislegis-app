@@ -39,6 +39,7 @@ import br.gov.mj.sislegis.app.rest.serializers.CompactSetProposicaoSerializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
@@ -120,8 +121,9 @@ public class Proposicao extends AbstractEntity {
 	@Transient
 	private String linkPauta;
 
-	@Transient
-	private Posicionamento posicionamento;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "posicionamento_atual_id", nullable = true)
+	private PosicionamentoProposicao posicionamentoAtual;
 
 	@Transient
 	private Boolean posicionamentoPreliminar;
@@ -172,6 +174,14 @@ public class Proposicao extends AbstractEntity {
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "proposicao_elaboracao_normativa", joinColumns = { @JoinColumn(name = "proposicao_id") }, inverseJoinColumns = { @JoinColumn(name = "elaboracao_normativa_id") })
 	private Set<ElaboracaoNormativa> elaboracoesNormativas;
+
+	@JsonIgnore
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "proposicao")
+	@OrderBy("ordem")	
+	private List<RoadmapComissao> roadmapComissoes;
+	//TODO tentar no futuro usar serializar e desserializer
+	@Transient
+	private List<String> roadmapComissoesUI;
 
 	public String getSigla() {
 		if (Objects.isNull(sigla))
@@ -303,12 +313,12 @@ public class Proposicao extends AbstractEntity {
 		this.linkPauta = linkPauta;
 	}
 
-	public Posicionamento getPosicionamento() {
-		return posicionamento;
+	public PosicionamentoProposicao getPosicionamentoAtual() {
+		return posicionamentoAtual;
 	}
 
-	public void setPosicionamento(Posicionamento posicionamento) {
-		this.posicionamento = posicionamento;
+	public void setPosicionamentoAtual(PosicionamentoProposicao posicionamento) {
+		this.posicionamentoAtual = posicionamento;
 	}
 
 	public Boolean isPosicionamentoPreliminar() {
@@ -432,6 +442,22 @@ public class Proposicao extends AbstractEntity {
 
 	public void setElaboracoesNormativas(Set<ElaboracaoNormativa> elaboracoesNormativas) {
 		this.elaboracoesNormativas = elaboracoesNormativas;
+	}
+
+	public List<RoadmapComissao> getRoadmapComissoes() {
+		return roadmapComissoes;
+	}
+
+	public void setRoadmapComissoes(List<RoadmapComissao> etapasRoadmapComissoes) {
+		this.roadmapComissoes = etapasRoadmapComissoes;
+	}
+
+	public List<String> getRoadmapComissoesUI() {
+		return roadmapComissoesUI;
+	}
+
+	public void setRoadmapComissoesUI(List<String> roadmapComissoesUI) {
+		this.roadmapComissoesUI = roadmapComissoesUI;
 	}
 
 	@JsonIgnore

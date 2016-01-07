@@ -22,12 +22,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import br.gov.mj.sislegis.app.service.ReuniaoService;
 import org.jboss.resteasy.annotations.GZIP;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
-import br.gov.mj.sislegis.app.service.Service;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 @Path("/reuniaos")
@@ -35,7 +35,7 @@ import br.gov.mj.sislegis.app.util.SislegisUtil;
 public class ReuniaoEndpoint {
 
 	@Inject
-	private Service<Reuniao> service;
+	private ReuniaoService service;
 
 	@Inject
 	private ProposicaoService proposicaoService;
@@ -65,15 +65,19 @@ public class ReuniaoEndpoint {
 	@GET
 	@Path("/findByData")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Collection<Proposicao> findByData(@QueryParam("data") Date data, @QueryParam("fetchAll") Boolean fetchAll)
-			throws Exception {
+	public Collection<Proposicao> findByData(@QueryParam("data") Date data,
+			@QueryParam("responsavel") Long idResponsavel, @QueryParam("posicionamento") Long idPosicionameto,
+			@QueryParam("comissao") String comissao, @QueryParam("origem") String origem,
+			@QueryParam("isFavorita") String isFavorita, @QueryParam("limit") Integer limit,
+			@QueryParam("offset") Integer offset, @QueryParam("proposicaoIds") Integer[] idsProposicoes,
+			@QueryParam("fetchAll") Boolean fetchAll) throws Exception {
 		long start = 0;
 		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.ALL)) {
 			start = System.currentTimeMillis();
 		}
 
-		Collection<Proposicao> lista = proposicaoService.buscarProposicoesPorDataReuniao(data,
-				(fetchAll != null && fetchAll));
+		Collection<Proposicao> lista = proposicaoService.buscarProposicoesPorDataReuniao(data, comissao, idResponsavel,
+				origem, isFavorita, idPosicionameto, limit, offset, idsProposicoes, (fetchAll != null && fetchAll));
 
 		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.ALL)) {
 			long stop = System.currentTimeMillis();
@@ -89,6 +93,14 @@ public class ReuniaoEndpoint {
 	public List<Reuniao> listAll() {
 		List<Reuniao> results = service.listAll();
 		return results;
+	}
+
+	@GET
+	@Path("/reunioesPorMes")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Reuniao> reunioesPorMes(@QueryParam("mes") Integer mes, @QueryParam("ano") Integer ano){
+		List<Reuniao> reunioes = service.reunioesPorMes(mes, ano);
+		return reunioes;
 	}
 
 	@PUT
