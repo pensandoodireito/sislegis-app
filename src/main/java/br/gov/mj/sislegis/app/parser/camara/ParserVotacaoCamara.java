@@ -10,10 +10,10 @@ import java.util.List;
 
 public class ParserVotacaoCamara {
 
-    public List<Votacao> votacoesPorProposicao(Integer idProposicao, String ano, String tipo) throws Exception {
+    public List<Votacao> votacoesPorProposicao(String numero, String ano, String tipo) throws Exception {
         List<Votacao> votacoes = new ArrayList<>();
         StringBuilder wsURL = new StringBuilder("http://www.camara.gov.br/SitCamaraWS/Proposicoes.asmx/ObterVotacaoProposicao?");
-        wsURL.append("numero=").append(idProposicao);
+        wsURL.append("numero=").append(numero);
         wsURL.append("&ano=").append(ano);
         wsURL.append("&tipo=").append(tipo);
 

@@ -9,12 +9,12 @@ class VotacaoCamaraParserSpec extends Specification{
         given:
         def parserVotacaoCamara = new ParserVotacaoCamara()
         def tipo = "PL"
-        def idProposicao = 1992
+        def numero = "1992"
         def ano = "2007"
         def votacoes
 
         when:
-        votacoes = parserVotacaoCamara.votacoesPorProposicao(idProposicao, ano, tipo)
+        votacoes = parserVotacaoCamara.votacoesPorProposicao(numero, ano, tipo)
 
         then:
         votacoes.each{
