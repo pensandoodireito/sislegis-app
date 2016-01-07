@@ -104,4 +104,5 @@
 	</changeSet>
 	
 	<include relativeToChangelogFile="true" file="update151101.sql" />
+	<include relativeToChangelogFile="true" file="update151102.sql" />
 </databaseChangeLog>
