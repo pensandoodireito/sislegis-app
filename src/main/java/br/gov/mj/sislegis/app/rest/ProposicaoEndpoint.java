@@ -349,6 +349,7 @@ public class ProposicaoEndpoint {
 			e.printStackTrace();
 			return null;
 		}
+
 	}
 
 }

@@ -55,4 +55,20 @@ class ProposicaoEndpointSpec extends Specification {
         assert resp.status == 200 // status 200 = Ok
     }
 
+    def "deve listar as votacoes de uma proposicao"(){
+
+        given:
+        def caminho = "/sislegis/rest/proposicaos/listarVotacoes"
+        def query = [idProposicao: null, tipo: "PL", numero: "1992", ano: "2007", origem: "CAMARA"]
+
+        when:
+        def resp = client.get(path: caminho, query: query, headers: cabecalho)
+
+        then:
+        resp.data.each{
+            println it.data
+        }
+
+    }
+
 }
