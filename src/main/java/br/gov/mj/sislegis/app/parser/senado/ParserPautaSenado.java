@@ -24,7 +24,7 @@ public class ParserPautaSenado {
 		ParserPautaSenado parser = new ParserPautaSenado();
 
 		// TODO: Informação que vem do filtro
-		String siglaComissao = "CAE";
+		String siglaComissao = "PLEN";
 		String datIni = "20151001";
 		String datFim = "20151008";
 		Set<PautaReuniaoComissao> pautas = parser.getPautaComissao(siglaComissao, datIni, datFim);

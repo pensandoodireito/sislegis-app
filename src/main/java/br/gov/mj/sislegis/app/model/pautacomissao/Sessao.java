@@ -48,7 +48,29 @@ public class Sessao extends AbstractEntity	{
 		titulo = sessaoWS.getTitulo();
 
 	}
+	public String getLinkIntegra() {
+		if (agenda.getCasa() != null) {
+			switch (agenda.getCasa()) {
+			case CAMARA:
 
+				if ("PLEN".equalsIgnoreCase(agenda.getComissao())) {
+					return "http://www.camara.leg.br/internet/ordemdodia/ordemDetalheReuniaoPle.asp?codReuniao="
+							+ getIdentificadorExterno();
+				} else {
+					return "http://www.camara.leg.br/internet/ordemdodia/ordemDetalheReuniaoCom.asp?codReuniao="
+							+ getIdentificadorExterno();
+				}
+			case SENADO:
+
+				return "http://legis.senado.leg.br/comissoes/reuniao?reuniao=" + getIdentificadorExterno();
+
+			default:
+				throw new IllegalArgumentException("Casa legislativa desconhecida");
+			}
+		}
+		return "";
+
+	}
 	public String getIdentificadorExterno() {
 		return identificadorExterno;
 	}

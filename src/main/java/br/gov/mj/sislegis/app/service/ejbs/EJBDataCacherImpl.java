@@ -44,8 +44,8 @@ public class EJBDataCacherImpl implements EJBDataCacher {
 	@Override
 	public boolean isEntityCached(String dataKey) {
 		boolean isCached = refDataCache.containsKey(dataKey);
-		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.FINE)) {
-			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+		if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.FINEST)) {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINEST,
 					"Cache " + dataKey + " " + (isCached ? "Hit" : "Miss"));
 		}
 		return refDataCache.containsKey(dataKey);

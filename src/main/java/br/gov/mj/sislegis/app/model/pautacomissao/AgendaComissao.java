@@ -1,5 +1,6 @@
 package br.gov.mj.sislegis.app.model.pautacomissao;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -130,6 +131,8 @@ public class AgendaComissao extends AbstractEntity {
 
 	}
 
+	
+
 	public Sessao getSessao(String identificadorExterno) {
 		if (sessoes != null) {
 			for (Iterator<Sessao> iterator = sessoes.iterator(); iterator.hasNext();) {
@@ -151,6 +154,10 @@ public class AgendaComissao extends AbstractEntity {
 	public void setDataReferencia(Date time) {
 		dataReferencia = time;
 		sessoes.clear();
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
 	}
 
 }
