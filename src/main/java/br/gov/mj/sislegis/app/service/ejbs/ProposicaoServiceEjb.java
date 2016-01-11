@@ -210,7 +210,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	public int salvarProposicaoIndependente(Proposicao proposicaoFromBusca) {
 		// Agora vamos salvar/associar as proposições na reunião
 		try {
-			Proposicao proposicao = buscarPorId(proposicaoFromBusca.getIdProposicao());
+			Proposicao proposicao = buscarPorId(proposicaoFromBusca.getIdProposicao(), false);
 
 			// Caso a proposição não exista, salvamos ela e associamos a
 			// reunião
@@ -257,10 +257,13 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public Proposicao buscarPorId(Integer id) {
+	public Proposicao buscarPorId(Integer id, boolean fetchall) {
 		Proposicao proposicao = findById(id.longValue());
 		if (proposicao != null) {
 			popularDadosTransientes(proposicao);
+			if (fetchall) {
+				populaTodosDados(proposicao);
+			}
 		}
 		return proposicao;
 	}
@@ -452,13 +455,17 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	private void popularTodosDados(List<Proposicao> proposicoesReuniao) {
 		for (Iterator iterator = proposicoesReuniao.iterator(); iterator.hasNext();) {
 			Proposicao proposicao = (Proposicao) iterator.next();
-			proposicao.setListaComentario(comentarioService.findByProposicaoId(proposicao.getId()));
-			proposicao.setTotalComentarios(proposicao.getListaComentario().size());
-			proposicao.setListaEncaminhamentoProposicao(new HashSet<EncaminhamentoProposicao>(
-					encaminhamentoProposicaoService.findByProposicao(proposicao.getId())));
-			proposicao.setTotalEncaminhamentos(proposicao.getListaEncaminhamentoProposicao().size());
+			populaTodosDados(proposicao);
 		}
 
+	}
+
+	private void populaTodosDados(Proposicao proposicao) {
+		proposicao.setListaComentario(comentarioService.findByProposicaoId(proposicao.getId()));
+		proposicao.setTotalComentarios(proposicao.getListaComentario().size());
+		proposicao.setListaEncaminhamentoProposicao(new HashSet<EncaminhamentoProposicao>(
+				encaminhamentoProposicaoService.findByProposicao(proposicao.getId())));
+		proposicao.setTotalEncaminhamentos(proposicao.getListaEncaminhamentoProposicao().size());
 	}
 
 	@Override
@@ -857,10 +864,11 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		Proposicao proposicao = findById(idProposicao);
 
 		if (proposicao == null) {
-			throw new IllegalArgumentException("Tentativa de inserir roadmap para proposicao nao encontrada. Id: " + idProposicao);
+			throw new IllegalArgumentException("Tentativa de inserir roadmap para proposicao nao encontrada. Id: "
+					+ idProposicao);
 		}
 
-		for (RoadmapComissao roadmapComissao : proposicao.getRoadmapComissoes()){
+		for (RoadmapComissao roadmapComissao : proposicao.getRoadmapComissoes()) {
 			em.remove(roadmapComissao);
 		}
 
@@ -984,10 +992,27 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			proposicao.setTotalEncaminhamentos(encaminhamentoProposicaoService.totalByProposicao(proposicao.getId()));
 			proposicao.setTotalPautasComissao(totalProposicaoPautaComissaoByProposicao(proposicao.getId()));
 
-			proposicao.setRoadmapComissoesUI(new ArrayList<String>());
-			for (RoadmapComissao roadmapComissao : proposicao.getRoadmapComissoes()){
-				proposicao.getRoadmapComissoesUI().add(roadmapComissao.getComissao());
+			PosicionamentoProposicao posicionamentoProposicao;
+			try {
+				TypedQuery<PosicionamentoProposicao> query = em.createQuery(
+						"FROM PosicionamentoProposicao WHERE proposicao.id = :id ORDER BY dataCriacao DESC ",
+						PosicionamentoProposicao.class);
+
+				query.setParameter("id", proposicao.getId());
+				query.setMaxResults(1);
+
+				posicionamentoProposicao = query.getSingleResult();
+			} catch (NoResultException e) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+						"Nenhum posicionamento encontrado no historico, para a proposicao id: " + proposicao.getId());
+				posicionamentoProposicao = null;
 			}
+
+			if (posicionamentoProposicao != null) {
+				proposicao.setPosicionamentoAtual(posicionamentoProposicao);
+				proposicao.setPosicionamentoPreliminar(posicionamentoProposicao.isPreliminar());
+			}
+
 		}
 	}
 

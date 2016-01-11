@@ -30,6 +30,7 @@ import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
+
 import org.jboss.resteasy.annotations.cache.Cache;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
@@ -177,8 +178,8 @@ public class ProposicaoEndpoint {
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response findById(@PathParam("id") Integer id) {
-		return Response.ok(proposicaoService.buscarPorId(id)).build();
+	public Response findById(@PathParam("id") Integer id,@QueryParam("fetchAll") Boolean fetchAll) {
+		return Response.ok(proposicaoService.buscarPorId(id,(fetchAll != null && fetchAll))).build();
 	}
 
 	@GET
