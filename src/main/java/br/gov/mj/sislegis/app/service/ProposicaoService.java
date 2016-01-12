@@ -170,4 +170,11 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 */
 	void setRoadmapComissoes(Long idProposicao, List<String> comissoes);
 
+	/**
+	 * Busca o processo no SEI (via WS) e insere objeto de identificacao com link para este processo, relacionando com a Proposicao
+	 *
+	 * @param id id da proposicao
+	 * @param nup numero de protocolo do SEI
+     */
+	void inserirProcessoSei(Long id, String nup);
 }

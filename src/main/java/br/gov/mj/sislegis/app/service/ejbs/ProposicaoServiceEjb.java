@@ -885,6 +885,11 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 	}
 
+	@Override
+	public void inserirProcessoSei(Long id, String nup) {
+
+	}
+
 	/**
 	 * Este comparador checa por alterações na proposição.
 	 */
