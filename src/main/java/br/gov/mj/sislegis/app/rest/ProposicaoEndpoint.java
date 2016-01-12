@@ -337,7 +337,20 @@ public class ProposicaoEndpoint {
 			return Response.ok().build();
 		} catch (Exception e) {
 			e.printStackTrace();
-			return Response.status(Response.Status.BAD_REQUEST).build();
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+	}
+
+	@POST
+	@Path("/inserirProcessoSei")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response inserirProcessoSei(ProcessoSeiWrapper processoSeiWrapper){
+		try {
+			proposicaoService.inserirProcessoSei(processoSeiWrapper.getId(), processoSeiWrapper.getNup());
+			return Response.ok().build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 	}
 
@@ -413,5 +426,26 @@ class RoadmapComissoesWrapper{
 
 	public void setComissoes(List<String> comissoes) {
 		this.comissoes = comissoes;
+	}
+}
+
+class ProcessoSeiWrapper {
+	private Long id;
+	private String nup;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getNup() {
+		return nup;
+	}
+
+	public void setNup(String nup) {
+		this.nup = nup;
 	}
 }
