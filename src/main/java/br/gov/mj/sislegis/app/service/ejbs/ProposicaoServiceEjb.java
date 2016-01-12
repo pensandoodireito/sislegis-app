@@ -35,6 +35,7 @@ import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
 import br.gov.mj.sislegis.app.model.Posicionamento;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
+import br.gov.mj.sislegis.app.model.ProcessoSei;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
@@ -887,7 +888,16 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	@Override
 	public void inserirProcessoSei(Long id, String nup) {
+		Proposicao proposicao = findById(id);
 
+		ProcessoSei processoSei = new ProcessoSei();
+		processoSei.setNup(nup);
+		processoSei.setProposicao(proposicao);
+
+		//FIXME buscar no WS do SEI
+		processoSei.setLinkSei("http://www.justica.gov.br/");
+
+		em.persist(processoSei);
 	}
 
 	/**
