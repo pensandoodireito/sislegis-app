@@ -1,6 +1,7 @@
 package br.gov.mj.sislegis.app.service;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.ejb.Local;
+import javax.xml.rpc.ServiceException;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
@@ -176,5 +178,5 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @param id id da proposicao
 	 * @param protocolo numero de protocolo do SEI
      */
-	void vincularProcessoSei(Long id, String protocolo);
+	void vincularProcessoSei(Long id, String protocolo) throws ServiceException, RemoteException;
 }
