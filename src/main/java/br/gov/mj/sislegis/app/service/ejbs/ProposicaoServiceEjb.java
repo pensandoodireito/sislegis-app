@@ -887,11 +887,11 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public void inserirProcessoSei(Long id, String nup) {
+	public void vincularProcessoSei(Long id, String protocolo) {
 		Proposicao proposicao = findById(id);
 
 		ProcessoSei processoSei = new ProcessoSei();
-		processoSei.setNup(nup);
+		processoSei.setProtocolo(protocolo);
 		processoSei.setProposicao(proposicao);
 
 		//FIXME buscar no WS do SEI

@@ -174,7 +174,7 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * Busca o processo no SEI (via WS) e insere objeto de identificacao com link para este processo, relacionando com a Proposicao
 	 *
 	 * @param id id da proposicao
-	 * @param nup numero de protocolo do SEI
+	 * @param protocolo numero de protocolo do SEI
      */
-	void inserirProcessoSei(Long id, String nup);
+	void vincularProcessoSei(Long id, String protocolo);
 }

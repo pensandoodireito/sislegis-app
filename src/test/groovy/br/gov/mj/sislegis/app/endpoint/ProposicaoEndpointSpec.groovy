@@ -57,7 +57,7 @@ class ProposicaoEndpointSpec extends Specification {
 
     def "deve inserir um processo do sei a partir do protocolo"(){
         given:
-        def caminho = "/sislegis/rest/proposicaos/inserirProcessoSei"
+        def caminho = "/sislegis/rest/proposicaos/vincularProcessoSei"
         def dados = [id: 7, nup: "123456"]
 
         when:

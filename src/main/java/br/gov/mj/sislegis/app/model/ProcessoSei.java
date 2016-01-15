@@ -23,7 +23,7 @@ public class ProcessoSei extends AbstractEntity {
     @ManyToOne(optional = false)
     private Proposicao proposicao;
 
-    private String nup;
+    private String protocolo;
 
     private String linkSei;
 
@@ -43,12 +43,12 @@ public class ProcessoSei extends AbstractEntity {
         this.proposicao = proposicao;
     }
 
-    public String getNup() {
-        return nup;
+    public String getProtocolo() {
+        return protocolo;
     }
 
-    public void setNup(String nup) {
-        this.nup = nup;
+    public void setProtocolo(String nup) {
+        this.protocolo = nup;
     }
 
     public String getLinkSei() {

@@ -342,11 +342,11 @@ public class ProposicaoEndpoint {
 	}
 
 	@POST
-	@Path("/inserirProcessoSei")
+	@Path("/vincularProcessoSei")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response inserirProcessoSei(ProcessoSeiWrapper processoSeiWrapper){
 		try {
-			proposicaoService.inserirProcessoSei(processoSeiWrapper.getId(), processoSeiWrapper.getNup());
+			proposicaoService.vincularProcessoSei(processoSeiWrapper.getId(), processoSeiWrapper.getProtocolo());
 			return Response.ok().build();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -431,7 +431,7 @@ class RoadmapComissoesWrapper{
 
 class ProcessoSeiWrapper {
 	private Long id;
-	private String nup;
+	private String protocolo;
 
 	public Long getId() {
 		return id;
@@ -441,11 +441,11 @@ class ProcessoSeiWrapper {
 		this.id = id;
 	}
 
-	public String getNup() {
-		return nup;
+	public String getProtocolo() {
+		return protocolo;
 	}
 
-	public void setNup(String nup) {
-		this.nup = nup;
+	public void setProtocolo(String protocolo) {
+		this.protocolo = protocolo;
 	}
 }
