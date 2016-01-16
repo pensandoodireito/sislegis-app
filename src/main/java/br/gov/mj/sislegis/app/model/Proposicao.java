@@ -182,6 +182,9 @@ public class Proposicao extends AbstractEntity {
 	@JsonSerialize(using = CompactListRoadmapComissaoSerializer.class)
 	private List<RoadmapComissao> roadmapComissoes;
 
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "proposicao")
+	private List<ProcessoSei> processosSei;
+
 	public String getSigla() {
 		if (Objects.isNull(sigla))
 			sigla = getTipo() + " " + getNumero() + "/" + getAno();
@@ -449,6 +452,14 @@ public class Proposicao extends AbstractEntity {
 
 	public void setRoadmapComissoes(List<RoadmapComissao> etapasRoadmapComissoes) {
 		this.roadmapComissoes = etapasRoadmapComissoes;
+	}
+
+	public List<ProcessoSei> getProcessosSei() {
+		return processosSei;
+	}
+
+	public void setProcessosSei(List<ProcessoSei> processosSei) {
+		this.processosSei = processosSei;
 	}
 
 	@JsonIgnore

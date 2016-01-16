@@ -15,6 +15,7 @@ import javax.persistence.Table;
 public class ProcessoSei extends AbstractEntity {
 
     @Id
+    @JsonIgnore
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
