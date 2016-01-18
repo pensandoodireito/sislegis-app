@@ -41,6 +41,9 @@ Para também executar o upgrade de banco utilize:
 
     mvn install -P upgrade
 
+Para construir o sislegis-app é necessário ter a variável de ambiente KEYCLOAK_SERVER setada com o endereço do servidor do keycloak:
+
+    export KEYCLOAK_SERVER=localhost
 
 Criação do Banco de Dados
 -------------------------
@@ -64,6 +67,6 @@ Para configurar o Keycloak inicie o WildFly e acesse a interface administrativa 
 
     http://localhost:8080/auth
   Senha usuário padrão é admin/admin
-      Clique em adicionar Realm (botão no topo direito). Selecione o arquivo do ambiente sislegis `configuracoes/keycloak/keycloak.json` 
+	  Clique em adicionar Realm (botão no topo direito). Selecione o arquivo do ambiente sislegis `configuracoes/keycloak/keycloak.json` 
   No ambiente de desenveolvimento utilize 
-      `configuracoes/keycloak/keycloak.json.desenvolvimento` 
+	  `configuracoes/keycloak/keycloak.json.desenvolvimento` 
