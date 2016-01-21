@@ -217,15 +217,50 @@
 			</plugin>
 
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>1.4.1</version>
+				<executions>
+					<execution>
+						<id>enforce-property</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireProperty>
+									<property>env.KEYCLOAK_SERVER</property>
+									<message>ATENCAO: Váriavel de ambiente KEYCLOAK_SERVER não encontrada!</message>
+									<regex>.+</regex>
+									<regexMessage>Variavel do keycloak não pode ser vazia.</regexMessage>
+								</requireProperty>
+							</rules>
+							<fail>true</fail>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+
+			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>1.8</version>
 				<executions>
 					<execution>
+						<id>GenerateKeycloakConf</id>
 						<phase>generate-sources</phase>
 						<configuration>
 							<target>
+
+								<copy file="src/main/webapp/WEB-INF/keycloak.json.template"
+									tofile="target/sislegis/WEB-INF/keycloak.json" />
+								<!-- Add to your environment the property value for KEYCLOAK_SERVER -->
+								<replace token="keycloak_server" value="${env.KEYCLOAK_SERVER}"
+									dir="target/sislegis/WEB-INF/">
+									<include name="keycloak.json" />
+								</replace>
 								<loadfile property="keycloakconf"
-									srcFile="src/main/webapp/WEB-INF/keycloak.json">
+									srcFile="target/sislegis/WEB-INF/keycloak.json">
 									<filterchain>
 										<tokenfilter>
 											<replacestring from='"' to='\"' />
@@ -246,12 +281,14 @@
 									file="src/main/java/br/gov/mj/sislegis/app/rest/authentication/KeyCloakGenerated.java">
 									";${line.separator}}${line.separator}
 								</echo>
+
 							</target>
 						</configuration>
 						<goals>
 							<goal>run</goal>
 						</goals>
 					</execution>
+
 				</executions>
 			</plugin>
 
@@ -396,7 +433,8 @@
 											<format property="tstamped-file-name" pattern="ddMMMyy_kkmm"
 												locale="pt,BR" />
 										</tstamp>
-										<echo>Criando backup em	${backup-dir}/backup_${tstamped-file-name}.gz</echo>
+										<echo>Criando backup em
+											${backup-dir}/backup_${tstamped-file-name}.gz</echo>
 
 										<exec executable="pg_dump"
 											output="${backup-dir}/backup_${tstamped-file-name}"
