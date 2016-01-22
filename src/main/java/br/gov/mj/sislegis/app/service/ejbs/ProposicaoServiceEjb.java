@@ -910,6 +910,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 	}
 
+	@Override
+	public void excluirProcessoSei(Long idProcesso) {
+		ProcessoSei processoSei = em.find(ProcessoSei.class, idProcesso);
+		em.remove(processoSei);
+	}
+
 	/**
 	 * Este comparador checa por alterações na proposição.
 	 */

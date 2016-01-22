@@ -354,6 +354,19 @@ public class ProposicaoEndpoint {
 		}
 	}
 
+	@DELETE
+	@Path("/excluirProcessoSei/{idProcesso:[0-9]+}")
+	public Response excluirProcessoSei(Long idProcesso){
+		try {
+			proposicaoService.excluirProcessoSei(idProcesso);
+			return Response.noContent().build();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+	}
+
 }
 
 class AddProposicaoPautaWrapper {

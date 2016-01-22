@@ -179,4 +179,11 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @param protocolo numero de protocolo do SEI
      */
 	void vincularProcessoSei(Long id, String protocolo) throws ServiceException, RemoteException;
+
+	/**
+	 * Remove vinculo de processo do SEI
+	 *
+	 * @param idProcesso id do processoSei
+     */
+	void excluirProcessoSei(Long idProcesso);
 }
