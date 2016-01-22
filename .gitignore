@@ -8,3 +8,4 @@ db.backup.gz
 .idea
 src/main/java/br/gov/mj/sislegis/app/rest/authentication/KeyCloakGenerated.java
 /bin/
+src/main/webapp/WEB-INF/keycloak.json
