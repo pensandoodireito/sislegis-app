@@ -356,7 +356,7 @@ public class ProposicaoEndpoint {
 
 	@DELETE
 	@Path("/excluirProcessoSei/{idProcesso:[0-9]+}")
-	public Response excluirProcessoSei(Long idProcesso){
+	public Response excluirProcessoSei(@PathParam("idProcesso") Long idProcesso){
 		try {
 			proposicaoService.excluirProcessoSei(idProcesso);
 			return Response.noContent().build();
