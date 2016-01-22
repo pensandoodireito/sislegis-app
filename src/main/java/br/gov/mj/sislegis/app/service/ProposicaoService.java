@@ -13,6 +13,7 @@ import javax.xml.rpc.ServiceException;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
+import br.gov.mj.sislegis.app.model.ProcessoSei;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
@@ -178,7 +179,7 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @param id id da proposicao
 	 * @param protocolo numero de protocolo do SEI
      */
-	void vincularProcessoSei(Long id, String protocolo) throws ServiceException, RemoteException;
+	ProcessoSei vincularProcessoSei(Long id, String protocolo) throws ServiceException, RemoteException;
 
 	/**
 	 * Remove vinculo de processo do SEI

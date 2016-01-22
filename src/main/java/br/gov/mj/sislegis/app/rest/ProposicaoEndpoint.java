@@ -27,10 +27,10 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
+import br.gov.mj.sislegis.app.model.ProcessoSei;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
-
 import org.jboss.resteasy.annotations.cache.Cache;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
@@ -344,13 +344,14 @@ public class ProposicaoEndpoint {
 	@POST
 	@Path("/vincularProcessoSei")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response inserirProcessoSei(ProcessoSeiWrapper processoSeiWrapper){
+	@Produces(MediaType.APPLICATION_JSON)
+	public ProcessoSei inserirProcessoSei(ProcessoSeiWrapper processoSeiWrapper){
 		try {
-			proposicaoService.vincularProcessoSei(processoSeiWrapper.getId(), processoSeiWrapper.getProtocolo());
-			return Response.ok().build();
+			ProcessoSei processoSei = proposicaoService.vincularProcessoSei(processoSeiWrapper.getId(), processoSeiWrapper.getProtocolo());
+			return processoSei;
 		} catch (Exception e) {
 			e.printStackTrace();
-			return Response.status(Status.BAD_REQUEST).build();
+			return null;
 		}
 	}
 

@@ -891,7 +891,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public void vincularProcessoSei(Long id, String protocolo) throws ServiceException, RemoteException {
+	public ProcessoSei vincularProcessoSei(Long id, String protocolo) throws ServiceException, RemoteException {
 		Proposicao proposicao = findById(id);
 
 		ProcessoSei processoSei = new ProcessoSei();
@@ -905,6 +905,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (retornoConsultaProcedimento != null) {
 			processoSei.setLinkSei(retornoConsultaProcedimento.getLinkAcesso());
 			em.persist(processoSei);
+			return processoSei;
 		} else{
 			throw new IllegalArgumentException("Processo nao encontrado no SEI. Protocolo: " + protocolo);
 		}

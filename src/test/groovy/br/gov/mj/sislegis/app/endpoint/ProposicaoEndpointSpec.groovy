@@ -6,7 +6,7 @@ import spock.lang.Specification
 
 class ProposicaoEndpointSpec extends Specification {
 
-    def token = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiIyM2UyMjAyOS02OTE5LTQ3N2ItYjhjMi1mZjI4NWRiMzY2NGEiLCJleHAiOjE0NTM0MjMzMzQsIm5iZiI6MCwiaWF0IjoxNDUzNDIzMDM0LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2F1dGgvcmVhbG1zL3Npc2xlZ2lzIiwiYXVkIjoic2lzbGVnaXMiLCJzdWIiOiI1ZWU3Y2U3Ni1lMjEwLTRlYjYtOTY1NS00MzE5ZWIyNjg2NjQiLCJhenAiOiJzaXNsZWdpcyIsInNlc3Npb25fc3RhdGUiOiIxNDczNzViYy1jNGI3LTRmOGEtODU0YS1iNDg0MDZjZDlhMzciLCJjbGllbnRfc2Vzc2lvbiI6IjUzZWQxMTUwLWMyMDAtNDBiNi1iOGQzLWZmYmU1MmM2ODU5MCIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vc2lzbGVnaXMubG9jYWwiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50Iiwidmlldy1wcm9maWxlIl19fSwibmFtZSI6Ikd1c3Rhdm8gRGVsZ2FkbyIsInByZWZlcnJlZF91c2VybmFtZSI6Imd1c3Rhdm8iLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiRGVsZ2FkbyIsImVtYWlsIjoiZ2NkZWxnYWRvQGdtYWlsLmNvbSJ9.Bp7ig_Lay4MPphpzbTzngRVZhYxL6muBiyaeuWb93mQ80RI5A7uENWa0LeJaIVtVri7CaCkIURBp8frC_H4rbYBY9kM2op4ye4UdTuQhU2VNwdEz820Okj-uQUcqWECNSFsfXj5jxoAfw-PipA6qLYjPMkozk9q5Yg_x_ZQLxZTaMS0iiZ1VHm1wWpX4ZHupypGVslTtfEm7KXaEQskkWODbgvrs-O5ToiOQkUTnrgRXcg3wnCPxWrdsqyhSB8VHdu6g28WXxtycX6hrSrPiTQf0O10bF8oNQBCPyP9Ig0pCZCOjv4fv8WGRlUI5CKH5ssVzjuSXLlmeW3F2WGRsDg"
+    def token = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJjMjY0NjAyNi03MzMxLTQ2NzYtYmQ2Yy04NjRkMDdjYzE5NDgiLCJleHAiOjE0NTM0MjY5MTYsIm5iZiI6MCwiaWF0IjoxNDUzNDI2NjE2LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2F1dGgvcmVhbG1zL3Npc2xlZ2lzIiwiYXVkIjoic2lzbGVnaXMiLCJzdWIiOiI1ZWU3Y2U3Ni1lMjEwLTRlYjYtOTY1NS00MzE5ZWIyNjg2NjQiLCJhenAiOiJzaXNsZWdpcyIsInNlc3Npb25fc3RhdGUiOiIxNDczNzViYy1jNGI3LTRmOGEtODU0YS1iNDg0MDZjZDlhMzciLCJjbGllbnRfc2Vzc2lvbiI6Ijg4YTM3OWU0LTkyYWQtNDRlNy1iZGNkLTViZWNmYWNiNDg0YiIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vc2lzbGVnaXMubG9jYWwiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50Iiwidmlldy1wcm9maWxlIl19fSwibmFtZSI6Ikd1c3Rhdm8gRGVsZ2FkbyIsInByZWZlcnJlZF91c2VybmFtZSI6Imd1c3Rhdm8iLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiRGVsZ2FkbyIsImVtYWlsIjoiZ2NkZWxnYWRvQGdtYWlsLmNvbSJ9.GG0t3IGLJx0AEYiroz8yF82fmsVM33nXj5iDg-GHfI66BiTMLdUBhiF-mujn4Sucl15GUorYhtmfzefCjKvl1278fvbuq8TZ0Cqv2eWlT6YjxEI-MZ-Pdv7ffpY1cYAFVphTwUMO6M3VHBoItD3PSAPyejFcYpHauugp-FAJGlJqSCuwSUr7yyL5UoEigEanZps12W7m-umE9agfKBScMxLbKbg6eyaUM_iciShPUNhdOh6ju-s22_xuLaILnfBGjPa1N61KnjMlMmpc3Mn76xfRfAVDWvZw6_wQy3J8lTF4CbMr_PnMLfHQU1v6gah02wcT9VsMy6e9DYE9beVX1Q"
     def client = new RESTClient("http://localhost:8080/")
     def cabecalho = [Authorization: token]
 
@@ -58,25 +58,25 @@ class ProposicaoEndpointSpec extends Specification {
     def "deve inserir um processo do sei a partir do protocolo"(){
         given:
         def caminho = "/sislegis/rest/proposicaos/vincularProcessoSei"
-        def dados = [id: 125, protocolo: "16.0.000000002-0"]
+        def dados = [id: 125, protocolo: "1600000000020"]
 
         when:
         def resp = client.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
 
         then:
-        assert resp.status == 200 // status 200 = Ok
+        assert resp.data != null
     }
 
     def "deve excluir um processo SEI pelo seu id"(){
         given:
-        def idProcessoSei = 129;
+        def idProcessoSei = 141;
         def caminho = "/sislegis/rest/proposicaos/excluirProcessoSei/" + idProcessoSei;
 
         when:
         def resp = client.delete(path: caminho, headers: cabecalho)
 
         then:
-        asser resp.status = 204 // status 204 = no content
+        assert resp.status == 204 // status 204 = no content
     }
 
 }
