@@ -2,13 +2,73 @@ package br.gov.mj.sislegis.app.endpoint
 
 import groovyx.net.http.ContentType
 import groovyx.net.http.RESTClient
-import spock.lang.Specification
-
 class ProposicaoEndpointSpec extends Specification {
 
-    def token = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJkZTE5MjExOS0xYzJhLTQ4ZTAtYTI2Mi1mOTA5ZmFmMTQ0NTEiLCJleHAiOjE0NTAxMDg4NTAsIm5iZiI6MCwiaWF0IjoxNDUwMTA4NTUwLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2F1dGgvcmVhbG1zL3Npc2xlZ2lzIiwiYXVkIjoic2lzbGVnaXMiLCJzdWIiOiJjNmZkMjhmMi0yMDU0LTRmMGEtOWU4My0yMjQzMzJlM2ZmNDAiLCJhenAiOiJzaXNsZWdpcyIsInNlc3Npb25fc3RhdGUiOiIzYmRiNjhjZi1iN2YzLTRlNzktYmVjZS1iNWVlMzE2YmNiZWEiLCJjbGllbnRfc2Vzc2lvbiI6IjA0ODcwNTVmLTlhNDEtNDRiOC04MGViLWU3MDMyNWIwMGJhYyIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vc2lzbGVnaXMubG9jYWwiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50Iiwidmlldy1wcm9maWxlIl19fSwibmFtZSI6Ikd1c3Rhdm8gRGVsZ2FkbyIsInByZWZlcnJlZF91c2VybmFtZSI6Imd1c3Rhdm8iLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiRGVsZ2FkbyIsImVtYWlsIjoiZ2NkZWxnYWRvQGdtYWlsLmNvbSJ9.ZZqEbRqDqITOc7vFw8hVJHj0lg8SOTF2jw7_uPYoSKhfi40SjzJU7Sq1A1jX6QaQgocLa_RzLB9j2DrUP-buRTJalIzZzh354RdsqzAxbFB_LWFkbZc_jHA0EHkVWAPfe8PhRXyZtfVYrjseRsYxO6LIdd71gF34EjgRAvU26R9kKu8ufkbg_tylgQ3f9p8ttjz9HLlTW3dyEC36OC7Bt5p0KOUS0LEfPJDIJwR559xZArm7qni0cfTjW_ZJUn2tVIIzGv8PPm4_mk0X0-tjjipEkFZun5XvDrzOIlNGTUzyru5RCo19_jOXXWxuAIs4j0WbJ-_MoUhNpwjo2_PsUw"
+    def token = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiI4OWZkZDNhZi05YWU1LTRjYzItOWQyYS05YjAyMzg5ZjEyYzciLCJleHAiOjE0NTU1NjI1MzgsIm5iZiI6MCwiaWF0IjoxNDU1NTYyMjM4LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2F1dGgvcmVhbG1zL3Npc2xlZ2lzIiwiYXVkIjoic2lzbGVnaXMiLCJzdWIiOiI1ZWU3Y2U3Ni1lMjEwLTRlYjYtOTY1NS00MzE5ZWIyNjg2NjQiLCJhenAiOiJzaXNsZWdpcyIsInNlc3Npb25fc3RhdGUiOiI3NzQwNDM4My0xZTExLTQ5MmUtOGJhNS0wY2E0NzgzMThlNWYiLCJjbGllbnRfc2Vzc2lvbiI6ImNjODViZThlLThkNTYtNDUyNy05MTM5LWEyZWY3NDQ5MTFlNCIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vc2lzbGVnaXMubG9jYWwiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50Iiwidmlldy1wcm9maWxlIl19fSwibmFtZSI6Ikd1c3Rhdm8gRGVsZ2FkbyIsInByZWZlcnJlZF91c2VybmFtZSI6Imd1c3Rhdm8iLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiRGVsZ2FkbyIsImVtYWlsIjoiZ2NkZWxnYWRvQGdtYWlsLmNvbSJ9.bmqtmAvfDLpycVECaBS1l34XFjwF6qx2pS9vTzub9KVqNJT8rjrPLOX-sbwcufGV1RfZnhKFpFhq_GOz_lEuYtsJcmSGoZ7NLhCH9Zf2ey-SNLiaeE4mV1_2If6HG4PKiR71Fr2TsVI2lJPHAI5sbyTKYv-4MyDIKYWPUeiXP3mDPzRnIhbKncrsdTmCj0kVfPojDmcN1Na_R-VobDdjfnMgcsk9VUt0ffouxTQ7Q7l9mVgptuTAWOx1hPdG8Lt8xXuBIk6UTejmdamq_KdD6Ad9P_gsP0D7CX37BeKyqFvw9hDrcuT1Gix-PkrQ53iLNfZlZ1dzMjaCEDzY8TWzNw"
     def client = new RESTClient("http://localhost:8080/")
     def cabecalho = [Authorization: token]
+
+    def "deve buscar proposicoes por pauta - Camara"(){
+        given:
+        def caminho = "/sislegis/rest/proposicaos/proposicoesPautaCamara/"
+        def idComissao = 2001 //CAPADR
+        def data = "02/15/2016"
+        def query = [idComissao: idComissao, data: data]
+
+        when:
+        def resp = client.get(path: caminho, query: query, headers: cabecalho)
+
+        then:
+        resp.data.each {
+            println it
+        }
+    }
+
+    def "deve buscar proposicoes por pauta - Senado"(){
+        given:
+        def caminho = "/sislegis/rest/proposicaos/proposicoesPautaSenado/"
+        def siglaComissao = "CAE"
+        def data = "02/15/2016"
+        def query = [siglaComissao: siglaComissao, data: data]
+
+        when:
+        def resp = client.get(path: caminho, query: query, headers: cabecalho)
+
+        then:
+        resp.data.each {
+            println it
+        }
+    }
+
+    def "deve trazer dados detalhados da proposicao - Camara"(){
+        given:
+        def caminho = "/sislegis/rest/proposicaos/detalharProposicaoCamaraWS/"
+        def idProposicao = 1786728
+        def query = [id: idProposicao]
+
+        when:
+        def resp = client.get(path: caminho, query: query, headers: cabecalho)
+
+        then:
+        resp.data.each {
+            println it
+        }
+    }
+
+    def "deve trazer dados detalhados da proposicao - Senado"(){
+        given:
+        def caminho = "/sislegis/rest/proposicaos/detalharProposicaoSenadoWS/"
+        def id = 120529
+        def query = [id: id]
+
+        when:
+        def resp = client.get(path: caminho, query: query, headers: cabecalho)
+
+        then:
+        resp.data.each {
+            println it
+        }
+    }
 
     def "deve alterar o posicionamento de uma proposicao"() {
 
@@ -56,3 +116,5 @@ class ProposicaoEndpointSpec extends Specification {
     }
 
 }
+
+import spock.lang.Specification
