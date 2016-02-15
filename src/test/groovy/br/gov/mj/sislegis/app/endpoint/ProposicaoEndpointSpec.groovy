@@ -2,13 +2,14 @@ package br.gov.mj.sislegis.app.endpoint
 
 import groovyx.net.http.ContentType
 import groovyx.net.http.RESTClient
+
 class ProposicaoEndpointSpec extends Specification {
 
-    def token = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiI4OWZkZDNhZi05YWU1LTRjYzItOWQyYS05YjAyMzg5ZjEyYzciLCJleHAiOjE0NTU1NjI1MzgsIm5iZiI6MCwiaWF0IjoxNDU1NTYyMjM4LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2F1dGgvcmVhbG1zL3Npc2xlZ2lzIiwiYXVkIjoic2lzbGVnaXMiLCJzdWIiOiI1ZWU3Y2U3Ni1lMjEwLTRlYjYtOTY1NS00MzE5ZWIyNjg2NjQiLCJhenAiOiJzaXNsZWdpcyIsInNlc3Npb25fc3RhdGUiOiI3NzQwNDM4My0xZTExLTQ5MmUtOGJhNS0wY2E0NzgzMThlNWYiLCJjbGllbnRfc2Vzc2lvbiI6ImNjODViZThlLThkNTYtNDUyNy05MTM5LWEyZWY3NDQ5MTFlNCIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vc2lzbGVnaXMubG9jYWwiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50Iiwidmlldy1wcm9maWxlIl19fSwibmFtZSI6Ikd1c3Rhdm8gRGVsZ2FkbyIsInByZWZlcnJlZF91c2VybmFtZSI6Imd1c3Rhdm8iLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiRGVsZ2FkbyIsImVtYWlsIjoiZ2NkZWxnYWRvQGdtYWlsLmNvbSJ9.bmqtmAvfDLpycVECaBS1l34XFjwF6qx2pS9vTzub9KVqNJT8rjrPLOX-sbwcufGV1RfZnhKFpFhq_GOz_lEuYtsJcmSGoZ7NLhCH9Zf2ey-SNLiaeE4mV1_2If6HG4PKiR71Fr2TsVI2lJPHAI5sbyTKYv-4MyDIKYWPUeiXP3mDPzRnIhbKncrsdTmCj0kVfPojDmcN1Na_R-VobDdjfnMgcsk9VUt0ffouxTQ7Q7l9mVgptuTAWOx1hPdG8Lt8xXuBIk6UTejmdamq_KdD6Ad9P_gsP0D7CX37BeKyqFvw9hDrcuT1Gix-PkrQ53iLNfZlZ1dzMjaCEDzY8TWzNw"
+    def token = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiI3OTViMjQyNC0wMjEwLTRlMGEtOTA0Yy1kYmNhZjk1YWIwMDAiLCJleHAiOjE0NTU1NzEzNTQsIm5iZiI6MCwiaWF0IjoxNDU1NTcxMDU0LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2F1dGgvcmVhbG1zL3Npc2xlZ2lzIiwiYXVkIjoic2lzbGVnaXMiLCJzdWIiOiI1ZWU3Y2U3Ni1lMjEwLTRlYjYtOTY1NS00MzE5ZWIyNjg2NjQiLCJhenAiOiJzaXNsZWdpcyIsInNlc3Npb25fc3RhdGUiOiI3NzQwNDM4My0xZTExLTQ5MmUtOGJhNS0wY2E0NzgzMThlNWYiLCJjbGllbnRfc2Vzc2lvbiI6Ijc5MjM2Y2FkLTMzMTUtNDc0MS1iZGViLTBiYzc1OTQ3MGZmZiIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vc2lzbGVnaXMubG9jYWwiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50Iiwidmlldy1wcm9maWxlIl19fSwibmFtZSI6Ikd1c3Rhdm8gRGVsZ2FkbyIsInByZWZlcnJlZF91c2VybmFtZSI6Imd1c3Rhdm8iLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiRGVsZ2FkbyIsImVtYWlsIjoiZ2NkZWxnYWRvQGdtYWlsLmNvbSJ9.I_nsohc5VDjIwbcXnxlMoEF8yE1LMFazPys4pbA9R2xZhsXsJKzeiR2LtXqo_fiW5Gl1t1bn2-fQPstCr6A-i_i_XpKJEF3934danPwMOQKGZZdhEW7JAB-yYafAUk8IId02pfWd044zmg4d19a8QFub4H2Zi1n-ECImJ3Jdl5Irm9leIaXSuyKBBTy1ddn0ghdmXGHx0Vlr4RAzIiBQQOaXReql-WqEAa4sJXoPa6-PnyTyGWfPAlgnyeAOh1mUeT6-aPhrGNntFX_XPcm5LTWKKwPJUbHFqNfJTRjfALunZuKKdob1jLxLAAr-GwuXiemJgO1IksUgIv1_FU6GiA"
     def client = new RESTClient("http://localhost:8080/")
     def cabecalho = [Authorization: token]
 
-    def "deve buscar proposicoes por pauta - Camara"(){
+    def "deve buscar proposicoes por pauta - Camara"() {
         given:
         def caminho = "/sislegis/rest/proposicaos/proposicoesPautaCamara/"
         def idComissao = 2001 //CAPADR
@@ -24,7 +25,7 @@ class ProposicaoEndpointSpec extends Specification {
         }
     }
 
-    def "deve buscar proposicoes por pauta - Senado"(){
+    def "deve buscar proposicoes por pauta - Senado"() {
         given:
         def caminho = "/sislegis/rest/proposicaos/proposicoesPautaSenado/"
         def siglaComissao = "CAE"
@@ -40,7 +41,7 @@ class ProposicaoEndpointSpec extends Specification {
         }
     }
 
-    def "deve trazer dados detalhados da proposicao - Camara"(){
+    def "deve trazer dados detalhados da proposicao - Camara"() {
         given:
         def caminho = "/sislegis/rest/proposicaos/detalharProposicaoCamaraWS/"
         def idProposicao = 1786728
@@ -55,7 +56,7 @@ class ProposicaoEndpointSpec extends Specification {
         }
     }
 
-    def "deve trazer dados detalhados da proposicao - Senado"(){
+    def "deve trazer dados detalhados da proposicao - Senado"() {
         given:
         def caminho = "/sislegis/rest/proposicaos/detalharProposicaoSenadoWS/"
         def id = 120529
@@ -68,6 +69,117 @@ class ProposicaoEndpointSpec extends Specification {
         resp.data.each {
             println it
         }
+    }
+
+    // TODO nao esta convertendo json
+    def "deve salvar proposicoes de uma pauta"() {
+        given:
+        def caminho = "/sislegis/rest/proposicaos/salvarProposicoesDePauta"
+
+        def dados = [
+                pautaReunioes: [
+                        id                : null,
+                        comissao          : "CAE",
+                        data              : "02/15/2016",
+                        origem            : "SENADO",
+                        codigoReuniao     : 4475,
+                        linkPauta         : "http://legis.senado.leg.br/comissoes/reuniao?reuniao=4475",
+                        titulo            : "CAE, \u00E0s 10h, 1\u00AA, Ordin\u00E1ria",
+                        situacao          : "Agendada",
+                        tipo              : "Ordin\u00E1ria",
+                        manual            : false,
+                        proposicoesDaPauta: [
+                                proposicaoId          : null,
+                                pautaReuniaoComissaoId: null,
+                                ordemPauta            : 1,
+                                relator               : "Senador Lindbergh Farias",
+                                proposicao            : [
+                                        ementa          : "Encaminha, nos termos do art. 6\u00BA da Lei n\u00BA 9.069, de 29 de junho de 1995, a Programa\u00E7\u00E3o Monet\u00E1ria para o 1\u00BA trimestre e para o ano de 2015, contendo estimativas das faixas de varia\u00E7\u00E3o dos principais agregados monet\u00E1rios, an\u00E1lise da evolu\u00E7\u00E3o da economia nacional e justificativa da programa\u00E7\u00E3o monet\u00E1ria.",
+                                        tipo            : "MSF",
+                                        numero          : "00011",
+                                        ano             : "2015",
+                                        sigla           : "MSF 00011/2015",
+                                        comissao        : "CAE",
+                                        idProposicao    : 120529,
+                                        origem          : "SENADO",
+                                        linkProposicao  : "http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate=120529",
+                                        ultimoComentario: [
+                                                id         : 154,
+                                                descricao  : "removida",
+                                                autor      : [
+                                                        id   : 1,
+                                                        nome : "Gustavo Delgado",
+                                                        email: "gcdelgado@gmail.com"
+                                                ],
+                                                dataCriacao: "02/15/2016",
+                                                proposicao : null,
+                                                oculto     : false
+                                        ],
+                                        reuniao         : [
+                                                data: "02/15/2016"
+                                        ]
+                                ],
+                                pautaReuniaoComissao  : [
+                                        codigoReuniao: 4475
+                                ],
+                                resultado             : ""
+                        ]
+                ],
+                reuniaoDate  : "02/15/2016"
+        ]
+
+        when:
+        def resp = client.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
+
+        then:
+        assert resp.status == 200 // status 200 = Ok
+
+    }
+
+    def "deve salvar proposicao extra"() {
+        given:
+
+        def caminho = "/sislegis/rest/proposicaos/salvarProposicaoExtra"
+        def dados = [
+                id                           : null,
+                idProposicao                 : 120529,
+                tipo                         : "MSF",
+                ano                          : "2015",
+                numero                       : "00011",
+                situacao                     : "INPAUTA",
+                autor                        : "Presidente da República",
+                origem                       : "SENADO",
+                resultadoASPAR               : null,
+                comissao                     : "SACAE",
+                seqOrdemPauta                : null,
+                sigla                        : "MSF 00011/2015",
+                ementa                       : "Encaminha, nos termos do art. 6º da Lei nº 9.069, de 29 de junho de 1995, a Programação Monetária para o 1º trimestre e para o ano de 2015, contendo estimativas das faixas de variação dos principais agregados monetários, análise da evolução da economia nacional e justificativa da programação monetária.",
+                linkProposicao               : "http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate=120529",
+                linkPauta                    : null,
+                posicionamentoAtual          : null,
+                posicionamentoPreliminar     : null,
+                responsavel                  : null,
+                tags                         : null,
+                listaComentario              : [],
+                listaEncaminhamentoProposicao: [],
+                listaPautasComissao          : [],
+                totalComentarios             : 0,
+                totalEncaminhamentos         : 0,
+                totalPautasComissao          : 0,
+                proposicoesPai               : null,
+                proposicoesFilha             : null,
+                elaboracoesNormativas        : null,
+                roadmapComissoes             : null,
+                processosSei                 : null,
+                favorita                     : false,
+                pautaComissaoAtual           : null
+        ]
+
+        when:
+        def resp = client.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
+
+        then:
+        assert resp.status == 200 // status 201 = Created
     }
 
     def "deve alterar o posicionamento de uma proposicao"() {
@@ -102,7 +214,7 @@ class ProposicaoEndpointSpec extends Specification {
 
     }
 
-    def "deve atualizar o roadmap completo de comissoes de uma proposicao"(){
+    def "deve atualizar o roadmap completo de comissoes de uma proposicao"() {
 
         given:
         def caminho = "/sislegis/rest/proposicaos/setRoadmapComissoes"
