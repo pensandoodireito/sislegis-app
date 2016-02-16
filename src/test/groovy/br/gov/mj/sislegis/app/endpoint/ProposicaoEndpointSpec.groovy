@@ -6,7 +6,7 @@ import spock.lang.Specification
 
 class ProposicaoEndpointSpec extends Specification {
 
-    def token = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiI4OTA0ZWEyNS04ZTZiLTQwZGItOGExNS05NzI5ODQ1NGRmNjMiLCJleHAiOjE0NTU2NTcyMjcsIm5iZiI6MCwiaWF0IjoxNDU1NjU2OTI3LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2F1dGgvcmVhbG1zL3Npc2xlZ2lzIiwiYXVkIjoic2lzbGVnaXMiLCJzdWIiOiI1ZWU3Y2U3Ni1lMjEwLTRlYjYtOTY1NS00MzE5ZWIyNjg2NjQiLCJhenAiOiJzaXNsZWdpcyIsInNlc3Npb25fc3RhdGUiOiI2YTM3NmVjOS1iZmNiLTQ5NjktYTVkYS1mY2ExM2Y0NzVkYWIiLCJjbGllbnRfc2Vzc2lvbiI6IjI2MDY2YWE2LTcwOTEtNDg4Mi1hZWQ0LTgwMWU5NWQyZmE1OSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vc2lzbGVnaXMubG9jYWwiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50Iiwidmlldy1wcm9maWxlIl19fSwibmFtZSI6Ikd1c3Rhdm8gRGVsZ2FkbyIsInByZWZlcnJlZF91c2VybmFtZSI6Imd1c3Rhdm8iLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiRGVsZ2FkbyIsImVtYWlsIjoiZ2NkZWxnYWRvQGdtYWlsLmNvbSJ9.PJ_2owKkpH-0uhlerKJZBzM79KhamZqrVq7GQVFCVgLxz8r3H8xwUj24yxKKySUgZaJ3lymba9eoDs9RBO1JTghDOWftSLrl0e98l5idWSXvmHLseyFITf-FAfQ1qEFtaoMPfsvmce5pGkCRYemUOQK5Yba1B03594vZmONIUkloHGhRuCXFTnt_M8JFjpZsnwdcayfBr6tievjLFAVpxZS-l6KqM5dzperCnGeCgz_15gZLuGa58HRh5VVymkIx39j_LeBQzCxXLgc3qkjD48vVJbO_4A203vyt5TfDxcF454dUDK3ufQ8lwKJ8lbU4eN-Zs2W7mYfCbPL-8dicaA"
+    def token = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiI0OGYzM2I4ZS00ODhmLTQ2MmYtOTNiZi1mNjczMDZlMDkwZjMiLCJleHAiOjE0NTU2NTg5MzMsIm5iZiI6MCwiaWF0IjoxNDU1NjU4NjMzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2F1dGgvcmVhbG1zL3Npc2xlZ2lzIiwiYXVkIjoic2lzbGVnaXMiLCJzdWIiOiI1ZWU3Y2U3Ni1lMjEwLTRlYjYtOTY1NS00MzE5ZWIyNjg2NjQiLCJhenAiOiJzaXNsZWdpcyIsInNlc3Npb25fc3RhdGUiOiI5MGQ5MmQ2OC02M2NiLTQ5YTItOTkwZi0xYjM1MTZiYWMxNjkiLCJjbGllbnRfc2Vzc2lvbiI6Ijc3NGJjMmY5LWFhM2YtNDJjNC04MDIzLTI1NGQ4MzdkNGNkNCIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vc2lzbGVnaXMubG9jYWwiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50Iiwidmlldy1wcm9maWxlIl19fSwibmFtZSI6Ikd1c3Rhdm8gRGVsZ2FkbyIsInByZWZlcnJlZF91c2VybmFtZSI6Imd1c3Rhdm8iLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiRGVsZ2FkbyIsImVtYWlsIjoiZ2NkZWxnYWRvQGdtYWlsLmNvbSJ9.I04DkgXvHbPRYSEJHKdMhBxJ6YAgVTMxGbk9cp6_R3DZ7jL8GxZTD7O8HR4PiVsqGxl_Q0xPCZOcDB0L2NbBbxO8-CLRWW1UGwnJHKwmGvaOcxdRMFFoCzpUfvGQrMYw3eSvJSonZoB_0T42Y8fvTziOdgMWi6yTJRkm3vn5zOf6BiT1F6QELCdLPnPeVzh3bcp0WJC9jAIiAn0eV9GbfHEGHocK88fmnaIP-NZpkx74LADEk-PvK8fgnG-cMX6C01k8FCKQemcQgEJCr8NUBM-GRXVsWCocH8x28bNjeGVNS3QoUqYeU1UQ0Vx5kJ-TvxaYz1A6vVbMIAEMTIEzWQ"
     def client = new RESTClient("http://localhost:8080/")
     def cabecalho = [Authorization: token]
 
@@ -198,16 +198,17 @@ class ProposicaoEndpointSpec extends Specification {
     }
 
     def "deve consultar proposicoes pelos filtros"() {
+
         given:
-        def ementa = "com garantia da República Federativa do Brasil, entre o Estado do Rio Grande do Sul"
-        def autor = ""
-        def sigla = ""
-        def origem = ""
-        def isFavorita = ""
-        def limit = "5"
-        def offset = "0"
         def caminho = "/sislegis/rest/proposicaos/consultar"
-        def query = [ementa: ementa, autor: autor, sigla: sigla, origem: origem, isFavorita: isFavorita, limit: limit, offset: offset]
+
+        def query = [ementa    : "Programação Monetária para o 1º trimestre e para o ano de 2015",
+                     autor     : "",
+                     sigla     : "",
+                     origem    : "",
+                     isFavorita: "",
+                     limit     : 5,
+                     offset    : 0]
 
         when:
         def resp = client.get(path: caminho, query: query, headers: cabecalho)
@@ -242,6 +243,25 @@ class ProposicaoEndpointSpec extends Specification {
 
         then:
         assert resp.status == 204 // status 204 = No Content
+    }
+
+    def "deve realizar uma busca independente de proposicao"() {
+        given:
+        def origem = "SENADO"
+        def tipo = "MSF"
+        def numero = "11"
+        def ano = 2015
+        def caminho = "/sislegis/rest/proposicaos/buscaIndependente/" + origem + "/" + tipo + "/" + ano
+
+        def query = [numero: numero]
+
+        when:
+        def resp = client.get(path: caminho, query: query, headers: cabecalho)
+
+        then:
+        resp.data.each {
+            println it
+        }
     }
 
     def "deve alterar o posicionamento de uma proposicao"() {
