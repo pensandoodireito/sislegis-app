@@ -6,7 +6,7 @@ import spock.lang.Specification
 
 class ProposicaoEndpointSpec extends Specification {
 
-    def token = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJjYjY2ZjY5Zi1lY2YzLTQ3NDEtYjVkYi05ODE2YmE4MWNiNjAiLCJleHAiOjE0NTU2NTk5NzQsIm5iZiI6MCwiaWF0IjoxNDU1NjU5Njc0LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2F1dGgvcmVhbG1zL3Npc2xlZ2lzIiwiYXVkIjoic2lzbGVnaXMiLCJzdWIiOiI1ZWU3Y2U3Ni1lMjEwLTRlYjYtOTY1NS00MzE5ZWIyNjg2NjQiLCJhenAiOiJzaXNsZWdpcyIsInNlc3Npb25fc3RhdGUiOiI5MGQ5MmQ2OC02M2NiLTQ5YTItOTkwZi0xYjM1MTZiYWMxNjkiLCJjbGllbnRfc2Vzc2lvbiI6Ijc3NGJjMmY5LWFhM2YtNDJjNC04MDIzLTI1NGQ4MzdkNGNkNCIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vc2lzbGVnaXMubG9jYWwiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50Iiwidmlldy1wcm9maWxlIl19fSwibmFtZSI6Ikd1c3Rhdm8gRGVsZ2FkbyIsInByZWZlcnJlZF91c2VybmFtZSI6Imd1c3Rhdm8iLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiRGVsZ2FkbyIsImVtYWlsIjoiZ2NkZWxnYWRvQGdtYWlsLmNvbSJ9.ZyqMV7YYgeG-5zYMg4WlivSjFt2dzr60LY_Po9VfAe-qi_b2IxZv4vIR8a2pbzD6ClPECYvnTPBMjO1RbNd_C8skRSaACdPeMvwkmObQD-3x_9L0EX1HXOakyxcm3m7MeK89jrB79m0eQ8gUjzzAPsyUtGSY6AO0EPTpsmO7VzGJk54qBXa9R2kwW8cR-pEfKN_GSy6p3CzHvB9t_ESCqaMVV738aDtgFBKK1wLmmLHQ7KRnXC6JwgonXcTS-qsmoAi8cCTAiFnF3w9oRIjIZlqdLmfLoyhB03T89Negaq_cNtACWy72Z3SjSBigK6WM0OXLRrC5BsV-YzEmLWfqKA"
+    def token = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiI3MjllMzRjYy04Y2ExLTRjMGItOTEzOC0xM2FmNGIzOTBmZGIiLCJleHAiOjE0NTU2NjA1MDMsIm5iZiI6MCwiaWF0IjoxNDU1NjYwMjAzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2F1dGgvcmVhbG1zL3Npc2xlZ2lzIiwiYXVkIjoic2lzbGVnaXMiLCJzdWIiOiI1ZWU3Y2U3Ni1lMjEwLTRlYjYtOTY1NS00MzE5ZWIyNjg2NjQiLCJhenAiOiJzaXNsZWdpcyIsInNlc3Npb25fc3RhdGUiOiI5MGQ5MmQ2OC02M2NiLTQ5YTItOTkwZi0xYjM1MTZiYWMxNjkiLCJjbGllbnRfc2Vzc2lvbiI6Ijc3NGJjMmY5LWFhM2YtNDJjNC04MDIzLTI1NGQ4MzdkNGNkNCIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vc2lzbGVnaXMubG9jYWwiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50Iiwidmlldy1wcm9maWxlIl19fSwibmFtZSI6Ikd1c3Rhdm8gRGVsZ2FkbyIsInByZWZlcnJlZF91c2VybmFtZSI6Imd1c3Rhdm8iLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiRGVsZ2FkbyIsImVtYWlsIjoiZ2NkZWxnYWRvQGdtYWlsLmNvbSJ9.NyIYUs8p0wGBAbWDkkR1kokIjvbJ_k8fNmQJh3piZspihWSfCUfh1wedemCjMcrA6z09VJlgv0UXH74azHeyi3JCHTSWPM_iC4mOCNTJEQxH5sFpqUgGunO9v6_Wqn5bkMq4CHQys_j8nxKIurWA_MOdxJSXhOjCAQGKD26A8aDhCVbVkkqMThlPGqtE08NtnjV6EqA5ABgl1sIgw9r1SfZFtz6Y9AIlLq76dL8n1PPzR1dzwbbCxlBWyrV05MKizuJd_5ABJWxALgrV2bGceLzH0LIPJhMNtqqMtI1tlKc8G4Zrn99qrOMJt1W6mnexDfxs0PTJ9GASOLfdcmrC2Q"
     def client = new RESTClient("http://localhost:8080/")
     def cabecalho = [Authorization: token]
 
@@ -288,6 +288,30 @@ class ProposicaoEndpointSpec extends Specification {
         resp.data.each {
             println it
         }
+    }
+
+    def "deve marcar uma proposicao para ser seguida"(){
+        given:
+        def id = 165
+        def caminho = "/sislegis/rest/proposicaos/follow/" + id
+
+        when:
+        def resp = client.post(path: caminho, headers: cabecalho)
+
+        then:
+        assert resp.status == 204 // status 204 = No content
+    }
+
+    def "deve marcar uma proposicao para nao ser mais seguida"(){
+        given:
+        def id = 165
+        def caminho = "/sislegis/rest/proposicaos/follow/" + id
+
+        when:
+        def resp = client.delete(path: caminho, headers: cabecalho)
+
+        then:
+        assert resp.status == 204 // status 204 = No content
     }
 
     def "deve alterar o posicionamento de uma proposicao"() {
