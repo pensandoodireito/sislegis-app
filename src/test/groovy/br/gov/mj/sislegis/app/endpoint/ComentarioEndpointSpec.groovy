@@ -37,17 +37,6 @@ class ComentarioEndpointSpec extends Specification{
         }
     }
 
-    def "deve ocultar um comentario"(){
-        def idComentario = 166
-        def caminho = "sislegis/rest/comentarios/ocultar/" + idComentario
-
-        when:
-        def response = restClient.get(path: caminho, headers: cabecalho)
-
-        then:
-        assert response.status == 200 // status 200 = Ok
-    }
-
     def "deve alterar um comentario"(){
         given:
         def idComentario = 174
@@ -62,5 +51,16 @@ class ComentarioEndpointSpec extends Specification{
 
         then:
         assert response.status == 204 // status 204 = No Content
+    }
+
+    def "deve ocultar um comentario"(){
+        def idComentario = 166
+        def caminho = "sislegis/rest/comentarios/ocultar/" + idComentario
+
+        when:
+        def response = restClient.get(path: caminho, headers: cabecalho)
+
+        then:
+        assert response.status == 200 // status 200 = Ok
     }
 }
