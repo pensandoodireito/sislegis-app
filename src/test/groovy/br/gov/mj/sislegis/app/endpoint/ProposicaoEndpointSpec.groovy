@@ -6,9 +6,8 @@ import spock.lang.Specification
 
 class ProposicaoEndpointSpec extends Specification {
 
-    def token = "Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJmYTU2NmIzOC00YThjLTRhZTEtOWZhNi1mOWYwOTJiOTE2ZjUiLCJleHAiOjE0NTU2NjE4MTcsIm5iZiI6MCwiaWF0IjoxNDU1NjYxNTE3LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2F1dGgvcmVhbG1zL3Npc2xlZ2lzIiwiYXVkIjoic2lzbGVnaXMiLCJzdWIiOiI1ZWU3Y2U3Ni1lMjEwLTRlYjYtOTY1NS00MzE5ZWIyNjg2NjQiLCJhenAiOiJzaXNsZWdpcyIsInNlc3Npb25fc3RhdGUiOiI5MGQ5MmQ2OC02M2NiLTQ5YTItOTkwZi0xYjM1MTZiYWMxNjkiLCJjbGllbnRfc2Vzc2lvbiI6IjczMzg5OGE1LTdmMzQtNDcxYS05OWJkLTFmNWU2Y2Q5MmI1ZiIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vc2lzbGVnaXMubG9jYWwiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50Iiwidmlldy1wcm9maWxlIl19fSwibmFtZSI6Ikd1c3Rhdm8gRGVsZ2FkbyIsInByZWZlcnJlZF91c2VybmFtZSI6Imd1c3Rhdm8iLCJnaXZlbl9uYW1lIjoiR3VzdGF2byIsImZhbWlseV9uYW1lIjoiRGVsZ2FkbyIsImVtYWlsIjoiZ2NkZWxnYWRvQGdtYWlsLmNvbSJ9.m3O-ktxEYUmfy9Hvf1FasfEAIovEwtOBECAPw5QdV7wDi5SjH0oOEIrW5yZzvtOVIgV1GSfF1aGHxTFELUGT4ylWN6JZ2uwJQXBcdcWZJNLjwhA05Ez5lMjlvGQ6UBpY5doGA_1b5KwQzxNK2bG8luXkmvg2aJ_SgQBr4fRJmMD7TQqjW_k6brNup1JJUkfIGdBf5NUs3Vb4XmGgI3CaAGEoykoYWlGTl6pkJEogbqxrIDGTrrZ61SsYuEGV6mrxkt4uquAhnmlBy6Huhd20uTF3XDFBR0tvCYZCNd3CirJVmoZqhPoroPf_zCyByhJ6pjTSeJBiPo3vPOjrrg-zLg"
-    def client = new RESTClient("http://localhost:8080/")
-    def cabecalho = [Authorization: token]
+    def restClient = new RESTClient("http://localhost/")
+    def cabecalho = [Authorization: new BearerToken().obterToken()]
 
     def "deve buscar proposicoes por pauta - Camara"() {
         given:
@@ -18,7 +17,7 @@ class ProposicaoEndpointSpec extends Specification {
         def query = [idComissao: idComissao, data: data]
 
         when:
-        def resp = client.get(path: caminho, query: query, headers: cabecalho)
+        def resp = restClient.get(path: caminho, query: query, headers: cabecalho)
 
         then:
         resp.data.each {
@@ -34,7 +33,7 @@ class ProposicaoEndpointSpec extends Specification {
         def query = [siglaComissao: siglaComissao, data: data]
 
         when:
-        def resp = client.get(path: caminho, query: query, headers: cabecalho)
+        def resp = restClient.get(path: caminho, query: query, headers: cabecalho)
 
         then:
         resp.data.each {
@@ -49,7 +48,7 @@ class ProposicaoEndpointSpec extends Specification {
         def query = [id: idProposicao]
 
         when:
-        def resp = client.get(path: caminho, query: query, headers: cabecalho)
+        def resp = restClient.get(path: caminho, query: query, headers: cabecalho)
 
         then:
         resp.data.each {
@@ -64,77 +63,12 @@ class ProposicaoEndpointSpec extends Specification {
         def query = [id: id]
 
         when:
-        def resp = client.get(path: caminho, query: query, headers: cabecalho)
+        def resp = restClient.get(path: caminho, query: query, headers: cabecalho)
 
         then:
         resp.data.each {
             println it
         }
-    }
-
-    // TODO nao esta convertendo json
-    def "deve salvar proposicoes de uma pauta"() {
-        given:
-        def caminho = "/sislegis/rest/proposicaos/salvarProposicoesDePauta"
-
-        def dados = [
-                pautaReunioes: [
-                        id                : null,
-                        comissao          : "CAE",
-                        data              : "02/15/2016",
-                        origem            : "SENADO",
-                        codigoReuniao     : 4475,
-                        linkPauta         : "http://legis.senado.leg.br/comissoes/reuniao?reuniao=4475",
-                        titulo            : "CAE, \u00E0s 10h, 1\u00AA, Ordin\u00E1ria",
-                        situacao          : "Agendada",
-                        tipo              : "Ordin\u00E1ria",
-                        manual            : false,
-                        proposicoesDaPauta: [
-                                proposicaoId          : null,
-                                pautaReuniaoComissaoId: null,
-                                ordemPauta            : 1,
-                                relator               : "Senador Lindbergh Farias",
-                                proposicao            : [
-                                        ementa          : "Encaminha, nos termos do art. 6\u00BA da Lei n\u00BA 9.069, de 29 de junho de 1995, a Programa\u00E7\u00E3o Monet\u00E1ria para o 1\u00BA trimestre e para o ano de 2015, contendo estimativas das faixas de varia\u00E7\u00E3o dos principais agregados monet\u00E1rios, an\u00E1lise da evolu\u00E7\u00E3o da economia nacional e justificativa da programa\u00E7\u00E3o monet\u00E1ria.",
-                                        tipo            : "MSF",
-                                        numero          : "00011",
-                                        ano             : "2015",
-                                        sigla           : "MSF 00011/2015",
-                                        comissao        : "CAE",
-                                        idProposicao    : 120529,
-                                        origem          : "SENADO",
-                                        linkProposicao  : "http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate=120529",
-                                        ultimoComentario: [
-                                                id         : 154,
-                                                descricao  : "removida",
-                                                autor      : [
-                                                        id   : 1,
-                                                        nome : "Gustavo Delgado",
-                                                        email: "gcdelgado@gmail.com"
-                                                ],
-                                                dataCriacao: "02/15/2016",
-                                                proposicao : null,
-                                                oculto     : false
-                                        ],
-                                        reuniao         : [
-                                                data: "02/15/2016"
-                                        ]
-                                ],
-                                pautaReuniaoComissao  : [
-                                        codigoReuniao: 4475
-                                ],
-                                resultado             : ""
-                        ]
-                ],
-                reuniaoDate  : "02/15/2016"
-        ]
-
-        when:
-        def resp = client.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
-
-        then:
-        assert resp.status == 200 // status 200 = Ok
-
     }
 
     def "deve salvar proposicao extra"() {
@@ -177,7 +111,7 @@ class ProposicaoEndpointSpec extends Specification {
         ]
 
         when:
-        def resp = client.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
+        def resp = restClient.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
 
         then:
         assert resp.status == 200 // status 201 = Created
@@ -189,7 +123,7 @@ class ProposicaoEndpointSpec extends Specification {
         def caminho = "/sislegis/rest/proposicaos/" + id
 
         when:
-        def resp = client.get(path: caminho, headers: cabecalho)
+        def resp = restClient.get(path: caminho, headers: cabecalho)
 
         then:
         resp.data.each {
@@ -211,7 +145,7 @@ class ProposicaoEndpointSpec extends Specification {
                      offset    : 0]
 
         when:
-        def resp = client.get(path: caminho, query: query, headers: cabecalho)
+        def resp = restClient.get(path: caminho, query: query, headers: cabecalho)
 
         then:
         resp.data.each {
@@ -239,7 +173,7 @@ class ProposicaoEndpointSpec extends Specification {
         ]
 
         when:
-        def resp = client.put(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
+        def resp = restClient.put(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
 
         then:
         assert resp.status == 204 // status 204 = No Content
@@ -256,7 +190,7 @@ class ProposicaoEndpointSpec extends Specification {
         def query = [numero: numero]
 
         when:
-        def resp = client.get(path: caminho, query: query, headers: cabecalho)
+        def resp = restClient.get(path: caminho, query: query, headers: cabecalho)
 
         then:
         resp.data.each {
@@ -269,7 +203,7 @@ class ProposicaoEndpointSpec extends Specification {
         def caminho = "/sislegis/rest/proposicaos/listTipos/CAMARA"
 
         when:
-        def resp = client.get(path: caminho, headers: cabecalho)
+        def resp = restClient.get(path: caminho, headers: cabecalho)
 
         then:
         resp.data.each {
@@ -282,7 +216,7 @@ class ProposicaoEndpointSpec extends Specification {
         def caminho = "/sislegis/rest/proposicaos/listTipos/SENADO"
 
         when:
-        def resp = client.get(path: caminho, headers: cabecalho)
+        def resp = restClient.get(path: caminho, headers: cabecalho)
 
         then:
         resp.data.each {
@@ -296,7 +230,7 @@ class ProposicaoEndpointSpec extends Specification {
         def caminho = "/sislegis/rest/proposicaos/follow/" + id
 
         when:
-        def resp = client.post(path: caminho, headers: cabecalho)
+        def resp = restClient.post(path: caminho, headers: cabecalho)
 
         then:
         assert resp.status == 204 // status 204 = No content
@@ -308,7 +242,7 @@ class ProposicaoEndpointSpec extends Specification {
         def caminho = "/sislegis/rest/proposicaos/follow/" + id
 
         when:
-        def resp = client.delete(path: caminho, headers: cabecalho)
+        def resp = restClient.delete(path: caminho, headers: cabecalho)
 
         then:
         assert resp.status == 204 // status 204 = No content
@@ -320,7 +254,7 @@ class ProposicaoEndpointSpec extends Specification {
         def caminho = "/sislegis/rest/proposicaos/check4updates/" + id
 
         when:
-        def resp = client.post(path: caminho, headers: cabecalho)
+        def resp = restClient.post(path: caminho, headers: cabecalho)
 
         then:
         println resp;
@@ -330,13 +264,10 @@ class ProposicaoEndpointSpec extends Specification {
 
         given:
         def caminho = "/sislegis/rest/proposicaos/alterarPosicionamento"
-        def id = 47
-        def idPosicionamento = 7
-        def preliminar = true
-        def dados = [id: id, idPosicionamento: idPosicionamento, preliminar: preliminar]
+        def dados = [id: 165, idPosicionamento: 7, preliminar: true]
 
         when:
-        def resp = client.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
+        def resp = restClient.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
 
         then:
         assert resp.status == 200 // status 200 = Ok
@@ -345,11 +276,11 @@ class ProposicaoEndpointSpec extends Specification {
     def "deve listar o historico de alteracoes de posicionamento"() {
 
         given:
-        def id = 35
+        def id = 165
         def caminho = "/sislegis/rest/proposicaos/historicoPosicionamentos/" + id
 
         when:
-        def resp = client.get(path: caminho, headers: cabecalho)
+        def resp = restClient.get(path: caminho, headers: cabecalho)
 
         then:
         resp.data.each {
@@ -364,7 +295,7 @@ class ProposicaoEndpointSpec extends Specification {
         def caminho = "/sislegis/rest/proposicaos/" + id + "/pautas"
 
         when:
-        def resp = client.get(path: caminho, headers: cabecalho)
+        def resp = restClient.get(path: caminho, headers: cabecalho)
 
         then:
         resp.data.each {
@@ -376,10 +307,10 @@ class ProposicaoEndpointSpec extends Specification {
 
         given:
         def caminho = "/sislegis/rest/proposicaos/setRoadmapComissoes"
-        def dados = [idProposicao: 29, comissoes: ['PLEN', 'CAPADR', 'CCJC']]
+        def dados = [idProposicao: 165, comissoes: ['PLEN', 'CAPADR', 'CCJC']]
 
         when:
-        def resp = client.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
+        def resp = restClient.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
 
         then:
         assert resp.status == 200 // status 200 = Ok

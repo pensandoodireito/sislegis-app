@@ -879,6 +879,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			roadmapComissao.setProposicao(proposicao);
 			roadmapComissao.setComissao(comissao);
 			roadmapComissao.setOrdem(ordem);
+			roadmapComissao.setProposicaoId(idProposicao);
 
 			em.persist(roadmapComissao);
 			ordem++;

@@ -32,6 +32,14 @@ public class RoadmapComissao implements Serializable {
 	@JoinColumn(name = "proposicao_id", updatable = false, insertable = false, referencedColumnName = "id", nullable = false)
 	Proposicao proposicao;
 
+	public Long getProposicaoId() {
+		return proposicaoId;
+	}
+
+	public void setProposicaoId(Long proposicaoId) {
+		this.proposicaoId = proposicaoId;
+	}
+
 	public Proposicao getProposicao() {
 		return proposicao;
 	}
