@@ -48,4 +48,19 @@ class ComentarioEndpointSpec extends Specification{
         assert response.status == 200 // status 200 = Ok
     }
 
+    def "deve alterar um comentario"(){
+        given:
+        def idComentario = 174
+        def caminho = "sislegis/rest/comentarios/" + idComentario
+
+        def dados = [id: idComentario,
+                     descricao  : "comentario alterado pelo teste xxxxx",
+                     proposicao : [id: 162]]
+
+        when:
+        def response = restClient.put(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
+
+        then:
+        assert response.status == 204 // status 204 = No Content
+    }
 }
