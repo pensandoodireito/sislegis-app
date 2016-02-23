@@ -11,7 +11,10 @@ class UsuarioEndpointSpec extends Specification{
     def "deve inserir um novo usuario"(){
         given:
         def caminho = "/sislegis/rest/usuarios"
-        def dados = [nome: "maria", email: "mariajose@mj.gov.br"]
+        def random = new Random()
+        def emailAleatorio = random.nextInt()
+        def email = emailAleatorio + "@mj.gov.br"
+        def dados = [nome: "maria", email: email]
 
         when:
         def resp = restClient.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
@@ -20,13 +23,16 @@ class UsuarioEndpointSpec extends Specification{
         assert resp.status == 201 // status 201 = Created
     }
 
-    def "deve excluir um usuario"(){
+    def "deve excluir o ultimo usuario da lista"(){
         given:
-        def idusuario = 223
-        def caminho = "/sislegis/rest/usuarios/" + idusuario
+        def caminho = "/sislegis/rest/usuarios/"
+        def usuarios = listarTodosUsuarios()
+        def posicaoUltimoUsuario = usuarios.size - 1
+        def idUsuario = usuarios[posicaoUltimoUsuario].id
+        def caminhoCompleto = caminho + idUsuario
 
         when:
-        def resp = restClient.delete(path: caminho, headers: cabecalho)
+        def resp = restClient.delete(path: caminhoCompleto, headers: cabecalho)
 
         then:
         assert resp.status == 204 // status 204 = No Content
@@ -63,15 +69,11 @@ class UsuarioEndpointSpec extends Specification{
     }
 
     def "deve listar todos os usuarios"(){
-        given:
-        def caminho = "/sislegis/rest/usuarios"
-        def query = [start: 0, max: 300]
-
         when:
-        def resp = restClient.get(path: caminho, query: query, headers: cabecalho)
+        def usuarios = listarTodosUsuarios()
 
         then:
-        resp.data.each{
+        usuarios.each{
             println it
         }
     }
@@ -88,5 +90,14 @@ class UsuarioEndpointSpec extends Specification{
 
         then:
         assert resp.status == 204 // status 204 = No Content
+    }
+
+    def listarTodosUsuarios(){
+        def caminho = "/sislegis/rest/usuarios"
+        def query = [start: 0, max: 300]
+
+        def resp = restClient.get(path: caminho, query: query, headers: cabecalho)
+
+        return resp.data
     }
 }
