@@ -11,7 +11,9 @@ class PosicionamentoEndpointSpec extends Specification{
     def "deve inserir um novo posicionamento"(){
         given:
         def caminho = "/sislegis/rest/posicionamentos"
-        def dados = [nome: "Novo posicionamento"]
+        def random = new Random()
+        def nomeAleatorio = random.nextInt()
+        def dados = [nome: nomeAleatorio]
 
         when:
         def resp = restClient.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
@@ -22,7 +24,9 @@ class PosicionamentoEndpointSpec extends Specification{
 
     def "deve excluir um posicionamento"(){
         given:
-        def idPosicionamento = 220
+        def posicionamentos = listarTodosPosicionamentos()
+        def ultimoPosicionamento = posicionamentos[posicionamentos.size - 1]
+        def idPosicionamento = ultimoPosicionamento.id
         def caminho = "/sislegis/rest/posicionamentos/" + idPosicionamento
 
         when:
@@ -48,17 +52,22 @@ class PosicionamentoEndpointSpec extends Specification{
     }
 
     def "deve listar todos os posicionamentos"(){
-        given:
+        when:
+        def posicionamentos = listarTodosPosicionamentos()
+
+        then:
+        posicionamentos.each{
+            println it
+        }
+    }
+
+    def listarTodosPosicionamentos(){
         def caminho = "/sislegis/rest/posicionamentos"
         def query = [start: 0, max: 300]
 
-        when:
         def resp = restClient.get(path: caminho, query: query, headers: cabecalho)
 
-        then:
-        resp.data.each{
-            println it
-        }
+        return resp.data
     }
 
     def "deve alterar um posicionamento"(){

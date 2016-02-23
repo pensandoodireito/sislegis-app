@@ -11,7 +11,9 @@ class AreaConsultadaEndpointSpec extends Specification{
     def "deve inserir uma nova area consultada"(){
         given:
         def caminho = "/sislegis/rest/areaconsultadas/"
-        def dados = [descricao: "Area Consultada Teste"]
+        def random = new Random()
+        def nomeAleatorio = random.nextInt()
+        def dados = [descricao: nomeAleatorio]
 
         when:
         def resp = restClient.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
