@@ -55,17 +55,16 @@ class UsuarioEndpointSpec extends Specification{
 
     def "deve consultar um usuario pelo id"(){
         given:
-        def idusuario = 2
-        def caminho = "/sislegis/rest/usuarios/" + idusuario
+        def usuarios = listarTodosUsuarios()
+        def idUsuario = usuarios[0].id
+        def caminho = "/sislegis/rest/usuarios/" + idUsuario
 
         when:
         def resp = restClient.get(path: caminho, headers: cabecalho)
 
         then:
         assert resp.status == 200 // status 200 = Ok
-        resp.data.each{
-            println it
-        }
+        println resp.data
     }
 
     def "deve listar todos os usuarios"(){
@@ -80,10 +79,11 @@ class UsuarioEndpointSpec extends Specification{
 
     def "deve alterar um usuario"(){
         given:
-        def idusuario = 1
-        def caminho = "/sislegis/rest/usuarios/" + idusuario
-        def dados = [id: idusuario,
-                     nome: "Gustavo Cesar Delgado"]
+        def usuarios = listarTodosUsuarios()
+        def idUsuario = usuarios[0].id
+        def email = usuarios[0].email
+        def caminho = "/sislegis/rest/usuarios/" + idUsuario
+        def dados = [id: idUsuario, nome: "Nome alterado usr", email: email]
 
         when:
         def resp = restClient.put(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
