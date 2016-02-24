@@ -25,12 +25,31 @@ class TarefaEndpointSpec extends Specification{
 
         given:
         def caminho = "/sislegis/rest/tarefas/finalizar"
-        def dados = [idTarefa: 186, descricaoComentario: "Cometário de finalização"]
+        def tarefas = listarTodasTarefas()
+        def idTarefa = tarefas[0].id
+        def dados = [idTarefa: idTarefa, descricaoComentario: "Cometário de finalização"]
 
         when:
         def resp = restClient.post(path: caminho, body: dados, headers: cabecalho, requestContentType: "application/x-www-form-urlencoded; charset=utf-8")
 
         then:
         assert resp.status == 200 // status 200 = Ok
+    }
+
+    def "deve listar todas as tarefas"(){
+        when:
+        def tarefas = listarTodasTarefas()
+
+        then:
+        tarefas.each{
+            println it
+        }
+    }
+
+    def listarTodasTarefas(){
+        def caminho = "/sislegis/rest/tarefas/"
+        def query = [start: 0, max: 300]
+        def resp = restClient.get(path: caminho, query: query, headers: cabecalho)
+        return resp.data
     }
 }
