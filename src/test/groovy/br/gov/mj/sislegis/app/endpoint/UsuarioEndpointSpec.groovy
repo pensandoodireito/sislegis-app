@@ -7,6 +7,7 @@ import spock.lang.Specification
 class UsuarioEndpointSpec extends Specification{
     def restClient = new RESTClient("http://localhost/")
     def cabecalho = [Authorization: new BearerToken().obterToken()]
+    def nomeUsuario = "teste123"
 
     def "deve inserir um novo usuario"(){
         given:
@@ -14,7 +15,7 @@ class UsuarioEndpointSpec extends Specification{
         def random = new Random()
         def emailAleatorio = random.nextInt()
         def email = emailAleatorio + "@mj.gov.br"
-        def dados = [nome: "maria", email: email]
+        def dados = [nome: nomeUsuario, email: email]
 
         when:
         def resp = restClient.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
@@ -23,13 +24,40 @@ class UsuarioEndpointSpec extends Specification{
         assert resp.status == 201 // status 201 = Created
     }
 
-    def "deve excluir o ultimo usuario da lista"(){
+    def "deve consultar um usuario pelo id"(){
+        given:
+        def usuario = selecionarUsuarioInseridoNoTeste()
+        def caminho = "/sislegis/rest/usuarios/" + usuario.id
+
+        when:
+        def resp = restClient.get(path: caminho, headers: cabecalho)
+
+        then:
+        assert resp.status == 200 // status 200 = Ok
+        println resp.data
+    }
+
+    def "deve alterar o email do usuario inserido no teste anterior"(){
+        given:
+        def usuario = selecionarUsuarioInseridoNoTeste()
+        def random = new Random()
+        def emailAleatorio = random.nextInt()
+        def email = emailAleatorio + "@mj.gov.br"
+        def caminho = "/sislegis/rest/usuarios/" + usuario.id
+        def dados = [id: usuario.id, nome: usuario.nome, email: email]
+
+        when:
+        def resp = restClient.put(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
+
+        then:
+        assert resp.status == 204 // status 204 = No Content
+    }
+
+    def "deve excluir usuario inserido no teste anterior"(){
         given:
         def caminho = "/sislegis/rest/usuarios/"
-        def usuarios = listarTodosUsuarios()
-        def posicaoUltimoUsuario = usuarios.size - 1
-        def idUsuario = usuarios[posicaoUltimoUsuario].id
-        def caminhoCompleto = caminho + idUsuario
+        def usuario = selecionarUsuarioInseridoNoTeste()
+        def caminhoCompleto = caminho + usuario.id
 
         when:
         def resp = restClient.delete(path: caminhoCompleto, headers: cabecalho)
@@ -53,20 +81,6 @@ class UsuarioEndpointSpec extends Specification{
         }
     }
 
-    def "deve consultar um usuario pelo id"(){
-        given:
-        def usuarios = listarTodosUsuarios()
-        def idUsuario = usuarios[0].id
-        def caminho = "/sislegis/rest/usuarios/" + idUsuario
-
-        when:
-        def resp = restClient.get(path: caminho, headers: cabecalho)
-
-        then:
-        assert resp.status == 200 // status 200 = Ok
-        println resp.data
-    }
-
     def "deve listar todos os usuarios"(){
         when:
         def usuarios = listarTodosUsuarios()
@@ -77,21 +91,6 @@ class UsuarioEndpointSpec extends Specification{
         }
     }
 
-    def "deve alterar um usuario"(){
-        given:
-        def usuarios = listarTodosUsuarios()
-        def idUsuario = usuarios[0].id
-        def email = usuarios[0].email
-        def caminho = "/sislegis/rest/usuarios/" + idUsuario
-        def dados = [id: idUsuario, nome: "Nome alterado usr", email: email]
-
-        when:
-        def resp = restClient.put(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
-
-        then:
-        assert resp.status == 204 // status 204 = No Content
-    }
-
     def listarTodosUsuarios(){
         def caminho = "/sislegis/rest/usuarios"
         def query = [start: 0, max: 300]
@@ -99,5 +98,14 @@ class UsuarioEndpointSpec extends Specification{
         def resp = restClient.get(path: caminho, query: query, headers: cabecalho)
 
         return resp.data
+    }
+
+    def selecionarUsuarioInseridoNoTeste(){
+        def usuarios = listarTodosUsuarios()
+        for (def usuario : usuarios){
+            if (nomeUsuario.equals(usuario.nome)){
+                return usuario
+            }
+        }
     }
 }
