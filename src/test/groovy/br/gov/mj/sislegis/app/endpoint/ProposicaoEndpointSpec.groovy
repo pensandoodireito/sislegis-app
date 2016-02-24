@@ -77,19 +77,19 @@ class ProposicaoEndpointSpec extends Specification {
         def caminho = "/sislegis/rest/proposicaos/salvarProposicaoExtra"
         def dados = [
                 id                           : null,
-                idProposicao                 : 120529,
-                tipo                         : "MSF",
-                ano                          : "2015",
-                numero                       : "00011",
-                situacao                     : "INPAUTA",
-                autor                        : "Presidente da República",
+                idProposicao                 : 49293,
+                tipo                         : "SF",
+                ano                          : "2001",
+                numero                       : "00811",
+                situacao                     : "Processado",
+                autor                        : "CPI - Futebol - 2000",
                 origem                       : "SENADO",
                 resultadoASPAR               : null,
-                comissao                     : "SACAE",
+                comissao                     : "CE",
                 seqOrdemPauta                : null,
-                sigla                        : "MSF 00011/2015",
-                ementa                       : "Encaminha, nos termos do art. 6º da Lei nº 9.069, de 29 de junho de 1995, a Programação Monetária para o 1º trimestre e para o ano de 2015, contendo estimativas das faixas de variação dos principais agregados monetários, análise da evolução da economia nacional e justificativa da programação monetária.",
-                linkProposicao               : "http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate=120529",
+                sigla                        : "SF 49293/2001",
+                ementa                       : "Requer seja criada, no âmbito da Comissão de Educação, uma Subcomissão de Desportos, de caráter permanente, destinada a apreciar programas, planos e políticas governamentais instituídas para o setor desportivo no País.",
+                linkProposicao               : "http://www.senado.leg.br/atividade/materia/detalhes.asp?p_cod_mate=49293",
                 linkPauta                    : null,
                 posicionamentoAtual          : null,
                 posicionamentoPreliminar     : null,
@@ -114,62 +114,64 @@ class ProposicaoEndpointSpec extends Specification {
         def resp = restClient.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
 
         then:
-        assert resp.status == 200 // status 201 = Created
+        assert resp.status == 201 // status 201 = Created
     }
 
-    def "deve buscar a proposicao pelo id"() {
+    def "deve buscar a proposicao inserida no teste anterior pelo id"() {
         given:
-        def id = 150
+        def proposicoes = consultarPorFiltros()
+        def proposicao = proposicoes[0]
+        def id = proposicao.id
         def caminho = "/sislegis/rest/proposicaos/" + id
 
         when:
         def resp = restClient.get(path: caminho, headers: cabecalho)
 
         then:
-        resp.data.each {
-            println it
-        }
+        println resp.data
     }
 
-    def "deve consultar proposicoes pelos filtros"() {
-
-        given:
-        def caminho = "/sislegis/rest/proposicaos/consultar"
-
-        def query = [ementa    : "Programação Monetária para o 1º trimestre e para o ano de 2015",
-                     autor     : "",
-                     sigla     : "",
-                     origem    : "",
-                     isFavorita: "",
-                     limit     : 5,
-                     offset    : 0]
-
+    def "deve consultar por filtros a comissao inserida no teste anterior"() {
         when:
-        def resp = restClient.get(path: caminho, query: query, headers: cabecalho)
+        def proposicoes = consultarPorFiltros()
 
         then:
-        resp.data.each {
+        proposicoes.each {
             println it
         }
     }
 
-    def "deve atualizar os dados de uma proposicao"() {
+    def "deve sincronizar dados da proposicao com a Camara ou Senado"(){
         given:
-        def id = 165
+        def proposicoes = consultarPorFiltros()
+        def id = proposicoes[0].id
+        def caminho = "/sislegis/rest/proposicaos/check4updates/" + id
+
+        when:
+        def resp = restClient.post(path: caminho, headers: cabecalho)
+
+        then:
+        assert resp.status == 202 || resp.status == 304; // Status 202 = Accepted; 304 = Not Modified
+    }
+
+    def "deve atualizar os dados da proposicao inserida no teste anterior"() {
+        given:
+        def proposicoes = consultarPorFiltros()
+        def proposicao = proposicoes[0]
+        def id = proposicao.id
         def caminho = "/sislegis/rest/proposicaos/" + id
 
-        def dados = [id          : 165,
-                     idProposicao: 115949,
-                     tipo        : "MSF",
-                     ano         : 2014,
-                     numero      : 00001,
-                     autor       : "Presidente da República",
+        def dados = [id          : id,
+                     idProposicao: proposicao.idProposicao,
+                     tipo        : proposicao.tipo,
+                     ano         : proposicao.ano,
+                     numero      : proposicao.numero,
+                     ementa      : proposicao.ementa,
+                     autor       : proposicao.autor,
                      comissao    : "ATA-PLEN",
                      situacao    : "TPRS",
                      origem      : "SENADO",
-                     responsavel : [id   : 1,
-                                    nome : "Gustavo Delgado",
-                                    email: "gcdelgado@gmail.com"]
+                     responsavel : [id   : 1]
         ]
 
         when:
@@ -178,6 +180,125 @@ class ProposicaoEndpointSpec extends Specification {
         then:
         assert resp.status == 204 // status 204 = No Content
     }
+
+    def "deve marcar a proposicao inserida no teste anterior para ser seguida"(){
+        given:
+        def proposicoes = consultarPorFiltros()
+        def id = proposicoes[0].id
+        def caminho = "/sislegis/rest/proposicaos/follow/" + id
+
+        when:
+        def resp = restClient.post(path: caminho, headers: cabecalho)
+
+        then:
+        assert resp.status == 204 // status 204 = No content
+    }
+
+    def "deve marcar a proposicao inserida no teste anterior para nao ser mais seguida"(){
+        given:
+        def proposicoes = consultarPorFiltros()
+        def id = proposicoes[0].id
+        def caminho = "/sislegis/rest/proposicaos/follow/" + id
+
+        when:
+        def resp = restClient.delete(path: caminho, headers: cabecalho)
+
+        then:
+        assert resp.status == 204 // status 204 = No content
+    }
+
+    def "deve alterar o posicionamento da proposicao inserida no teste anterior"() {
+
+        given:
+        def proposicoes = consultarPorFiltros()
+        def proposicao = proposicoes[0]
+        def id = proposicao.id
+        def idPosicionamento = null
+        def caminho = "/sislegis/rest/proposicaos/alterarPosicionamento"
+        def dados = [id: id, idPosicionamento: idPosicionamento, preliminar: true]
+
+        when:
+        def resp = restClient.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
+
+        then:
+        assert resp.status == 200 // status 200 = Ok
+    }
+
+    def "deve listar o historico de alteracoes de posicionamento"() {
+
+        given:
+        def proposicoes = consultarPorFiltros()
+        def proposicao = proposicoes[0]
+        def id = proposicao.id
+        def caminho = "/sislegis/rest/proposicaos/historicoPosicionamentos/" + id
+
+        when:
+        def resp = restClient.get(path: caminho, headers: cabecalho)
+
+        then:
+        println resp.data
+
+    }
+
+    def "deve listar pautas da proposicao inserida no teste anterior"(){
+        given:
+        def proposicoes = consultarPorFiltros()
+        def proposicao = proposicoes[0]
+        def id = proposicao.id
+        def caminho = "/sislegis/rest/proposicaos/" + id + "/pautas"
+
+        when:
+        def resp = restClient.get(path: caminho, headers: cabecalho)
+
+        then:
+        println resp.data
+    }
+
+    def "deve atualizar o roadmap de comissoes da proposicao inserida no teste anterior"() {
+
+        given:
+        def proposicoes = consultarPorFiltros()
+        def proposicao = proposicoes[0]
+        def id = proposicao.id
+        def caminho = "/sislegis/rest/proposicaos/setRoadmapComissoes"
+        def dados = [idProposicao: id, comissoes: ['PLEN', 'CAPADR', 'CCJC']]
+
+        when:
+        def resp = restClient.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
+
+        then:
+        assert resp.status == 200 // status 200 = Ok
+    }
+
+    def "deve limpar o roadmap de comissoes da proposicao inserida no teste anterior"() {
+
+        given:
+        def proposicoes = consultarPorFiltros()
+        def proposicao = proposicoes[0]
+        def id = proposicao.id
+        def caminho = "/sislegis/rest/proposicaos/setRoadmapComissoes"
+        def dados = [idProposicao: id, comissoes: []]
+
+        when:
+        def resp = restClient.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
+
+        then:
+        assert resp.status == 200 // status 200 = Ok
+    }
+
+    def "deve excluir a proposicao inserida no teste anterior"(){
+        given:
+        def proposicoes = consultarPorFiltros()
+        def id = proposicoes[0].id
+        def caminho = "/sislegis/rest/proposicaos/" + id
+
+        when:
+        def resp = restClient.delete(path: caminho, headers: cabecalho)
+
+        then:
+        assert resp.status == 204 // status 204 = No content
+    }
+
 
     def "deve realizar uma busca independente de proposicao"() {
         given:
@@ -224,96 +345,18 @@ class ProposicaoEndpointSpec extends Specification {
         }
     }
 
-    def "deve marcar uma proposicao para ser seguida"(){
-        given:
-        def id = 165
-        def caminho = "/sislegis/rest/proposicaos/follow/" + id
+    def consultarPorFiltros(){
+        def caminho = "/sislegis/rest/proposicaos/consultar"
 
-        when:
-        def resp = restClient.post(path: caminho, headers: cabecalho)
+        def query = [ementa    : "Requer seja criada, no âmbito da Comissão de Educação, uma Subcomissão de Desportos, de caráter permanente, destinada a apreciar programas, planos e políticas governamentais instituídas para o setor desportivo no País.",
+                     autor     : "CPI - Futebol - 2000",
+                     sigla     : "RQS 00811/2001",
+                     limit     : 5,
+                     offset    : 0]
 
-        then:
-        assert resp.status == 204 // status 204 = No content
-    }
+        def resp = restClient.get(path: caminho, query: query, headers: cabecalho)
 
-    def "deve marcar uma proposicao para nao ser mais seguida"(){
-        given:
-        def id = 165
-        def caminho = "/sislegis/rest/proposicaos/follow/" + id
-
-        when:
-        def resp = restClient.delete(path: caminho, headers: cabecalho)
-
-        then:
-        assert resp.status == 204 // status 204 = No content
-    }
-
-    def "deve sincronizar dados da proposicao com a Camara ou Senado"(){
-        given:
-        def id = 165
-        def caminho = "/sislegis/rest/proposicaos/check4updates/" + id
-
-        when:
-        def resp = restClient.post(path: caminho, headers: cabecalho)
-
-        then:
-        println resp;
-    }
-
-    def "deve alterar o posicionamento de uma proposicao"() {
-
-        given:
-        def caminho = "/sislegis/rest/proposicaos/alterarPosicionamento"
-        def dados = [id: 165, idPosicionamento: 7, preliminar: true]
-
-        when:
-        def resp = restClient.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
-
-        then:
-        assert resp.status == 200 // status 200 = Ok
-    }
-
-    def "deve listar o historico de alteracoes de posicionamento"() {
-
-        given:
-        def id = 165
-        def caminho = "/sislegis/rest/proposicaos/historicoPosicionamentos/" + id
-
-        when:
-        def resp = restClient.get(path: caminho, headers: cabecalho)
-
-        then:
-        resp.data.each {
-            println it
-        }
-
-    }
-
-    def "deve listar pautas de uma proposicao"(){
-        given:
-        def id = 150
-        def caminho = "/sislegis/rest/proposicaos/" + id + "/pautas"
-
-        when:
-        def resp = restClient.get(path: caminho, headers: cabecalho)
-
-        then:
-        resp.data.each {
-            println it
-        }
-    }
-
-    def "deve atualizar o roadmap completo de comissoes de uma proposicao"() {
-
-        given:
-        def caminho = "/sislegis/rest/proposicaos/setRoadmapComissoes"
-        def dados = [idProposicao: 165, comissoes: ['PLEN', 'CAPADR', 'CCJC']]
-
-        when:
-        def resp = restClient.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
-
-        then:
-        assert resp.status == 200 // status 200 = Ok
+        return resp.data
     }
 
 }
