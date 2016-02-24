@@ -16,8 +16,12 @@ class TarefaEndpointSpec extends Specification{
         def resp = restClient.get(path: caminho, headers: cabecalho)
 
         then:
-        resp.data.each {
-            println it
+        assert resp.status == 200 // status 200 = Ok
+
+        if (resp.data.size > 0) {
+            resp.data.each {
+                println it
+            }
         }
     }
 
