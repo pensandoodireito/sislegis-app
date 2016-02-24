@@ -4,17 +4,18 @@ import groovyx.net.http.ContentType
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
 
-class ComentarioEndpointSpec extends Specification{
+class ComentarioEndpointSpec extends Specification {
 
     def restClient = new RESTClient("http://localhost/")
     def cabecalho = [Authorization: new BearerToken().obterToken()]
 
-    def "deve salvar um novo comentario"(){
+    def "deve salvar um novo comentario"() {
         given:
         def caminho = "sislegis/rest/comentarios/"
+        def comentarios = listarTodosComentarios()
+        def idProposicao = comentarios[0].proposicao.id
 
-        def dados = [descricao  : "novo comentario teste teste",
-                     proposicao : [id: 162]]
+        def dados = [descricao: "novo comentario teste", proposicao: [id: idProposicao]]
 
         when:
         def response = restClient.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
@@ -23,9 +24,10 @@ class ComentarioEndpointSpec extends Specification{
         assert response.status == 201 // status 201 = Created
     }
 
-    def "deve listar os comentarios de uma proposicao"(){
+    def "deve listar os comentarios de uma proposicao"() {
         given:
-        def idProposicao = 162
+        def comentarios = listarTodosComentarios()
+        def idProposicao = comentarios[0].proposicao.id
         def caminho = "sislegis/rest/comentarios/proposicao/" + idProposicao
 
         when:
@@ -37,14 +39,16 @@ class ComentarioEndpointSpec extends Specification{
         }
     }
 
-    def "deve alterar um comentario"(){
+    def "deve alterar um comentario"() {
         given:
-        def idComentario = 174
+        def comentarios = listarTodosComentarios()
+        def idProposicao = comentarios[0].proposicao.id
+        def idComentario = comentarios[0].id
         def caminho = "sislegis/rest/comentarios/" + idComentario
 
-        def dados = [id: idComentario,
-                     descricao  : "comentario alterado pelo teste xxxxx",
-                     proposicao : [id: 162]]
+        def dados = [id        : idComentario,
+                     descricao : "comentario alterado pelo teste!",
+                     proposicao: [id: idProposicao]]
 
         when:
         def response = restClient.put(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
@@ -53,8 +57,9 @@ class ComentarioEndpointSpec extends Specification{
         assert response.status == 204 // status 204 = No Content
     }
 
-    def "deve ocultar um comentario"(){
-        def idComentario = 166
+    def "deve ocultar um comentario"() {
+        def comentarios = listarTodosComentarios()
+        def idComentario = comentarios[0].id
         def caminho = "sislegis/rest/comentarios/ocultar/" + idComentario
 
         when:
@@ -62,5 +67,23 @@ class ComentarioEndpointSpec extends Specification{
 
         then:
         assert response.status == 200 // status 200 = Ok
+    }
+
+    def "deve listar todos os comentarios"() {
+        when:
+        def comentarios = listarTodosComentarios()
+
+        then:
+        comentarios.each {
+            println it
+        }
+    }
+
+    def listarTodosComentarios() {
+        def caminho = "sislegis/rest/comentarios/"
+        def query = [start: 0, max: 300]
+        def response = restClient.get(path: caminho, query: query, headers: cabecalho)
+
+        return response.data
     }
 }
