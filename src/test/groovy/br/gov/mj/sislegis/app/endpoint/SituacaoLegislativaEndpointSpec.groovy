@@ -10,7 +10,8 @@ class SituacaoLegislativaEndpointSpec extends Specification {
 
     def "deve consultar uma situacao legislativa pelo id"() {
         given:
-        def idSituacao = 10
+        def situacoesSenado = listarTodasDoSenado()
+        def idSituacao = situacoesSenado[0].id
         def caminho = "/sislegis/rest/situacoes/" + idSituacao
 
         when:
@@ -18,20 +19,15 @@ class SituacaoLegislativaEndpointSpec extends Specification {
 
         then:
         assert resp.status == 200 // status 200 = Ok
-        resp.data.each {
-            println it
-        }
+        println resp.data
     }
 
     def "deve listar as situacao legislativas do senado"() {
-        given:
-        def caminho = "/sislegis/rest/situacoes/SENADO"
-
         when:
-        def resp = restClient.get(path: caminho, headers: cabecalho)
+        def situacoes = listarTodasDoSenado()
 
         then:
-        resp.data.each {
+        situacoes.each {
             println it
         }
     }
@@ -51,17 +47,26 @@ class SituacaoLegislativaEndpointSpec extends Specification {
 
     def "deve alterar uma situacao legislativa"() {
         given:
-        def idSituacao = 10
+        def situacoesSenado = listarTodasDoSenado()
+        def idSituacao = situacoesSenado[0].id
+        def random = new Random()
+        def idExterno = random.nextInt()
         def caminho = "/sislegis/rest/situacoes/" + idSituacao
         def dados = [id       : idSituacao,
-                     descricao: "Situação ALTERADA 1",
-                     origem   : "CAMARA",
-                     idExterno: 1052]
+                     descricao: "Situação ALTERADA",
+                     origem   : "SENADO",
+                     idExterno: idExterno]
 
         when:
         def resp = restClient.put(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
 
         then:
         assert resp.status == 204 // status 204 = No Content
+    }
+
+    def listarTodasDoSenado() {
+        def caminho = "/sislegis/rest/situacoes/SENADO"
+        def resp = restClient.get(path: caminho, headers: cabecalho)
+        return resp.data
     }
 }
