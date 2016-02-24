@@ -12,10 +12,15 @@ class EncaminhamentoProposicaoEndpointSpec extends Specification {
     def "deve inserir um novo encaminhamento"() {
         given:
         def caminho = "/sislegis/rest/encaminhamentoProposicao/"
-        def dados = [proposicao         : [id: 162],
-                     tipoEncaminhamento : [id: 179],
-                     responsavel        : [id: 1],
-                     detalhes: "Detalhes do novo encaminhamento inserido no teste"]
+        def encaminhamentos = listarTodosEncaminhamentos()
+        def encaminhamento = encaminhamentos[0]
+        def idProposicao = encaminhamento.proposicao.id
+        def idResponsavel = encaminhamento.responsavel.id
+        def idTipoEncaminhamento = encaminhamento.tipoEncaminhamento.id
+        def dados = [proposicao         : [id: idProposicao],
+                     tipoEncaminhamento : [id: idTipoEncaminhamento],
+                     responsavel        : [id: idResponsavel],
+                     detalhes: "Novo encaminhamento inserido no teste"]
 
         when:
         def resp = restClient.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
@@ -29,7 +34,9 @@ class EncaminhamentoProposicaoEndpointSpec extends Specification {
 
         given:
         def caminho = "/sislegis/rest/encaminhamentoProposicao/finalizar"
-        def dados = [idEncaminhamentoProposicao: 181,
+        def encaminhamentos = listarTodosEncaminhamentos()
+        def idEncaminhamento = encaminhamentos[0].id
+        def dados = [idEncaminhamentoProposicao: idEncaminhamento,
                      descricaoComentario       : "Cometário de finalização do encaminhamento"]
 
         when:
@@ -39,4 +46,22 @@ class EncaminhamentoProposicaoEndpointSpec extends Specification {
         assert resp.status == 200 // status 200 = Ok
     }
 
+    def "deve listar todos os encaminhamentos"(){
+        when:
+        def encaminhamentos = listarTodosEncaminhamentos()
+
+        then:
+        encaminhamentos.each {
+            println it
+        }
+    }
+
+    def listarTodosEncaminhamentos(){
+        def caminho = "/sislegis/rest/encaminhamentoProposicao"
+        def query = [start: 0, max: 300]
+
+        def resp = restClient.get(path: caminho, query: query, headers: cabecalho)
+
+        return resp.data
+    }
 }
