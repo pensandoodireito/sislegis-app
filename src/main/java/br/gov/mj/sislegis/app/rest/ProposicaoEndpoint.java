@@ -30,7 +30,7 @@ import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
-
+import br.gov.mj.sislegis.app.model.Votacao;
 import org.jboss.resteasy.annotations.cache.Cache;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
@@ -339,6 +339,23 @@ public class ProposicaoEndpoint {
 			e.printStackTrace();
 			return Response.status(Response.Status.BAD_REQUEST).build();
 		}
+	}
+
+	@GET
+	@Path("/listarVotacoes")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Votacao> listarVotacoes(@QueryParam("idProposicao") String idProposicao, @QueryParam("tipo") String tipo, @QueryParam("numero") String numero, @QueryParam("ano") String ano, @QueryParam("origem") String origem){
+
+		try {
+			Integer idProp = (idProposicao == null || "".equals(idProposicao)) ? null : Integer.valueOf(idProposicao);
+			List<Votacao> votacoes = proposicaoService.listarVotacoes(idProp, tipo, numero, ano, Origem.valueOf(origem));
+			return votacoes;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
 	}
 
 }
