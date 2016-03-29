@@ -41,6 +41,7 @@ import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
 import br.gov.mj.sislegis.app.model.RoadmapComissao;
 import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.model.Votacao;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.SituacaoSessao;
@@ -49,9 +50,11 @@ import br.gov.mj.sislegis.app.parser.ProposicaoSearcherFactory;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
 import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
+import br.gov.mj.sislegis.app.parser.camara.ParserVotacaoCamara;
 import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserPlenarioSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
+import br.gov.mj.sislegis.app.parser.senado.ParserVotacaoSenado;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
@@ -82,6 +85,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	@Inject
 	private ParserPlenarioSenado parserPlenarioSenado;
+
+	@Inject
+	private ParserVotacaoCamara parserVotacaoCamara;
+
+	@Inject
+	private ParserVotacaoSenado parserVotacaoSenado;
 
 	@Inject
 	private ComentarioService comentarioService;
@@ -1240,6 +1249,18 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 		return null;
 
+	}
+
+	@Override
+	public List<Votacao> listarVotacoes(Integer idProposicao, String tipo, String numero, String ano, Origem origem) throws Exception {
+
+		if (Origem.CAMARA.equals(origem)){
+			return parserVotacaoCamara.votacoesPorProposicao(numero, ano, tipo);
+		} else if (Origem.SENADO.equals(origem)){
+			return parserVotacaoSenado.votacoesPorProposicao(idProposicao);
+		}
+
+		return null;
 	}
 
 }

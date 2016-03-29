@@ -5,7 +5,7 @@ import groovyx.net.http.RESTClient
 import spock.lang.Specification
 
 class ProposicaoEndpointSpec extends Specification {
-
+    
     def restClient = new RESTClient("http://localhost/")
     def cabecalho = [Authorization: new BearerToken().obterToken()]
 
@@ -270,6 +270,7 @@ class ProposicaoEndpointSpec extends Specification {
         assert resp.status == 200 // status 200 = Ok
     }
 
+<<<<<<< HEAD
     def "deve limpar o roadmap de comissoes da proposicao inserida no teste anterior"() {
 
         given:
@@ -360,3 +361,38 @@ class ProposicaoEndpointSpec extends Specification {
     }
 
 }
+=======
+    def "deve listar as votacoes de uma proposicao da CAMARA"(){
+
+        given:
+        def caminho = "/sislegis/rest/proposicaos/listarVotacoes"
+        def query = [idProposicao: "", tipo: "PL", numero: "1992", ano: "2007", origem: "CAMARA"]
+
+        when:
+        def resp = client.get(path: caminho, query: query, headers: cabecalho)
+
+        then:
+        resp.data.each{
+            println it.dataHora
+        }
+
+    }
+
+    def "deve listar as votacoes de uma proposicao do SENADO"(){
+
+        given:
+        def caminho = "/sislegis/rest/proposicaos/listarVotacoes"
+        def query = [idProposicao: "112464", tipo: "", numero: "", ano: "", origem: "SENADO"]
+
+        when:
+        def resp = client.get(path: caminho, query: query, headers: cabecalho)
+
+        then:
+        resp.data.each{
+            println it.getDataHora
+        }
+
+    }
+
+}
+>>>>>>> 8084cb5cff4e7651040f49da04f1c4ca380f1aa8
