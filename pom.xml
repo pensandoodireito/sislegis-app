@@ -196,6 +196,15 @@
 				<groupId>org.wildfly.plugins</groupId>
 				<artifactId>wildfly-maven-plugin</artifactId>
 				<version>${version.wildfly.maven.plugin}</version>
+				<configuration>
+					<hostname>127.0.0.1</hostname>
+					<port>9990</port>
+					<username>sislegis</username>
+					<password>@dmin123</password>
+					<!-- <before-deployment> <scripts> <script>configure-security-domain.cli</script> 
+						</scripts> </before-deployment> <after-deployment> <scripts> <script>remove-security-domain.cli</script> 
+						</scripts> </after-deployment> -->
+				</configuration>
 				<executions>
 					<execution>
 						<phase>install</phase>
