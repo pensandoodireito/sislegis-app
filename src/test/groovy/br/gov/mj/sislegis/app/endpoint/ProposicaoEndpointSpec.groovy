@@ -270,7 +270,6 @@ class ProposicaoEndpointSpec extends Specification {
         assert resp.status == 200 // status 200 = Ok
     }
 
-<<<<<<< HEAD
     def "deve limpar o roadmap de comissoes da proposicao inserida no teste anterior"() {
 
         given:
@@ -360,8 +359,7 @@ class ProposicaoEndpointSpec extends Specification {
         return resp.data
     }
 
-}
-=======
+
     def "deve listar as votacoes de uma proposicao da CAMARA"(){
 
         given:
@@ -395,4 +393,3 @@ class ProposicaoEndpointSpec extends Specification {
     }
 
 }
->>>>>>> 8084cb5cff4e7651040f49da04f1c4ca380f1aa8
