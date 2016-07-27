@@ -17,6 +17,7 @@ import br.gov.mj.sislegis.app.model.ProcessoSei;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.model.Votacao;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 
@@ -187,4 +188,14 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @param idProcesso id do processoSei
      */
 	void excluirProcessoSei(Long idProcesso);
+/* Retorna a lista de votacoes por proposicao
+	 *
+	 * @param idProposicao atributo idProposicao da entidade Proposicao
+	 * @param tipo
+	 * @param numero
+	 * @param ano
+	 * @param origem
+     */
+	List<Votacao> listarVotacoes(Integer idProposicao, String tipo, String numero, String ano, Origem origem) throws Exception;
+
 }
