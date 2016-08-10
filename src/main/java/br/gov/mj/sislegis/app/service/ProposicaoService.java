@@ -1,6 +1,7 @@
 package br.gov.mj.sislegis.app.service;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -8,9 +9,11 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.ejb.Local;
+import javax.xml.rpc.ServiceException;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
+import br.gov.mj.sislegis.app.model.ProcessoSei;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
@@ -172,7 +175,20 @@ public interface ProposicaoService extends Service<Proposicao> {
 	void setRoadmapComissoes(Long idProposicao, List<String> comissoes);
 
 	/**
-	 * Retorna a lista de votacoes por proposicao
+	 * Busca o processo no SEI (via WS) e insere objeto de identificacao com link para este processo, relacionando com a Proposicao
+	 *
+	 * @param id id da proposicao
+	 * @param protocolo numero de protocolo do SEI
+     */
+	ProcessoSei vincularProcessoSei(Long id, String protocolo) throws ServiceException, RemoteException;
+
+	/**
+	 * Remove vinculo de processo do SEI
+	 *
+	 * @param idProcesso id do processoSei
+     */
+	void excluirProcessoSei(Long idProcesso);
+/* Retorna a lista de votacoes por proposicao
 	 *
 	 * @param idProposicao atributo idProposicao da entidade Proposicao
 	 * @param tipo

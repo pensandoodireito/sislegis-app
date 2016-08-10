@@ -2,6 +2,7 @@ package br.gov.mj.sislegis.app.service.ejbs;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -27,6 +28,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.xml.rpc.ServiceException;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.AlteracaoProposicao;
@@ -35,6 +37,7 @@ import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
 import br.gov.mj.sislegis.app.model.Posicionamento;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
+import br.gov.mj.sislegis.app.model.ProcessoSei;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
@@ -54,6 +57,8 @@ import br.gov.mj.sislegis.app.parser.camara.ParserVotacaoCamara;
 import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserPlenarioSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
+import br.gov.mj.sislegis.app.seiws.RetornoConsultaProcedimento;
+import br.gov.mj.sislegis.app.seiws.SeiServiceLocator;
 import br.gov.mj.sislegis.app.parser.senado.ParserVotacaoSenado;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ComentarioService;
@@ -420,9 +425,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 						ppc.setOrdemPauta(rp.getSeqOrdemPauta());
 						p.getPautasComissoes().add(ppc);
 					}
-					if (!fetchAll) {
-						popularDadosTransientes(p);
-					}
+					
+					popularDadosTransientes(p);
+					
 					proposicoes.add(p);
 				}
 
@@ -449,9 +454,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				query.setParameter("rid", reuniao.getId());
 				List<Proposicao> proposicoesReuniao = query.getResultList();
 				proposicoes.addAll(proposicoesReuniao);
-				if (!fetchAll) {
-					popularDadosTransientes(proposicoes);
-				}
+				
+				popularDadosTransientes(proposicoes);
+				
 			}
 
 		}
@@ -893,6 +898,33 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			em.persist(roadmapComissao);
 			ordem++;
 		}
+	}
+
+	@Override
+	public ProcessoSei vincularProcessoSei(Long id, String protocolo) throws ServiceException, RemoteException {
+		Proposicao proposicao = findById(id);
+
+		ProcessoSei processoSei = new ProcessoSei();
+		processoSei.setProtocolo(protocolo);
+		processoSei.setProposicao(proposicao);
+
+		SeiServiceLocator seiServiceLocator = new SeiServiceLocator();
+		RetornoConsultaProcedimento retornoConsultaProcedimento = seiServiceLocator.getSeiPortService().
+				consultarProcedimento("sislegis", "sislegis", null, protocolo, null, null, null, null, null, null, null, null, null);
+
+		if (retornoConsultaProcedimento != null) {
+			processoSei.setLinkSei(retornoConsultaProcedimento.getLinkAcesso());
+			em.persist(processoSei);
+			return processoSei;
+		} else{
+			throw new IllegalArgumentException("Processo nao encontrado no SEI. Protocolo: " + protocolo);
+		}
+	}
+
+	@Override
+	public void excluirProcessoSei(Long idProcesso) {
+		ProcessoSei processoSei = em.find(ProcessoSei.class, idProcesso);
+		em.remove(processoSei);
 	}
 
 	/**

@@ -14,7 +14,7 @@ public class TesteSeiWS {
 	try {
 		SeiServiceLocator locator = new SeiServiceLocator();
 	    RetornoConsultaProcedimento retorno = locator.getSeiPortService().consultarProcedimento("sislegis", "sislegis",
-		    null, "08027.000010/2015-43", null, null, null, null, null, null, null, null, null);
+		    null, "16.0.000000001-2", null, null, null, null, null, null, null, null, null);
 	    
 	    
 	    //locator.getSeiPortService().incluirDocumento(siglaSistema, identificacaoServico, idUnidade, documento)
@@ -22,10 +22,10 @@ public class TesteSeiWS {
 	    System.out.println(retorno.getLinkAcesso());
 	    // 08000.000010/2014-61
 
-	    Usuario[] usuario = locator.getSeiPortService().listarUsuarios("SISLEGIS", "sislegis", "110001114", "");
-	    for (Usuario us : usuario) {
-		System.out.println("Usuario :" + us.getNome() + " sigla " + us.getSigla() + " id " + us.getIdUsuario());
-	    }
+//	    Usuario[] usuario = locator.getSeiPortService().listarUsuarios("SISLEGIS", "sislegis", "110000834", "");
+//	    for (Usuario us : usuario) {
+//		System.out.println("Usuario :" + us.getNome() + " sigla " + us.getSigla() + " id " + us.getIdUsuario());
+//	    }
 
 	    // locator.getSeiPortService().consultarProcedimento(siglaSistema,
 	    // identificacaoServico, idUnidade,
@@ -72,15 +72,15 @@ public class TesteSeiWS {
 	    
 	    System.out.println("############################## USUÁRIOS...");
 
-	    for (Unidade unidade : listaUnidades) {
-		 if(unidade.getDescricao().contains("anistia")){
-		    usuario = locator.getSeiPortService().listarUsuarios("SISLEGIS", "sislegis", unidade.getIdUnidade(), "");
-        	    System.out.println("");
-        	    for (Usuario us : usuario) {
-        		System.out.println("Usuario :" + us.getNome() + " sigla " + us.getSigla() + " id " + us.getIdUsuario()+" Unidade "+unidade.getDescricao());
-        	    }
-    	        }
-	    }
+//	    for (Unidade unidade : listaUnidades) {
+//		 if(unidade.getDescricao().contains("anistia")){
+//		    usuario = locator.getSeiPortService().listarUsuarios("SISLEGIS", "sislegis", unidade.getIdUnidade(), "");
+//        	    System.out.println("");
+//        	    for (Usuario us : usuario) {
+//        		System.out.println("Usuario :" + us.getNome() + " sigla " + us.getSigla() + " id " + us.getIdUsuario()+" Unidade "+unidade.getDescricao());
+//        	    }
+//    	        }
+//	    }
 	    // System.out.println(retornoDoc.getDocumentoFormatado());
 
 	} catch (RemoteException e) {
@@ -89,7 +89,10 @@ public class TesteSeiWS {
 	} catch (ServiceException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
+	} catch (Exception e){
+		e.printStackTrace();
 	}
+
 
     }
 }

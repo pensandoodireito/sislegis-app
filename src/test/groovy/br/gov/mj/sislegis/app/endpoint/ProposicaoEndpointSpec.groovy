@@ -9,6 +9,7 @@ class ProposicaoEndpointSpec extends Specification {
     def restClient = new RESTClient("http://localhost/")
     def cabecalho = [Authorization: new BearerToken().obterToken()]
 
+    def client = new RESTClient("http://localhost:8080/")
     def "deve buscar proposicoes por pauta - Camara"() {
         given:
         def caminho = "/sislegis/rest/proposicaos/proposicoesPautaCamara/"
@@ -270,7 +271,6 @@ class ProposicaoEndpointSpec extends Specification {
         assert resp.status == 200 // status 200 = Ok
     }
 
-<<<<<<< HEAD
     def "deve limpar o roadmap de comissoes da proposicao inserida no teste anterior"() {
 
         given:
@@ -360,8 +360,7 @@ class ProposicaoEndpointSpec extends Specification {
         return resp.data
     }
 
-}
-=======
+
     def "deve listar as votacoes de uma proposicao da CAMARA"(){
 
         given:
@@ -394,5 +393,28 @@ class ProposicaoEndpointSpec extends Specification {
 
     }
 
+    def "deve inserir um processo do sei a partir do protocolo"(){
+        given:
+        def caminho = "/sislegis/rest/proposicaos/vincularProcessoSei"
+        def dados = [id: 125, protocolo: "1600000000020"]
+
+        when:
+        def resp = client.post(path: caminho, body: dados, headers: cabecalho, requestContentType: ContentType.JSON)
+
+        then:
+        println resp.data
+    }
+
+    def "deve excluir um processo SEI pelo seu id"(){
+        given:
+        def idProcessoSei = 145;
+        def caminho = "/sislegis/rest/proposicaos/excluirProcessoSei/" + idProcessoSei;
+
+        when:
+        def resp = client.delete(path: caminho, headers: cabecalho)
+
+        then:
+        assert resp.status == 204 // status 204 = no content
+    }
+
 }
->>>>>>> 8084cb5cff4e7651040f49da04f1c4ca380f1aa8

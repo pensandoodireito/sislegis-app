@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
+import br.gov.mj.sislegis.app.model.ProcessoSei;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
@@ -337,7 +338,34 @@ public class ProposicaoEndpoint {
 			return Response.ok().build();
 		} catch (Exception e) {
 			e.printStackTrace();
-			return Response.status(Response.Status.BAD_REQUEST).build();
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+	}
+
+	@POST
+	@Path("/vincularProcessoSei")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public ProcessoSei inserirProcessoSei(ProcessoSeiWrapper processoSeiWrapper){
+		try {
+			ProcessoSei processoSei = proposicaoService.vincularProcessoSei(processoSeiWrapper.getId(), processoSeiWrapper.getProtocolo());
+			return processoSei;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	@DELETE
+	@Path("/excluirProcessoSei/{idProcesso:[0-9]+}")
+	public Response excluirProcessoSei(@PathParam("idProcesso") Long idProcesso){
+		try {
+			proposicaoService.excluirProcessoSei(idProcesso);
+			return Response.noContent().build();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Status.BAD_REQUEST).build();
 		}
 	}
 
@@ -430,5 +458,26 @@ class RoadmapComissoesWrapper{
 
 	public void setComissoes(List<String> comissoes) {
 		this.comissoes = comissoes;
+	}
+}
+
+class ProcessoSeiWrapper {
+	private Long id;
+	private String protocolo;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getProtocolo() {
+		return protocolo;
+	}
+
+	public void setProtocolo(String protocolo) {
+		this.protocolo = protocolo;
 	}
 }
