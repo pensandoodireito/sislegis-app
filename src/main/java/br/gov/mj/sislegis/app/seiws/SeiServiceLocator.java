@@ -26,8 +26,11 @@ public class SeiServiceLocator extends org.apache.axis.client.Service implements
         super(wsdlLoc, sName);
     }
 
+    // Caso esteja setada a variavel de ambiente SEI_URL, usara esta URL, caso contrario aponta para o SEI em Producao
+    private String urlSei = System.getenv("SEI_URL") != null ? System.getenv("SEI_URL") : "http://sei.mj.gov.br";
+
     // Use to get a proxy class for SeiPortService
-    private java.lang.String SeiPortService_address = "http://sei.treinamento.mj.gov.br/sei/ws/SeiWS.php";
+    private java.lang.String SeiPortService_address = urlSei + "/ws/SeiWS.php";
 
     public java.lang.String getSeiPortServiceAddress() {
         return SeiPortService_address;
