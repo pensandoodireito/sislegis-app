@@ -21,6 +21,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
+import br.gov.mj.sislegis.app.model.Papel;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
@@ -37,6 +38,20 @@ public class UsuarioEndpoint {
 	private UsuarioService service;
 	@Inject
 	private UsuarioAutenticadoBean controleUsuarioAutenticado;
+
+	@GET
+	@Path("/me")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getMe(@HeaderParam("Authorization") String authorization) {
+		try {
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+
+			return Response.ok(user).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.FORBIDDEN).build();
+		}
+	}
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)

@@ -3,8 +3,12 @@ package br.gov.mj.sislegis.app.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -30,6 +34,12 @@ public class Usuario extends AbstractEntity {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
+
+	@ElementCollection(targetClass = Papel.class, fetch = FetchType.EAGER)
+	@Enumerated(EnumType.STRING)
+	@CollectionTable(name = "usuario_papel")
+	@Column(name = "papel")
+	private Set<Papel> papeis = new HashSet<Papel>();
 
 	@Column
 	private String nome;
@@ -103,6 +113,18 @@ public class Usuario extends AbstractEntity {
 		if (email != null && !email.trim().isEmpty())
 			result += ", email: " + email;
 		return result;
+	}
+
+	public void addPapel(Papel p) {
+		papeis.add(p);
+	}
+
+	public void removePapel(Papel p) {
+		papeis.remove(p);
+	}
+
+	public Set<Papel> getPapeis() {
+		return papeis;
 	}
 
 }
