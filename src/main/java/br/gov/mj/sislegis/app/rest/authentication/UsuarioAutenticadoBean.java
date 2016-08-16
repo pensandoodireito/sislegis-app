@@ -40,9 +40,10 @@ public class UsuarioAutenticadoBean {
 	}
 
 	public synchronized Usuario carregaUsuarioAutenticado(String authorization) throws IOException {
-		JSONObject jsonUser = null;
-
-		jsonUser = buscaDadosUsuarioDoKeycloak(authorization);
+		JSONObject jsonUser = buscaDadosUsuarioDoKeycloak(authorization);
+		if (!jsonUser.has("email")) {
+			throw new IOException("Usuário de keycloak sem email configurado. Configure um email para o usuario.");
+		}
 		String email = jsonUser.getString("email");
 		Usuario authenticatedUser = usuarioService.findOrCreateByEmail(jsonUser.getString("name"), email);
 
