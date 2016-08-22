@@ -96,14 +96,11 @@ public class Proposicao extends AbstractEntity {
 
 	@Column
 	private String situacao;
-	
-	@Column(name="parecer_sal")
+
+	@Column(name = "parecer_sal")
 	private String parecerSAL;
 
-	@Column(name="nota_tecnica")
-	private String notaTecnica;
-
-	@Column(name="explicacao_sal")
+	@Column(name = "explicacao_sal")
 	private String explicacao;
 
 	@Column
@@ -552,14 +549,6 @@ public class Proposicao extends AbstractEntity {
 
 	public void setParecerSAL(String parecerSAL) {
 		this.parecerSAL = parecerSAL;
-	}
-
-	public String getNotaTecnica() {
-		return notaTecnica;
-	}
-
-	public void setNotaTecnica(String notaTecnica) {
-		this.notaTecnica = notaTecnica;
 	}
 
 	public String getExplicacao() {
