@@ -31,11 +31,11 @@ import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import br.gov.mj.sislegis.app.rest.serializers.CompactListRoadmapComissaoSerializer;
 import org.apache.commons.collections.CollectionUtils;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
+import br.gov.mj.sislegis.app.rest.serializers.CompactListRoadmapComissaoSerializer;
 import br.gov.mj.sislegis.app.rest.serializers.CompactSetProposicaoSerializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -81,6 +81,10 @@ public class Proposicao extends AbstractEntity {
 	@Column(nullable = false, unique = true)
 	private Integer idProposicao;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "estado")
+	private EstadoProposicao estado;
+
 	@Column
 	private String tipo;
 
@@ -92,6 +96,15 @@ public class Proposicao extends AbstractEntity {
 
 	@Column
 	private String situacao;
+	
+	@Column(name="parecer_sal")
+	private String parecerSAL;
+
+	@Column(name="nota_tecnica")
+	private String notaTecnica;
+
+	@Column(name="explicacao_sal")
+	private String explicacao;
 
 	@Column
 	private String autor;
@@ -174,7 +187,6 @@ public class Proposicao extends AbstractEntity {
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "proposicao_elaboracao_normativa", joinColumns = { @JoinColumn(name = "proposicao_id") }, inverseJoinColumns = { @JoinColumn(name = "elaboracao_normativa_id") })
 	private Set<ElaboracaoNormativa> elaboracoesNormativas;
-
 
 	@OrderBy("ordem")
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "proposicao")
@@ -526,4 +538,35 @@ public class Proposicao extends AbstractEntity {
 		return mostRecent;
 	}
 
+	public EstadoProposicao getEstado() {
+		return estado;
+	}
+
+	public void setEstado(EstadoProposicao estado) {
+		this.estado = estado;
+	}
+
+	public String getParecerSAL() {
+		return parecerSAL;
+	}
+
+	public void setParecerSAL(String parecerSAL) {
+		this.parecerSAL = parecerSAL;
+	}
+
+	public String getNotaTecnica() {
+		return notaTecnica;
+	}
+
+	public void setNotaTecnica(String notaTecnica) {
+		this.notaTecnica = notaTecnica;
+	}
+
+	public String getExplicacao() {
+		return explicacao;
+	}
+
+	public void setExplicacao(String explicacao) {
+		this.explicacao = explicacao;
+	}
 }
