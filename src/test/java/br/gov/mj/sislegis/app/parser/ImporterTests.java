@@ -61,7 +61,8 @@ public class ImporterTests {
 	static Map<String, String> atribuidoToResponsavel = new HashMap<String, String>();
 	static {
 		String[] user = { "Eduarda", "Guilherme", "Leonardo", "Marcelo", "Natalia", "Paula", "Sem atribuição", "Afonso" };
-		String[] userEmail = { "Eduarda", "Guilherme", "Leonardo", "Marcelo", "Natalia", "Paula", null, "Afonso" };
+		String[] userEmail = { "eduarda.cintra@mj.gov.br", "guialmeida@gmail.com", "Leonardo", "Marcelo",
+				"natalia.langenegger@mj.gov.br", "Paula", null, "Afonso" };
 
 		for (int i = 0; i < userEmail.length; i++) {
 			atribuidoToResponsavel.put(user[i], userEmail[i]);
@@ -115,7 +116,7 @@ public class ImporterTests {
 		List<Posicionamento> posicoes = posicionamentoSvc.listAll();
 		for (Iterator iterator = posicoes.iterator(); iterator.hasNext();) {
 			Posicionamento posicionamento = (Posicionamento) iterator.next();
-			posicionamentos.put(posicionamento.getNome(), posicionamento);
+			posicionamentos.put(posicionamento.getNome().toLowerCase(), posicionamento);
 		}
 	}
 
@@ -158,13 +159,16 @@ public class ImporterTests {
 							prop.setExplicacao(p.tema);
 							prop.setResponsavel(responsavel);
 							prop.setParecerSAL(p.providencias);
-							Posicionamento posicionamento = posicionamentos.get(p.posicaoSAL);
-							if (posicionamentos.get(p.posicaoSAL) != null) {
-								System.out.println("Achou " + posicionamentos.get(p.posicaoSAL));
+							Posicionamento posicionamento = posicionamentos.get(p.posicaoSAL.toLowerCase());
+							if (posicionamento != null) {
+								System.out.println("Achou " + posicionamento);
 							} else {
 								if ("".equals(p.posicaoSAL)) {
 
 								} else {
+									posicionamento = new Posicionamento();
+									posicionamento.setNome(p.posicaoSAL.trim());
+									em.persist(posicionamento);
 									System.err.println("Posicionametno novo " + p.posicaoSAL);
 								}
 							}
