@@ -16,7 +16,7 @@ import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.EJBDataCacher;
 
 @Stateless
-public class ComissaoServiceEjb extends AbstractPersistence<Comissao, Long> implements ComissaoService {
+public class ComissaoServiceEjb extends AbstractPersistence<Comissao, Long> implements ComissaoService, EJBUnitTestable {
 
 	private static final String CACHE_KEY_COMISSOES_CAMARA = "COMISSOES_CAMARA";
 	private static final String CACHE_KEY_COMISSOES_SENADO = "COMISSOES_SENADO";
@@ -86,4 +86,12 @@ public class ComissaoServiceEjb extends AbstractPersistence<Comissao, Long> impl
 		return null;
 	}
 
+	@Override
+	public void setInjectedEntities(Object... injections) {
+		this.em = (EntityManager) injections[0];
+		this.dataCacher = (EJBDataCacher) injections[1];
+		parserComissoesSenado = new ParserComissoesSenado();
+		parserComissoesCamara = new ParserComissoesCamara();
+
+	}
 }

@@ -191,6 +191,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			for (Iterator<ProposicaoPautaComissao> iterator2 = ppcs.iterator(); iterator2.hasNext();) {
 				ProposicaoPautaComissao proposicaoPautaComissao = (ProposicaoPautaComissao) iterator2.next();
 				Proposicao proposicaoPauta = proposicaoPautaComissao.getProposicao();
+				System.out.println(comentarioService + " " + proposicaoPauta);
 				List<Comentario> comentarios = comentarioService.findByIdProposicao(proposicaoPauta.getIdProposicao());
 				if (comentarios != null && !comentarios.isEmpty()) {
 					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
@@ -425,9 +426,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 						ppc.setOrdemPauta(rp.getSeqOrdemPauta());
 						p.getPautasComissoes().add(ppc);
 					}
-					
+
 					popularDadosTransientes(p);
-					
+
 					proposicoes.add(p);
 				}
 
@@ -454,9 +455,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				query.setParameter("rid", reuniao.getId());
 				List<Proposicao> proposicoesReuniao = query.getResultList();
 				proposicoes.addAll(proposicoesReuniao);
-				
+
 				popularDadosTransientes(proposicoes);
-				
+
 			}
 
 		}
@@ -663,17 +664,20 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	@Override
 	public boolean syncDadosPautaProposicao(Proposicao proposicaoLocal) throws IOException {
 		try {
+			System.out.println("AAa");
 			Date initialMonday = getClosestMonday(new Date());
 			Date nextMonday = getNextWeek(initialMonday);
 			Set<PautaReuniaoComissao> props = new HashSet<PautaReuniaoComissao>();
 			switch (proposicaoLocal.getOrigem()) {
 			case SENADO:
+				System.out.println("VAi senado");
 				props = buscarProposicoesPautaSenadoWS(proposicaoLocal.getComissao(), initialMonday, nextMonday);
+				System.out.println("props " + props);
 				break;
 			case CAMARA:
-
+				System.out.println("coimussa" + proposicaoLocal.getComissao());
 				Comissao comissao = comissaoService.getBySigla(proposicaoLocal.getComissao());
-
+				System.out.println("coimussa " + comissao);
 				if (comissao == null) {
 					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
 							Level.SEVERE,
@@ -681,6 +685,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 									+ proposicaoLocal.getComissao() + " " + proposicaoLocal);
 					return false;
 				}
+				System.out.println("initialMonday" + initialMonday + " " + nextMonday);
 				props = buscarProposicoesPautaCamaraWS(comissao.getId(), initialMonday, nextMonday);
 				break;
 
@@ -740,6 +745,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			}
 
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
 					"Falhou ao sincronizar proposicao " + proposicaoLocal, e);
 		}
@@ -909,14 +915,15 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		processoSei.setProposicao(proposicao);
 
 		SeiServiceLocator seiServiceLocator = new SeiServiceLocator();
-		RetornoConsultaProcedimento retornoConsultaProcedimento = seiServiceLocator.getSeiPortService().
-				consultarProcedimento("sislegis", "sislegis", null, protocolo, null, null, null, null, null, null, null, null, null);
+		RetornoConsultaProcedimento retornoConsultaProcedimento = seiServiceLocator.getSeiPortService()
+				.consultarProcedimento("sislegis", "sislegis", null, protocolo, null, null, null, null, null, null,
+						null, null, null);
 
 		if (retornoConsultaProcedimento != null) {
 			processoSei.setLinkSei(retornoConsultaProcedimento.getLinkAcesso());
 			em.persist(processoSei);
 			return processoSei;
-		} else{
+		} else {
 			throw new IllegalArgumentException("Processo nao encontrado no SEI. Protocolo: " + protocolo);
 		}
 	}
@@ -1200,15 +1207,6 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 	}
 
-	@Override
-	public void setInjectedEntities(Object... injections) {
-		this.em = (EntityManager) injections[0];
-		this.parserProposicaoCamara = (ParserProposicaoCamara) injections[1];
-		this.reuniaoService = (ReuniaoService) injections[2];
-		this.reuniaoProposicaoService = (ReuniaoProposicaoService) injections[3];
-
-	}
-
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@Override
 	public void adicionaProposicoesReuniao(Set<PautaReuniaoComissao> pautaReunioes, Reuniao reuniao) throws IOException {
@@ -1284,15 +1282,27 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public List<Votacao> listarVotacoes(Integer idProposicao, String tipo, String numero, String ano, Origem origem) throws Exception {
+	public List<Votacao> listarVotacoes(Integer idProposicao, String tipo, String numero, String ano, Origem origem)
+			throws Exception {
 
-		if (Origem.CAMARA.equals(origem)){
+		if (Origem.CAMARA.equals(origem)) {
 			return parserVotacaoCamara.votacoesPorProposicao(numero, ano, tipo);
-		} else if (Origem.SENADO.equals(origem)){
+		} else if (Origem.SENADO.equals(origem)) {
 			return parserVotacaoSenado.votacoesPorProposicao(idProposicao);
 		}
 
 		return null;
 	}
 
+	@Override
+	public void setInjectedEntities(Object... injections) {
+		this.em = (EntityManager) injections[0];
+		this.parserProposicaoCamara = (ParserProposicaoCamara) injections[1];
+		this.reuniaoService = (ReuniaoService) injections[2];
+		this.reuniaoProposicaoService = (ReuniaoProposicaoService) injections[3];
+		this.comissaoService = (ComissaoService) injections[4];
+		comentarioService = (ComentarioService) injections[5];
+		parserPautaCamara = new ParserPautaCamara();
+
+	}
 }

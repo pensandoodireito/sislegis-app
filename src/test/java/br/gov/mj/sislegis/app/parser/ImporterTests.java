@@ -27,18 +27,27 @@ import org.junit.Before;
 import org.junit.Test;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.EstadoProposicao;
 import br.gov.mj.sislegis.app.model.Posicionamento;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Tag;
 import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
 import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
+import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
+import br.gov.mj.sislegis.app.service.ComentarioService;
+import br.gov.mj.sislegis.app.service.ComissaoService;
+import br.gov.mj.sislegis.app.service.EJBDataCacher;
 import br.gov.mj.sislegis.app.service.PosicionamentoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.TagService;
 import br.gov.mj.sislegis.app.service.UsuarioService;
+import br.gov.mj.sislegis.app.service.ejbs.ComentarioServiceEjb;
+import br.gov.mj.sislegis.app.service.ejbs.ComissaoServiceEjb;
+import br.gov.mj.sislegis.app.service.ejbs.EJBDataCacherImpl;
 import br.gov.mj.sislegis.app.service.ejbs.EJBUnitTestable;
 import br.gov.mj.sislegis.app.service.ejbs.PosicionamentoServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.ProposicaoServiceEjb;
@@ -48,8 +57,11 @@ import br.gov.mj.sislegis.app.service.ejbs.TagServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.UsuarioServiceEjb;
 
 public class ImporterTests {
+	private static final String EMAIL_USUARIO_PADRAO = "eduarda.cintra@mj.gov.br";
 	PosicionamentoService posicionamentoSvc;
 	ProposicaoService proposicaoService;
+	ComissaoService comissaoService;
+	ComentarioService comentarioService;
 	private UsuarioService userSvc;
 	EntityManager entityManager;
 	TagService tagService;
@@ -108,11 +120,19 @@ public class ImporterTests {
 
 		reuniaoProposicaoEJB = new ReuniaoProposicaoServiceEjb();
 		reuniaoProposicaoEJB.setInjectedEntities(em);
+		comissaoService = new ComissaoServiceEjb();
+		EJBDataCacherImpl ejbCacher = new EJBDataCacherImpl();
+		ejbCacher.initialize();
+		((EJBUnitTestable) comissaoService).setInjectedEntities(em, ejbCacher);
+
+		comentarioService = new ComentarioServiceEjb();
+		((EJBUnitTestable) comentarioService).setInjectedEntities(em);
 		((EJBUnitTestable) proposicaoService).setInjectedEntities(em, new ParserProposicaoCamara(), reuniaoEJB,
-				reuniaoProposicaoEJB);
+				reuniaoProposicaoEJB, comissaoService, comentarioService);
 		((EJBUnitTestable) userSvc).setInjectedEntities(em);
 		((EJBUnitTestable) posicionamentoSvc).setInjectedEntities(em);
 		((EJBUnitTestable) tagService).setInjectedEntities(em);
+
 		List<Posicionamento> posicoes = posicionamentoSvc.listAll();
 		for (Iterator iterator = posicoes.iterator(); iterator.hasNext();) {
 			Posicionamento posicionamento = (Posicionamento) iterator.next();
@@ -124,6 +144,8 @@ public class ImporterTests {
 		XSSFWorkbook wb = new XSSFWorkbook(new FileInputStream(new File(
 				"/home/sislegis/workspace/b/src/main/resources/Acompanhamento PLs Estado.xlsx")));
 
+		ParserPautaCamara pautaCamara = new ParserPautaCamara();
+		ParserPautaSenado pautaSenado = new ParserPautaSenado();
 		List<ProposicalXLS> list = new ArrayList<ProposicalXLS>();
 		// for (int i = 0; i < wb.getNumberOfSheets(); i++) {
 		// Sheet sheet = wb.getSheetAt(i);
@@ -141,6 +163,7 @@ public class ImporterTests {
 						ProposicalXLS p = new ProposicalXLS(row);
 						System.out.println(p);
 						ProposicaoSearcher parserPropCamara = new ParserProposicaoCamara();
+
 						if ("Senado".equals(origem)) {
 							parserPropCamara = new ParserProposicaoSenado();
 						}
@@ -154,6 +177,7 @@ public class ImporterTests {
 							if (propdb != null) {
 								prop = propdb;
 							}
+
 							Usuario responsavel = userSvc.findByEmail(atribuidoToResponsavel.get(p.responsavel));
 							System.out.println(p.responsavel + " " + responsavel);
 							prop.setExplicacao(p.tema);
@@ -177,7 +201,7 @@ public class ImporterTests {
 								pp.setDataCriacao(new Date());
 								pp.setProposicao(prop);
 								if (responsavel == null) {
-									pp.setUsuario(userSvc.findByEmail(atribuidoToResponsavel.get("Eduarda")));
+									pp.setUsuario(userSvc.findByEmail(EMAIL_USUARIO_PADRAO));
 								} else {
 									pp.setUsuario(responsavel);
 								}
@@ -189,9 +213,10 @@ public class ImporterTests {
 							prop.setResultadoASPAR(p.asparTxt);
 							prop.setFavorita(p.prioritario);
 
-							// prop.setEstado(estado);
 							if (p.despachado) {
 								prop.setEstado(EstadoProposicao.DESPACHADA);
+							} else {
+								prop.setEstado(EstadoProposicao.EMANALISE);
 							}
 							trans.begin();
 							List<Tag> tags = tagService.buscaPorSufixo(p.macrotema);
@@ -219,9 +244,35 @@ public class ImporterTests {
 								}
 							}
 							prop.setTags(tags);
+							if (p.comissao != null && p.comissao.length() > 0) {
+								prop.setComissao(p.comissao);
+							}
 
 							proposicaoService.save(prop);
+							if (p.areaDeMerito != null || p.areaDeMerito.length() > 0) {
+								Comentario c = new Comentario();
+								if (responsavel != null) {
+									c.setAutor(responsavel);
+								} else {
+									c.setAutor(userSvc.findByEmail(EMAIL_USUARIO_PADRAO));
+								}
+								c.setDescricao(p.areaDeMerito);
+								System.out.println(p.areaDeMerito + " " + prop.getNumero());
+								c.setProposicao(prop);
+								c.setDataCriacao(new Date());
+								em.persist(c);
+							}
+
 							trans.commit();
+
+							if (p.pauta.length() > 0) {
+								trans = em.getTransaction();
+								trans.begin();
+								System.out.println("PAUTA " + p.pauta);
+								prop = proposicaoService.buscarPorIdProposicao(prop.getIdProposicao());
+								proposicaoService.syncDadosPautaProposicao(prop.getId());
+								trans.commit();
+							}
 
 						} catch (Exception e) {
 							e.printStackTrace();
