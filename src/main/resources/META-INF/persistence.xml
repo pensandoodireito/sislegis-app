@@ -19,4 +19,20 @@
 
 		</properties>
 	</persistence-unit>
+
+	<persistence-unit name="sislegis-persistence-unit-test"
+		transaction-type="RESOURCE_LOCAL">
+		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+		<properties>
+			<property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/sislegis" />
+			<property name="javax.persistence.jdbc.user" value="sislegis" />
+			<property name="javax.persistence.jdbc.password" value="sislegis" />
+			<property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" />
+			<property name="hibernate.show_sql" value="false" />
+			<property name="hibernate.format_sql" value="true" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
+
+			
+		</properties>
+	</persistence-unit>
 </persistence>

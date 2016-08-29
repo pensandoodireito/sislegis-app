@@ -29,7 +29,7 @@ import br.gov.mj.sislegis.app.service.UsuarioService;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 @Stateless
-public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implements UsuarioService {
+public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implements UsuarioService, EJBUnitTestable {
 
 	@PersistenceContext
 	private EntityManager em;
@@ -197,6 +197,12 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 		Collection<Proposicao> props = (findById(id)).getProposicoesSeguidas();
 		props.size();
 		return props;
+	}
+
+	@Override
+	public void setInjectedEntities(Object... injections) {
+		this.em = (EntityManager) injections[0];
+
 	}
 
 }
