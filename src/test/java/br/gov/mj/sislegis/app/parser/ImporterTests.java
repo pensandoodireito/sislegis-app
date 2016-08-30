@@ -19,6 +19,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 
+import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -28,11 +29,13 @@ import org.junit.Test;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Comentario;
+import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
 import br.gov.mj.sislegis.app.model.EstadoProposicao;
 import br.gov.mj.sislegis.app.model.Posicionamento;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Tag;
+import br.gov.mj.sislegis.app.model.TipoEncaminhamento;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
 import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
@@ -40,27 +43,38 @@ import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
-import br.gov.mj.sislegis.app.service.EJBDataCacher;
+import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
+import br.gov.mj.sislegis.app.service.NotificacaoService;
 import br.gov.mj.sislegis.app.service.PosicionamentoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.TagService;
+import br.gov.mj.sislegis.app.service.TarefaService;
+import br.gov.mj.sislegis.app.service.TipoEncaminhamentoService;
 import br.gov.mj.sislegis.app.service.UsuarioService;
 import br.gov.mj.sislegis.app.service.ejbs.ComentarioServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.ComissaoServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.EJBDataCacherImpl;
 import br.gov.mj.sislegis.app.service.ejbs.EJBUnitTestable;
+import br.gov.mj.sislegis.app.service.ejbs.EncaminhamentoProposicaoServiceEjb;
+import br.gov.mj.sislegis.app.service.ejbs.NotificacaoServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.PosicionamentoServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.ProposicaoServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.ReuniaoProposicaoServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.ReuniaoServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.TagServiceEjb;
+import br.gov.mj.sislegis.app.service.ejbs.TarefaServiceEjb;
+import br.gov.mj.sislegis.app.service.ejbs.TipoEncaminhamentoServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.UsuarioServiceEjb;
 
 public class ImporterTests {
-	private static final String EMAIL_USUARIO_PADRAO = "eduarda.cintra@mj.gov.br";
+	private static final String EMAIL_USUARIO_PADRAO = "rafael.coutinho@gmail.com";
 	PosicionamentoService posicionamentoSvc;
 	ProposicaoService proposicaoService;
 	ComissaoService comissaoService;
+	TipoEncaminhamentoService tipoEncaminhamentoService;
+	EncaminhamentoProposicaoService encaminhamentoService;
+	TarefaService tarefaService;
+	NotificacaoService notiService;
 	ComentarioService comentarioService;
 	private UsuarioService userSvc;
 	EntityManager entityManager;
@@ -82,6 +96,7 @@ public class ImporterTests {
 
 	}
 	Map<String, Posicionamento> posicionamentos = new HashMap<String, Posicionamento>();
+	private TipoEncaminhamento tipoEnc;
 
 	public static void closeEntityManager() {
 		emf.close();
@@ -117,6 +132,9 @@ public class ImporterTests {
 		reuniaoEJB = new ReuniaoServiceEjb();
 		reuniaoEJB.setInjectedEntities(em);
 		tagService = new TagServiceEjb();
+		encaminhamentoService = new EncaminhamentoProposicaoServiceEjb();
+		tarefaService = new TarefaServiceEjb();
+		notiService = new NotificacaoServiceEjb();
 
 		reuniaoProposicaoEJB = new ReuniaoProposicaoServiceEjb();
 		reuniaoProposicaoEJB.setInjectedEntities(em);
@@ -124,20 +142,30 @@ public class ImporterTests {
 		EJBDataCacherImpl ejbCacher = new EJBDataCacherImpl();
 		ejbCacher.initialize();
 		((EJBUnitTestable) comissaoService).setInjectedEntities(em, ejbCacher);
-
+		((EJBUnitTestable) notiService).setInjectedEntities(em);
 		comentarioService = new ComentarioServiceEjb();
 		((EJBUnitTestable) comentarioService).setInjectedEntities(em);
+		((EJBUnitTestable) tarefaService).setInjectedEntities(em, notiService);
+		((EJBUnitTestable) encaminhamentoService).setInjectedEntities(em, tarefaService);
 		((EJBUnitTestable) proposicaoService).setInjectedEntities(em, new ParserProposicaoCamara(), reuniaoEJB,
 				reuniaoProposicaoEJB, comissaoService, comentarioService);
 		((EJBUnitTestable) userSvc).setInjectedEntities(em);
 		((EJBUnitTestable) posicionamentoSvc).setInjectedEntities(em);
 		((EJBUnitTestable) tagService).setInjectedEntities(em);
-
+		tipoEncaminhamentoService = new TipoEncaminhamentoServiceEjb();
+		((EJBUnitTestable) tipoEncaminhamentoService).setInjectedEntities(em);
 		List<Posicionamento> posicoes = posicionamentoSvc.listAll();
 		for (Iterator iterator = posicoes.iterator(); iterator.hasNext();) {
 			Posicionamento posicionamento = (Posicionamento) iterator.next();
 			posicionamentos.put(posicionamento.getNome().toLowerCase(), posicionamento);
 		}
+		for (Iterator iterator = tipoEncaminhamentoService.listAll().iterator(); iterator.hasNext();) {
+			TipoEncaminhamento enc = (TipoEncaminhamento) iterator.next();
+			if (enc.getNome().equals("Elaborar Nota Técnica")) {
+				this.tipoEnc = enc;
+			}
+		}
+
 	}
 
 	private void processaExcel() throws IOException {
@@ -153,9 +181,9 @@ public class ImporterTests {
 			Sheet sheet = wb.getSheet("Projetos");
 			int k = 0;
 			for (Row row : sheet) {
-				if (k++ > 5) {
-					return;
-				}
+				// if (k++ > 5) {
+				// return;
+				// }
 				if (row.getCell(0) != null) {
 					String origem = row.getCell(0).getStringCellValue();
 					if ("Câmara".equals(origem) || "Senado".equals(origem)) {
@@ -183,32 +211,6 @@ public class ImporterTests {
 							prop.setExplicacao(p.tema);
 							prop.setResponsavel(responsavel);
 							prop.setParecerSAL(p.providencias);
-							Posicionamento posicionamento = posicionamentos.get(p.posicaoSAL.toLowerCase());
-							if (posicionamento != null) {
-								System.out.println("Achou " + posicionamento);
-							} else {
-								if ("".equals(p.posicaoSAL)) {
-
-								} else {
-									posicionamento = new Posicionamento();
-									posicionamento.setNome(p.posicaoSAL.trim());
-									em.persist(posicionamento);
-									System.err.println("Posicionametno novo " + p.posicaoSAL);
-								}
-							}
-							if (posicionamentos != null) {
-								PosicionamentoProposicao pp = new PosicionamentoProposicao();
-								pp.setDataCriacao(new Date());
-								pp.setProposicao(prop);
-								if (responsavel == null) {
-									pp.setUsuario(userSvc.findByEmail(EMAIL_USUARIO_PADRAO));
-								} else {
-									pp.setUsuario(responsavel);
-								}
-								pp.setPosicionamento(posicionamento);
-								em.persist(pp);
-								prop.setPosicionamentoAtual(pp);
-							}
 
 							prop.setResultadoASPAR(p.asparTxt);
 							prop.setFavorita(p.prioritario);
@@ -249,7 +251,23 @@ public class ImporterTests {
 							}
 
 							proposicaoService.save(prop);
-							if (p.areaDeMerito != null || p.areaDeMerito.length() > 0) {
+							if (p.drive != null && p.drive.length() > 0) {
+								EncaminhamentoProposicao ep = new EncaminhamentoProposicao();
+								Comentario ce = new Comentario();
+								ce.setAutor(userSvc.findByEmail(EMAIL_USUARIO_PADRAO));
+								ce.setProposicao(prop);
+								ce.setDescricao("Buscar do Drive: " + p.drive);
+								ce.setDataCriacao(new Date());
+								ep.setComentario(ce);
+								ep.setDetalhes("Buscar do Drive: " + p.drive);
+								ep.setResponsavel(userSvc.findByEmail(EMAIL_USUARIO_PADRAO));
+								ep.setProposicao(prop);
+								ep.setTipoEncaminhamento(this.tipoEnc);
+								encaminhamentoService.salvarEncaminhamentoProposicao(ep);
+
+							}
+
+							if (p.areaDeMerito != null && p.areaDeMerito.length() > 0) {
 								Comentario c = new Comentario();
 								if (responsavel != null) {
 									c.setAutor(responsavel);
@@ -265,6 +283,37 @@ public class ImporterTests {
 
 							trans.commit();
 
+							if (p.posicaoSAL != null && p.posicaoSAL.length() > 0) {
+								trans = em.getTransaction();
+								trans.begin();
+								Posicionamento posicionamento = posicionamentos.get(p.posicaoSAL.toLowerCase());
+								if (posicionamento != null) {
+									System.out.println("Achou " + posicionamento);
+								} else {
+									if ("".equals(p.posicaoSAL)) {
+
+									} else {
+										posicionamento = new Posicionamento();
+										posicionamento.setNome(p.posicaoSAL.trim());
+										em.persist(posicionamento);
+										System.err.println("Posicionametno novo " + p.posicaoSAL);
+									}
+								}
+								if (posicionamentos != null) {
+									PosicionamentoProposicao pp = new PosicionamentoProposicao();
+									pp.setDataCriacao(new Date());
+									pp.setProposicao(prop);
+									if (responsavel == null) {
+										pp.setUsuario(userSvc.findByEmail(EMAIL_USUARIO_PADRAO));
+									} else {
+										pp.setUsuario(responsavel);
+									}
+									pp.setPosicionamento(posicionamento);
+									em.persist(pp);
+									prop.setPosicionamentoAtual(pp);
+								}
+								trans.commit();
+							}
 							if (p.pauta.length() > 0) {
 								trans = em.getTransaction();
 								trans.begin();
@@ -324,6 +373,7 @@ class ProposicalXLS {
 	String tipo;
 	String numero;
 	String ano;
+	String drive;
 	static Pattern p = Pattern.compile("(\\w+)\\s+(\\d+.*?)/(\\d+)\\s*(\\((\\w+)\\s+(\\d+)/(\\d+)\\))?");
 
 	ProposicalXLS(Row r) {
@@ -379,7 +429,11 @@ class ProposicalXLS {
 		estagio = r.getCell(++c).getStringCellValue();
 		despachoInicial = r.getCell(++c).getStringCellValue();
 		responsavel = r.getCell(++c).getStringCellValue();
-		String drive = r.getCell(++c).getStringCellValue();
+		Hyperlink link = r.getCell(++c).getHyperlink();
+		if (link != null) {
+			this.drive = link.getAddress();
+		}
+
 		macrotema = r.getCell(++c).getStringCellValue();
 		pauta = r.getCell(++c).getStringCellValue();
 		asparTxt = r.getCell(++c).getStringCellValue();

@@ -284,6 +284,27 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
+	public List<Proposicao> consultar(Map<String, String> filtros, Integer offset, Integer limit) {
+		StringBuilder query = new StringBuilder("SELECT p FROM Proposicao p WHERE 1=1");
+		String sigla = filtros.get("sigla");
+		String autor = filtros.get("autor");
+		String ementa = filtros.get("ementa");
+		String origem = filtros.get("origem");
+		String isFavorita = filtros.get("isFavorita");
+		String estado = filtros.get("estado");
+		query.append(createWhereClause(sigla, null, autor, ementa, origem, isFavorita, estado, null, null, null));
+		query.append(" order by tipo,ano,numero");
+		TypedQuery<Proposicao> findByIdQuery = getEntityManager().createQuery(query.toString(), Proposicao.class);
+
+		setParams(sigla, null, autor, ementa, origem, isFavorita, estado, null, null, null, findByIdQuery);
+
+		List<Proposicao> proposicoes = findByIdQuery.setFirstResult(offset).setMaxResults(limit).getResultList();
+		popularDadosTransientes(proposicoes);
+
+		return proposicoes;
+	}
+
+	@Override
 	public List<Proposicao> consultar(String sigla, String autor, String ementa, String origem, String isFavorita,
 			Integer offset, Integer limit) {
 		StringBuilder query = new StringBuilder("SELECT p FROM Proposicao p WHERE 1=1");
@@ -301,6 +322,13 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	private void setParams(String sigla, String comissao, String autor, String ementa, String origem,
 			String isFavorita, Long idResponsavel, Long idPosicionamento, Integer[] idProposicoes,
+			TypedQuery findByIdQuery) {
+		setParams(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, idPosicionamento,
+				idProposicoes, findByIdQuery);
+	}
+
+	private void setParams(String sigla, String comissao, String autor, String ementa, String origem,
+			String isFavorita, String estado, Long idResponsavel, Long idPosicionamento, Integer[] idProposicoes,
 			TypedQuery findByIdQuery) {
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			findByIdQuery.setParameter("sigla", "%" + sigla + "%");
@@ -326,6 +354,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (Objects.nonNull(idResponsavel)) {
 			findByIdQuery.setParameter("idResponsavel", idResponsavel);
 		}
+		if (Objects.nonNull(estado)) {
+			findByIdQuery.setParameter("estado", estado);
+		}
 
 		if (Objects.nonNull(idProposicoes) && idProposicoes.length > 0) {
 			List<Integer> idProps = new ArrayList<Integer>(idProposicoes.length);
@@ -338,6 +369,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem,
 			String isFavorita, Long idResponsavel, Long idPosicionamento, Integer[] idProposicao) {
+		return createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel,
+				idPosicionamento, idProposicao);
+	}
+
+	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem,
+			String isFavorita, String estado, Long idResponsavel, Long idPosicionamento, Integer[] idProposicao) {
 		StringBuilder query = new StringBuilder();
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			query.append(" AND upper(CONCAT(p.tipo,' ',p.numero,'/',p.ano)) like upper(:sigla)");
@@ -353,6 +390,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 		if (Objects.nonNull(origem) && !origem.equals("")) {
 			query.append(" AND p.origem = :origem");
+		}
+		if (Objects.nonNull(estado) && !estado.equals("")) {
+			query.append(" AND p.estado = :estado");
 		}
 		if (Objects.nonNull(isFavorita) && !isFavorita.equals("")) {
 			query.append(" AND p.isFavorita = :isFavorita");

@@ -194,10 +194,21 @@ public class ProposicaoEndpoint {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Proposicao> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor,
 			@QueryParam("sigla") String sigla, @QueryParam("origem") String origem,
+			@QueryParam("estado") String estado,
 			@QueryParam("isFavorita") String isFavorita, @QueryParam("limit") Integer limit,
 			@QueryParam("offset") Integer offset) {
+		
+		Map m = new HashMap<String, String>();
+		m.put("sigla", sigla);
+		m.put("ementa", ementa);
+		m.put("autor", autor);
+		m.put("origem", origem);
+		m.put("isFavorita", isFavorita);
+		m.put("estado", estado);
+		
+				
 
-		List<Proposicao> results = proposicaoService.consultar(sigla, autor, ementa, origem, isFavorita, offset, limit);
+		List<Proposicao> results = proposicaoService.consultar(m, offset, limit);
 		return results;
 	}
 

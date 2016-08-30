@@ -63,6 +63,8 @@ public interface ProposicaoService extends Service<Proposicao> {
 	List<Proposicao> consultar(String sigla, String autor, String ementa, String origem, String isFavorita,
 			Integer offset, Integer limit);
 
+	List<Proposicao> consultar(Map<String, String> filtros, Integer offset, Integer limit);
+
 	/**
 	 * Faz buscas por proposições diretamente dos webservices da origem, não
 	 * tendo a necessidade delas estarem no banco do sislegis.
@@ -175,27 +177,38 @@ public interface ProposicaoService extends Service<Proposicao> {
 	void setRoadmapComissoes(Long idProposicao, List<String> comissoes);
 
 	/**
-	 * Busca o processo no SEI (via WS) e insere objeto de identificacao com link para este processo, relacionando com a Proposicao
+	 * Busca o processo no SEI (via WS) e insere objeto de identificacao com
+	 * link para este processo, relacionando com a Proposicao
 	 *
-	 * @param id id da proposicao
-	 * @param protocolo numero de protocolo do SEI
-     */
+	 * @param id
+	 *            id da proposicao
+	 * @param protocolo
+	 *            numero de protocolo do SEI
+	 */
 	ProcessoSei vincularProcessoSei(Long id, String protocolo) throws ServiceException, RemoteException;
 
 	/**
 	 * Remove vinculo de processo do SEI
 	 *
-	 * @param idProcesso id do processoSei
-     */
+	 * @param idProcesso
+	 *            id do processoSei
+	 */
 	void excluirProcessoSei(Long idProcesso);
-/* Retorna a lista de votacoes por proposicao
-	 *
+
+	/*
+	 * Retorna a lista de votacoes por proposicao
+	 * 
 	 * @param idProposicao atributo idProposicao da entidade Proposicao
+	 * 
 	 * @param tipo
+	 * 
 	 * @param numero
+	 * 
 	 * @param ano
+	 * 
 	 * @param origem
-     */
-	List<Votacao> listarVotacoes(Integer idProposicao, String tipo, String numero, String ano, Origem origem) throws Exception;
+	 */
+	List<Votacao> listarVotacoes(Integer idProposicao, String tipo, String numero, String ano, Origem origem)
+			throws Exception;
 
 }
