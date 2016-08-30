@@ -35,6 +35,7 @@ import br.gov.mj.sislegis.app.model.AlteracaoProposicao;
 import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.NotaTecnica;
 import br.gov.mj.sislegis.app.model.Posicionamento;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.ProcessoSei;
@@ -425,9 +426,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 						ppc.setOrdemPauta(rp.getSeqOrdemPauta());
 						p.getPautasComissoes().add(ppc);
 					}
-					
+
 					popularDadosTransientes(p);
-					
+
 					proposicoes.add(p);
 				}
 
@@ -454,9 +455,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				query.setParameter("rid", reuniao.getId());
 				List<Proposicao> proposicoesReuniao = query.getResultList();
 				proposicoes.addAll(proposicoesReuniao);
-				
+
 				popularDadosTransientes(proposicoes);
-				
+
 			}
 
 		}
@@ -909,14 +910,15 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		processoSei.setProposicao(proposicao);
 
 		SeiServiceLocator seiServiceLocator = new SeiServiceLocator();
-		RetornoConsultaProcedimento retornoConsultaProcedimento = seiServiceLocator.getSeiPortService().
-				consultarProcedimento("sislegis", "sislegis", null, protocolo, null, null, null, null, null, null, null, null, null);
+		RetornoConsultaProcedimento retornoConsultaProcedimento = seiServiceLocator.getSeiPortService()
+				.consultarProcedimento("sislegis", "sislegis", null, protocolo, null, null, null, null, null, null,
+						null, null, null);
 
 		if (retornoConsultaProcedimento != null) {
 			processoSei.setLinkSei(retornoConsultaProcedimento.getLinkAcesso());
 			em.persist(processoSei);
 			return processoSei;
-		} else{
+		} else {
 			throw new IllegalArgumentException("Processo nao encontrado no SEI. Protocolo: " + protocolo);
 		}
 	}
@@ -1033,6 +1035,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			proposicao.setTotalComentarios(comentarioService.totalByProposicao(proposicao.getId()));
 			proposicao.setTotalEncaminhamentos(encaminhamentoProposicaoService.totalByProposicao(proposicao.getId()));
 			proposicao.setTotalPautasComissao(totalProposicaoPautaComissaoByProposicao(proposicao.getId()));
+			proposicao.setTotalNotasTecnicas(getNotaTecnicas(proposicao.getId()).size());
 
 			PosicionamentoProposicao posicionamentoProposicao;
 			try {
@@ -1284,15 +1287,35 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public List<Votacao> listarVotacoes(Integer idProposicao, String tipo, String numero, String ano, Origem origem) throws Exception {
+	public List<Votacao> listarVotacoes(Integer idProposicao, String tipo, String numero, String ano, Origem origem)
+			throws Exception {
 
-		if (Origem.CAMARA.equals(origem)){
+		if (Origem.CAMARA.equals(origem)) {
 			return parserVotacaoCamara.votacoesPorProposicao(numero, ano, tipo);
-		} else if (Origem.SENADO.equals(origem)){
+		} else if (Origem.SENADO.equals(origem)) {
 			return parserVotacaoSenado.votacoesPorProposicao(idProposicao);
 		}
 
 		return null;
+	}
+
+	@Override
+	public List<NotaTecnica> getNotaTecnicas(Long proposicaoId) {
+		Query q = em.createNamedQuery("listNotatecnicaProposicao")
+				.setParameter("idProposicao", proposicaoId);
+		List<NotaTecnica> res = q.getResultList();
+
+		return res;
+	}
+
+	@Override
+	public void saveNotaTecnica(NotaTecnica nt) {
+		if (nt.getId() != null){
+			em.merge(nt);
+		}else{			
+			em.persist(nt);
+		}
+
 	}
 
 }

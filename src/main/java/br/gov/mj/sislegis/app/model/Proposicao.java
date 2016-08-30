@@ -167,6 +167,8 @@ public class Proposicao extends AbstractEntity {
 
 	@Transient
 	private Integer totalComentarios = 0;
+	@Transient
+	private Integer totalNotasTecnicas = 0;
 
 	@Transient
 	private Integer totalEncaminhamentos = 0;
@@ -557,5 +559,13 @@ public class Proposicao extends AbstractEntity {
 
 	public void setExplicacao(String explicacao) {
 		this.explicacao = explicacao;
+	}
+
+	public Integer getTotalNotasTecnicas() {
+		return totalNotasTecnicas;
+	}
+
+	public void setTotalNotasTecnicas(Integer totalNotasTecnicas) {
+		this.totalNotasTecnicas = totalNotasTecnicas;
 	}
 }

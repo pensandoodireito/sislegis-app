@@ -7,7 +7,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -16,6 +19,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "proposicao_notatecnica")
+@NamedQueries({ @NamedQuery(name = "listNotatecnicaProposicao", query = "select n from NotaTecnica n where n.proposicao.id=:idProposicao")
+
+})
 public class NotaTecnica extends AbstractEntity {
 	/**
 	 * 
@@ -25,8 +31,10 @@ public class NotaTecnica extends AbstractEntity {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
+
 	@JsonIgnore
 	@ManyToOne(optional = false)
+	@JoinColumn(name = "proposicao_id", referencedColumnName = "id", nullable = false)
 	private Proposicao proposicao;
 
 	@ManyToOne(optional = false)
@@ -39,7 +47,7 @@ public class NotaTecnica extends AbstractEntity {
 	private String nota;
 
 	protected NotaTecnica() {
-
+		dataCriacao = new Date();
 	}
 
 	public NotaTecnica(Proposicao p, Usuario u) {
@@ -71,5 +79,13 @@ public class NotaTecnica extends AbstractEntity {
 
 	public Date getDataCriacao() {
 		return dataCriacao;
+	}
+
+	public void setUsuario(Usuario usuario) {
+		this.usuario = usuario;
+	}
+
+	public void setProposicao(Proposicao proposicao) {
+		this.proposicao = proposicao;
 	}
 }
