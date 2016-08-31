@@ -195,6 +195,11 @@ public class Proposicao extends AbstractEntity {
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "proposicao")
 	private List<ProcessoSei> processosSei;
 
+	public Proposicao() {
+		super();
+		this.estado = EstadoProposicao.FORADEPAUTA;
+	}
+
 	public String getSigla() {
 		if (Objects.isNull(sigla))
 			sigla = getTipo() + " " + getNumero() + "/" + getAno();

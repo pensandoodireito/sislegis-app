@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -135,9 +136,28 @@ public class ProposicaoEndpoint {
 	}
 
 	@POST
+	@Path("/salvarProposicoesExtras")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response salvarProposicoesExtras(List<Proposicao> proposicoes) {
+		try {
+			Map<Integer, Proposicao> responses = new HashMap<>();
+			for (Iterator iterator = proposicoes.iterator(); iterator.hasNext();) {
+				Proposicao proposicao = (Proposicao) iterator.next();
+
+				int result = proposicaoService.salvarProposicaoIndependente(proposicao);
+				responses.put(result, proposicao);
+			}
+			return Response.ok(responses, MediaType.APPLICATION_JSON).build();
+		} catch (EJBTransactionRolledbackException e) {
+			return Response.status(Response.Status.CONFLICT).build();
+		}
+
+	}
+
+	@POST
 	@Path("/salvarProposicaoExtra")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response salvarProposicoes(Proposicao proposicao) {
+	public Response salvarProposicaoExtra(Proposicao proposicao) {
 		try {
 			int result = proposicaoService.salvarProposicaoIndependente(proposicao);
 			switch (result) {
@@ -195,10 +215,9 @@ public class ProposicaoEndpoint {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Proposicao> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor,
 			@QueryParam("sigla") String sigla, @QueryParam("origem") String origem,
-			@QueryParam("estado") String estado,
-			@QueryParam("isFavorita") String isFavorita, @QueryParam("limit") Integer limit,
-			@QueryParam("offset") Integer offset) {
-		
+			@QueryParam("estado") String estado, @QueryParam("isFavorita") String isFavorita,
+			@QueryParam("limit") Integer limit, @QueryParam("offset") Integer offset) {
+
 		Map m = new HashMap<String, String>();
 		m.put("sigla", sigla);
 		m.put("ementa", ementa);
@@ -206,8 +225,6 @@ public class ProposicaoEndpoint {
 		m.put("origem", origem);
 		m.put("isFavorita", isFavorita);
 		m.put("estado", estado);
-		
-				
 
 		List<Proposicao> results = proposicaoService.consultar(m, offset, limit);
 		return results;
