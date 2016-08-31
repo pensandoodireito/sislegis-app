@@ -170,6 +170,14 @@ public class ImporterTests {
 				this.tipoEnc = enc;
 			}
 		}
+		if (tipoEnc == null) {
+			tipoEnc = new TipoEncaminhamento();
+			tipoEnc.setNome("Elaborar Nota Técnica");
+			EntityTransaction trans = em.getTransaction();
+			trans.begin();
+			tipoEncaminhamentoService.save(tipoEnc);
+			trans.commit();
+		}
 
 	}
 
@@ -209,9 +217,10 @@ public class ImporterTests {
 					if ("Câmara".equals(origem) || "Senado".equals(origem)) {
 
 						ProposicalXLS p = new ProposicalXLS(row);
-//						if (!p.numero.equals("30") || !p.ano.equals("2015")) {
-//							continue;
-//						}
+						// if (!p.numero.equals("30") || !p.ano.equals("2015"))
+						// {
+						// continue;
+						// }
 						ProposicaoSearcher parserPropCamara = new ParserProposicaoCamara();
 
 						if ("Senado".equals(origem)) {
@@ -278,28 +287,33 @@ public class ImporterTests {
 								t = tags.iterator().next();
 							}
 							prop.setTags(tags);
-							if (p.comissao != null && p.comissao.length() > 0 && p.comissao.length()<"COMISSÃO ESPECIAL".length()) {
+							if (p.comissao != null && p.comissao.length() > 0
+									&& p.comissao.length() < "COMISSÃO ESPECIAL".length()) {
 								prop.setComissao(p.comissao);
 							}
 
 							proposicaoService.save(prop);
 							if (p.drive != null && p.drive.length() > 0) {
 								EncaminhamentoProposicao ep = new EncaminhamentoProposicao();
-								Comentario ce = new Comentario();
-								ce.setAutor(userSvc.findByEmail(EMAIL_USUARIO_PADRAO));
-								ce.setProposicao(prop);
-								ce.setDescricao("Buscar do Drive: " + p.drive);
-								ce.setDataCriacao(new Date());
-								ep.setComentario(ce);
+								// Comentario ce = new Comentario();
+								// ce.setAutor(userSvc.findByEmail(EMAIL_USUARIO_PADRAO));
+								// ce.setProposicao(prop);
+								// ce.setDescricao("Buscar do Drive: " +
+								// p.drive);
+								// ce.setDataCriacao(new Date());
+//								ep.setComentario(ce);
 								ep.setDetalhes("Buscar do Drive: " + p.drive);
-								ep.setResponsavel(userSvc.findByEmail(EMAIL_USUARIO_PADRAO));
+								if (responsavel != null) {
+									ep.setResponsavel(responsavel);
+								}
 								ep.setProposicao(prop);
 								ep.setTipoEncaminhamento(this.tipoEnc);
 								encaminhamentoService.salvarEncaminhamentoProposicao(ep);
 
 							}
 
-							if (p.areaDeMerito != null && p.areaDeMerito.length() > 0 && !"Não há".equals(p.areaDeMerito)) {
+							if (p.areaDeMerito != null && p.areaDeMerito.length() > 0
+									&& !"Não há".equals(p.areaDeMerito)) {
 								Comentario c = new Comentario();
 								if (responsavel != null) {
 									c.setAutor(responsavel);
@@ -330,6 +344,7 @@ public class ImporterTests {
 										posicionamento = new Posicionamento();
 										posicionamento.setNome(p.posicaoSAL.trim());
 										em.persist(posicionamento);
+										posicionamentos.put(posicionamento.getNome(), posicionamento);
 										// System.err.println("Posicionametno novo "
 										// + p.posicaoSAL);
 									}
