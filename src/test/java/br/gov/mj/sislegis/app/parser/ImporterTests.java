@@ -6,11 +6,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,6 +68,7 @@ import br.gov.mj.sislegis.app.service.ejbs.TagServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.TarefaServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.TipoEncaminhamentoServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.UsuarioServiceEjb;
+import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 public class ImporterTests {
 	private static final String EMAIL_USUARIO_PADRAO = "rafael.coutinho@gmail.com";
@@ -87,8 +91,9 @@ public class ImporterTests {
 	static Map<String, String> atribuidoToResponsavel = new HashMap<String, String>();
 	static {
 		String[] user = { "Eduarda", "Guilherme", "Leonardo", "Marcelo", "Natalia", "Paula", "Sem atribuição", "Afonso" };
-		String[] userEmail = { "eduarda.cintra@mj.gov.br", "guialmeida@gmail.com", "Leonardo", "Marcelo",
-				"natalia.langenegger@mj.gov.br", "Paula", null, "Afonso" };
+		String[] userEmail = { "eduarda.cintra@mj.gov.br", "guilherme.moraesrego@mj.gov.br",
+				"leonardo.povoa@mj.gov.br", "marcelo.bastos@mj.gov.br", "natalia.langenegger@mj.gov.br",
+				"paula.leal@mj.gov.br", null, "afonso.almeida@mj.gov.br" };
 
 		for (int i = 0; i < userEmail.length; i++) {
 			atribuidoToResponsavel.put(user[i], userEmail[i]);
@@ -169,11 +174,27 @@ public class ImporterTests {
 	}
 
 	private void processaExcel() throws IOException {
+		for (Iterator iterator = atribuidoToResponsavel.keySet().iterator(); iterator.hasNext();) {
+			String nome = (String) iterator.next();
+			String email = atribuidoToResponsavel.get(nome);
+			if (email != null) {
+				if (userSvc.findByEmail(email) == null) {
+					EntityTransaction trans = em.getTransaction();
+					trans.begin();
+					Usuario u = new Usuario();
+					u.setEmail(email);
+					u.setNome(nome);
+					userSvc.save(u);
+					System.out.println("Salvando usuario");
+					trans.commit();
+				}
+			}
+
+		}
+
 		XSSFWorkbook wb = new XSSFWorkbook(new FileInputStream(new File(
 				"/home/sislegis/workspace/b/src/main/resources/Acompanhamento PLs Estado.xlsx")));
 
-		ParserPautaCamara pautaCamara = new ParserPautaCamara();
-		ParserPautaSenado pautaSenado = new ParserPautaSenado();
 		List<ProposicalXLS> list = new ArrayList<ProposicalXLS>();
 		// for (int i = 0; i < wb.getNumberOfSheets(); i++) {
 		// Sheet sheet = wb.getSheetAt(i);
@@ -181,15 +202,16 @@ public class ImporterTests {
 			Sheet sheet = wb.getSheet("Projetos");
 			int k = 0;
 			for (Row row : sheet) {
-				// if (k++ > 5) {
-				// return;
-				// }
+				ParserPautaCamara pautaCamara = new ParserPautaCamara();
+				ParserPautaSenado pautaSenado = new ParserPautaSenado();
 				if (row.getCell(0) != null) {
 					String origem = row.getCell(0).getStringCellValue();
 					if ("Câmara".equals(origem) || "Senado".equals(origem)) {
 
 						ProposicalXLS p = new ProposicalXLS(row);
-						System.out.println(p);
+//						if (!p.numero.equals("30") || !p.ano.equals("2015")) {
+//							continue;
+//						}
 						ProposicaoSearcher parserPropCamara = new ParserProposicaoCamara();
 
 						if ("Senado".equals(origem)) {
@@ -198,16 +220,29 @@ public class ImporterTests {
 						EntityTransaction trans = em.getTransaction();
 
 						try {
-							Proposicao prop = parserPropCamara
-									.searchProposicao(p.tipo, Integer.parseInt(p.numero), Integer.parseInt(p.ano))
-									.iterator().next();
+							Collection<Proposicao> proposicoesWS = parserPropCamara.searchProposicao(p.tipo, p.numero,
+									Integer.parseInt(p.ano));
+							if (proposicoesWS.isEmpty()) {
+								if (p.hasMore()) {
+									proposicoesWS = parserPropCamara.searchProposicao(p.tipo, p.numero,
+											Integer.parseInt(p.ano));
+								} else {
+									throw new Exception("Nao conseguiu encontrar " + p);
+								}
+
+							}
+							Proposicao prop = proposicoesWS.iterator().next();
 							Proposicao propdb = proposicaoService.buscarPorIdProposicao(prop.getIdProposicao());
 							if (propdb != null) {
 								prop = propdb;
 							}
-
-							Usuario responsavel = userSvc.findByEmail(atribuidoToResponsavel.get(p.responsavel));
-							System.out.println(p.responsavel + " " + responsavel);
+							String emailResp = atribuidoToResponsavel.get(p.responsavel);
+							Usuario responsavel = null;
+							if (emailResp != null) {
+								responsavel = userSvc.findByEmail(emailResp);
+							}
+							// System.out.println(p.responsavel + " " +
+							// responsavel);
 							prop.setExplicacao(p.tema);
 							prop.setResponsavel(responsavel);
 							prop.setParecerSAL(p.providencias);
@@ -225,7 +260,8 @@ public class ImporterTests {
 							Tag t = new Tag();
 							if (tags.isEmpty()) {
 								if (p.macrotema != null && p.macrotema.length() > 0) {
-									System.err.println("** Nenhuma tag para " + p.macrotema);
+									// System.err.println("** Nenhuma tag para "
+									// + p.macrotema);
 
 									t.setTag(p.macrotema.trim());
 
@@ -237,16 +273,12 @@ public class ImporterTests {
 									tags.add(t);
 								}
 							} else {
-								System.err.println("Encontrou tag para " + p.macrotema + " = " + tags.size());
+								// System.err.println("Encontrou tag para " +
+								// p.macrotema + " = " + tags.size());
 								t = tags.iterator().next();
-								for (Iterator iterator = tags.iterator(); iterator.hasNext();) {
-									Tag tag = (Tag) iterator.next();
-									System.out.println(tag.getTag());
-
-								}
 							}
 							prop.setTags(tags);
-							if (p.comissao != null && p.comissao.length() > 0) {
+							if (p.comissao != null && p.comissao.length() > 0 && p.comissao.length()<"COMISSÃO ESPECIAL".length()) {
 								prop.setComissao(p.comissao);
 							}
 
@@ -267,7 +299,7 @@ public class ImporterTests {
 
 							}
 
-							if (p.areaDeMerito != null && p.areaDeMerito.length() > 0) {
+							if (p.areaDeMerito != null && p.areaDeMerito.length() > 0 && !"Não há".equals(p.areaDeMerito)) {
 								Comentario c = new Comentario();
 								if (responsavel != null) {
 									c.setAutor(responsavel);
@@ -275,7 +307,8 @@ public class ImporterTests {
 									c.setAutor(userSvc.findByEmail(EMAIL_USUARIO_PADRAO));
 								}
 								c.setDescricao(p.areaDeMerito);
-								System.out.println(p.areaDeMerito + " " + prop.getNumero());
+								// System.out.println(p.areaDeMerito + " " +
+								// prop.getNumero());
 								c.setProposicao(prop);
 								c.setDataCriacao(new Date());
 								em.persist(c);
@@ -288,7 +321,8 @@ public class ImporterTests {
 								trans.begin();
 								Posicionamento posicionamento = posicionamentos.get(p.posicaoSAL.toLowerCase());
 								if (posicionamento != null) {
-									System.out.println("Achou " + posicionamento);
+									// System.out.println("Achou " +
+									// posicionamento);
 								} else {
 									if ("".equals(p.posicaoSAL)) {
 
@@ -296,7 +330,8 @@ public class ImporterTests {
 										posicionamento = new Posicionamento();
 										posicionamento.setNome(p.posicaoSAL.trim());
 										em.persist(posicionamento);
-										System.err.println("Posicionametno novo " + p.posicaoSAL);
+										// System.err.println("Posicionametno novo "
+										// + p.posicaoSAL);
 									}
 								}
 								if (posicionamentos != null) {
@@ -317,14 +352,17 @@ public class ImporterTests {
 							if (p.pauta.length() > 0) {
 								trans = em.getTransaction();
 								trans.begin();
-								System.out.println("PAUTA " + p.pauta);
+								// System.out.println("PAUTA " + p.pauta);
 								prop = proposicaoService.buscarPorIdProposicao(prop.getIdProposicao());
 								proposicaoService.syncDadosPautaProposicao(prop.getId());
 								trans.commit();
 							}
 
 						} catch (Exception e) {
+							System.err.println("Falhou ao processar " + p);
 							e.printStackTrace();
+							Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
+									"Falhou ao processar " + p, e);
 							if (trans.isActive()) {
 								trans.rollback();
 							}
@@ -374,7 +412,28 @@ class ProposicalXLS {
 	String numero;
 	String ano;
 	String drive;
-	static Pattern p = Pattern.compile("(\\w+)\\s+(\\d+.*?)/(\\d+)\\s*(\\((\\w+)\\s+(\\d+)/(\\d+)\\))?");
+	static Pattern p = Pattern.compile("(\\w+)\\s+(\\d+.*?)/?\\s?(\\d+)\\s*(\\((\\w+)\\s+(\\d+)/(\\d+)\\))?");
+
+	boolean hasMore() {
+
+		// System.out.println(sigla);
+		if (m.find()) {
+			tipo = m.group(1);
+			numero = m.group(2);
+			numero = numero.replace("-B", "");
+			ano = m.group(3);
+			if (ano.length() == 2) {
+				ano = "20" + ano;
+			}
+			return true;
+
+		} else {
+			// System.err.println("IX " + sigla);
+		}
+		return false;
+	}
+
+	Matcher m = null;
 
 	ProposicalXLS(Row r) {
 		int c = 0;
@@ -387,18 +446,8 @@ class ProposicalXLS {
 		}
 
 		sigla = r.getCell(++c).getStringCellValue();
-		Matcher m = p.matcher(sigla);
-		System.out.println(sigla);
-		if (m.find()) {
-
-			tipo = m.group(1);
-			numero = m.group(2);
-
-			ano = m.group(3);
-
-		} else {
-			System.err.println("IX " + sigla);
-		}
+		m = p.matcher(sigla);
+		hasMore();
 
 		autoria = r.getCell(++c).getStringCellValue();
 		tema = r.getCell(++c).getStringCellValue();
@@ -443,6 +492,6 @@ class ProposicalXLS {
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return origem.name() + " " + sigla;
+		return origem.name() + " " + sigla + " (" + numero + "/" + ano + ")";
 	}
 }

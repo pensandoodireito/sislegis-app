@@ -1,8 +1,9 @@
 package br.gov.mj.sislegis.app.model;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Date;
 import java.util.List;
+
+import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class Votacao {

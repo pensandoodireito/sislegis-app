@@ -9,11 +9,20 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
-import br.gov.mj.sislegis.app.model.*;
+import br.gov.mj.sislegis.app.model.Comissao;
+import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.ParserFetcher;
-import br.gov.mj.sislegis.app.parser.senado.xstream.*;
+import br.gov.mj.sislegis.app.parser.senado.xstream.ComissaoBean;
+import br.gov.mj.sislegis.app.parser.senado.xstream.EventoBean;
+import br.gov.mj.sislegis.app.parser.senado.xstream.ItemBean;
+import br.gov.mj.sislegis.app.parser.senado.xstream.ListaProposicoes;
+import br.gov.mj.sislegis.app.parser.senado.xstream.ListaReunioes;
+import br.gov.mj.sislegis.app.parser.senado.xstream.Materias;
+import br.gov.mj.sislegis.app.parser.senado.xstream.ParteBean;
+import br.gov.mj.sislegis.app.parser.senado.xstream.Resultado;
+import br.gov.mj.sislegis.app.parser.senado.xstream.ReuniaoBeanSenado;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 import com.thoughtworks.xstream.XStream;

@@ -175,12 +175,8 @@
 			<version>0.7.1</version>
 		</dependency>
 
-<!-- 		<dependency>
-			<groupId>org.hibernate.javax.persistence</groupId>
-			<artifactId>hibernate-jpa-2.0-api</artifactId>
-			<scope>provided</scope>
-
-		</dependency> -->
+		<!-- <dependency> <groupId>org.hibernate.javax.persistence</groupId> <artifactId>hibernate-jpa-2.0-api</artifactId> 
+			<scope>provided</scope> </dependency> -->
 		<dependency>
 			<groupId>org.hibernate.javax.persistence</groupId>
 			<artifactId>hibernate-jpa-2.1-api</artifactId>
@@ -367,7 +363,11 @@
 					<excludes>
 						<exclude>**/endpoint/*</exclude>
 					</excludes>
-
+					<systemPropertyVariables>
+						<java.util.logging.config.file>
+							src/test/resources/logging.properties
+						</java.util.logging.config.file>
+					</systemPropertyVariables>
 				</configuration>
 			</plugin>
 

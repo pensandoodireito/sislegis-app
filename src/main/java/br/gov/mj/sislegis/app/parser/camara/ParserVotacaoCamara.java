@@ -1,12 +1,13 @@
 package br.gov.mj.sislegis.app.parser.camara;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import br.gov.mj.sislegis.app.model.Votacao;
 import br.gov.mj.sislegis.app.parser.ParserFetcher;
 import br.gov.mj.sislegis.app.parser.camara.xstream.ProposicaoVotos;
-import com.thoughtworks.xstream.XStream;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.thoughtworks.xstream.XStream;
 
 public class ParserVotacaoCamara {
 

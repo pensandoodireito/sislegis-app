@@ -2,7 +2,6 @@ package br.gov.mj.sislegis.app.parser.camara.xstream;
 
 import java.util.List;
 
-import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.parser.CollectionLazyConverter;
 

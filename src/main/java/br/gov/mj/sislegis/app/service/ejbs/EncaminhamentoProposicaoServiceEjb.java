@@ -1,12 +1,8 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
-import br.gov.mj.sislegis.app.model.Comentario;
-import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
-import br.gov.mj.sislegis.app.model.Tarefa;
-import br.gov.mj.sislegis.app.service.AbstractPersistence;
-import br.gov.mj.sislegis.app.service.ComentarioService;
-import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
-import br.gov.mj.sislegis.app.service.TarefaService;
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -15,9 +11,12 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
-import java.math.BigInteger;
-import java.util.Date;
-import java.util.List;
+import br.gov.mj.sislegis.app.model.Comentario;
+import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.Tarefa;
+import br.gov.mj.sislegis.app.service.AbstractPersistence;
+import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
+import br.gov.mj.sislegis.app.service.TarefaService;
 
 @Stateless
 public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<EncaminhamentoProposicao, Long> implements

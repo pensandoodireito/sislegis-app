@@ -35,6 +35,7 @@ import br.gov.mj.sislegis.app.model.AlteracaoProposicao;
 import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.EstadoProposicao;
 import br.gov.mj.sislegis.app.model.Posicionamento;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.ProcessoSei;
@@ -57,9 +58,9 @@ import br.gov.mj.sislegis.app.parser.camara.ParserVotacaoCamara;
 import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserPlenarioSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
+import br.gov.mj.sislegis.app.parser.senado.ParserVotacaoSenado;
 import br.gov.mj.sislegis.app.seiws.RetornoConsultaProcedimento;
 import br.gov.mj.sislegis.app.seiws.SeiServiceLocator;
-import br.gov.mj.sislegis.app.parser.senado.ParserVotacaoSenado;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
@@ -191,7 +192,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			for (Iterator<ProposicaoPautaComissao> iterator2 = ppcs.iterator(); iterator2.hasNext();) {
 				ProposicaoPautaComissao proposicaoPautaComissao = (ProposicaoPautaComissao) iterator2.next();
 				Proposicao proposicaoPauta = proposicaoPautaComissao.getProposicao();
-				System.out.println(comentarioService + " " + proposicaoPauta);
+
 				List<Comentario> comentarios = comentarioService.findByIdProposicao(proposicaoPauta.getIdProposicao());
 				if (comentarios != null && !comentarios.isEmpty()) {
 					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
@@ -355,7 +356,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			findByIdQuery.setParameter("idResponsavel", idResponsavel);
 		}
 		if (Objects.nonNull(estado)) {
-			findByIdQuery.setParameter("estado", estado);
+			findByIdQuery.setParameter("estado", EstadoProposicao.valueOf(estado));
 		}
 
 		if (Objects.nonNull(idProposicoes) && idProposicoes.length > 0) {
@@ -557,7 +558,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public Collection<Proposicao> buscaProposicaoIndependentePor(Origem origem, String tipo, Integer numero, Integer ano)
+	public Collection<Proposicao> buscaProposicaoIndependentePor(Origem origem, String tipo, String numero, Integer ano)
 			throws IOException {
 		switch (origem) {
 		case CAMARA:
@@ -704,20 +705,15 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	@Override
 	public boolean syncDadosPautaProposicao(Proposicao proposicaoLocal) throws IOException {
 		try {
-			System.out.println("AAa");
 			Date initialMonday = getClosestMonday(new Date());
 			Date nextMonday = getNextWeek(initialMonday);
 			Set<PautaReuniaoComissao> props = new HashSet<PautaReuniaoComissao>();
 			switch (proposicaoLocal.getOrigem()) {
 			case SENADO:
-				System.out.println("VAi senado");
 				props = buscarProposicoesPautaSenadoWS(proposicaoLocal.getComissao(), initialMonday, nextMonday);
-				System.out.println("props " + props);
 				break;
 			case CAMARA:
-				System.out.println("coimussa" + proposicaoLocal.getComissao());
 				Comissao comissao = comissaoService.getBySigla(proposicaoLocal.getComissao());
-				System.out.println("coimussa " + comissao);
 				if (comissao == null) {
 					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
 							Level.SEVERE,
@@ -725,7 +721,6 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 									+ proposicaoLocal.getComissao() + " " + proposicaoLocal);
 					return false;
 				}
-				System.out.println("initialMonday" + initialMonday + " " + nextMonday);
 				props = buscarProposicoesPautaCamaraWS(comissao.getId(), initialMonday, nextMonday);
 				break;
 

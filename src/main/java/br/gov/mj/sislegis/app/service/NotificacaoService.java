@@ -2,7 +2,6 @@ package br.gov.mj.sislegis.app.service;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import br.gov.mj.sislegis.app.model.Notificacao;
 import br.gov.mj.sislegis.app.model.Usuario;

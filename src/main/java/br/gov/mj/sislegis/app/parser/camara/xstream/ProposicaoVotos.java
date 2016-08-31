@@ -1,11 +1,5 @@
 package br.gov.mj.sislegis.app.parser.camara.xstream;
 
-import br.gov.mj.sislegis.app.model.Votacao;
-import br.gov.mj.sislegis.app.model.Voto;
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,6 +7,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import br.gov.mj.sislegis.app.model.Votacao;
+import br.gov.mj.sislegis.app.model.Voto;
+
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 @XStreamAlias("proposicao")
 public class ProposicaoVotos {

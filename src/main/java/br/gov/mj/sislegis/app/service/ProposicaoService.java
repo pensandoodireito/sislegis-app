@@ -74,7 +74,7 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @param ano
 	 * @return Lista de proposicoes encontradas na origem
 	 */
-	Collection<Proposicao> buscaProposicaoIndependentePor(Origem origem, String tipo, Integer numero, Integer ano)
+	Collection<Proposicao> buscaProposicaoIndependentePor(Origem origem, String tipo, String numero, Integer ano)
 			throws IOException;
 
 	Collection<TipoProposicao> listTipos(Origem valueOf) throws IOException;

@@ -1,9 +1,10 @@
 package br.gov.mj.sislegis.app.service;
 
-import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import java.util.List;
 
 import javax.ejb.Local;
-import java.util.List;
+
+import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
 
 @Local
 public interface EncaminhamentoProposicaoService extends Service<EncaminhamentoProposicao> {
