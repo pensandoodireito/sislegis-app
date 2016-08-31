@@ -610,6 +610,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 						.append("\n");
 				local.setAno(remote.getAno());
 			}
+			if (((local.getComissao() == null || "AVULSA".equals(local.getComissao())) && remote.getComissao() != null && !remote
+					.getComissao().equals(local.getComissao()))) {
+				descricaoAlteracao.append("Alterada comissão: '").append(local.getComissao()).append("' => '")
+						.append(remote.getComissao()).append("'\n");
+				local.setComissao(remote.getComissao());
+			}
 
 			if ((local.getAutor() == null && remote.getAutor() != null)
 					|| (remote.getAutor() != null && !local.getAutor().equals(remote.getAutor()))) {
