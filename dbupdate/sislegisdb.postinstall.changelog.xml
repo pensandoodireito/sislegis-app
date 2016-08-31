@@ -3,6 +3,7 @@
 	objectQuotingStrategy="QUOTE_ALL_OBJECTS" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+	<include relativeToChangelogFile="true" file="sislegisdb.install.changelog.xml" />
 	<include relativeToChangelogFile="true" file="update151002.sql" />
 
 	<!-- Alteracoes pós 151002 e pré 151101 -->
@@ -107,4 +108,5 @@
 	<include relativeToChangelogFile="true" file="update151102.sql" />
 	<include relativeToChangelogFile="true" file="update151201.sql" />
 	<include relativeToChangelogFile="true" file="update160101.sql" />
+	<include relativeToChangelogFile="true" file="update160902.sql" />
 </databaseChangeLog>

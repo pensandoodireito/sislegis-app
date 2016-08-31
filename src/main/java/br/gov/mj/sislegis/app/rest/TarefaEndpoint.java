@@ -1,9 +1,7 @@
 package br.gov.mj.sislegis.app.rest;
 
-import br.gov.mj.sislegis.app.model.Tarefa;
-import br.gov.mj.sislegis.app.model.Usuario;
-import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
-import br.gov.mj.sislegis.app.service.TarefaService;
+import java.io.IOException;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.persistence.OptimisticLockException;
@@ -21,8 +19,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import java.io.IOException;
-import java.util.List;
+
+import br.gov.mj.sislegis.app.model.Tarefa;
+import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
+import br.gov.mj.sislegis.app.service.TarefaService;
 
 @Path("/tarefas")
 public class TarefaEndpoint {

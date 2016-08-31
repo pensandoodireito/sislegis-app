@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.parser.ParserFetcher;
@@ -42,19 +44,27 @@ import com.thoughtworks.xstream.XStream;
  * <li>comissao - proposicoes/proposicao/situacao/orgao/siglaOrgaoEstado</li>
  * <li>autor - proposicoes/proposicao/autor1/txtNomeAutor</li>
  * <li>ementa - proposicoes/proposicao/txtEmenta</li>
- * <li>linkProposicao - proposicoes/proposicao/id + link estatico http://www2.camara.leg.br/proposicoesWeb/fichadetramitacao?idProposicao=</li>
+ * <li>linkProposicao - proposicoes/proposicao/id + link estatico
+ * http://www2.camara.leg.br/proposicoesWeb/fichadetramitacao?idProposicao=</li>
  * </ul>
  * 
  * Veja o metodo conversor em @see ProposicaoWS
  */
 public class ParserProposicaoCamara implements ProposicaoSearcher {
+	static Pattern p = Pattern.compile("(\\w+)\\s+(\\d+.*?)/(\\d+)\\s*(\\((\\w+)\\s+(\\d+)/(\\d+)\\))?");
 
 	public static void main(String[] args) throws Exception {
+
+		Matcher m = p.matcher("PLS 268/1999 (PL 3494/2000 na Câmara)");
+		System.out.println(m.find());
+		System.out.println(m.group(1));
+		System.out.println(m.find());
+		System.out.println(m.group(1));
 		ParserProposicaoCamara parser = new ParserProposicaoCamara();
 		Long idProposicao = 1197825l; // TODO: Informação que vem do filtro
-//		System.out.println(parser.getProposicao(idProposicao).toString());
-//		System.out.println(parser.listaTipos());
-		Collection<Proposicao> prop = parser.searchProposicao("PL", 5965, 2013);
+		// System.out.println(parser.getProposicao(idProposicao).toString());
+		// System.out.println(parser.listaTipos());
+		Collection<Proposicao> prop = parser.searchProposicao("PL", "7922", 2014);
 		for (Iterator iterator = prop.iterator(); iterator.hasNext();) {
 			Proposicao proposicaoLista = (Proposicao) iterator.next();
 			Proposicao proposicaoId = parser.getProposicao(proposicaoLista.getIdProposicao().longValue());
@@ -74,7 +84,7 @@ public class ParserProposicaoCamara implements ProposicaoSearcher {
 	 * http://www.camara.gov.br/SitCamaraWS/Proposicoes.asmx?op=
 	 * ListarProposicoes
 	 */
-	public Collection<Proposicao> searchProposicao(String tipo, Integer numero, Integer ano) throws IOException {
+	public Collection<Proposicao> searchProposicao(String tipo, String numero, Integer ano) throws IOException {
 		// http://www.camara.gov.br/SitCamaraWS/Proposicoes.asmx/ListarProposicoes?sigla=DIS&numero=&ano=2015&datApresentacaoIni=&datApresentacaoFim=&idTipoAutor=&parteNomeAutor=&siglaPartidoAutor=&siglaUFAutor=&generoAutor=&codEstado=&codOrgaoEstado=&emTramitacao=
 		StringBuilder wsURL = new StringBuilder(
 				"http://www.camara.gov.br/SitCamaraWS/Proposicoes.asmx/ListarProposicoes?");
@@ -139,7 +149,7 @@ public class ParserProposicaoCamara implements ProposicaoSearcher {
 		// por algum motivo o search é melhor (possui todos os campos), portanto
 		// bucsamos novamente por
 		// ele.
-		Collection<Proposicao> props = searchProposicao(prop.getTipo(), Integer.parseInt(prop.getNumero()),
+		Collection<Proposicao> props = searchProposicao(prop.getTipo(), prop.getNumero(),
 				Integer.parseInt(prop.getAno()));
 		if (!props.isEmpty() && props.size() == 1) {
 			prop = props.iterator().next();

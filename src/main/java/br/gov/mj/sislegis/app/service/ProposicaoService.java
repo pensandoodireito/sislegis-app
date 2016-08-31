@@ -66,6 +66,8 @@ public interface ProposicaoService extends Service<Proposicao> {
 	List<Proposicao> consultar(String sigla, String autor, String ementa, String origem, String isFavorita,
 			Integer offset, Integer limit);
 
+	List<Proposicao> consultar(Map<String, String> filtros, Integer offset, Integer limit);
+
 	/**
 	 * Faz buscas por proposições diretamente dos webservices da origem, não
 	 * tendo a necessidade delas estarem no banco do sislegis.
@@ -75,7 +77,7 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @param ano
 	 * @return Lista de proposicoes encontradas na origem
 	 */
-	Collection<Proposicao> buscaProposicaoIndependentePor(Origem origem, String tipo, Integer numero, Integer ano)
+	Collection<Proposicao> buscaProposicaoIndependentePor(Origem origem, String tipo, String numero, Integer ano)
 			throws IOException;
 
 	Collection<TipoProposicao> listTipos(Origem valueOf) throws IOException;

@@ -1,7 +1,6 @@
 package br.gov.mj.sislegis.app.rest;
 
-import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
-import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.persistence.OptimisticLockException;
@@ -19,7 +18,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import java.util.List;
+
+import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
 
 @Path("/encaminhamentoProposicao")
 public class EncaminhamentoProposicaoEndpoint {

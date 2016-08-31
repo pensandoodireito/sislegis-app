@@ -25,7 +25,7 @@ public interface ProposicaoSearcher {
 	 * @return
 	 * @throws IOException
 	 */
-	public Collection<Proposicao> searchProposicao(String tipo, Integer numero, Integer ano) throws IOException;
+	public Collection<Proposicao> searchProposicao(String tipo, String numero, Integer ano) throws IOException;
 
 	/**
 	 * Retorna todos os tipos de possíveis para um filtro de proposicoes

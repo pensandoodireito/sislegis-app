@@ -1,16 +1,17 @@
 package br.gov.mj.sislegis.app.parser.senado;
 
-import br.gov.mj.sislegis.app.model.Votacao;
-import br.gov.mj.sislegis.app.model.Voto;
-import br.gov.mj.sislegis.app.parser.ParserFetcher;
-import com.thoughtworks.xstream.XStream;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import br.gov.mj.sislegis.app.model.Votacao;
+import br.gov.mj.sislegis.app.model.Voto;
+import br.gov.mj.sislegis.app.parser.ParserFetcher;
+
+import com.thoughtworks.xstream.XStream;
 
 public class ParserVotacaoSenado {
 

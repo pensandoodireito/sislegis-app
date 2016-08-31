@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.parser.ParserFetcher;
 import br.gov.mj.sislegis.app.parser.ProposicaoSearcher;
@@ -49,8 +48,8 @@ public class ParserProposicaoSenado implements ProposicaoSearcher {
 
 	public static void main(String[] args) throws Exception {
 		ParserProposicaoSenado parser = new ParserProposicaoSenado();
-		System.out.println(parser.listaTipos());
-		Collection<Proposicao> searchProps = parser.searchProposicao("RQS", 1, 2015);
+		
+		Collection<Proposicao> searchProps = parser.searchProposicao("PLC", "30", 2015);
 		System.out.println("Busca retornou " + searchProps.size() + " proposicoes");
 		Proposicao propLista = searchProps.iterator().next();
 		Proposicao propGet = parser.getProposicao(propLista.getIdProposicao().longValue());
@@ -103,7 +102,7 @@ public class ParserProposicaoSenado implements ProposicaoSearcher {
 	 * @return
 	 * @throws IOException
 	 */
-	public Collection<Proposicao> searchProposicao(String sigla, Integer numero, Integer ano) throws IOException {
+	public Collection<Proposicao> searchProposicao(String sigla, String numero, Integer ano) throws IOException {
 		StringBuilder wsURL = new StringBuilder("http://legis.senado.leg.br/dadosabertos/materia/pesquisa/lista?");
 		wsURL.append("v=4");
 		wsURL.append("&sigla=").append(URLEncoder.encode(sigla, "UTF-8"));

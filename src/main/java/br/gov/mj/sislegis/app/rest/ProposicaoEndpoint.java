@@ -26,6 +26,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
+import org.jboss.resteasy.annotations.cache.Cache;
+
+import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.NotaTecnica;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.ProcessoSei;
@@ -33,10 +36,6 @@ import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.Votacao;
-
-import org.jboss.resteasy.annotations.cache.Cache;
-
-import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
@@ -196,10 +195,21 @@ public class ProposicaoEndpoint {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Proposicao> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor,
 			@QueryParam("sigla") String sigla, @QueryParam("origem") String origem,
+			@QueryParam("estado") String estado,
 			@QueryParam("isFavorita") String isFavorita, @QueryParam("limit") Integer limit,
 			@QueryParam("offset") Integer offset) {
+		
+		Map m = new HashMap<String, String>();
+		m.put("sigla", sigla);
+		m.put("ementa", ementa);
+		m.put("autor", autor);
+		m.put("origem", origem);
+		m.put("isFavorita", isFavorita);
+		m.put("estado", estado);
+		
+				
 
-		List<Proposicao> results = proposicaoService.consultar(sigla, autor, ementa, origem, isFavorita, offset, limit);
+		List<Proposicao> results = proposicaoService.consultar(m, offset, limit);
 		return results;
 	}
 
@@ -222,7 +232,7 @@ public class ProposicaoEndpoint {
 	@Path("/buscaIndependente/{origem:[A-Z]*}/{tipo:[A-Z\\.]*}/{ano:[0-9]{4}}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Collection<Proposicao> buscaIndependente(@PathParam("origem") String origem, @PathParam("tipo") String tipo,
-			@QueryParam("numero") Integer numero, @PathParam("ano") Integer ano) throws Exception {
+			@QueryParam("numero") String numero, @PathParam("ano") Integer ano) throws Exception {
 
 		return proposicaoService.buscaProposicaoIndependentePor(Origem.valueOf(origem), tipo, numero, ano);
 
