@@ -2,7 +2,6 @@ package br.gov.mj.sislegis.app.rest;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,12 +21,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
-import br.gov.mj.sislegis.app.service.ReuniaoService;
 import org.jboss.resteasy.annotations.GZIP;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
+import br.gov.mj.sislegis.app.service.ReuniaoService;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 @Path("/reuniaos")

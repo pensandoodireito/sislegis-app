@@ -20,7 +20,7 @@ import br.gov.mj.sislegis.app.service.NotificacaoService;
 import br.gov.mj.sislegis.app.service.TarefaService;
 
 @Stateless
-public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implements TarefaService {
+public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implements TarefaService, EJBUnitTestable {
 
 	private static final String CATEGORIA_TAREFAS = "TAREFAS";
 	@PersistenceContext
@@ -52,6 +52,9 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 			}
 			if (enc.getDataHoraLimite() != null) {
 				notTxt += " - " + sdf.format(enc.getDataHoraLimite());
+			}
+			if (notTxt.length() > 128) {
+				notTxt = notTxt.substring(0, 120) + "...";
 			}
 			Notificacao not = new Notificacao(entity.getUsuario(), notTxt, entity.getId().toString(), CATEGORIA_TAREFAS);
 
@@ -167,6 +170,13 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 		tarefa.getEncaminhamentoProposicao().setComentarioFinalizacao(comentario);
 
 		save(tarefa);
+	}
+
+	@Override
+	public void setInjectedEntities(Object... injections) {
+		this.em = (EntityManager) injections[0];
+		this.notificacaoService = (NotificacaoService) injections[1];
+
 	}
 
 }

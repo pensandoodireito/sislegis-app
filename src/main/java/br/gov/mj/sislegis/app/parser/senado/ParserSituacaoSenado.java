@@ -13,7 +13,6 @@ import br.gov.mj.sislegis.app.parser.SituacaoParser;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
 
 public class ParserSituacaoSenado implements SituacaoParser {
 	public static void main(String[] args) {

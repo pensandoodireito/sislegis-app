@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.ejb.Local;
-import javax.persistence.EntityManager;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Usuario;

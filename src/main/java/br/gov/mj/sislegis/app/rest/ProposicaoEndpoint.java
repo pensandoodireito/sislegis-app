@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,15 +27,16 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
+import org.jboss.resteasy.annotations.cache.Cache;
+
+import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.NotaTecnica;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.ProcessoSei;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.Votacao;
-import org.jboss.resteasy.annotations.cache.Cache;
-
-import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
@@ -134,9 +136,28 @@ public class ProposicaoEndpoint {
 	}
 
 	@POST
+	@Path("/salvarProposicoesExtras")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response salvarProposicoesExtras(List<Proposicao> proposicoes) {
+		try {
+			Map<Integer, Proposicao> responses = new HashMap<>();
+			for (Iterator iterator = proposicoes.iterator(); iterator.hasNext();) {
+				Proposicao proposicao = (Proposicao) iterator.next();
+
+				int result = proposicaoService.salvarProposicaoIndependente(proposicao);
+				responses.put(result, proposicao);
+			}
+			return Response.ok(responses, MediaType.APPLICATION_JSON).build();
+		} catch (EJBTransactionRolledbackException e) {
+			return Response.status(Response.Status.CONFLICT).build();
+		}
+
+	}
+
+	@POST
 	@Path("/salvarProposicaoExtra")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response salvarProposicoes(Proposicao proposicao) {
+	public Response salvarProposicaoExtra(Proposicao proposicao) {
 		try {
 			int result = proposicaoService.salvarProposicaoIndependente(proposicao);
 			switch (result) {
@@ -179,8 +200,8 @@ public class ProposicaoEndpoint {
 	@GET
 	@Path("/{id:[0-9][0-9]*}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response findById(@PathParam("id") Integer id,@QueryParam("fetchAll") Boolean fetchAll) {
-		return Response.ok(proposicaoService.buscarPorId(id,(fetchAll != null && fetchAll))).build();
+	public Response findById(@PathParam("id") Integer id, @QueryParam("fetchAll") Boolean fetchAll) {
+		return Response.ok(proposicaoService.buscarPorId(id, (fetchAll != null && fetchAll))).build();
 	}
 
 	@GET
@@ -194,10 +215,18 @@ public class ProposicaoEndpoint {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Proposicao> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor,
 			@QueryParam("sigla") String sigla, @QueryParam("origem") String origem,
-			@QueryParam("isFavorita") String isFavorita, @QueryParam("limit") Integer limit,
-			@QueryParam("offset") Integer offset) {
+			@QueryParam("estado") String estado, @QueryParam("isFavorita") String isFavorita,
+			@QueryParam("limit") Integer limit, @QueryParam("offset") Integer offset) {
 
-		List<Proposicao> results = proposicaoService.consultar(sigla, autor, ementa, origem, isFavorita, offset, limit);
+		Map m = new HashMap<String, String>();
+		m.put("sigla", sigla);
+		m.put("ementa", ementa);
+		m.put("autor", autor);
+		m.put("origem", origem);
+		m.put("isFavorita", isFavorita);
+		m.put("estado", estado);
+
+		List<Proposicao> results = proposicaoService.consultar(m, offset, limit);
 		return results;
 	}
 
@@ -220,7 +249,7 @@ public class ProposicaoEndpoint {
 	@Path("/buscaIndependente/{origem:[A-Z]*}/{tipo:[A-Z\\.]*}/{ano:[0-9]{4}}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Collection<Proposicao> buscaIndependente(@PathParam("origem") String origem, @PathParam("tipo") String tipo,
-			@QueryParam("numero") Integer numero, @PathParam("ano") Integer ano) throws Exception {
+			@QueryParam("numero") String numero, @PathParam("ano") Integer ano) throws Exception {
 
 		return proposicaoService.buscaProposicaoIndependentePor(Origem.valueOf(origem), tipo, numero, ano);
 
@@ -304,7 +333,8 @@ public class ProposicaoEndpoint {
 		try {
 			Usuario usuarioLogado = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
 			proposicaoService.alterarPosicionamento(posicionamentoProposicaoWrapper.getId(),
-					posicionamentoProposicaoWrapper.getIdPosicionamento(), posicionamentoProposicaoWrapper.preliminar, usuarioLogado);
+					posicionamentoProposicaoWrapper.getIdPosicionamento(), posicionamentoProposicaoWrapper.preliminar,
+					usuarioLogado);
 			return Response.ok().build();
 
 		} catch (Exception e) {
@@ -320,6 +350,31 @@ public class ProposicaoEndpoint {
 		return proposicaoService.listarHistoricoPosicionamentos(id);
 	}
 
+	@GET
+	@Path("/{id:[0-9]+}/notatecnica")
+	@Cache(maxAge = 24, noStore = false, isPrivate = false, sMaxAge = 24)
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<NotaTecnica> listNotaTecnicas(@PathParam("id") Long id) throws Exception {
+		return proposicaoService.getNotaTecnicas(id);
+	}
+
+	@POST
+	@Path("/{id:[0-9]+}/notatecnica")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response createNotaTecnica(@PathParam("id") Long id, NotaTecnica nt,
+			@HeaderParam("Authorization") String authorization) {
+		try {
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+			nt.setUsuario(user);
+			nt.setProposicao(proposicaoService.findById(id));
+
+			proposicaoService.saveNotaTecnica(nt);
+			return Response.ok(nt).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Status.BAD_REQUEST).build();
+		}
+	}
 
 	@GET
 	@Path("/{id:[0-9]+}/pautas")
@@ -332,9 +387,10 @@ public class ProposicaoEndpoint {
 	@POST
 	@Path("/setRoadmapComissoes")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response setRoadmapComissoes(RoadmapComissoesWrapper roadmapComissoesWrapper){
+	public Response setRoadmapComissoes(RoadmapComissoesWrapper roadmapComissoesWrapper) {
 		try {
-			proposicaoService.setRoadmapComissoes(roadmapComissoesWrapper.getIdProposicao(), roadmapComissoesWrapper.getComissoes());
+			proposicaoService.setRoadmapComissoes(roadmapComissoesWrapper.getIdProposicao(),
+					roadmapComissoesWrapper.getComissoes());
 			return Response.ok().build();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -346,9 +402,10 @@ public class ProposicaoEndpoint {
 	@Path("/vincularProcessoSei")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public ProcessoSei inserirProcessoSei(ProcessoSeiWrapper processoSeiWrapper){
+	public ProcessoSei inserirProcessoSei(ProcessoSeiWrapper processoSeiWrapper) {
 		try {
-			ProcessoSei processoSei = proposicaoService.vincularProcessoSei(processoSeiWrapper.getId(), processoSeiWrapper.getProtocolo());
+			ProcessoSei processoSei = proposicaoService.vincularProcessoSei(processoSeiWrapper.getId(),
+					processoSeiWrapper.getProtocolo());
 			return processoSei;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -358,7 +415,7 @@ public class ProposicaoEndpoint {
 
 	@DELETE
 	@Path("/excluirProcessoSei/{idProcesso:[0-9]+}")
-	public Response excluirProcessoSei(@PathParam("idProcesso") Long idProcesso){
+	public Response excluirProcessoSei(@PathParam("idProcesso") Long idProcesso) {
 		try {
 			proposicaoService.excluirProcessoSei(idProcesso);
 			return Response.noContent().build();
@@ -372,11 +429,14 @@ public class ProposicaoEndpoint {
 	@GET
 	@Path("/listarVotacoes")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Votacao> listarVotacoes(@QueryParam("idProposicao") String idProposicao, @QueryParam("tipo") String tipo, @QueryParam("numero") String numero, @QueryParam("ano") String ano, @QueryParam("origem") String origem){
+	public List<Votacao> listarVotacoes(@QueryParam("idProposicao") String idProposicao,
+			@QueryParam("tipo") String tipo, @QueryParam("numero") String numero, @QueryParam("ano") String ano,
+			@QueryParam("origem") String origem) {
 
 		try {
 			Integer idProp = (idProposicao == null || "".equals(idProposicao)) ? null : Integer.valueOf(idProposicao);
-			List<Votacao> votacoes = proposicaoService.listarVotacoes(idProp, tipo, numero, ano, Origem.valueOf(origem));
+			List<Votacao> votacoes = proposicaoService
+					.listarVotacoes(idProp, tipo, numero, ano, Origem.valueOf(origem));
 			return votacoes;
 
 		} catch (Exception e) {
@@ -440,7 +500,7 @@ class PosicionamentoProposicaoWrapper {
 	}
 }
 
-class RoadmapComissoesWrapper{
+class RoadmapComissoesWrapper {
 	private Long idProposicao;
 	private List<String> comissoes;
 

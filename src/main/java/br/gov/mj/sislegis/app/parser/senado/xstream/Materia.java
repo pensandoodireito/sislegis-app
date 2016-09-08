@@ -134,7 +134,9 @@ public class Materia {
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER)
 					.log(Level.FINEST, "Nao carregou autuacoes da situacao atual");
 		} else if (!situacaoAtual.autuacoes.autuacoes.isEmpty()) {
-			p.setComissao(situacaoAtual.autuacoes.autuacoes.get(0).Local.SiglaLocal);
+			if (situacaoAtual.autuacoes.autuacoes.get(0).Local != null) {
+				p.setComissao(situacaoAtual.autuacoes.autuacoes.get(0).Local.SiglaLocal);
+			}
 			p.setSituacao(situacaoAtual.autuacoes.autuacoes.get(0).Situacao.SiglaSituacao);
 		}
 		if (DadosBasicosMateria != null) {

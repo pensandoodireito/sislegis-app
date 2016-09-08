@@ -6,17 +6,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.ConcurrencyManagement;
-import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.Local;
 import javax.ejb.Singleton;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.TypedQuery;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -48,9 +40,10 @@ public class UsuarioAutenticadoBean {
 	}
 
 	public synchronized Usuario carregaUsuarioAutenticado(String authorization) throws IOException {
-		JSONObject jsonUser = null;
-
-		jsonUser = buscaDadosUsuarioDoKeycloak(authorization);
+		JSONObject jsonUser = buscaDadosUsuarioDoKeycloak(authorization);
+		if (!jsonUser.has("email")) {
+			throw new IOException("Usuário de keycloak sem email configurado. Configure um email para o usuario.");
+		}
 		String email = jsonUser.getString("email");
 		Usuario authenticatedUser = usuarioService.findOrCreateByEmail(jsonUser.getString("name"), email);
 

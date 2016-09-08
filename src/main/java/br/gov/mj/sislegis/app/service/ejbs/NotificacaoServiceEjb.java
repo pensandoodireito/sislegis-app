@@ -15,7 +15,8 @@ import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.NotificacaoService;
 
 @Stateless
-public class NotificacaoServiceEjb extends AbstractPersistence<Notificacao, Long> implements NotificacaoService {
+public class NotificacaoServiceEjb extends AbstractPersistence<Notificacao, Long> implements NotificacaoService,
+		EJBUnitTestable {
 
 	@PersistenceContext
 	private EntityManager em;
@@ -79,6 +80,12 @@ public class NotificacaoServiceEjb extends AbstractPersistence<Notificacao, Long
 			return l.get(0);
 
 		}
+	}
+
+	@Override
+	public void setInjectedEntities(Object... injections) {
+		this.em = (EntityManager) injections[0];
+
 	}
 
 }

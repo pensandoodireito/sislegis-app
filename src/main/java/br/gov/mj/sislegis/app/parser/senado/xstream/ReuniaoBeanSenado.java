@@ -10,17 +10,14 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import br.gov.mj.sislegis.app.enumerated.SituacaoSenado;
-import br.gov.mj.sislegis.app.util.SislegisUtil;
-import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
-
 import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.enumerated.SituacaoSenado;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.Sessao;
 import br.gov.mj.sislegis.app.model.pautacomissao.SituacaoSessao;
+import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 public class ReuniaoBeanSenado extends br.gov.mj.sislegis.app.parser.ReuniaoBean {
 	private static final String MATERIA = "MATE";

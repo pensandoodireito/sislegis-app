@@ -35,6 +35,8 @@ import br.gov.mj.sislegis.app.model.AlteracaoProposicao;
 import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.EstadoProposicao;
+import br.gov.mj.sislegis.app.model.NotaTecnica;
 import br.gov.mj.sislegis.app.model.Posicionamento;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.ProcessoSei;
@@ -57,9 +59,9 @@ import br.gov.mj.sislegis.app.parser.camara.ParserVotacaoCamara;
 import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserPlenarioSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
+import br.gov.mj.sislegis.app.parser.senado.ParserVotacaoSenado;
 import br.gov.mj.sislegis.app.seiws.RetornoConsultaProcedimento;
 import br.gov.mj.sislegis.app.seiws.SeiServiceLocator;
-import br.gov.mj.sislegis.app.parser.senado.ParserVotacaoSenado;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
@@ -191,6 +193,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			for (Iterator<ProposicaoPautaComissao> iterator2 = ppcs.iterator(); iterator2.hasNext();) {
 				ProposicaoPautaComissao proposicaoPautaComissao = (ProposicaoPautaComissao) iterator2.next();
 				Proposicao proposicaoPauta = proposicaoPautaComissao.getProposicao();
+
 				List<Comentario> comentarios = comentarioService.findByIdProposicao(proposicaoPauta.getIdProposicao());
 				if (comentarios != null && !comentarios.isEmpty()) {
 					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
@@ -283,6 +286,27 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
+	public List<Proposicao> consultar(Map<String, String> filtros, Integer offset, Integer limit) {
+		StringBuilder query = new StringBuilder("SELECT p FROM Proposicao p WHERE 1=1");
+		String sigla = filtros.get("sigla");
+		String autor = filtros.get("autor");
+		String ementa = filtros.get("ementa");
+		String origem = filtros.get("origem");
+		String isFavorita = filtros.get("isFavorita");
+		String estado = filtros.get("estado");
+		query.append(createWhereClause(sigla, null, autor, ementa, origem, isFavorita, estado, null, null, null));
+		query.append(" order by tipo,ano,numero");
+		TypedQuery<Proposicao> findByIdQuery = getEntityManager().createQuery(query.toString(), Proposicao.class);
+
+		setParams(sigla, null, autor, ementa, origem, isFavorita, estado, null, null, null, findByIdQuery);
+
+		List<Proposicao> proposicoes = findByIdQuery.setFirstResult(offset).setMaxResults(limit).getResultList();
+		popularDadosTransientes(proposicoes);
+
+		return proposicoes;
+	}
+
+	@Override
 	public List<Proposicao> consultar(String sigla, String autor, String ementa, String origem, String isFavorita,
 			Integer offset, Integer limit) {
 		StringBuilder query = new StringBuilder("SELECT p FROM Proposicao p WHERE 1=1");
@@ -300,6 +324,13 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	private void setParams(String sigla, String comissao, String autor, String ementa, String origem,
 			String isFavorita, Long idResponsavel, Long idPosicionamento, Integer[] idProposicoes,
+			TypedQuery findByIdQuery) {
+		setParams(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, idPosicionamento,
+				idProposicoes, findByIdQuery);
+	}
+
+	private void setParams(String sigla, String comissao, String autor, String ementa, String origem,
+			String isFavorita, String estado, Long idResponsavel, Long idPosicionamento, Integer[] idProposicoes,
 			TypedQuery findByIdQuery) {
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			findByIdQuery.setParameter("sigla", "%" + sigla + "%");
@@ -325,6 +356,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (Objects.nonNull(idResponsavel)) {
 			findByIdQuery.setParameter("idResponsavel", idResponsavel);
 		}
+		if (Objects.nonNull(estado)) {
+			findByIdQuery.setParameter("estado", EstadoProposicao.valueOf(estado));
+		}
 
 		if (Objects.nonNull(idProposicoes) && idProposicoes.length > 0) {
 			List<Integer> idProps = new ArrayList<Integer>(idProposicoes.length);
@@ -337,6 +371,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem,
 			String isFavorita, Long idResponsavel, Long idPosicionamento, Integer[] idProposicao) {
+		return createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel,
+				idPosicionamento, idProposicao);
+	}
+
+	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem,
+			String isFavorita, String estado, Long idResponsavel, Long idPosicionamento, Integer[] idProposicao) {
 		StringBuilder query = new StringBuilder();
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			query.append(" AND upper(CONCAT(p.tipo,' ',p.numero,'/',p.ano)) like upper(:sigla)");
@@ -352,6 +392,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 		if (Objects.nonNull(origem) && !origem.equals("")) {
 			query.append(" AND p.origem = :origem");
+		}
+		if (Objects.nonNull(estado) && !estado.equals("")) {
+			query.append(" AND p.estado = :estado");
 		}
 		if (Objects.nonNull(isFavorita) && !isFavorita.equals("")) {
 			query.append(" AND p.isFavorita = :isFavorita");
@@ -425,9 +468,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 						ppc.setOrdemPauta(rp.getSeqOrdemPauta());
 						p.getPautasComissoes().add(ppc);
 					}
-					
+
 					popularDadosTransientes(p);
-					
+
 					proposicoes.add(p);
 				}
 
@@ -454,9 +497,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				query.setParameter("rid", reuniao.getId());
 				List<Proposicao> proposicoesReuniao = query.getResultList();
 				proposicoes.addAll(proposicoesReuniao);
-				
+
 				popularDadosTransientes(proposicoes);
-				
+
 			}
 
 		}
@@ -516,7 +559,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public Collection<Proposicao> buscaProposicaoIndependentePor(Origem origem, String tipo, Integer numero, Integer ano)
+	public Collection<Proposicao> buscaProposicaoIndependentePor(Origem origem, String tipo, String numero, Integer ano)
 			throws IOException {
 		switch (origem) {
 		case CAMARA:
@@ -566,6 +609,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				descricaoAlteracao.append("Alterado ano: ").append(local.getAno()).append("=>").append(remote.getAno())
 						.append("\n");
 				local.setAno(remote.getAno());
+			}
+			if (((local.getComissao() == null || "AVULSA".equals(local.getComissao())) && remote.getComissao() != null && !remote
+					.getComissao().equals(local.getComissao()))) {
+				descricaoAlteracao.append("Alterada comissão: '").append(local.getComissao()).append("' => '")
+						.append(remote.getComissao()).append("'\n");
+				local.setComissao(remote.getComissao());
 			}
 
 			if ((local.getAutor() == null && remote.getAutor() != null)
@@ -671,9 +720,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				props = buscarProposicoesPautaSenadoWS(proposicaoLocal.getComissao(), initialMonday, nextMonday);
 				break;
 			case CAMARA:
-
 				Comissao comissao = comissaoService.getBySigla(proposicaoLocal.getComissao());
-
 				if (comissao == null) {
 					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(
 							Level.SEVERE,
@@ -740,6 +787,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			}
 
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
 					"Falhou ao sincronizar proposicao " + proposicaoLocal, e);
 		}
@@ -909,14 +957,15 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		processoSei.setProposicao(proposicao);
 
 		SeiServiceLocator seiServiceLocator = new SeiServiceLocator();
-		RetornoConsultaProcedimento retornoConsultaProcedimento = seiServiceLocator.getSeiPortService().
-				consultarProcedimento("sislegis", "sislegis", null, protocolo, null, null, null, null, null, null, null, null, null);
+		RetornoConsultaProcedimento retornoConsultaProcedimento = seiServiceLocator.getSeiPortService()
+				.consultarProcedimento("sislegis", "sislegis", null, protocolo, null, null, null, null, null, null,
+						null, null, null);
 
 		if (retornoConsultaProcedimento != null) {
 			processoSei.setLinkSei(retornoConsultaProcedimento.getLinkAcesso());
 			em.persist(processoSei);
 			return processoSei;
-		} else{
+		} else {
 			throw new IllegalArgumentException("Processo nao encontrado no SEI. Protocolo: " + protocolo);
 		}
 	}
@@ -1033,6 +1082,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			proposicao.setTotalComentarios(comentarioService.totalByProposicao(proposicao.getId()));
 			proposicao.setTotalEncaminhamentos(encaminhamentoProposicaoService.totalByProposicao(proposicao.getId()));
 			proposicao.setTotalPautasComissao(totalProposicaoPautaComissaoByProposicao(proposicao.getId()));
+			proposicao.setTotalNotasTecnicas(getNotaTecnicas(proposicao.getId()).size());
 
 			PosicionamentoProposicao posicionamentoProposicao;
 			try {
@@ -1200,15 +1250,6 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 	}
 
-	@Override
-	public void setInjectedEntities(Object... injections) {
-		this.em = (EntityManager) injections[0];
-		this.parserProposicaoCamara = (ParserProposicaoCamara) injections[1];
-		this.reuniaoService = (ReuniaoService) injections[2];
-		this.reuniaoProposicaoService = (ReuniaoProposicaoService) injections[3];
-
-	}
-
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
 	@Override
 	public void adicionaProposicoesReuniao(Set<PautaReuniaoComissao> pautaReunioes, Reuniao reuniao) throws IOException {
@@ -1284,15 +1325,45 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public List<Votacao> listarVotacoes(Integer idProposicao, String tipo, String numero, String ano, Origem origem) throws Exception {
+	public List<Votacao> listarVotacoes(Integer idProposicao, String tipo, String numero, String ano, Origem origem)
+			throws Exception {
 
-		if (Origem.CAMARA.equals(origem)){
+		if (Origem.CAMARA.equals(origem)) {
 			return parserVotacaoCamara.votacoesPorProposicao(numero, ano, tipo);
-		} else if (Origem.SENADO.equals(origem)){
+		} else if (Origem.SENADO.equals(origem)) {
 			return parserVotacaoSenado.votacoesPorProposicao(idProposicao);
 		}
 
 		return null;
+	}
+
+	@Override
+	public List<NotaTecnica> getNotaTecnicas(Long proposicaoId) {
+		Query q = em.createNamedQuery("listNotatecnicaProposicao").setParameter("idProposicao", proposicaoId);
+		List<NotaTecnica> res = q.getResultList();
+
+		return res;
+	}
+
+	@Override
+	public void saveNotaTecnica(NotaTecnica nt) {
+		if (nt.getId() != null) {
+			em.merge(nt);
+		} else {
+			em.persist(nt);
+		}
+
+	}
+
+	public void setInjectedEntities(Object... injections) {
+		this.em = (EntityManager) injections[0];
+		this.parserProposicaoCamara = (ParserProposicaoCamara) injections[1];
+		this.reuniaoService = (ReuniaoService) injections[2];
+		this.reuniaoProposicaoService = (ReuniaoProposicaoService) injections[3];
+		this.comissaoService = (ComissaoService) injections[4];
+		comentarioService = (ComentarioService) injections[5];
+		parserPautaCamara = new ParserPautaCamara();
+
 	}
 
 }

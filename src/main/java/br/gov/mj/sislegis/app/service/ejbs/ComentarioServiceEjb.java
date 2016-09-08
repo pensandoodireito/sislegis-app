@@ -15,7 +15,8 @@ import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 
 @Stateless
-public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> implements ComentarioService {
+public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> implements ComentarioService,
+		EJBUnitTestable {
 
 	@PersistenceContext
 	private EntityManager em;
@@ -98,5 +99,11 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> 
 		Comentario comentario = findById(idComentario);
 		comentario.setOculto(true);
 		save(comentario);
+	}
+
+	@Override
+	public void setInjectedEntities(Object... injections) {
+		this.em = (EntityManager) injections[0];
+
 	}
 }

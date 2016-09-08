@@ -1,17 +1,18 @@
 package br.gov.mj.sislegis.app.service.ejbs;
 
-import br.gov.mj.sislegis.app.model.Tag;
-import br.gov.mj.sislegis.app.service.AbstractPersistence;
-import br.gov.mj.sislegis.app.service.TagService;
+import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.List;
+
+import br.gov.mj.sislegis.app.model.Tag;
+import br.gov.mj.sislegis.app.service.AbstractPersistence;
+import br.gov.mj.sislegis.app.service.TagService;
 
 @Stateless
 public class TagServiceEjb extends AbstractPersistence<Tag, Long>
-implements TagService{
+implements TagService, EJBUnitTestable{
 	
 	@PersistenceContext
     private EntityManager em;
@@ -41,4 +42,9 @@ implements TagService{
 		return lista;
 	}
 
+	@Override
+	public void setInjectedEntities(Object... injections) {
+		this.em = (EntityManager) injections[0];
+
+	}
 }
