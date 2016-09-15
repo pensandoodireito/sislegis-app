@@ -11,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -41,7 +42,7 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private Comentario comentarioFinalizacao;
 
-	@OneToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "tipo_encaminhamento_id")
 	private TipoEncaminhamento tipoEncaminhamento;
 

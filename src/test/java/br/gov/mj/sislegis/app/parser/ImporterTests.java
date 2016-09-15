@@ -89,14 +89,20 @@ public class ImporterTests {
 	private ReuniaoProposicaoServiceEjb reuniaoProposicaoEJB;
 
 	static Map<String, String> atribuidoToResponsavel = new HashMap<String, String>();
+	static Map<String, String> nomeCompleto = new HashMap<String, String>();
 	static {
-		String[] user = { "Eduarda", "Guilherme", "Leonardo", "Marcelo", "Natalia", "Paula", "Sem atribuição", "Afonso" };
+		String[] user = { "Eduarda", "Guilherme", "Leonardo Povoa", "Marcelo Bastos", "Natalia Langenegger",
+				"Paula Leal", "Sem atribuição", "Afonso Almeida" };
+		String[] userCompleto = { "Eduarda Cintra", "Guilherme Moraes Rego", "Leonardo", "Marcelo", "Natalia", "Paula",
+				"Sem atribuição", "Afonso" };
 		String[] userEmail = { "eduarda.cintra@mj.gov.br", "guilherme.moraesrego@mj.gov.br",
 				"leonardo.povoa@mj.gov.br", "marcelo.bastos@mj.gov.br", "natalia.langenegger@mj.gov.br",
 				"paula.leal@mj.gov.br", null, "afonso.almeida@mj.gov.br" };
 
 		for (int i = 0; i < userEmail.length; i++) {
 			atribuidoToResponsavel.put(user[i], userEmail[i]);
+			nomeCompleto.put(user[i], userCompleto[i]);
+
 		}
 
 	}
@@ -185,15 +191,16 @@ public class ImporterTests {
 		for (Iterator iterator = atribuidoToResponsavel.keySet().iterator(); iterator.hasNext();) {
 			String nome = (String) iterator.next();
 			String email = atribuidoToResponsavel.get(nome);
+			String nomeCompletoStr = nomeCompleto.get(nome);
 			if (email != null) {
 				if (userSvc.findByEmail(email) == null) {
 					EntityTransaction trans = em.getTransaction();
 					trans.begin();
 					Usuario u = new Usuario();
 					u.setEmail(email);
-					u.setNome(nome);
+					u.setNome(nomeCompletoStr);
 					userSvc.save(u);
-					System.out.println("Salvando usuario");
+					System.out.println("Salvando usuario " + u);
 					trans.commit();
 				}
 			}
@@ -301,7 +308,7 @@ public class ImporterTests {
 								// ce.setDescricao("Buscar do Drive: " +
 								// p.drive);
 								// ce.setDataCriacao(new Date());
-//								ep.setComentario(ce);
+								// ep.setComentario(ce);
 								ep.setDetalhes("Buscar do Drive: " + p.drive);
 								if (responsavel != null) {
 									ep.setResponsavel(responsavel);
@@ -344,6 +351,7 @@ public class ImporterTests {
 										posicionamento = new Posicionamento();
 										posicionamento.setNome(p.posicaoSAL.trim());
 										em.persist(posicionamento);
+										posicionamento = posicionamentos.get(p.posicaoSAL.toLowerCase());
 										posicionamentos.put(posicionamento.getNome(), posicionamento);
 										// System.err.println("Posicionametno novo "
 										// + p.posicaoSAL);
@@ -394,12 +402,16 @@ public class ImporterTests {
 
 	@Test
 	public void testDBAccess() {
+		
 		try {
+			 processaExcel();
+			
 
-			processaExcel();
+			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
+			
 			fail();
 		}
 	}

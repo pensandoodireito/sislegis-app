@@ -30,6 +30,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.jboss.resteasy.annotations.cache.Cache;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.AreaDeMeritoRevisao;
 import br.gov.mj.sislegis.app.model.NotaTecnica;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.ProcessoSei;
@@ -41,6 +42,7 @@ import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
+import br.gov.mj.sislegis.app.service.AreaDeMeritoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.ReuniaoService;
 
@@ -53,6 +55,9 @@ public class ProposicaoEndpoint {
 
 	@Inject
 	private ProposicaoService proposicaoService;
+
+	@Inject
+	private AreaDeMeritoService areaMeritoRevisao;
 
 	@GET
 	@Path("/proposicoesPautaCamara")
@@ -348,6 +353,22 @@ public class ProposicaoEndpoint {
 	@Path("/historicoPosicionamentos/{id:[0-9]+}")
 	public List<PosicionamentoProposicao> historicoPosicionamentos(@PathParam("id") Long id) {
 		return proposicaoService.listarHistoricoPosicionamentos(id);
+	}
+
+	@GET
+	@Path("/{id:[0-9]+}/revisaoMerito")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<AreaDeMeritoRevisao> listRevisoes(@PathParam("id") Long id) throws Exception {
+		return areaMeritoRevisao.listRevisoesProposicao(id);
+	}
+
+	@POST
+	@Path("/{id:[0-9]+}/revisaoMerito")
+	@Produces(MediaType.APPLICATION_JSON)
+	public AreaDeMeritoRevisao saveRevisao(@PathParam("id") Long id, AreaDeMeritoRevisao entity) throws Exception {
+		entity.setProposicao(proposicaoService.findById(id));
+
+		return areaMeritoRevisao.saveRevisao(entity);
 	}
 
 	@GET

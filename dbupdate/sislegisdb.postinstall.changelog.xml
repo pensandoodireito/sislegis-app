@@ -25,7 +25,7 @@
 
 	<changeSet author="sislegis (generated)" id="1447161377822-15">
 		<createTable tableName="pautareuniaocomissao">
-			<column name="id" type="BIGINT">
+			<column name="id" type="BIGINT">	
 				<constraints nullable="false" />
 			</column>
 			<column name="codigoreuniao" type="INT" />
