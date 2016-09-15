@@ -396,6 +396,21 @@ public class ProposicaoEndpoint {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 	}
+	@DELETE
+	@Path("/{id:[0-9]+}/notatecnica/{idNota:[0-9]+}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response removeNotaTecnica(@PathParam("id") Long id, @PathParam("idNota") Long idNota,
+			@HeaderParam("Authorization") String authorization) {
+		try {
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+			proposicaoService.deleteNotaById(idNota);
+
+			return Response.ok().build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+	}
 
 	@GET
 	@Path("/{id:[0-9]+}/pautas")

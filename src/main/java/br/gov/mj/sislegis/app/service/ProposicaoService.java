@@ -218,4 +218,6 @@ public interface ProposicaoService extends Service<Proposicao> {
 
 	void saveNotaTecnica(NotaTecnica nt);
 
+	void deleteNotaById(Long idNota);
+
 }

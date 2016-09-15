@@ -1368,6 +1368,13 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		this.comissaoService = (ComissaoService) injections[4];
 		comentarioService = (ComentarioService) injections[5];
 		parserPautaCamara = new ParserPautaCamara();
+		parserPautaSenado = new ParserPautaSenado();
+
+	}
+
+	@Override
+	public void deleteNotaById(Long idNota) {
+		getEntityManager().remove(getEntityManager().find(NotaTecnica.class, idNota));
 
 	}
 

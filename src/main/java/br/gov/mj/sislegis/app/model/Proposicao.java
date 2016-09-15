@@ -199,6 +199,9 @@ public class Proposicao extends AbstractEntity {
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "proposicao")
 	private List<ProcessoSei> processosSei;
 
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "proposicao", cascade = CascadeType.REMOVE)
+	private List<NotaTecnica> notatecnicas = new ArrayList<NotaTecnica>();
+
 	public Proposicao() {
 		super();
 		this.estado = EstadoProposicao.FORADEPAUTA;

@@ -46,6 +46,9 @@ public class NotaTecnica extends AbstractEntity {
 	@Column(length = 20000)
 	private String nota;
 
+	@Column(length = 256)
+	private String url_arquivo;
+
 	protected NotaTecnica() {
 		dataCriacao = new Date();
 	}
@@ -87,5 +90,13 @@ public class NotaTecnica extends AbstractEntity {
 
 	public void setProposicao(Proposicao proposicao) {
 		this.proposicao = proposicao;
+	}
+
+	public String getUrl_arquivo() {
+		return url_arquivo;
+	}
+
+	public void setUrl_arquivo(String url_arquivo) {
+		this.url_arquivo = url_arquivo;
 	}
 }

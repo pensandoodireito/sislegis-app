@@ -33,6 +33,7 @@ CREATE TABLE proposicao_notatecnica (
   proposicao_id     BIGINT NOT NULL,
   usuario_id        BIGINT NOT NULL,
   nota 				VARCHAR(20000),
+  url_arquivo		VARCHAR(256),
   FOREIGN KEY (proposicao_id) REFERENCES proposicao (id),
   FOREIGN KEY (usuario_id) REFERENCES usuario (id)
 );
