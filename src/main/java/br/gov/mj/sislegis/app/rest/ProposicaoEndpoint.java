@@ -30,6 +30,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.jboss.resteasy.annotations.cache.Cache;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.AreaDeMeritoRevisao;
 import br.gov.mj.sislegis.app.model.NotaTecnica;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.ProcessoSei;
@@ -41,6 +42,7 @@ import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
+import br.gov.mj.sislegis.app.service.AreaDeMeritoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.ReuniaoService;
 
@@ -53,6 +55,9 @@ public class ProposicaoEndpoint {
 
 	@Inject
 	private ProposicaoService proposicaoService;
+
+	@Inject
+	private AreaDeMeritoService areaMeritoRevisao;
 
 	@GET
 	@Path("/proposicoesPautaCamara")
@@ -351,6 +356,22 @@ public class ProposicaoEndpoint {
 	}
 
 	@GET
+	@Path("/{id:[0-9]+}/revisaoMerito")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<AreaDeMeritoRevisao> listRevisoes(@PathParam("id") Long id) throws Exception {
+		return areaMeritoRevisao.listRevisoesProposicao(id);
+	}
+
+	@POST
+	@Path("/{id:[0-9]+}/revisaoMerito")
+	@Produces(MediaType.APPLICATION_JSON)
+	public AreaDeMeritoRevisao saveRevisao(@PathParam("id") Long id, AreaDeMeritoRevisao entity) throws Exception {
+		entity.setProposicao(proposicaoService.findById(id));
+
+		return areaMeritoRevisao.saveRevisao(entity);
+	}
+
+	@GET
 	@Path("/{id:[0-9]+}/notatecnica")
 	@Cache(maxAge = 24, noStore = false, isPrivate = false, sMaxAge = 24)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -373,6 +394,21 @@ public class ProposicaoEndpoint {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return Response.status(Status.BAD_REQUEST).build();
+		}
+	}
+	@DELETE
+	@Path("/{id:[0-9]+}/notatecnica/{idNota:[0-9]+}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response removeNotaTecnica(@PathParam("id") Long id, @PathParam("idNota") Long idNota,
+			@HeaderParam("Authorization") String authorization) {
+		try {
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+			proposicaoService.deleteNotaById(idNota);
+
+			return Response.ok().build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 

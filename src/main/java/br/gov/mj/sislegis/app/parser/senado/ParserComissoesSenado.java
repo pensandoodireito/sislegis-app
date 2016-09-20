@@ -43,6 +43,7 @@ public class ParserComissoesSenado {
 		xstream.aliasField("Colegiados", ListaColegiados.class, "comissoes");
 		xstream.aliasField("Codigo", Comissao.class, "id");
 		xstream.aliasField("Sigla", Comissao.class, "sigla");
+		xstream.aliasField("Nome", Comissao.class, "nome");
 	}
 }
 

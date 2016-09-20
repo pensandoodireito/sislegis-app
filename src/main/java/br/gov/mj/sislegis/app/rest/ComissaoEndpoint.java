@@ -72,8 +72,7 @@ public class ComissaoEndpoint {
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Comissao> listAll(@QueryParam("start") Integer startPosition,
-			@QueryParam("max") Integer maxResult) {
+	public List<Comissao> listAll() {
 		final List<Comissao> results = service.listAll();
 		return results;
 	}	
