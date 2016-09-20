@@ -298,11 +298,21 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		String origem = filtros.get("origem");
 		String isFavorita = filtros.get("isFavorita");
 		String estado = filtros.get("estado");
-		query.append(createWhereClause(sigla, null, autor, ementa, origem, isFavorita, estado, null, null, null));
+		Long idEquipe = null;
+		try {
+			if (filtros.get("idEquipe") != null) {
+				idEquipe = Long.parseLong(filtros.get("idEquipe"));
+			}
+		} catch (NumberFormatException e) {
+
+		}
+
+		query.append(createWhereClause(sigla, null, autor, ementa, origem, isFavorita, estado, null, idEquipe, null,
+				null));
 		query.append(" order by tipo,ano,numero");
 		TypedQuery<Proposicao> findByIdQuery = getEntityManager().createQuery(query.toString(), Proposicao.class);
 
-		setParams(sigla, null, autor, ementa, origem, isFavorita, estado, null, null, null, findByIdQuery);
+		setParams(sigla, null, autor, ementa, origem, isFavorita, estado, null, idEquipe, null, null, findByIdQuery);
 
 		List<Proposicao> proposicoes = findByIdQuery.setFirstResult(offset).setMaxResults(limit).getResultList();
 		popularDadosTransientes(proposicoes);
@@ -329,13 +339,13 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	private void setParams(String sigla, String comissao, String autor, String ementa, String origem,
 			String isFavorita, Long idResponsavel, Long idPosicionamento, Integer[] idProposicoes,
 			TypedQuery findByIdQuery) {
-		setParams(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, idPosicionamento,
+		setParams(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null, idPosicionamento,
 				idProposicoes, findByIdQuery);
 	}
 
 	private void setParams(String sigla, String comissao, String autor, String ementa, String origem,
-			String isFavorita, String estado, Long idResponsavel, Long idPosicionamento, Integer[] idProposicoes,
-			TypedQuery findByIdQuery) {
+			String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento,
+			Integer[] idProposicoes, TypedQuery findByIdQuery) {
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			findByIdQuery.setParameter("sigla", "%" + sigla + "%");
 		}
@@ -360,6 +370,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (Objects.nonNull(idResponsavel)) {
 			findByIdQuery.setParameter("idResponsavel", idResponsavel);
 		}
+		if (Objects.nonNull(idEquipe)) {
+			findByIdQuery.setParameter("idEquipe", idEquipe);
+		}
 		if (Objects.nonNull(estado)) {
 			findByIdQuery.setParameter("estado", EstadoProposicao.valueOf(estado));
 		}
@@ -375,12 +388,13 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem,
 			String isFavorita, Long idResponsavel, Long idPosicionamento, Integer[] idProposicao) {
-		return createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel,
+		return createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null,
 				idPosicionamento, idProposicao);
 	}
 
 	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem,
-			String isFavorita, String estado, Long idResponsavel, Long idPosicionamento, Integer[] idProposicao) {
+			String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento,
+			Integer[] idProposicao) {
 		StringBuilder query = new StringBuilder();
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			query.append(" AND upper(CONCAT(p.tipo,' ',p.numero,'/',p.ano)) like upper(:sigla)");
@@ -405,6 +419,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 		if (Objects.nonNull(idResponsavel)) {
 			query.append(" AND p.responsavel.id = :idResponsavel");
+		}
+		if (Objects.nonNull(idEquipe)) {
+			query.append(" AND p.responsavel.id = :idEquipe");
 		}
 		if (Objects.nonNull(idPosicionamento)) {
 			if (idPosicionamento == -1) {
@@ -1089,26 +1106,27 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			proposicao.setTotalNotasTecnicas(getNotaTecnicas(proposicao.getId()).size());
 			proposicao.setTotalParecerAreaMerito(areaMeritoService.listRevisoesProposicao(proposicao.getId()).size());
 
-			PosicionamentoProposicao posicionamentoProposicao;
-			try {
-				TypedQuery<PosicionamentoProposicao> query = em.createQuery(
-						"FROM PosicionamentoProposicao WHERE proposicao.id = :id ORDER BY dataCriacao DESC ",
-						PosicionamentoProposicao.class);
-
-				query.setParameter("id", proposicao.getId());
-				query.setMaxResults(1);
-
-				posicionamentoProposicao = query.getSingleResult();
-			} catch (NoResultException e) {
-				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
-						"Nenhum posicionamento encontrado no historico, para a proposicao id: " + proposicao.getId());
-				posicionamentoProposicao = null;
-			}
-
-			if (posicionamentoProposicao != null) {
-				proposicao.setPosicionamentoAtual(posicionamentoProposicao);
-				proposicao.setPosicionamentoPreliminar(posicionamentoProposicao.isPreliminar());
-			}
+			// PosicionamentoProposicao posicionamentoProposicao;
+			// try {
+			// TypedQuery<PosicionamentoProposicao> query = em.createQuery(
+			// "FROM PosicionamentoProposicao WHERE proposicao.id = :id ORDER BY dataCriacao DESC ",
+			// PosicionamentoProposicao.class);
+			//
+			// query.setParameter("id", proposicao.getId());
+			// query.setMaxResults(1);
+			//
+			// posicionamentoProposicao = query.getSingleResult();
+			// } catch (NoResultException e) {
+			// Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE,
+			// "Nenhum posicionamento encontrado no historico, para a proposicao id: "
+			// + proposicao.getId());
+			// posicionamentoProposicao = null;
+			// }
+			//
+			// if (posicionamentoProposicao != null) {
+			// proposicao.setPosicionamentoAtual(posicionamentoProposicao);
+			// proposicao.setPosicionamentoPreliminar(posicionamentoProposicao.isPreliminar());
+			// }
 
 		}
 	}
