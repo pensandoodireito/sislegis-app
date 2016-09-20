@@ -221,6 +221,7 @@ public class ProposicaoEndpoint {
 	public List<Proposicao> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor,
 			@QueryParam("sigla") String sigla, @QueryParam("origem") String origem,
 			@QueryParam("estado") String estado, @QueryParam("isFavorita") String isFavorita,
+			@QueryParam("idEquipe") Long idEquipe,
 			@QueryParam("limit") Integer limit, @QueryParam("offset") Integer offset) {
 
 		Map m = new HashMap<String, String>();
@@ -230,6 +231,7 @@ public class ProposicaoEndpoint {
 		m.put("origem", origem);
 		m.put("isFavorita", isFavorita);
 		m.put("estado", estado);
+		m.put("idEquipe", idEquipe);
 
 		List<Proposicao> results = proposicaoService.consultar(m, offset, limit);
 		return results;
