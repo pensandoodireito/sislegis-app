@@ -33,6 +33,13 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 	}
 
 	@Override
+	public void deleteById(Long id) {
+		int deleted = em.createQuery("delete Tarefa where encaminhamentoProposicao.id=:id").setParameter("id", id)
+				.executeUpdate();
+		super.deleteById(id);
+	}
+
+	@Override
 	protected EntityManager getEntityManager() {
 		return em;
 	}

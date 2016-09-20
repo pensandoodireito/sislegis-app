@@ -20,6 +20,8 @@ public class Comissao extends AbstractEntity {
 
 	@Column(name = "sigla")
 	private String sigla;
+	@Column(name = "nome")
+	private String nome;
 
 	public Long getId() {
 		return this.id;
@@ -43,6 +45,14 @@ public class Comissao extends AbstractEntity {
 		if (id != null)
 			result += "id: " + id;
 		return result;
+	}
+
+	public String getNome() {
+		return nome;
+	}
+
+	public void setNome(String nome) {
+		this.nome = nome;
 	}
 
 }

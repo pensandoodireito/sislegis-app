@@ -10,16 +10,20 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
+@Table(name = "areamerito")
 @XmlRootElement
-public class Posicionamento extends AbstractEntity {
+public class AreaDeMerito extends AbstractEntity {
 
-	private static final long serialVersionUID = -5843916678553628190L;
+	private static final long serialVersionUID = -2801342641242367391L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -28,18 +32,18 @@ public class Posicionamento extends AbstractEntity {
 
 	@Column(unique = true)
 	private String nome;
-	
-	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "posicionamento", fetch = FetchType.LAZY)
-	private List<PosicionamentoProposicao> posicoes = new ArrayList<PosicionamentoProposicao>();
-	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "posicionamento", fetch = FetchType.LAZY)
+
+	@OneToOne
+	@JoinColumn(name = "contato_id", referencedColumnName = "id")
+	private Usuario contato;
+
+	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "areaMerito", fetch = FetchType.LAZY)
 	private List<AreaDeMeritoRevisao> revisoes = new ArrayList<AreaDeMeritoRevisao>();
 
-	public Long getId() {
-		return this.id;
-	}
+	@Override
+	public Number getId() {
 
-	public void setId(final Long id) {
-		this.id = id;
+		return id;
 	}
 
 	public String getNome() {
@@ -50,16 +54,21 @@ public class Posicionamento extends AbstractEntity {
 		this.nome = nome;
 	}
 
-	@Override
-	public String toString() {
-		String result = getClass().getSimpleName() + " ";
-		if (nome != null && !nome.trim().isEmpty())
-			result += "nome: " + nome;
-		return result;
+	public Usuario getContato() {
+		return contato;
+	}
+
+	public void setContato(Usuario contato) {
+		this.contato = contato;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	@JsonIgnore
-	public List<PosicionamentoProposicao> getPosicoes() {
-		return posicoes;
+	public List<AreaDeMeritoRevisao> getRevisoes() {
+		return revisoes;
 	}
+
 }

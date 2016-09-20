@@ -33,31 +33,8 @@ CREATE TABLE proposicao_notatecnica (
   proposicao_id     BIGINT NOT NULL,
   usuario_id        BIGINT NOT NULL,
   nota 				VARCHAR(20000),
+  url_arquivo		VARCHAR(256),
   FOREIGN KEY (proposicao_id) REFERENCES proposicao (id),
   FOREIGN KEY (usuario_id) REFERENCES usuario (id)
 );
 --rollback drop table proposicao_notatecnica
-
---changeset coutinho:160902-7
-CREATE TABLE areaespecifica (
-  id                BIGINT PRIMARY KEY NOT NULL,
-  datacriacao       TIMESTAMP NOT NULL,
-  contato_id        BIGINT,
-  nome 				VARCHAR(256),
-  email				VARCHAR(256),
-  FOREIGN KEY (contato_id) REFERENCES usuario (id)
-);
---rollback drop table area_especifica
-
---changeset coutinho:160902-7
-CREATE TABLE parecer_areaespecifica (
-  id                BIGINT PRIMARY KEY NOT NULL,
-  datacriacao       TIMESTAMP NOT NULL,
-  proposicao_id     BIGINT NOT NULL,
-  contato_id        BIGINT,
-  parecer			VARCHAR(256),
-  posicionamento_id BIGINT,
-  FOREIGN KEY (proposicao_id) REFERENCES proposicao (id),
-  FOREIGN KEY (posicionamento_id) REFERENCES posicionamento (id),
-  FOREIGN KEY (contato_id) REFERENCES usuario (id));
---rollback drop table parecer_areaespecifica

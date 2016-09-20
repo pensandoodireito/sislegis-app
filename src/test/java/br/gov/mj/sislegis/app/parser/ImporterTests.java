@@ -34,6 +34,7 @@ import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
 import br.gov.mj.sislegis.app.model.EstadoProposicao;
+import br.gov.mj.sislegis.app.model.Papel;
 import br.gov.mj.sislegis.app.model.Posicionamento;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
@@ -71,7 +72,7 @@ import br.gov.mj.sislegis.app.service.ejbs.UsuarioServiceEjb;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 public class ImporterTests {
-	private static final String EMAIL_USUARIO_PADRAO = "rafael.coutinho@gmail.com";
+	private static final String EMAIL_USUARIO_PADRAO = "ana.couto@mj.gov.br";
 	PosicionamentoService posicionamentoSvc;
 	ProposicaoService proposicaoService;
 	ComissaoService comissaoService;
@@ -89,18 +90,25 @@ public class ImporterTests {
 	private ReuniaoProposicaoServiceEjb reuniaoProposicaoEJB;
 
 	static Map<String, String> atribuidoToResponsavel = new HashMap<String, String>();
+	static Map<String, String> nomeCompleto = new HashMap<String, String>();
 	static {
-		String[] user = { "Eduarda", "Guilherme", "Leonardo", "Marcelo", "Natalia", "Paula", "Sem atribuição", "Afonso" };
+		String[] user = { "Eduarda", "Guilherme", "Leonardo", "Marcelo", "Natalia", "Paula", "Sem atribuição",
+				"Afonso", "Ana Carla Couto de Miranda Castro" };
+		String[] userCompleto = { "Eduarda Cintra", "Guilherme Moraes Rego", "Leonardo Povoa", "Marcelo Bastos",
+				"Natalia Langenegger", "Paula Leal", "Sem atribuição", "Afonso Almeida",
+				"Ana Carla Couto de Miranda Castro" };
 		String[] userEmail = { "eduarda.cintra@mj.gov.br", "guilherme.moraesrego@mj.gov.br",
 				"leonardo.povoa@mj.gov.br", "marcelo.bastos@mj.gov.br", "natalia.langenegger@mj.gov.br",
-				"paula.leal@mj.gov.br", null, "afonso.almeida@mj.gov.br" };
+				"paula.leal@mj.gov.br", null, "afonso.almeida@mj.gov.br", "ana.couto@mj.gov.br" };
 
 		for (int i = 0; i < userEmail.length; i++) {
 			atribuidoToResponsavel.put(user[i], userEmail[i]);
+			nomeCompleto.put(user[i], userCompleto[i]);
+
 		}
 
 	}
-	Map<String, Posicionamento> posicionamentos = new HashMap<String, Posicionamento>();
+	Map<String, Posicionamento> posicionamentoCache = new HashMap<String, Posicionamento>();
 	private TipoEncaminhamento tipoEnc;
 
 	public static void closeEntityManager() {
@@ -162,7 +170,7 @@ public class ImporterTests {
 		List<Posicionamento> posicoes = posicionamentoSvc.listAll();
 		for (Iterator iterator = posicoes.iterator(); iterator.hasNext();) {
 			Posicionamento posicionamento = (Posicionamento) iterator.next();
-			posicionamentos.put(posicionamento.getNome().toLowerCase(), posicionamento);
+			posicionamentoCache.put(posicionamento.getNome().toLowerCase(), posicionamento);
 		}
 		for (Iterator iterator = tipoEncaminhamentoService.listAll().iterator(); iterator.hasNext();) {
 			TipoEncaminhamento enc = (TipoEncaminhamento) iterator.next();
@@ -185,15 +193,21 @@ public class ImporterTests {
 		for (Iterator iterator = atribuidoToResponsavel.keySet().iterator(); iterator.hasNext();) {
 			String nome = (String) iterator.next();
 			String email = atribuidoToResponsavel.get(nome);
+			String nomeCompletoStr = nomeCompleto.get(nome);
 			if (email != null) {
 				if (userSvc.findByEmail(email) == null) {
 					EntityTransaction trans = em.getTransaction();
 					trans.begin();
 					Usuario u = new Usuario();
 					u.setEmail(email);
-					u.setNome(nome);
+					u.setNome(nomeCompletoStr);
+					if (email.equals(EMAIL_USUARIO_PADRAO)) {
+						u.addPapel(Papel.ADMIN);
+					} else {
+						u.addPapel(Papel.EQUIPE);
+					}
 					userSvc.save(u);
-					System.out.println("Salvando usuario");
+					System.out.println("Salvando usuario " + u);
 					trans.commit();
 				}
 			}
@@ -229,6 +243,11 @@ public class ImporterTests {
 						EntityTransaction trans = em.getTransaction();
 
 						try {
+							if (p.tipo == null || p.numero == null || p.ano == null) {
+								System.err.println("Entrada invalida:");
+								System.err.println(p);
+								continue;
+							}
 							Collection<Proposicao> proposicoesWS = parserPropCamara.searchProposicao(p.tipo, p.numero,
 									Integer.parseInt(p.ano));
 							if (proposicoesWS.isEmpty()) {
@@ -242,7 +261,9 @@ public class ImporterTests {
 							}
 							Proposicao prop = proposicoesWS.iterator().next();
 							Proposicao propdb = proposicaoService.buscarPorIdProposicao(prop.getIdProposicao());
+							boolean existente = false;
 							if (propdb != null) {
+								existente = true;
 								prop = propdb;
 							}
 							String emailResp = atribuidoToResponsavel.get(p.responsavel);
@@ -293,7 +314,7 @@ public class ImporterTests {
 							}
 
 							proposicaoService.save(prop);
-							if (p.drive != null && p.drive.length() > 0) {
+							if (existente == false && p.drive != null && p.drive.length() > 0) {
 								EncaminhamentoProposicao ep = new EncaminhamentoProposicao();
 								// Comentario ce = new Comentario();
 								// ce.setAutor(userSvc.findByEmail(EMAIL_USUARIO_PADRAO));
@@ -301,7 +322,7 @@ public class ImporterTests {
 								// ce.setDescricao("Buscar do Drive: " +
 								// p.drive);
 								// ce.setDataCriacao(new Date());
-//								ep.setComentario(ce);
+								// ep.setComentario(ce);
 								ep.setDetalhes("Buscar do Drive: " + p.drive);
 								if (responsavel != null) {
 									ep.setResponsavel(responsavel);
@@ -333,7 +354,7 @@ public class ImporterTests {
 							if (p.posicaoSAL != null && p.posicaoSAL.length() > 0) {
 								trans = em.getTransaction();
 								trans.begin();
-								Posicionamento posicionamento = posicionamentos.get(p.posicaoSAL.toLowerCase());
+								Posicionamento posicionamento = posicionamentoCache.get(p.posicaoSAL.toLowerCase());
 								if (posicionamento != null) {
 									// System.out.println("Achou " +
 									// posicionamento);
@@ -344,12 +365,19 @@ public class ImporterTests {
 										posicionamento = new Posicionamento();
 										posicionamento.setNome(p.posicaoSAL.trim());
 										em.persist(posicionamento);
-										posicionamentos.put(posicionamento.getNome(), posicionamento);
+										em.flush();
+										posicionamentoCache.put(posicionamento.getNome(), posicionamento);
+
 										// System.err.println("Posicionametno novo "
 										// + p.posicaoSAL);
 									}
 								}
-								if (posicionamentos != null) {
+
+								trans.commit();
+
+								if (posicionamento != null) {
+									trans = em.getTransaction();
+									trans.begin();
 									PosicionamentoProposicao pp = new PosicionamentoProposicao();
 									pp.setDataCriacao(new Date());
 									pp.setProposicao(prop);
@@ -361,13 +389,12 @@ public class ImporterTests {
 									pp.setPosicionamento(posicionamento);
 									em.persist(pp);
 									prop.setPosicionamentoAtual(pp);
+									trans.commit();
 								}
-								trans.commit();
 							}
 							if (p.pauta.length() > 0) {
 								trans = em.getTransaction();
 								trans.begin();
-								// System.out.println("PAUTA " + p.pauta);
 								prop = proposicaoService.buscarPorIdProposicao(prop.getIdProposicao());
 								proposicaoService.syncDadosPautaProposicao(prop.getId());
 								trans.commit();
@@ -394,12 +421,14 @@ public class ImporterTests {
 
 	@Test
 	public void testDBAccess() {
-		try {
 
+		try {
 			processaExcel();
+
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
+
 			fail();
 		}
 	}
@@ -449,8 +478,11 @@ class ProposicalXLS {
 	}
 
 	Matcher m = null;
+	int rowNumber = -1;
 
 	ProposicalXLS(Row r) {
+		rowNumber = r.getRowNum();
+
 		int c = 0;
 		if ("Câmara".equals(r.getCell(c).getStringCellValue())) {
 			origem = Origem.CAMARA;
@@ -507,6 +539,6 @@ class ProposicalXLS {
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return origem.name() + " " + sigla + " (" + numero + "/" + ano + ")";
+		return rowNumber + ":" + origem.name() + " " + sigla + " (" + numero + "/" + ano + ")";
 	}
 }

@@ -36,6 +36,7 @@ public class ParserComissoesCamara {
 		xstream.addImplicitCollection(ListaComissoes.class, "comissoes");
 		xstream.aliasAttribute(Comissao.class, "id", "id");
 		xstream.aliasAttribute(Comissao.class, "sigla", "sigla");
+		xstream.aliasAttribute(Comissao.class, "nome", "descricao");
 	}
 }
 

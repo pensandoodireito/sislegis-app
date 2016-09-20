@@ -63,6 +63,7 @@ import br.gov.mj.sislegis.app.parser.senado.ParserVotacaoSenado;
 import br.gov.mj.sislegis.app.seiws.RetornoConsultaProcedimento;
 import br.gov.mj.sislegis.app.seiws.SeiServiceLocator;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
+import br.gov.mj.sislegis.app.service.AreaDeMeritoService;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
@@ -104,6 +105,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	@Inject
 	private ReuniaoService reuniaoService;
+
+	@Inject
+	private AreaDeMeritoService areaMeritoService;
 
 	@Inject
 	private ReuniaoProposicaoService reuniaoProposicaoService;
@@ -1083,6 +1087,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			proposicao.setTotalEncaminhamentos(encaminhamentoProposicaoService.totalByProposicao(proposicao.getId()));
 			proposicao.setTotalPautasComissao(totalProposicaoPautaComissaoByProposicao(proposicao.getId()));
 			proposicao.setTotalNotasTecnicas(getNotaTecnicas(proposicao.getId()).size());
+			proposicao.setTotalParecerAreaMerito(areaMeritoService.listRevisoesProposicao(proposicao.getId()).size());
 
 			PosicionamentoProposicao posicionamentoProposicao;
 			try {
@@ -1363,6 +1368,13 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		this.comissaoService = (ComissaoService) injections[4];
 		comentarioService = (ComentarioService) injections[5];
 		parserPautaCamara = new ParserPautaCamara();
+		parserPautaSenado = new ParserPautaSenado();
+
+	}
+
+	@Override
+	public void deleteNotaById(Long idNota) {
+		getEntityManager().remove(getEntityManager().find(NotaTecnica.class, idNota));
 
 	}
 

@@ -63,7 +63,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @NamedQueries({ 
 	@NamedQuery(
 			name = "findByUniques", 
-			query = "select p from Proposicao p where p.idProposicao=:idProposicao and p.origem=:origem")
+			query = "select p from Proposicao p where p.idProposicao=:idProposicao and p.origem=:origem"),
+	@NamedQuery(
+				name = "findByPosicionamento", 
+				query = "select p from Proposicao p where p.posicionamentoAtual.id=:id")	
 
 })
 //@formatter:on
@@ -169,7 +172,8 @@ public class Proposicao extends AbstractEntity {
 	private Integer totalComentarios = 0;
 	@Transient
 	private Integer totalNotasTecnicas = 0;
-
+	@Transient
+	private Integer totalParecerAreaMerito = 0;
 	@Transient
 	private Integer totalEncaminhamentos = 0;
 
@@ -194,6 +198,9 @@ public class Proposicao extends AbstractEntity {
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "proposicao")
 	private List<ProcessoSei> processosSei;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "proposicao", cascade = CascadeType.REMOVE)
+	private List<NotaTecnica> notatecnicas = new ArrayList<NotaTecnica>();
 
 	public Proposicao() {
 		super();
@@ -572,5 +579,13 @@ public class Proposicao extends AbstractEntity {
 
 	public void setTotalNotasTecnicas(Integer totalNotasTecnicas) {
 		this.totalNotasTecnicas = totalNotasTecnicas;
+	}
+
+	public Integer getTotalParecerAreaMerito() {
+		return totalParecerAreaMerito;
+	}
+
+	public void setTotalParecerAreaMerito(Integer totalParecerAreaMerito) {
+		this.totalParecerAreaMerito = totalParecerAreaMerito;
 	}
 }
