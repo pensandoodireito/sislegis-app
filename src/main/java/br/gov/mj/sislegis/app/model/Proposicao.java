@@ -137,6 +137,10 @@ public class Proposicao extends AbstractEntity {
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "posicionamento_atual_id", nullable = true)
 	private PosicionamentoProposicao posicionamentoAtual;
+	
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "posicionamento_supar_id", nullable = true)
+	private Posicionamento posicionamentoSupar;
 
 	@Transient
 	private Boolean posicionamentoPreliminar;
@@ -587,5 +591,13 @@ public class Proposicao extends AbstractEntity {
 
 	public void setTotalParecerAreaMerito(Integer totalParecerAreaMerito) {
 		this.totalParecerAreaMerito = totalParecerAreaMerito;
+	}
+
+	public Posicionamento getPosicionamentoSupar() {
+		return posicionamentoSupar;
+	}
+
+	public void setPosicionamentoSupar(Posicionamento posicionamentoSupar) {
+		this.posicionamentoSupar = posicionamentoSupar;
 	}
 }
