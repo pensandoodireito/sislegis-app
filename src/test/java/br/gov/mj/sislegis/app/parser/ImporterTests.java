@@ -22,6 +22,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -170,7 +171,7 @@ public class ImporterTests {
 		List<Posicionamento> posicoes = posicionamentoSvc.listAll();
 		for (Iterator iterator = posicoes.iterator(); iterator.hasNext();) {
 			Posicionamento posicionamento = (Posicionamento) iterator.next();
-			posicionamentoCache.put(posicionamento.getNome().toLowerCase(), posicionamento);
+			posicionamentoCache.put(posicionamento.getNome().trim().toLowerCase(), posicionamento);
 		}
 		for (Iterator iterator = tipoEncaminhamentoService.listAll().iterator(); iterator.hasNext();) {
 			TipoEncaminhamento enc = (TipoEncaminhamento) iterator.next();
@@ -188,6 +189,8 @@ public class ImporterTests {
 		}
 
 	}
+
+	boolean debug = false;
 
 	private void processaExcel() throws IOException {
 		for (Iterator iterator = atribuidoToResponsavel.keySet().iterator(); iterator.hasNext();) {
@@ -221,16 +224,23 @@ public class ImporterTests {
 		// for (int i = 0; i < wb.getNumberOfSheets(); i++) {
 		// Sheet sheet = wb.getSheetAt(i);
 		{
-			Sheet sheet = wb.getSheet("Projetos");
+			Sheet sheet = wb.getSheetAt(0);// heet("Projetos");
 			int k = 0;
 			for (Row row : sheet) {
 				ParserPautaCamara pautaCamara = new ParserPautaCamara();
 				ParserPautaSenado pautaSenado = new ParserPautaSenado();
 				if (row.getCell(0) != null) {
-					String origem = row.getCell(0).getStringCellValue();
-					if ("Câmara".equals(origem) || "Senado".equals(origem)) {
 
+					String origem = "";
+					try {
+						origem = row.getCell(0).getStringCellValue();
+					} catch (Exception e) {
+
+					}
+
+					if ("Câmara".equals(origem) || "Senado".equals(origem)) {
 						ProposicalXLS p = new ProposicalXLS(row);
+
 						// if (!p.numero.equals("30") || !p.ano.equals("2015"))
 						// {
 						// continue;
@@ -241,13 +251,16 @@ public class ImporterTests {
 							parserPropCamara = new ParserProposicaoSenado();
 						}
 						EntityTransaction trans = em.getTransaction();
-
+						Proposicao prop = null;
 						try {
 							if (p.tipo == null || p.numero == null || p.ano == null) {
 								System.err.println("Entrada invalida:");
 								System.err.println(p);
 								continue;
 							}
+							// if(!p.numero.equals("5202")){
+							// continue;
+							// }
 							Collection<Proposicao> proposicoesWS = parserPropCamara.searchProposicao(p.tipo, p.numero,
 									Integer.parseInt(p.ano));
 							if (proposicoesWS.isEmpty()) {
@@ -259,12 +272,18 @@ public class ImporterTests {
 								}
 
 							}
-							Proposicao prop = proposicoesWS.iterator().next();
+							prop = proposicoesWS.iterator().next();
 							Proposicao propdb = proposicaoService.buscarPorIdProposicao(prop.getIdProposicao());
 							boolean existente = false;
 							if (propdb != null) {
 								existente = true;
 								prop = propdb;
+							}
+							if (debug) {
+								trans = em.getTransaction();
+								trans.begin();
+								proposicaoService.save(prop);
+								trans.commit();
 							}
 							String emailResp = atribuidoToResponsavel.get(p.responsavel);
 							Usuario responsavel = null;
@@ -273,56 +292,80 @@ public class ImporterTests {
 							}
 							// System.out.println(p.responsavel + " " +
 							// responsavel);
+							if (p.tema.length() > 5000) {
+								p.tema = p.tema.substring(0, 5000);
+							}
+							if (debug) {
+								trans = em.getTransaction();
+								trans.begin();
+							}
 							prop.setExplicacao(p.tema);
 							prop.setResponsavel(responsavel);
 							prop.setParecerSAL(p.providencias);
-
+							if (debug) {
+								proposicaoService.save(prop);
+								trans.commit();
+								trans = em.getTransaction();
+								trans.begin();
+							}
 							prop.setResultadoASPAR(p.asparTxt);
 							prop.setFavorita(p.prioritario);
+							if (debug) {
+								proposicaoService.save(prop);
+								trans.commit();
+								trans = em.getTransaction();
+							}
 
 							if (p.despachado) {
 								prop.setEstado(EstadoProposicao.DESPACHADA);
 							} else {
-								prop.setEstado(EstadoProposicao.EMANALISE);
-							}
-							trans.begin();
-							List<Tag> tags = tagService.buscaPorSufixo(p.macrotema);
-							Tag t = new Tag();
-							if (tags.isEmpty()) {
-								if (p.macrotema != null && p.macrotema.length() > 0) {
-									// System.err.println("** Nenhuma tag para "
-									// + p.macrotema);
-
-									t.setTag(p.macrotema.trim());
-
-									t = tagService.save(t);
-									// System.out.println(t.getId());
-									// tags =
-									// tagService.buscaPorSufixo(p.macrotema);
-									// System.out.println(tags.size());
-									tags.add(t);
+								if (p.situacao != null && p.situacao.toLowerCase().contains("feita")) {
+									prop.setEstado(EstadoProposicao.ADESPACHAR);
+								} else {
+									prop.setEstado(EstadoProposicao.EMANALISE);
 								}
-							} else {
-								// System.err.println("Encontrou tag para " +
-								// p.macrotema + " = " + tags.size());
-								t = tags.iterator().next();
 							}
-							prop.setTags(tags);
+							trans.begin();// verdadeiro
+							if (p.macrotema != null) {
+								List<Tag> tags = tagService.buscaPorSufixo(p.macrotema.trim());
+								Tag t = new Tag();
+								if (tags.isEmpty()) {
+									if (p.macrotema != null && p.macrotema.trim().length() > 0) {
+										if (p.macrotema.length() > 255) {
+											System.err.println("macrotema muito longo " + p.macrotema + " " + p);
+											p.macrotema = p.macrotema.substring(0, 254);
+										}
+										t.setTag(p.macrotema.trim());
+
+										t = tagService.save(t);
+
+										tags.add(t);
+									}
+								} else {
+
+									t = tags.iterator().next();
+								}
+								prop.setTags(tags);
+							}
+							if (debug) {
+								proposicaoService.save(prop);
+								trans.commit();
+								trans = em.getTransaction();
+								trans.begin();
+							}
 							if (p.comissao != null && p.comissao.length() > 0
 									&& p.comissao.length() < "COMISSÃO ESPECIAL".length()) {
 								prop.setComissao(p.comissao);
 							}
 
 							proposicaoService.save(prop);
+							if (debug) {
+								trans.commit();
+								trans = em.getTransaction();
+								trans.begin();
+							}
 							if (existente == false && p.drive != null && p.drive.length() > 0) {
 								EncaminhamentoProposicao ep = new EncaminhamentoProposicao();
-								// Comentario ce = new Comentario();
-								// ce.setAutor(userSvc.findByEmail(EMAIL_USUARIO_PADRAO));
-								// ce.setProposicao(prop);
-								// ce.setDescricao("Buscar do Drive: " +
-								// p.drive);
-								// ce.setDataCriacao(new Date());
-								// ep.setComentario(ce);
 								ep.setDetalhes("Buscar do Drive: " + p.drive);
 								if (responsavel != null) {
 									ep.setResponsavel(responsavel);
@@ -332,7 +375,11 @@ public class ImporterTests {
 								encaminhamentoService.salvarEncaminhamentoProposicao(ep);
 
 							}
-
+							if (debug) {
+								trans.commit();
+								trans = em.getTransaction();
+								trans.begin();
+							}
 							if (p.areaDeMerito != null && p.areaDeMerito.length() > 0
 									&& !"Não há".equals(p.areaDeMerito)) {
 								Comentario c = new Comentario();
@@ -341,20 +388,21 @@ public class ImporterTests {
 								} else {
 									c.setAutor(userSvc.findByEmail(EMAIL_USUARIO_PADRAO));
 								}
+								if (p.areaDeMerito.length() > 255) {
+									p.areaDeMerito = p.areaDeMerito.substring(0, 252) + "..";
+								}
 								c.setDescricao(p.areaDeMerito);
-								// System.out.println(p.areaDeMerito + " " +
-								// prop.getNumero());
+
 								c.setProposicao(prop);
 								c.setDataCriacao(new Date());
 								em.persist(c);
 							}
-
 							trans.commit();
 
 							if (p.posicaoSAL != null && p.posicaoSAL.length() > 0) {
-								trans = em.getTransaction();
-								trans.begin();
-								Posicionamento posicionamento = posicionamentoCache.get(p.posicaoSAL.toLowerCase());
+
+								Posicionamento posicionamento = posicionamentoCache.get(p.posicaoSAL.trim()
+										.toLowerCase());
 								if (posicionamento != null) {
 									// System.out.println("Achou " +
 									// posicionamento);
@@ -362,18 +410,19 @@ public class ImporterTests {
 									if ("".equals(p.posicaoSAL)) {
 
 									} else {
+										trans = em.getTransaction();
+										trans.begin();
 										posicionamento = new Posicionamento();
 										posicionamento.setNome(p.posicaoSAL.trim());
 										em.persist(posicionamento);
 										em.flush();
-										posicionamentoCache.put(posicionamento.getNome(), posicionamento);
-
+										posicionamentoCache.put(posicionamento.getNome().trim().toLowerCase(),
+												posicionamento);
+										trans.commit();
 										// System.err.println("Posicionametno novo "
 										// + p.posicaoSAL);
 									}
 								}
-
-								trans.commit();
 
 								if (posicionamento != null) {
 									trans = em.getTransaction();
@@ -391,7 +440,42 @@ public class ImporterTests {
 									prop.setPosicionamentoAtual(pp);
 									trans.commit();
 								}
+
 							}
+
+							if (p.supar != null && p.supar.trim().length() > 0) {
+								p.supar = p.supar.trim();
+								Posicionamento posicionamento = posicionamentoCache.get(p.supar.toLowerCase());
+								if (posicionamento != null) {
+
+								} else {
+									if ("".equals(p.supar)) {
+
+									} else {
+										trans = em.getTransaction();
+										trans.begin();
+										posicionamento = new Posicionamento();
+										posicionamento.setNome(p.supar);
+										em.persist(posicionamento);
+										em.flush();
+										posicionamentoCache.put(posicionamento.getNome().trim().toLowerCase(),
+												posicionamento);
+										trans.commit();
+										// System.err.println("Posicionametno novo "
+										// + p.posicaoSAL);
+									}
+								}
+
+								if (posicionamento != null) {
+									trans = em.getTransaction();
+									trans.begin();
+									prop.setPosicionamentoSupar(posicionamento);
+									proposicaoService.save(prop);
+									trans.commit();
+								}
+
+							}
+
 							if (p.pauta.length() > 0) {
 								trans = em.getTransaction();
 								trans.begin();
@@ -401,7 +485,14 @@ public class ImporterTests {
 							}
 
 						} catch (Exception e) {
-							System.err.println("Falhou ao processar " + p);
+							System.err.println("Falhou ao processar " + p + " " + p.comissao.length() + " "
+									+ p.situacao.length());
+							System.out.println(prop.getComissao().length() + " n:" + prop.getNumero().length() + " l:"
+									+ prop.getLinkProposicao().length() + " sit:" + prop.getSituacao().length() + " a:"
+									+ prop.getAutor().length());
+
+							p.printRow();
+
 							e.printStackTrace();
 							Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
 									"Falhou ao processar " + p, e);
@@ -417,6 +508,30 @@ public class ImporterTests {
 			}
 		}
 
+	}
+
+	// @Test
+	public void propCheck() {
+		try {
+			ProposicaoSearcher parserPropCamara = new ParserProposicaoCamara();
+			Collection<Proposicao> proposicoesWS = parserPropCamara.searchProposicao("PL", "4941", 2016);
+			Proposicao prop = proposicoesWS.iterator().next();
+			Proposicao propdb = proposicaoService.buscarPorIdProposicao(prop.getIdProposicao());
+			boolean existente = false;
+			if (propdb != null) {
+				existente = true;
+				prop = propdb;
+				System.err.println(existente);
+			}
+			EntityTransaction trans = em.getTransaction();
+			trans = em.getTransaction();
+			trans.begin();
+			proposicaoService.save(prop);
+			trans.commit();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Test
@@ -477,30 +592,127 @@ class ProposicalXLS {
 		return false;
 	}
 
-	Matcher m = null;
-	int rowNumber = -1;
+	public void printRow() {
+		int i = 0;
+		for (Iterator<Cell> iterator = r.cellIterator(); iterator.hasNext();) {
+			Cell type = (Cell) iterator.next();
+			try {
+				String col = "?";
+				for (Iterator iterator2 = colunas.keySet().iterator(); iterator2.hasNext();) {
+					String c = (String) iterator2.next();
+					Integer pos = colunas.get(c);
+					if (pos == i) {
+						col = c;
+						break;
+					}
 
-	ProposicalXLS(Row r) {
-		rowNumber = r.getRowNum();
+				}
+				System.out.println(i + ":'" + col + "':" + type.getStringCellValue().length() + ":"
+						+ type.getStringCellValue());
+			} catch (Exception e) {
+				System.err.println(i + ":" + e.getMessage());
+			}
+			i++;
 
-		int c = 0;
-		if ("Câmara".equals(r.getCell(c).getStringCellValue())) {
-			origem = Origem.CAMARA;
-		} else if ("Senado".equals(r.getCell(c).getStringCellValue())) {
-			origem = Origem.SENADO;
-		} else {
-			throw new IllegalArgumentException("Origem errada " + r.getCell(c));
 		}
 
-		sigla = r.getCell(++c).getStringCellValue();
+	}
+
+	Matcher m = null;
+	int rowNumber = -1;
+	private Row r;
+	String supar;
+	static Map<String, Integer> colunas = new HashMap<String, Integer>();
+	static {
+		// Estado
+		colunas.put("origem", 0);
+		colunas.put("sigla", 1);
+		colunas.put("autoria", 2);
+		colunas.put("tema", 3);
+		colunas.put("areaDeMerito", 4);
+		colunas.put("posicaoSAL", 5);
+		colunas.put("prioritario", 6);
+		colunas.put("despachado", 7);
+		colunas.put("comissao", 8);
+		colunas.put("providencias", 9);
+		colunas.put("estagio", 10);
+		colunas.put("despachoInicial", 11);
+		colunas.put("responsavel", 12);
+		colunas.put("drive", 13);
+		colunas.put("macrotema", 14);
+		colunas.put("pauta", 15);
+		colunas.put("asparTxt", 16);
+		colunas.put("supar", 17);
+		colunas.put("situacao", 18);
+		// // Penal
+		// colunas.put("origem", 0);
+		// colunas.put("sigla", 1);
+		// colunas.put("autoria", 2);
+		// colunas.put("tema", 3);
+		// colunas.put("areaDeMerito", 4);
+		// colunas.put("posicaoSAL", 5);
+		// colunas.put("prioritario", 6);
+		// colunas.put("despachado", 7);
+		// colunas.put("comissao", 8);
+		//
+		// colunas.put("situacao", 9);
+		// colunas.put("responsavel", 10);
+		// colunas.put("providencias", 11);
+		// colunas.put("pauta", 12);
+		// colunas.put("asparTxt", 15);
+		//
+		// colunas.put("despachoInicial", 20);
+		// colunas.put("drive", 20);
+		// colunas.put("macrotema", 20);
+		// colunas.put("estagio", 20);
+		// colunas.put("supar", 20);
+
+		// Pessoa
+		// colunas.put("origem", 0);
+		// colunas.put("sigla", 1);
+		// colunas.put("autoria", 2);
+		// colunas.put("tema", 3);
+		// colunas.put("areaDeMerito", 4);
+		// colunas.put("posicaoSAL", 5);
+		// colunas.put("prioritario", 6);
+		// colunas.put("despachado", 7);
+		// colunas.put("comissao", 8);
+		// colunas.put("macrotema", 9);
+		// colunas.put("estagio", 10);
+		// colunas.put("responsavel", 11);
+		// colunas.put("providencias", 12);
+		// colunas.put("pauta", 13);
+		// colunas.put("asparTxt", 15);
+		// colunas.put("supar", 16);
+		//
+		// colunas.put("despachoInicial", 20);
+		// colunas.put("drive", 20);
+		//
+		// colunas.put("situacao", 17);
+
+	}
+
+	ProposicalXLS(Row r) {
+		this.r = r;
+		rowNumber = r.getRowNum();
+
+		if ("Câmara".equals(r.getCell(colunas.get("origem")).getStringCellValue())) {
+			origem = Origem.CAMARA;
+		} else if ("Senado".equals(r.getCell(colunas.get("origem")).getStringCellValue())) {
+			origem = Origem.SENADO;
+		} else {
+			throw new IllegalArgumentException("Origem errada " + r.getCell(colunas.get("origem")));
+		}
+
+		sigla = r.getCell(colunas.get("sigla")).getStringCellValue();
 		m = p.matcher(sigla);
 		hasMore();
 
-		autoria = r.getCell(++c).getStringCellValue();
-		tema = r.getCell(++c).getStringCellValue();
-		areaDeMerito = r.getCell(++c).getStringCellValue();
-		posicaoSAL = r.getCell(++c).getStringCellValue();
-		String prioStr = r.getCell(++c).getStringCellValue();
+		autoria = r.getCell(colunas.get("autoria")).getStringCellValue();
+		tema = r.getCell(colunas.get("tema")).getStringCellValue();
+		areaDeMerito = r.getCell(colunas.get("areaDeMerito")).getStringCellValue();
+		posicaoSAL = r.getCell(colunas.get("posicaoSAL")).getStringCellValue();
+		String prioStr = r.getCell(colunas.get("prioritario")).getStringCellValue();
 
 		if ("Sim".equals(prioStr)) {
 			prioritario = true;
@@ -510,7 +722,7 @@ class ProposicalXLS {
 			throw new IllegalArgumentException("prioritario errada " + prioStr);
 		}
 
-		String desp = r.getCell(++c).getStringCellValue();
+		String desp = r.getCell(colunas.get("despachado")).getStringCellValue();
 
 		if ("ok".equalsIgnoreCase(desp)) {
 			despachado = true;
@@ -520,25 +732,41 @@ class ProposicalXLS {
 			System.err.println("despachado errada " + desp + " " + r.getRowNum());
 		}
 
-		comissao = r.getCell(++c).getStringCellValue();
-		providencias = r.getCell(++c).getStringCellValue();
-		estagio = r.getCell(++c).getStringCellValue();
-		despachoInicial = r.getCell(++c).getStringCellValue();
-		responsavel = r.getCell(++c).getStringCellValue();
-		Hyperlink link = r.getCell(++c).getHyperlink();
-		if (link != null) {
-			this.drive = link.getAddress();
+		comissao = r.getCell(colunas.get("comissao")).getStringCellValue();
+		providencias = r.getCell(colunas.get("providencias")).getStringCellValue();
+		if (r.getCell(colunas.get("estagio")) != null) {
+			estagio = r.getCell(colunas.get("estagio")).getStringCellValue();
+		}
+		if (r.getCell(colunas.get("despachoInicial")) != null) {
+			despachoInicial = r.getCell(colunas.get("despachoInicial")).getStringCellValue();
+		}
+		responsavel = r.getCell(colunas.get("responsavel")).getStringCellValue();
+		if (r.getCell(colunas.get("drive")) != null) {
+			Hyperlink link = r.getCell(colunas.get("drive")).getHyperlink();
+			if (link != null) {
+				this.drive = link.getAddress();
+			}
+		}
+		if (r.getCell(colunas.get("macrotema")) != null) {
+			macrotema = r.getCell(colunas.get("macrotema")).getStringCellValue();
+		}
+		pauta = r.getCell(colunas.get("pauta")).getStringCellValue();
+		if (r.getCell(colunas.get("asparTxt")) != null) {
+			asparTxt = r.getCell(colunas.get("asparTxt")).getStringCellValue();
+		}
+		if (r.getCell(colunas.get("situacao")) != null) {
+			situacao = r.getCell(colunas.get("situacao")).getStringCellValue();
 		}
 
-		macrotema = r.getCell(++c).getStringCellValue();
-		pauta = r.getCell(++c).getStringCellValue();
-		asparTxt = r.getCell(++c).getStringCellValue();
-		situacao = r.getCell(++c).getStringCellValue();
+		if (r.getCell(colunas.get("supar")) != null) {
+			supar = r.getCell(colunas.get("supar")).getStringCellValue();
+		}
+		System.out.println(this);
 	}
 
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return rowNumber + ":" + origem.name() + " " + sigla + " (" + numero + "/" + ano + ")";
+		return rowNumber + ":" + origem.name() + " " + sigla + " (" + numero + "/" + ano + ")" + " " + situacao;
 	}
 }

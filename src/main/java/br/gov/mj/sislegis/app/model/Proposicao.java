@@ -100,10 +100,10 @@ public class Proposicao extends AbstractEntity {
 	@Column
 	private String situacao;
 
-	@Column(name = "parecer_sal")
+	@Column(name = "parecer_sal", length = 5000)
 	private String parecerSAL;
 
-	@Column(name = "explicacao_sal")
+	@Column(name = "explicacao_sal", length = 5000)
 	private String explicacao;
 
 	@Column
@@ -137,7 +137,7 @@ public class Proposicao extends AbstractEntity {
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "posicionamento_atual_id", nullable = true)
 	private PosicionamentoProposicao posicionamentoAtual;
-	
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "posicionamento_supar_id", nullable = true)
 	private Posicionamento posicionamentoSupar;
@@ -277,6 +277,10 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public void setAutor(String autor) {
+		if (autor.length() > 255) {
+			System.err.println("autor muito longo:" + this);
+			autor = autor.substring(0, 255);
+		}
 		this.autor = autor;
 	}
 
