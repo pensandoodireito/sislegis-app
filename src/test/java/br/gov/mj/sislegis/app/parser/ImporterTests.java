@@ -34,6 +34,7 @@ import org.junit.Test;
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.Equipe;
 import br.gov.mj.sislegis.app.model.EstadoProposicao;
 import br.gov.mj.sislegis.app.model.Papel;
 import br.gov.mj.sislegis.app.model.Posicionamento;
@@ -49,6 +50,7 @@ import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
+import br.gov.mj.sislegis.app.service.EquipeService;
 import br.gov.mj.sislegis.app.service.NotificacaoService;
 import br.gov.mj.sislegis.app.service.PosicionamentoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
@@ -61,6 +63,7 @@ import br.gov.mj.sislegis.app.service.ejbs.ComissaoServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.EJBDataCacherImpl;
 import br.gov.mj.sislegis.app.service.ejbs.EJBUnitTestable;
 import br.gov.mj.sislegis.app.service.ejbs.EncaminhamentoProposicaoServiceEjb;
+import br.gov.mj.sislegis.app.service.ejbs.EquipeServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.NotificacaoServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.PosicionamentoServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.ProposicaoServiceEjb;
@@ -80,6 +83,7 @@ public class ImporterTests {
 	TipoEncaminhamentoService tipoEncaminhamentoService;
 	EncaminhamentoProposicaoService encaminhamentoService;
 	TarefaService tarefaService;
+	EquipeService equipeService;
 	NotificacaoService notiService;
 	ComentarioService comentarioService;
 	private UsuarioService userSvc;
@@ -90,23 +94,8 @@ public class ImporterTests {
 	private ReuniaoServiceEjb reuniaoEJB;
 	private ReuniaoProposicaoServiceEjb reuniaoProposicaoEJB;
 
-	static Map<String, String> atribuidoToResponsavel = new HashMap<String, String>();
-	static Map<String, String> nomeCompleto = new HashMap<String, String>();
+	static Map<String, Usuario> atribuidoToResponsavel = new HashMap<String, Usuario>();
 	static {
-		String[] user = { "Eduarda", "Guilherme", "Leonardo", "Marcelo", "Natalia", "Paula", "Sem atribuição",
-				"Afonso", "Ana Carla Couto de Miranda Castro" };
-		String[] userCompleto = { "Eduarda Cintra", "Guilherme Moraes Rego", "Leonardo Povoa", "Marcelo Bastos",
-				"Natalia Langenegger", "Paula Leal", "Sem atribuição", "Afonso Almeida",
-				"Ana Carla Couto de Miranda Castro" };
-		String[] userEmail = { "eduarda.cintra@mj.gov.br", "guilherme.moraesrego@mj.gov.br",
-				"leonardo.povoa@mj.gov.br", "marcelo.bastos@mj.gov.br", "natalia.langenegger@mj.gov.br",
-				"paula.leal@mj.gov.br", null, "afonso.almeida@mj.gov.br", "ana.couto@mj.gov.br" };
-
-		for (int i = 0; i < userEmail.length; i++) {
-			atribuidoToResponsavel.put(user[i], userEmail[i]);
-			nomeCompleto.put(user[i], userCompleto[i]);
-
-		}
 
 	}
 	Map<String, Posicionamento> posicionamentoCache = new HashMap<String, Posicionamento>();
@@ -149,6 +138,7 @@ public class ImporterTests {
 		encaminhamentoService = new EncaminhamentoProposicaoServiceEjb();
 		tarefaService = new TarefaServiceEjb();
 		notiService = new NotificacaoServiceEjb();
+		equipeService = new EquipeServiceEjb();
 
 		reuniaoProposicaoEJB = new ReuniaoProposicaoServiceEjb();
 		reuniaoProposicaoEJB.setInjectedEntities(em);
@@ -168,6 +158,9 @@ public class ImporterTests {
 		((EJBUnitTestable) tagService).setInjectedEntities(em);
 		tipoEncaminhamentoService = new TipoEncaminhamentoServiceEjb();
 		((EJBUnitTestable) tipoEncaminhamentoService).setInjectedEntities(em);
+
+		((EJBUnitTestable) equipeService).setInjectedEntities(em, userSvc);
+
 		List<Posicionamento> posicoes = posicionamentoSvc.listAll();
 		for (Iterator iterator = posicoes.iterator(); iterator.hasNext();) {
 			Posicionamento posicionamento = (Posicionamento) iterator.next();
@@ -188,34 +181,117 @@ public class ImporterTests {
 			trans.commit();
 		}
 
+		initUsers();
+
 	}
 
 	boolean debug = false;
 
-	private void processaExcel() throws IOException {
-		for (Iterator iterator = atribuidoToResponsavel.keySet().iterator(); iterator.hasNext();) {
-			String nome = (String) iterator.next();
-			String email = atribuidoToResponsavel.get(nome);
-			String nomeCompletoStr = nomeCompleto.get(nome);
+	private void checkCreate(String[] useralias, String[] usernames, String[] userEmails, Equipe equipe) {
+
+		for (int i = 0; i < useralias.length; i++) {
+
+			String nome = useralias[i];
+			String email = userEmails[i];
+			String nomeCompletoStr = usernames[i];
+
 			if (email != null) {
-				if (userSvc.findByEmail(email) == null) {
+				Usuario u = userSvc.findByEmail(email);
+				if (u == null) {
 					EntityTransaction trans = em.getTransaction();
 					trans.begin();
-					Usuario u = new Usuario();
+					u = new Usuario();
 					u.setEmail(email);
 					u.setNome(nomeCompletoStr);
+					u.setEquipe(equipe);
 					if (email.equals(EMAIL_USUARIO_PADRAO)) {
 						u.addPapel(Papel.ADMIN);
 					} else {
 						u.addPapel(Papel.EQUIPE);
 					}
+
 					userSvc.save(u);
 					System.out.println("Salvando usuario " + u);
 					trans.commit();
+
 				}
+
+				atribuidoToResponsavel.put(nome, u);
 			}
 
 		}
+	}
+
+	private void initUsers() {
+
+		String[] userEstadp = { "Eduarda", "Guilherme", "Leonardo", "Marcelo", "Natalia", "Paula", "Sem atribuição",
+				"Afonso", "Ana Carla Couto de Miranda Castro" };
+		String[] userCompletoEstado = { "Eduarda Cintra", "Guilherme Moraes Rego", "Leonardo Povoa", "Marcelo Bastos",
+				"Natalia Langenegger", "Paula Leal", "Sem atribuição", "Afonso Almeida",
+				"Ana Carla Couto de Miranda Castro" };
+		String[] userEmailEstado = { "eduarda.cintra@mj.gov.br", "guilherme.moraesrego@mj.gov.br",
+				"leonardo.povoa@mj.gov.br", "marcelo.bastos@mj.gov.br", "natalia.langenegger@mj.gov.br",
+				"paula.leal@mj.gov.br", null, "afonso.almeida@mj.gov.br", "ana.couto@mj.gov.br" };
+		String nomeEquipe = "Organização do Estado";
+		Equipe estado = getEquipe(nomeEquipe);
+
+		checkCreate(userEstadp, userCompletoEstado, userEmailEstado, estado);
+
+		// Adriana- adriana.ligeiro@mj.gov.br
+		// Mariana –
+		// mariana.carvalho@mj.gov.br<mailto:mariana.carvalho@mj.gov.br>
+		// Rodrigo –
+		// rodrigo.mercante@mj.gov.br<mailto:rodrigo.mercante@mj.gov.br>
+		// Clarice –
+		// clarice.oliveira@mj.gov.br<mailto:clarice.oliviera@mj.gov.br>
+		// Bernardo-
+		// bernardo.andrade.estagio@mj.gov.br<mailto:bernardo.andrade.estagio@mj.gov.br>
+		// Fernando- fernando.couto@mj.gov.br<mailto:fernando.couto@mj.gov.br>
+		// Frederico -
+		// frederico.moesch@mj.gov.br<mailto:frederico.moesch@mj.gov.br>
+
+		String[] userPenal = { "Adriana", "Mariana", "Rodrigo", "Clarice", "Bernardo", "Fernando", "Frederico",
+				"Sem atribuição" };
+		String[] userCompletoPenal = { "Adriana Ligeiro", "Mariana Carvalho", "Rodrigo Mercante", "Clarice Oliveira",
+				"Bernardo Andrade", "Fernando Couto", "Frederico Moesch", "Sem atribuição" };
+		String[] userEmailPenal = { "adriana.ligeiro@mj.gov.br", "mariana.carvalho@mj.gov.br",
+				"rodrigo.mercante@mj.gov.br", "clarice.oliveira@mj.gov.br", "bernardo.andrade.estagio@mj.gov.br",
+				"fernando.couto@mj.gov.br", "frederico.moesch@mj.gov.br", null };
+
+		Equipe penal = getEquipe("Processo e Controle Penal");
+
+		checkCreate(userPenal, userCompletoPenal, userEmailPenal, penal);
+
+		String[] userPessoa = { "Karise", "Cláudio", "Melina", "Sem atribuição" };
+		String[] userCompletoPessoa = { "Jocyane Figueroa", "Cláudio Teixeira", "Melina Siqueira", "Sem atribuição" };
+		String[] userEmailPessoa = { "jocyane.figueroa@mj.gov.br", "claudio.teixeira@mj.gov.br",
+				"melina.siqueira@mj.gov.br", null };
+
+		Equipe pessoa = getEquipe("Proteção da Pessoa");
+
+		checkCreate(userPessoa, userCompletoPessoa, userEmailPessoa, pessoa);
+
+		// Karise- jocyane.figueroa@mj.gov.br<mailto:jocyane.figueroa@mj.gov.br>
+		// Cláudio claudio.teixeira@mj.gov.br<mailto:claudio.teixeira@mj.gov.br>
+		// Melina – melina.siqueira@mj.gov.br<mailto:melina.siqueira@mj.gov.br>
+
+	}
+
+	private Equipe getEquipe(String nomeEquipe) {
+		Equipe estado = equipeService.getByName(nomeEquipe);
+		if (estado == null) {
+			EntityTransaction trans = em.getTransaction();
+			trans.begin();
+			estado = new Equipe();
+			estado.setNome(nomeEquipe);
+			em.persist(estado);
+			trans.commit();
+
+		}
+		return estado;
+	}
+
+	private void processaExcel() throws IOException {
 
 		XSSFWorkbook wb = new XSSFWorkbook(new FileInputStream(new File(
 				"/home/sislegis/workspace/b/src/main/resources/Acompanhamento PLs Estado.xlsx")));
@@ -285,11 +361,8 @@ public class ImporterTests {
 								proposicaoService.save(prop);
 								trans.commit();
 							}
-							String emailResp = atribuidoToResponsavel.get(p.responsavel);
-							Usuario responsavel = null;
-							if (emailResp != null) {
-								responsavel = userSvc.findByEmail(emailResp);
-							}
+							Usuario responsavel = atribuidoToResponsavel.get(p.responsavel);
+
 							// System.out.println(p.responsavel + " " +
 							// responsavel);
 							if (p.tema.length() > 5000) {
@@ -509,6 +582,25 @@ public class ImporterTests {
 		}
 
 	}
+
+	// // @Test
+	// public void equipe() {
+	//
+	// List<Usuario> all = userSvc.listAll();
+	// for (Iterator iterator = all.iterator(); iterator.hasNext();) {
+	// Usuario usuario = (Usuario) iterator.next();
+	// System.out.println(usuario);
+	// Set<EquipeUsuario> equipes = usuario.getEquipes();
+	// for (Iterator iterator2 = equipes.iterator(); iterator2.hasNext();) {
+	// EquipeUsuario equipeUsuario = (EquipeUsuario) iterator2.next();
+	// System.out.println(equipeUsuario.getEquipe());
+	// Map<String, String> filtros = new HashMap<String, String>();
+	// filtros.put("idEquipe", equipeUsuario.getEquipe().getId().toString());
+	// List l = proposicaoService.consultar(filtros, 0, 10);
+	// System.out.println(l.size());
+	// }
+	// }
+	// }
 
 	// @Test
 	public void propCheck() {

@@ -147,6 +147,9 @@ public class Proposicao extends AbstractEntity {
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	private Usuario responsavel;
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+	@JoinColumn(name = "idequipe", referencedColumnName = "id")
+	private Equipe equipe;
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "proposicao")
 	@OrderBy("pautaReuniaoComissao")
@@ -399,6 +402,11 @@ public class Proposicao extends AbstractEntity {
 
 	public void setResponsavel(Usuario responsavel) {
 		this.responsavel = responsavel;
+		if (responsavel == null) {
+
+		} else if (responsavel.getEquipe() != null) {
+			this.equipe = responsavel.getEquipe();
+		}
 	}
 
 	public String getResultadoASPAR() {
@@ -603,5 +611,13 @@ public class Proposicao extends AbstractEntity {
 
 	public void setPosicionamentoSupar(Posicionamento posicionamentoSupar) {
 		this.posicionamentoSupar = posicionamentoSupar;
+	}
+
+	public Equipe getEquipe() {
+		return equipe;
+	}
+
+	public void setEquipe(Equipe equipe) {
+		this.equipe = equipe;
 	}
 }

@@ -35,6 +35,7 @@ import br.gov.mj.sislegis.app.model.AlteracaoProposicao;
 import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.Equipe;
 import br.gov.mj.sislegis.app.model.EstadoProposicao;
 import br.gov.mj.sislegis.app.model.NotaTecnica;
 import br.gov.mj.sislegis.app.model.Posicionamento;
@@ -290,22 +291,15 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public List<Proposicao> consultar(Map<String, String> filtros, Integer offset, Integer limit) {
+	public List<Proposicao> consultar(Map<String, Object> filtros, Integer offset, Integer limit) {
 		StringBuilder query = new StringBuilder("SELECT p FROM Proposicao p WHERE 1=1");
-		String sigla = filtros.get("sigla");
-		String autor = filtros.get("autor");
-		String ementa = filtros.get("ementa");
-		String origem = filtros.get("origem");
-		String isFavorita = filtros.get("isFavorita");
-		String estado = filtros.get("estado");
-		Long idEquipe = null;
-		try {
-			if (filtros.get("idEquipe") != null) {
-				idEquipe = Long.parseLong(filtros.get("idEquipe"));
-			}
-		} catch (NumberFormatException e) {
-
-		}
+		String sigla = (String) filtros.get("sigla");
+		String autor = (String) filtros.get("autor");
+		String ementa = (String) filtros.get("ementa");
+		String origem = (String) filtros.get("origem");
+		String isFavorita = (String) filtros.get("isFavorita");
+		String estado = (String) filtros.get("estado");
+		Long idEquipe = (Long) filtros.get("idEquipe");
 
 		query.append(createWhereClause(sigla, null, autor, ementa, origem, isFavorita, estado, null, idEquipe, null,
 				null));
@@ -371,6 +365,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			findByIdQuery.setParameter("idResponsavel", idResponsavel);
 		}
 		if (Objects.nonNull(idEquipe)) {
+
 			findByIdQuery.setParameter("idEquipe", idEquipe);
 		}
 		if (Objects.nonNull(estado)) {
@@ -421,7 +416,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			query.append(" AND p.responsavel.id = :idResponsavel");
 		}
 		if (Objects.nonNull(idEquipe)) {
-			query.append(" AND p.responsavel.id = :idEquipe");
+			query.append(" AND  p.equipe.id = :idEquipe ");
 		}
 		if (Objects.nonNull(idPosicionamento)) {
 			if (idPosicionamento == -1) {

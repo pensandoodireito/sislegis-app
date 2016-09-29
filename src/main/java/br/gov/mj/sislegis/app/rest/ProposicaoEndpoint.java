@@ -221,10 +221,10 @@ public class ProposicaoEndpoint {
 	public List<Proposicao> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor,
 			@QueryParam("sigla") String sigla, @QueryParam("origem") String origem,
 			@QueryParam("estado") String estado, @QueryParam("isFavorita") String isFavorita,
-			@QueryParam("idEquipe") Long idEquipe,
-			@QueryParam("limit") Integer limit, @QueryParam("offset") Integer offset) {
+			@QueryParam("idEquipe") Long idEquipe, @QueryParam("limit") Integer limit,
+			@QueryParam("offset") Integer offset) {
 
-		Map m = new HashMap<String, String>();
+		Map<String, Object> m = new HashMap<String, Object>();
 		m.put("sigla", sigla);
 		m.put("ementa", ementa);
 		m.put("autor", autor);
@@ -398,6 +398,7 @@ public class ProposicaoEndpoint {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
 	}
+
 	@DELETE
 	@Path("/{id:[0-9]+}/notatecnica/{idNota:[0-9]+}")
 	@Consumes(MediaType.APPLICATION_JSON)

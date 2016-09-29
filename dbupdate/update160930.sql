@@ -11,4 +11,29 @@ ALTER TABLE proposicao ADD CONSTRAINT fk_supar_posicao FOREIGN KEY (posicionamen
 	REFERENCES posicionamento (id);
 --rollback ALTER TABLE proposicao drop CONSTRAINT fk_supar_posicao
 
+	
+--changeset coutinho:160930-3
+alter table proposicao ADD idequipe bigint;	
+--rollback alter table proposicao drop idequipe
+
+--changeset coutinho:160930-4
+ALTER TABLE proposicao ADD CONSTRAINT fk_equipe FOREIGN KEY (idequipe)
+	REFERENCES equipe (id);
+--rollback ALTER TABLE proposicao drop CONSTRAINT fk_equipe
+
+	
+	
+--changeset coutinho:160930-5
+drop TABLE equipe_usuario;
+--rollback
+	
+	
+--changeset coutinho:160930-6
+alter table usuario ADD idequipe bigint;	
+--rollback alter table usuario drop idequipe
+
+--changeset coutinho:160930-7
+ALTER TABLE usuario ADD CONSTRAINT fk_usuario_equipe FOREIGN KEY (idequipe)
+	REFERENCES equipe (id);
+--rollback ALTER TABLE proposicao drop CONSTRAINT fk_usuario_equipe
 

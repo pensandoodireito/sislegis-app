@@ -13,8 +13,11 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
@@ -43,6 +46,10 @@ public class Usuario extends AbstractEntity {
 
 	@Column
 	private String nome;
+
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "idequipe", referencedColumnName = "id", nullable = true)
+	private Equipe equipe = null;
 
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "Usuario_ProposicaoSeguida")
@@ -107,12 +114,11 @@ public class Usuario extends AbstractEntity {
 
 	@Override
 	public String toString() {
-		String result = getClass().getSimpleName() + " " + getId() + ":";
-		if (nome != null && !nome.trim().isEmpty())
-			result += "nome: " + nome;
-		if (email != null && !email.trim().isEmpty())
-			result += ", email: " + email;
-		return result;
+		StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName()).append(" ").append(getId()).append(":").append(email).append(" > ")
+				.append(equipe);
+
+		return sb.toString();
 	}
 
 	public void addPapel(Papel p) {
@@ -125,6 +131,14 @@ public class Usuario extends AbstractEntity {
 
 	public Set<Papel> getPapeis() {
 		return papeis;
+	}
+
+	public Equipe getEquipe() {
+		return equipe;
+	}
+
+	public void setEquipe(Equipe equipe) {
+		this.equipe = equipe;
 	}
 
 }
