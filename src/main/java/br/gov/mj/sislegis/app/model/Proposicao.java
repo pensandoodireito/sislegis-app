@@ -1,6 +1,7 @@
 package br.gov.mj.sislegis.app.model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -28,6 +29,10 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -75,7 +80,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 public class Proposicao extends AbstractEntity {
 
 	private static final long serialVersionUID = 7949894944142814382L;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "created", nullable = false)
+	private Date created;
 
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "updated", nullable = false)
+	private Date updated;
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id", updatable = false, nullable = false)
@@ -211,6 +222,7 @@ public class Proposicao extends AbstractEntity {
 
 	public Proposicao() {
 		super();
+		this.created = this.updated = new Date();
 		this.estado = EstadoProposicao.FORADEPAUTA;
 	}
 
@@ -619,5 +631,15 @@ public class Proposicao extends AbstractEntity {
 
 	public void setEquipe(Equipe equipe) {
 		this.equipe = equipe;
+	}
+
+	@PrePersist
+	protected void onCreate() {
+		updated = created = new Date();
+	}
+
+	@PreUpdate
+	protected void onUpdate() {
+		updated = new Date();
 	}
 }

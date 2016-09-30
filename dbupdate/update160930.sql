@@ -37,3 +37,10 @@ ALTER TABLE usuario ADD CONSTRAINT fk_usuario_equipe FOREIGN KEY (idequipe)
 	REFERENCES equipe (id);
 --rollback ALTER TABLE proposicao drop CONSTRAINT fk_usuario_equipe
 
+	
+--changeset coutinho:160930-8
+alter table proposicao ADD created timestamp not null;
+--rollback ALTER TABLE proposicao drop created
+--changeset coutinho:160930-9
+alter table proposicao ADD updated timestamp not null;
+--rollback ALTER TABLE proposicao drop created

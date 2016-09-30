@@ -161,11 +161,30 @@ public class ImporterTests {
 
 		((EJBUnitTestable) equipeService).setInjectedEntities(em, userSvc);
 
+		initPosicionamentos();
 		List<Posicionamento> posicoes = posicionamentoSvc.listAll();
 		for (Iterator iterator = posicoes.iterator(); iterator.hasNext();) {
 			Posicionamento posicionamento = (Posicionamento) iterator.next();
+			System.out.println("Posicionamentos: '" + posicionamento.getNome() + "'");
 			posicionamentoCache.put(posicionamento.getNome().trim().toLowerCase(), posicionamento);
 		}
+		posicionamentoCache.put("Pela rejeição".toLowerCase(), posicionamentoSvc.getByName("Contrário"));
+		posicionamentoCache.put("Pela rejeição.".toLowerCase(), posicionamentoSvc.getByName("Contrário"));
+		posicionamentoCache.put("Pela rejeição (16/09/16)".toLowerCase(), posicionamentoSvc.getByName("Contrário"));
+		posicionamentoCache.put("Previamente contrário".toLowerCase(), posicionamentoSvc.getByName("Contrário"));
+
+		posicionamentoCache.put("SUPAR: Liberar (19/09/16)".toLowerCase(), posicionamentoSvc.getByName("Favorável"));
+		posicionamentoCache.put("Liberar".toLowerCase(), posicionamentoSvc.getByName("Favorável"));
+		posicionamentoCache.put("Supar orientando por liberar".toLowerCase(), posicionamentoSvc.getByName("Favorável"));
+		posicionamentoCache.put("SUPAR: Liberar".toLowerCase(), posicionamentoSvc.getByName("Favorável"));
+
+		posicionamentoCache.put("Favorável com emendas".toLowerCase(),
+				posicionamentoSvc.getByName("Favorável com emendas"));
+		posicionamentoCache.put("Favorável com emendas".toLowerCase(),
+				posicionamentoSvc.getByName("Favorável com emendas"));
+		posicionamentoCache.put("Favorável com emenda".toLowerCase(),
+				posicionamentoSvc.getByName("Favorável com emendas"));
+
 		for (Iterator iterator = tipoEncaminhamentoService.listAll().iterator(); iterator.hasNext();) {
 			TipoEncaminhamento enc = (TipoEncaminhamento) iterator.next();
 			if (enc.getNome().equals("Elaborar Nota Técnica")) {
@@ -185,9 +204,30 @@ public class ImporterTests {
 
 	}
 
+	private void initPosicionamentos() {
+		// favoravel
+		// favoravel com emendas
+		// contrario
+		// monitorar
+		// nada a opor
+		String[] existentes = { "Favorável", "Favorável com emendas", "Contrário", "Monitorar", "Nada a opor" };
+		for (int i = 0; i < existentes.length; i++) {
+			Posicionamento p = posicionamentoSvc.getByName(existentes[i]);
+			if (p == null) {
+				p = new Posicionamento();
+				p.setNome(existentes[i]);
+				EntityTransaction t = em.getTransaction();
+				t.begin();
+				posicionamentoSvc.save(p);
+				t.commit();
+			}
+		}
+
+	}
+
 	boolean debug = false;
 
-	private void checkCreate(String[] useralias, String[] usernames, String[] userEmails, Equipe equipe) {
+	private void checkCreate(String[] useralias, String[] usernames, String[] userEmails, Equipe equipe, Papel p) {
 
 		for (int i = 0; i < useralias.length; i++) {
 
@@ -207,13 +247,11 @@ public class ImporterTests {
 					if (email.equals(EMAIL_USUARIO_PADRAO)) {
 						u.addPapel(Papel.ADMIN);
 					} else {
-						u.addPapel(Papel.EQUIPE);
+						u.addPapel(p);
 					}
 
 					userSvc.save(u);
-					System.out.println("Salvando usuario " + u);
 					trans.commit();
-
 				}
 
 				atribuidoToResponsavel.put(nome, u);
@@ -222,59 +260,73 @@ public class ImporterTests {
 		}
 	}
 
-	private void initUsers() {
+	Equipe atual;
+	Equipe pessoa;
+	Equipe penal;
+	Equipe estado;
 
-		String[] userEstadp = { "Eduarda", "Guilherme", "Leonardo", "Marcelo", "Natalia", "Paula", "Sem atribuição",
-				"Afonso", "Ana Carla Couto de Miranda Castro" };
+	private void initUsers() {
+		String[] userUp = { "Ana Carla Couto", "Afonso", "Marcelo D. Varella" };
+		String[] userCompletoUp = { "Ana Carla Couto de Miranda Castro", "Afonso Almeida", "Marcelo D. Varella" };
+		String[] userEmailUp = { "ana.couto@mj.gov.br", "afonso.almeida@mj.gov.br", "marcelo.varella@mj.gov.br" };
+
+		checkCreate(userUp, userCompletoUp, userEmailUp, null, Papel.SECRETARIO);
+
+		String[] userASPAR = { "leandrog", "pl", "gb", "nr", "nn", "fs" };
+		String[] userComAspar = { "Leandro Guedes", "Paula Lacerda", "Gabriel Borges", "Natália Reis", "Nayara Nunes",
+				"Fernanda Soares" };
+		String[] userEmailAspar = { "leandro.guedes@mj.gov.br", "paula.lacerda@mj.gov.br", "gabriel.borges@mj.gov.br",
+				"natalia.reis.estagio@mj.gov.br", "nayara.nunes@mj.gov.br", "fernanda.msoares.terceirizado@mj.gov.br" };
+
+		checkCreate(userASPAR, userComAspar, userEmailAspar, getEquipe("ASPAR"), Papel.ASPAR);
+
+		String[] userEstadp = { "Eduarda", "Guilherme", "Leonardo", "Marcelo", "Natalia", "Paula", "Sem atribuição" };
 		String[] userCompletoEstado = { "Eduarda Cintra", "Guilherme Moraes Rego", "Leonardo Povoa", "Marcelo Bastos",
-				"Natalia Langenegger", "Paula Leal", "Sem atribuição", "Afonso Almeida",
-				"Ana Carla Couto de Miranda Castro" };
+				"Natalia Langenegger", "Paula Leal", "Sem atribuição" };
 		String[] userEmailEstado = { "eduarda.cintra@mj.gov.br", "guilherme.moraesrego@mj.gov.br",
 				"leonardo.povoa@mj.gov.br", "marcelo.bastos@mj.gov.br", "natalia.langenegger@mj.gov.br",
-				"paula.leal@mj.gov.br", null, "afonso.almeida@mj.gov.br", "ana.couto@mj.gov.br" };
-		String nomeEquipe = "Organização do Estado";
-		Equipe estado = getEquipe(nomeEquipe);
+				"paula.leal@mj.gov.br", null };
+		estado = getEquipe("Politica Legislativa e Organização do Estado");
 
-		checkCreate(userEstadp, userCompletoEstado, userEmailEstado, estado);
+		checkCreate(userEstadp, userCompletoEstado, userEmailEstado, estado, Papel.EQUIPE);
+		setPapel("guilherme.moraesrego@mj.gov.br", Papel.DIRETOR);
 
-		// Adriana- adriana.ligeiro@mj.gov.br
-		// Mariana –
-		// mariana.carvalho@mj.gov.br<mailto:mariana.carvalho@mj.gov.br>
-		// Rodrigo –
-		// rodrigo.mercante@mj.gov.br<mailto:rodrigo.mercante@mj.gov.br>
-		// Clarice –
-		// clarice.oliveira@mj.gov.br<mailto:clarice.oliviera@mj.gov.br>
-		// Bernardo-
-		// bernardo.andrade.estagio@mj.gov.br<mailto:bernardo.andrade.estagio@mj.gov.br>
-		// Fernando- fernando.couto@mj.gov.br<mailto:fernando.couto@mj.gov.br>
-		// Frederico -
-		// frederico.moesch@mj.gov.br<mailto:frederico.moesch@mj.gov.br>
-
-		String[] userPenal = { "Adriana", "Mariana", "Rodrigo", "Clarice", "Bernardo", "Fernando", "Frederico",
+		String[] userPPessoa = { "Adriana", "Mariana", "Rodrigo", "Clarice", "Bernardo", "Fernando", "Frederico",
 				"Sem atribuição" };
-		String[] userCompletoPenal = { "Adriana Ligeiro", "Mariana Carvalho", "Rodrigo Mercante", "Clarice Oliveira",
+		String[] userCompPPessoa = { "Adriana Ligeiro", "Mariana Carvalho", "Rodrigo Mercante", "Clarice Oliveira",
 				"Bernardo Andrade", "Fernando Couto", "Frederico Moesch", "Sem atribuição" };
-		String[] userEmailPenal = { "adriana.ligeiro@mj.gov.br", "mariana.carvalho@mj.gov.br",
+		String[] userEmailPPessoa = { "adriana.ligeiro@mj.gov.br", "mariana.carvalho@mj.gov.br",
 				"rodrigo.mercante@mj.gov.br", "clarice.oliveira@mj.gov.br", "bernardo.andrade.estagio@mj.gov.br",
 				"fernando.couto@mj.gov.br", "frederico.moesch@mj.gov.br", null };
+		pessoa = getEquipe("Equipe Politica Legislativa e Proteção da Pessoa");
+		checkCreate(userPPessoa, userCompPPessoa, userEmailPPessoa, pessoa, Papel.EQUIPE);
+		setPapel("clarice.oliveira@mj.gov.br", Papel.DIRETOR);
 
-		Equipe penal = getEquipe("Processo e Controle Penal");
+		String[] userPenal = { "Karise", "Cláudio", "Melina", "Laura", "Silvana" };
+		String[] userCompletoPenal = { "Jocyane Figueroa", "Cláudio Teixeira", "Melina Siqueira", "Laura Souza",
+				"Silvana Nunes" };
+		String[] userEmailPenal = { "jocyane.figueroa@mj.gov.br", "claudio.teixeira@mj.gov.br",
+				"melina.siqueira@mj.gov.br", "laura.souza@mj.gov.br", "silvana.nunes@mj.gov.br" };
 
-		checkCreate(userPenal, userCompletoPenal, userEmailPenal, penal);
+		penal = getEquipe("Politica Processo e Controle Penal");
 
-		String[] userPessoa = { "Karise", "Cláudio", "Melina", "Sem atribuição" };
-		String[] userCompletoPessoa = { "Jocyane Figueroa", "Cláudio Teixeira", "Melina Siqueira", "Sem atribuição" };
-		String[] userEmailPessoa = { "jocyane.figueroa@mj.gov.br", "claudio.teixeira@mj.gov.br",
-				"melina.siqueira@mj.gov.br", null };
-
-		Equipe pessoa = getEquipe("Proteção da Pessoa");
-
-		checkCreate(userPessoa, userCompletoPessoa, userEmailPessoa, pessoa);
+		checkCreate(userPenal, userCompletoPenal, userEmailPenal, pessoa, Papel.EQUIPE);
+		setPapel("claudio.teixeira@mj.gov.br", Papel.DIRETOR);
 
 		// Karise- jocyane.figueroa@mj.gov.br<mailto:jocyane.figueroa@mj.gov.br>
 		// Cláudio claudio.teixeira@mj.gov.br<mailto:claudio.teixeira@mj.gov.br>
 		// Melina – melina.siqueira@mj.gov.br<mailto:melina.siqueira@mj.gov.br>
 
+	}
+
+	private void setPapel(String s, Papel p) {
+		EntityTransaction trans = em.getTransaction();
+		trans.begin();
+
+		Usuario diretorestado = userSvc.findByEmail(s);
+		diretorestado.addPapel(p);
+		userSvc.save(diretorestado);
+		trans.commit();
 	}
 
 	private Equipe getEquipe(String nomeEquipe) {
@@ -291,10 +343,26 @@ public class ImporterTests {
 		return estado;
 	}
 
-	private void processaExcel() throws IOException {
+	static int PENAL = 2;
+	static int PESSOA = 1;
+	static int ESTADO = 3;
+	static int CodigoEquipe = ESTADO;
 
-		XSSFWorkbook wb = new XSSFWorkbook(new FileInputStream(new File(
-				"/home/sislegis/workspace/b/src/main/resources/Acompanhamento PLs Estado.xlsx")));
+	private void processaExcel() throws IOException {
+		String file = null;
+		if (CodigoEquipe == PENAL) {
+			file = "/home/sislegis/workspace/b/src/main/resources/Acompanhamento PLs Penal.xlsx";
+			atual = penal;
+		} else if (CodigoEquipe == PESSOA) {
+			file = "/home/sislegis/workspace/b/src/main/resources/Acompanhamento PLs Pessoa.xlsx";
+			atual = pessoa;
+		} else if (CodigoEquipe == ESTADO) {
+			file = "/home/sislegis/workspace/b/src/main/resources/Acompanhamento PLs Estado.xlsx";
+			atual = estado;
+		}
+
+		System.out.println("** PROCESSANDO PLANILHA DA EQUIPE " + atual.getNome() + " *************");
+		XSSFWorkbook wb = new XSSFWorkbook(new FileInputStream(new File(file)));
 
 		List<ProposicalXLS> list = new ArrayList<ProposicalXLS>();
 		// for (int i = 0; i < wb.getNumberOfSheets(); i++) {
@@ -363,8 +431,6 @@ public class ImporterTests {
 							}
 							Usuario responsavel = atribuidoToResponsavel.get(p.responsavel);
 
-							// System.out.println(p.responsavel + " " +
-							// responsavel);
 							if (p.tema.length() > 5000) {
 								p.tema = p.tema.substring(0, 5000);
 							}
@@ -373,6 +439,7 @@ public class ImporterTests {
 								trans.begin();
 							}
 							prop.setExplicacao(p.tema);
+							prop.setEquipe(atual);
 							prop.setResponsavel(responsavel);
 							prop.setParecerSAL(p.providencias);
 							if (debug) {
@@ -392,7 +459,10 @@ public class ImporterTests {
 							if (p.despachado) {
 								prop.setEstado(EstadoProposicao.DESPACHADA);
 							} else {
+
 								if (p.situacao != null && p.situacao.toLowerCase().contains("feita")) {
+									prop.setEstado(EstadoProposicao.ADESPACHAR);
+								} else if (p.drive != null && !p.drive.isEmpty()) {
 									prop.setEstado(EstadoProposicao.ADESPACHAR);
 								} else {
 									prop.setEstado(EstadoProposicao.EMANALISE);
@@ -473,31 +543,11 @@ public class ImporterTests {
 							trans.commit();
 
 							if (p.posicaoSAL != null && p.posicaoSAL.length() > 0) {
+								p.posicaoSAL = p.posicaoSAL.trim();
 
-								Posicionamento posicionamento = posicionamentoCache.get(p.posicaoSAL.trim()
-										.toLowerCase());
+								Posicionamento posicionamento = posicionamentoCache.get(p.posicaoSAL.toLowerCase());
 								if (posicionamento != null) {
-									// System.out.println("Achou " +
-									// posicionamento);
-								} else {
-									if ("".equals(p.posicaoSAL)) {
 
-									} else {
-										trans = em.getTransaction();
-										trans.begin();
-										posicionamento = new Posicionamento();
-										posicionamento.setNome(p.posicaoSAL.trim());
-										em.persist(posicionamento);
-										em.flush();
-										posicionamentoCache.put(posicionamento.getNome().trim().toLowerCase(),
-												posicionamento);
-										trans.commit();
-										// System.err.println("Posicionametno novo "
-										// + p.posicaoSAL);
-									}
-								}
-
-								if (posicionamento != null) {
 									trans = em.getTransaction();
 									trans.begin();
 									PosicionamentoProposicao pp = new PosicionamentoProposicao();
@@ -512,6 +562,17 @@ public class ImporterTests {
 									em.persist(pp);
 									prop.setPosicionamentoAtual(pp);
 									trans.commit();
+
+								} else {
+									if ("".equals(p.posicaoSAL)) {
+
+									} else {
+										String msg = "Posicionamento SAL da planilha não reconhecido: " + p.posicaoSAL;
+										criaComentario(prop, responsavel, msg);
+										System.err.println("Posicionamento inválido '" + p.posicaoSAL + "' para " + p);
+										// System.err.println("Posicionametno novo "
+										// + p.posicaoSAL);
+									}
 								}
 
 							}
@@ -520,31 +581,19 @@ public class ImporterTests {
 								p.supar = p.supar.trim();
 								Posicionamento posicionamento = posicionamentoCache.get(p.supar.toLowerCase());
 								if (posicionamento != null) {
-
-								} else {
-									if ("".equals(p.supar)) {
-
-									} else {
-										trans = em.getTransaction();
-										trans.begin();
-										posicionamento = new Posicionamento();
-										posicionamento.setNome(p.supar);
-										em.persist(posicionamento);
-										em.flush();
-										posicionamentoCache.put(posicionamento.getNome().trim().toLowerCase(),
-												posicionamento);
-										trans.commit();
-										// System.err.println("Posicionametno novo "
-										// + p.posicaoSAL);
-									}
-								}
-
-								if (posicionamento != null) {
 									trans = em.getTransaction();
 									trans.begin();
 									prop.setPosicionamentoSupar(posicionamento);
 									proposicaoService.save(prop);
 									trans.commit();
+								} else {
+									if ("".equals(p.supar)) {
+
+									} else {
+										String msg = "Posicionamento SUPAR da planilha não reconhecido: " + p.supar;
+										criaComentario(prop, responsavel, msg);
+										System.err.println("Posicionamento inválido supar '" + p.supar + "' para " + p);
+									}
 								}
 
 							}
@@ -558,6 +607,7 @@ public class ImporterTests {
 							}
 
 						} catch (Exception e) {
+							e.printStackTrace();
 							System.err.println("Falhou ao processar " + p + " " + p.comissao.length() + " "
 									+ p.situacao.length());
 							System.out.println(prop.getComissao().length() + " n:" + prop.getNumero().length() + " l:"
@@ -566,7 +616,6 @@ public class ImporterTests {
 
 							p.printRow();
 
-							e.printStackTrace();
 							Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
 									"Falhou ao processar " + p, e);
 							if (trans.isActive()) {
@@ -581,6 +630,31 @@ public class ImporterTests {
 			}
 		}
 
+	}
+
+	private void criaComentario(Proposicao prop, Usuario responsavel, String msg) {
+		EntityTransaction trans = em.getTransaction();
+		trans.begin();
+		// posicionamento = new
+		// Posicionamento();
+		// posicionamento.setNome(p.posicaoSAL);
+		// em.persist(posicionamento);
+		// em.flush();
+		// posicionamentoCache.put(posicionamento.getNome().trim().toLowerCase(),
+		// posicionamento);
+		Comentario c = new Comentario();
+		if (responsavel != null) {
+			c.setAutor(responsavel);
+		} else {
+			c.setAutor(userSvc.findByEmail(EMAIL_USUARIO_PADRAO));
+		}
+
+		c.setDescricao(msg);
+
+		c.setProposicao(prop);
+		c.setDataCriacao(new Date());
+		em.persist(c);
+		trans.commit();
 	}
 
 	// // @Test
@@ -699,8 +773,9 @@ class ProposicalXLS {
 					}
 
 				}
-				System.out.println(i + ":'" + col + "':" + type.getStringCellValue().length() + ":"
-						+ type.getStringCellValue());
+				// System.out.println(i + ":'" + col + "':" +
+				// type.getStringCellValue().length() + ":" +
+				// type.getStringCellValue());
 			} catch (Exception e) {
 				System.err.println(i + ":" + e.getMessage());
 			}
@@ -716,71 +791,74 @@ class ProposicalXLS {
 	String supar;
 	static Map<String, Integer> colunas = new HashMap<String, Integer>();
 	static {
-		// Estado
-		colunas.put("origem", 0);
-		colunas.put("sigla", 1);
-		colunas.put("autoria", 2);
-		colunas.put("tema", 3);
-		colunas.put("areaDeMerito", 4);
-		colunas.put("posicaoSAL", 5);
-		colunas.put("prioritario", 6);
-		colunas.put("despachado", 7);
-		colunas.put("comissao", 8);
-		colunas.put("providencias", 9);
-		colunas.put("estagio", 10);
-		colunas.put("despachoInicial", 11);
-		colunas.put("responsavel", 12);
-		colunas.put("drive", 13);
-		colunas.put("macrotema", 14);
-		colunas.put("pauta", 15);
-		colunas.put("asparTxt", 16);
-		colunas.put("supar", 17);
-		colunas.put("situacao", 18);
-		// // Penal
-		// colunas.put("origem", 0);
-		// colunas.put("sigla", 1);
-		// colunas.put("autoria", 2);
-		// colunas.put("tema", 3);
-		// colunas.put("areaDeMerito", 4);
-		// colunas.put("posicaoSAL", 5);
-		// colunas.put("prioritario", 6);
-		// colunas.put("despachado", 7);
-		// colunas.put("comissao", 8);
-		//
-		// colunas.put("situacao", 9);
-		// colunas.put("responsavel", 10);
-		// colunas.put("providencias", 11);
-		// colunas.put("pauta", 12);
-		// colunas.put("asparTxt", 15);
-		//
-		// colunas.put("despachoInicial", 20);
-		// colunas.put("drive", 20);
-		// colunas.put("macrotema", 20);
-		// colunas.put("estagio", 20);
-		// colunas.put("supar", 20);
+		if (ImporterTests.CodigoEquipe == ImporterTests.ESTADO) {
+			// Estado
+			colunas.put("origem", 0);
+			colunas.put("sigla", 1);
+			colunas.put("autoria", 2);
+			colunas.put("tema", 3);
+			colunas.put("areaDeMerito", 4);
+			colunas.put("posicaoSAL", 5);
+			colunas.put("prioritario", 6);
+			colunas.put("despachado", 7);
+			colunas.put("comissao", 8);
+			colunas.put("providencias", 9);
+			colunas.put("estagio", 10);
+			colunas.put("despachoInicial", 11);
+			colunas.put("responsavel", 12);
+			colunas.put("drive", 13);
+			colunas.put("macrotema", 14);
+			colunas.put("pauta", 15);
+			colunas.put("asparTxt", 16);
+			colunas.put("supar", 17);
+			colunas.put("situacao", 18);
+		} else if (ImporterTests.CodigoEquipe == ImporterTests.PENAL) {
+			// // Penal
+			colunas.put("origem", 0);
+			colunas.put("sigla", 1);
+			colunas.put("autoria", 2);
+			colunas.put("tema", 3);
+			colunas.put("areaDeMerito", 4);
+			colunas.put("posicaoSAL", 5);
+			colunas.put("prioritario", 6);
+			colunas.put("despachado", 7);
+			colunas.put("comissao", 8);
 
-		// Pessoa
-		// colunas.put("origem", 0);
-		// colunas.put("sigla", 1);
-		// colunas.put("autoria", 2);
-		// colunas.put("tema", 3);
-		// colunas.put("areaDeMerito", 4);
-		// colunas.put("posicaoSAL", 5);
-		// colunas.put("prioritario", 6);
-		// colunas.put("despachado", 7);
-		// colunas.put("comissao", 8);
-		// colunas.put("macrotema", 9);
-		// colunas.put("estagio", 10);
-		// colunas.put("responsavel", 11);
-		// colunas.put("providencias", 12);
-		// colunas.put("pauta", 13);
-		// colunas.put("asparTxt", 15);
-		// colunas.put("supar", 16);
-		//
-		// colunas.put("despachoInicial", 20);
-		// colunas.put("drive", 20);
-		//
-		// colunas.put("situacao", 17);
+			colunas.put("situacao", 9);
+			colunas.put("responsavel", 10);
+			colunas.put("providencias", 11);
+			colunas.put("pauta", 12);
+			colunas.put("asparTxt", 15);
+
+			colunas.put("despachoInicial", 20);
+			colunas.put("drive", 20);
+			colunas.put("macrotema", 20);
+			colunas.put("estagio", 20);
+			colunas.put("supar", 20);
+		} else if (ImporterTests.CodigoEquipe == ImporterTests.PESSOA) {
+			// Pessoa
+			colunas.put("origem", 0);
+			colunas.put("sigla", 1);
+			colunas.put("autoria", 2);
+			colunas.put("tema", 3);
+			colunas.put("areaDeMerito", 4);
+			colunas.put("posicaoSAL", 5);
+			colunas.put("prioritario", 6);
+			colunas.put("despachado", 7);
+			colunas.put("comissao", 8);
+			colunas.put("macrotema", 9);
+			colunas.put("estagio", 10);
+			colunas.put("responsavel", 11);
+			colunas.put("providencias", 12);
+			colunas.put("pauta", 13);
+			colunas.put("asparTxt", 15);
+			colunas.put("supar", 16);
+
+			colunas.put("despachoInicial", 20);
+			colunas.put("drive", 20);
+
+			colunas.put("situacao", 17);
+		}
 
 	}
 
@@ -853,12 +931,12 @@ class ProposicalXLS {
 		if (r.getCell(colunas.get("supar")) != null) {
 			supar = r.getCell(colunas.get("supar")).getStringCellValue();
 		}
-		System.out.println(this);
+		// System.out.println(this);
 	}
 
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return rowNumber + ":" + origem.name() + " " + sigla + " (" + numero + "/" + ano + ")" + " " + situacao;
+		return rowNumber + ":" + origem.name() + " " + sigla + " (" + numero + "/" + ano + ")" + " sit:'" + situacao;
 	}
 }
