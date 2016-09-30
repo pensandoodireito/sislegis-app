@@ -542,11 +542,6 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public Proposicao save(Proposicao entity) {
-		return super.save(entity);
-	}
-
-	@Override
 	public void deleteById(Long id) {
 		List<EncaminhamentoProposicao> listaEnc = encaminhamentoProposicaoService.findByProposicao(id);
 		for (Iterator<EncaminhamentoProposicao> iterator = listaEnc.iterator(); iterator.hasNext();) {
@@ -901,7 +896,35 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public void alterarPosicionamento(Long id, Long idPosicionamento, boolean preliminar, Usuario usuario) {
+	public Proposicao save(Proposicao instanciaNova, Usuario user) {
+		if (user != null) {
+			if (instanciaNova.getId() != null) {
+				Proposicao proposicao = findById(instanciaNova.getId());
+				if (instanciaNova.getPosicionamentoAtual() == null && proposicao.getPosicionamentoAtual() != null) {
+					// se antigo era diff null
+					instanciaNova.setPosicionamentoAtual(null);
+				} else if ((instanciaNova.getPosicionamentoAtual() != null && proposicao.getPosicionamentoAtual() == null)
+						|| (instanciaNova.getPosicionamentoAtual() != null
+								&& proposicao.getPosicionamentoAtual() != null && !proposicao.getPosicionamentoAtual()
+								.getPosicionamento().equals(instanciaNova.getPosicionamentoAtual().getPosicionamento()))) {
+					
+					PosicionamentoProposicao posicionamentoProposicao = new PosicionamentoProposicao();
+					posicionamentoProposicao.setPosicionamento(instanciaNova.getPosicionamentoAtual().getPosicionamento());
+					posicionamentoProposicao.setProposicao(proposicao);
+					posicionamentoProposicao.setPreliminar(instanciaNova.getPosicionamentoAtual().isPreliminar());
+					posicionamentoProposicao.setUsuario(user);
+					em.persist(posicionamentoProposicao);
+					instanciaNova.setPosicionamentoAtual(posicionamentoProposicao);
+				}
+			}
+		}
+
+		return super.save(instanciaNova);
+	}
+
+	@Override
+	public PosicionamentoProposicao alterarPosicionamento(Long id, Long idPosicionamento, boolean preliminar,
+			Usuario usuario) {
 		Proposicao proposicao = findById(id);
 
 		// somente executa se o posicionamento for alterado
@@ -921,8 +944,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			} else {
 				proposicao.setPosicionamentoAtual(null);
 			}
-			save(proposicao);
+			save(proposicao, null);
+			return proposicao.getPosicionamentoAtual();
 		}
+		return null;
 	}
 
 	@Override
