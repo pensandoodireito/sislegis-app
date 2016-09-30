@@ -903,10 +903,26 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				if (instanciaNova.getPosicionamentoAtual() == null && proposicao.getPosicionamentoAtual() != null) {
 					// se antigo era diff null
 					instanciaNova.setPosicionamentoAtual(null);
-				} else if ((instanciaNova.getPosicionamentoAtual() != null && proposicao.getPosicionamentoAtual() == null)
-						|| (instanciaNova.getPosicionamentoAtual() != null
-								&& proposicao.getPosicionamentoAtual() != null && !proposicao.getPosicionamentoAtual()
-								.getPosicionamento().equals(instanciaNova.getPosicionamentoAtual().getPosicionamento()))) {
+				} else if 
+				//@formatter:off
+				(
+					(instanciaNova.getPosicionamentoAtual() != null && proposicao.getPosicionamentoAtual() == null)
+					|| (
+							(instanciaNova.getPosicionamentoAtual() != null	&& proposicao.getPosicionamentoAtual() != null) 
+							&& 
+							(
+								(proposicao.getPosicionamentoAtual().getPosicionamento()==null && instanciaNova.getPosicionamentoAtual().getPosicionamento()!=null)
+								||
+								(
+										proposicao.getPosicionamentoAtual().getPosicionamento()!=null && instanciaNova.getPosicionamentoAtual().getPosicionamento()!=null &&
+									
+									!proposicao.getPosicionamentoAtual().equals(instanciaNova.getPosicionamentoAtual().getPosicionamento())
+									
+									)
+							)
+						)
+				){
+				//@formatter:on
 					
 					PosicionamentoProposicao posicionamentoProposicao = new PosicionamentoProposicao();
 					posicionamentoProposicao.setPosicionamento(instanciaNova.getPosicionamentoAtual().getPosicionamento());
