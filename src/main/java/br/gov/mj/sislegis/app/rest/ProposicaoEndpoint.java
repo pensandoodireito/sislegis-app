@@ -181,12 +181,38 @@ public class ProposicaoEndpoint {
 
 	}
 
+	@PUT
+	@Path("/{id:[0-9][0-9]*}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response update(Proposicao entity, @HeaderParam("Authorization") String authorization) {
+
+		try {
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+			proposicaoService.save(entity, user);
+			return Response.ok(
+					UriBuilder.fromResource(ProposicaoEndpoint.class).path(String.valueOf(entity.getId())).build())
+					.build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
+
+	}
+
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response create(Proposicao entity) {
-		proposicaoService.save(entity);
-		return Response.created(
-				UriBuilder.fromResource(ProposicaoEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
+	public Response create(Proposicao entity, @HeaderParam("Authorization") String authorization) {
+		try {
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+			proposicaoService.save(entity, user);
+			return Response.created(
+					UriBuilder.fromResource(ProposicaoEndpoint.class).path(String.valueOf(entity.getId())).build())
+					.build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
+
 	}
 
 	@DELETE
@@ -242,14 +268,6 @@ public class ProposicaoEndpoint {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Proposicao> buscarPorSufixo(@QueryParam("sufixo") String sufixo) {
 		return proposicaoService.buscarPorSufixo(sufixo);
-	}
-
-	@PUT
-	@Path("/{id:[0-9][0-9]*}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response update(Proposicao entity) {
-		proposicaoService.save(entity);
-		return Response.noContent().build();
 	}
 
 	@GET
@@ -339,10 +357,11 @@ public class ProposicaoEndpoint {
 			@HeaderParam("Authorization") String authorization) {
 		try {
 			Usuario usuarioLogado = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
-			proposicaoService.alterarPosicionamento(posicionamentoProposicaoWrapper.getId(),
-					posicionamentoProposicaoWrapper.getIdPosicionamento(), posicionamentoProposicaoWrapper.preliminar,
-					usuarioLogado);
-			return Response.ok().build();
+			PosicionamentoProposicao pp = proposicaoService.alterarPosicionamento(
+					posicionamentoProposicaoWrapper.getId(), posicionamentoProposicaoWrapper.getIdPosicionamento(),
+					posicionamentoProposicaoWrapper.preliminar, usuarioLogado);
+
+			return Response.ok(pp).build();
 
 		} catch (Exception e) {
 			e.printStackTrace();

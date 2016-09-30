@@ -159,8 +159,9 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @param id
 	 * @param idPosicionamento
 	 * @param usuario
+	 * @return 
 	 */
-	void alterarPosicionamento(Long id, Long idPosicionamento, boolean preliminar, Usuario usuario);
+	PosicionamentoProposicao alterarPosicionamento(Long id, Long idPosicionamento, boolean preliminar, Usuario usuario);
 
 	/**
 	 * Retorna o historico de alteracoes de posicionamento por id da proposicao
@@ -219,5 +220,7 @@ public interface ProposicaoService extends Service<Proposicao> {
 	void saveNotaTecnica(NotaTecnica nt);
 
 	void deleteNotaById(Long idNota);
+
+	Proposicao save(Proposicao instanciaNova, Usuario user);
 
 }
