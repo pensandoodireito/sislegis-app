@@ -1,6 +1,7 @@
 package br.gov.mj.sislegis.app.model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -28,6 +29,10 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -75,7 +80,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 public class Proposicao extends AbstractEntity {
 
 	private static final long serialVersionUID = 7949894944142814382L;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "created", nullable = false)
+	private Date created;
 
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "updated", nullable = false)
+	private Date updated;
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id", updatable = false, nullable = false)
@@ -100,10 +111,10 @@ public class Proposicao extends AbstractEntity {
 	@Column
 	private String situacao;
 
-	@Column(name = "parecer_sal")
+	@Column(name = "parecer_sal", length = 5000)
 	private String parecerSAL;
 
-	@Column(name = "explicacao_sal")
+	@Column(name = "explicacao_sal", length = 5000)
 	private String explicacao;
 
 	@Column
@@ -138,11 +149,18 @@ public class Proposicao extends AbstractEntity {
 	@JoinColumn(name = "posicionamento_atual_id", nullable = true)
 	private PosicionamentoProposicao posicionamentoAtual;
 
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "posicionamento_supar_id", nullable = true)
+	private Posicionamento posicionamentoSupar;
+
 	@Transient
 	private Boolean posicionamentoPreliminar;
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	private Usuario responsavel;
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+	@JoinColumn(name = "idequipe", referencedColumnName = "id")
+	private Equipe equipe;
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "proposicao")
 	@OrderBy("pautaReuniaoComissao")
@@ -204,6 +222,7 @@ public class Proposicao extends AbstractEntity {
 
 	public Proposicao() {
 		super();
+		this.created = this.updated = new Date();
 		this.estado = EstadoProposicao.FORADEPAUTA;
 	}
 
@@ -273,6 +292,10 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	public void setAutor(String autor) {
+		if (autor.length() > 255) {
+			System.err.println("autor muito longo:" + this);
+			autor = autor.substring(0, 255);
+		}
 		this.autor = autor;
 	}
 
@@ -391,6 +414,11 @@ public class Proposicao extends AbstractEntity {
 
 	public void setResponsavel(Usuario responsavel) {
 		this.responsavel = responsavel;
+		if (responsavel == null) {
+
+		} else if (responsavel.getEquipe() != null) {
+			this.equipe = responsavel.getEquipe();
+		}
 	}
 
 	public String getResultadoASPAR() {
@@ -587,5 +615,31 @@ public class Proposicao extends AbstractEntity {
 
 	public void setTotalParecerAreaMerito(Integer totalParecerAreaMerito) {
 		this.totalParecerAreaMerito = totalParecerAreaMerito;
+	}
+
+	public Posicionamento getPosicionamentoSupar() {
+		return posicionamentoSupar;
+	}
+
+	public void setPosicionamentoSupar(Posicionamento posicionamentoSupar) {
+		this.posicionamentoSupar = posicionamentoSupar;
+	}
+
+	public Equipe getEquipe() {
+		return equipe;
+	}
+
+	public void setEquipe(Equipe equipe) {
+		this.equipe = equipe;
+	}
+
+	@PrePersist
+	protected void onCreate() {
+		updated = created = new Date();
+	}
+
+	@PreUpdate
+	protected void onUpdate() {
+		updated = new Date();
 	}
 }
