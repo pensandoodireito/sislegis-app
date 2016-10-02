@@ -310,12 +310,8 @@ public class ImporterTests {
 
 		penal = getEquipe("Politica Processo e Controle Penal");
 
-		checkCreate(userPenal, userCompletoPenal, userEmailPenal, pessoa, Papel.EQUIPE);
+		checkCreate(userPenal, userCompletoPenal, userEmailPenal, penal, Papel.EQUIPE);
 		setPapel("claudio.teixeira@mj.gov.br", Papel.DIRETOR);
-
-		// Karise- jocyane.figueroa@mj.gov.br<mailto:jocyane.figueroa@mj.gov.br>
-		// Cláudio claudio.teixeira@mj.gov.br<mailto:claudio.teixeira@mj.gov.br>
-		// Melina – melina.siqueira@mj.gov.br<mailto:melina.siqueira@mj.gov.br>
 
 	}
 
@@ -383,7 +379,7 @@ public class ImporterTests {
 					}
 
 					if ("Câmara".equals(origem) || "Senado".equals(origem)) {
-						ProposicalXLS p = new ProposicalXLS(row);
+						ProposicalXLS p = new ProposicalXLS(row, CodigoEquipe);
 
 						// if (!p.numero.equals("30") || !p.ano.equals("2015"))
 						// {
@@ -469,7 +465,7 @@ public class ImporterTests {
 								}
 							}
 							trans.begin();// verdadeiro
-							if (p.macrotema != null) {
+							if (p.macrotema != null && p.macrotema.trim().length() > 0) {
 								List<Tag> tags = tagService.buscaPorSufixo(p.macrotema.trim());
 								Tag t = new Tag();
 								if (tags.isEmpty()) {
@@ -610,9 +606,9 @@ public class ImporterTests {
 							e.printStackTrace();
 							System.err.println("Falhou ao processar " + p + " " + p.comissao.length() + " "
 									+ p.situacao.length());
-							System.out.println(prop.getComissao().length() + " n:" + prop.getNumero().length() + " l:"
-									+ prop.getLinkProposicao().length() + " sit:" + prop.getSituacao().length() + " a:"
-									+ prop.getAutor().length());
+//							System.out.println(prop.getComissao().length() + " n:" + prop.getNumero().length() + " l:"
+//									+ prop.getLinkProposicao().length() + " sit:" + prop.getSituacao().length() + " a:"
+//									+ prop.getAutor().length());
 
 							p.printRow();
 
@@ -701,9 +697,56 @@ public class ImporterTests {
 	}
 
 	@Test
-	public void testDBAccess() {
+	public void testA() {
 
 		try {
+			List l = em.createQuery("SELECT p FROM Proposicao p WHERE :tag in elements(p.tags)  ", Proposicao.class)
+					.setParameter("tag", "DH - mulheres").getResultList();
+			System.out.println(l.size());
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			fail();
+		}
+	}
+
+	@Test
+	public void testImportPenal() {
+
+		try {
+			CodigoEquipe = PENAL;
+			processaExcel();
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			fail();
+		}
+	}
+
+	@Test
+	public void testImportEstado() {
+
+		try {
+			CodigoEquipe = ESTADO;
+			processaExcel();
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			fail();
+		}
+	}
+
+	@Test
+	public void testImportPessoa() {
+
+		try {
+			CodigoEquipe = PESSOA;
 			processaExcel();
 
 		} catch (Exception e) {
@@ -785,13 +828,15 @@ class ProposicalXLS {
 
 	}
 
+	int tipoExecucao = -1;
 	Matcher m = null;
 	int rowNumber = -1;
 	private Row r;
 	String supar;
-	static Map<String, Integer> colunas = new HashMap<String, Integer>();
-	static {
-		if (ImporterTests.CodigoEquipe == ImporterTests.ESTADO) {
+	Map<String, Integer> colunas = new HashMap<String, Integer>();
+
+	void initColunas() {
+		if (tipoExecucao == ImporterTests.ESTADO) {
 			// Estado
 			colunas.put("origem", 0);
 			colunas.put("sigla", 1);
@@ -812,7 +857,7 @@ class ProposicalXLS {
 			colunas.put("asparTxt", 16);
 			colunas.put("supar", 17);
 			colunas.put("situacao", 18);
-		} else if (ImporterTests.CodigoEquipe == ImporterTests.PENAL) {
+		} else if (tipoExecucao == ImporterTests.PENAL) {
 			// // Penal
 			colunas.put("origem", 0);
 			colunas.put("sigla", 1);
@@ -835,7 +880,7 @@ class ProposicalXLS {
 			colunas.put("macrotema", 20);
 			colunas.put("estagio", 20);
 			colunas.put("supar", 20);
-		} else if (ImporterTests.CodigoEquipe == ImporterTests.PESSOA) {
+		} else if (tipoExecucao == ImporterTests.PESSOA) {
 			// Pessoa
 			colunas.put("origem", 0);
 			colunas.put("sigla", 1);
@@ -862,7 +907,9 @@ class ProposicalXLS {
 
 	}
 
-	ProposicalXLS(Row r) {
+	ProposicalXLS(Row r, int tipoExec) {
+		this.tipoExecucao = tipoExec;
+		initColunas();
 		this.r = r;
 		rowNumber = r.getRowNum();
 

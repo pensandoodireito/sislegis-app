@@ -2,8 +2,10 @@ package br.gov.mj.sislegis.app.model;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -11,6 +13,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -32,8 +37,12 @@ public class NotaTecnica extends AbstractEntity {
 	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 
+	@ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.REMOVE)
+	@JoinColumn(name = "documento_id", referencedColumnName = "id", nullable = true)
+	private Documento documento;
+
 	@JsonIgnore
-	@ManyToOne(optional = false)
+	@OneToOne(optional = true)
 	@JoinColumn(name = "proposicao_id", referencedColumnName = "id", nullable = false)
 	private Proposicao proposicao;
 
@@ -99,4 +108,23 @@ public class NotaTecnica extends AbstractEntity {
 	public void setUrl_arquivo(String url_arquivo) {
 		this.url_arquivo = url_arquivo;
 	}
+
+	@PrePersist
+	protected void onCreate() {
+		dataCriacao = new Date();
+	}
+
+	public Documento getDocumento() {
+		return documento;
+	}
+
+
+	public void setDocumento(Documento documento) {
+		this.documento = documento;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 }

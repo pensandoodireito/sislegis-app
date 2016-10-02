@@ -1,5 +1,6 @@
 package br.gov.mj.sislegis.app.model;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,6 +20,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import org.json.JSONObject;
 
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
 
@@ -139,6 +142,18 @@ public class Usuario extends AbstractEntity {
 
 	public void setEquipe(Equipe equipe) {
 		this.equipe = equipe;
+	}
+
+	public JSONObject toJson() {
+		JSONObject json = new JSONObject();
+		json.put("id", id);
+		json.put("nome", this.nome);
+		json.put("email", this.email);
+		if (equipe != null) {
+			json.put("equipe", this.equipe.toJson());
+		}
+
+		return json;
 	}
 
 }

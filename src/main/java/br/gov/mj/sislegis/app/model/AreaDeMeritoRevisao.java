@@ -16,6 +16,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "areamerito_revisao")
 @NamedQueries({
@@ -103,6 +105,11 @@ public class AreaDeMeritoRevisao extends AbstractEntity {
 
 	public void setDataAtualizacao(Date dataAtualizacao) {
 		this.dataAtualizacao = dataAtualizacao;
+	}
+
+	@JsonIgnore
+	public void setPendente(boolean b) {
+
 	}
 
 	public boolean isPendente() {

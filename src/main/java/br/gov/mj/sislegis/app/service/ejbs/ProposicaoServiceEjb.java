@@ -46,6 +46,7 @@ import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
 import br.gov.mj.sislegis.app.model.RoadmapComissao;
+import br.gov.mj.sislegis.app.model.Tag;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.Votacao;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
@@ -299,14 +300,16 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		String origem = (String) filtros.get("origem");
 		String isFavorita = (String) filtros.get("isFavorita");
 		String estado = (String) filtros.get("estado");
+		String macrotema = (String) filtros.get("macrotema");
 		Long idEquipe = (Long) filtros.get("idEquipe");
 
 		query.append(createWhereClause(sigla, null, autor, ementa, origem, isFavorita, estado, null, idEquipe, null,
-				null));
+				macrotema, null));
 		query.append(" order by tipo,ano,numero");
 		TypedQuery<Proposicao> findByIdQuery = getEntityManager().createQuery(query.toString(), Proposicao.class);
 
-		setParams(sigla, null, autor, ementa, origem, isFavorita, estado, null, idEquipe, null, null, findByIdQuery);
+		setParams(sigla, null, autor, ementa, origem, isFavorita, estado, null, idEquipe, null, macrotema, null,
+				findByIdQuery);
 
 		List<Proposicao> proposicoes = findByIdQuery.setFirstResult(offset).setMaxResults(limit).getResultList();
 		popularDadosTransientes(proposicoes);
@@ -334,12 +337,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			String isFavorita, Long idResponsavel, Long idPosicionamento, Integer[] idProposicoes,
 			TypedQuery findByIdQuery) {
 		setParams(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null, idPosicionamento,
-				idProposicoes, findByIdQuery);
+				null, idProposicoes, findByIdQuery);
 	}
 
 	private void setParams(String sigla, String comissao, String autor, String ementa, String origem,
 			String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento,
-			Integer[] idProposicoes, TypedQuery findByIdQuery) {
+			String macrotema, Integer[] idProposicoes, TypedQuery findByIdQuery) {
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			findByIdQuery.setParameter("sigla", "%" + sigla + "%");
 		}
@@ -364,6 +367,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (Objects.nonNull(idResponsavel)) {
 			findByIdQuery.setParameter("idResponsavel", idResponsavel);
 		}
+		if (Objects.nonNull(macrotema)) {
+
+			findByIdQuery.setParameter("tag",  macrotema);
+		}
 		if (Objects.nonNull(idEquipe)) {
 
 			findByIdQuery.setParameter("idEquipe", idEquipe);
@@ -384,12 +391,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem,
 			String isFavorita, Long idResponsavel, Long idPosicionamento, Integer[] idProposicao) {
 		return createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null,
-				idPosicionamento, idProposicao);
+				idPosicionamento, null, idProposicao);
 	}
 
 	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem,
 			String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento,
-			Integer[] idProposicao) {
+			String macroTema, Integer[] idProposicao) {
 		StringBuilder query = new StringBuilder();
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			query.append(" AND upper(CONCAT(p.tipo,' ',p.numero,'/',p.ano)) like upper(:sigla)");
@@ -415,6 +422,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (Objects.nonNull(idResponsavel)) {
 			query.append(" AND p.responsavel.id = :idResponsavel");
 		}
+		if (Objects.nonNull(macroTema)) {
+			query.append(" AND :tag in elements(p.tags)");
+		}
+
 		if (Objects.nonNull(idEquipe)) {
 			query.append(" AND  p.equipe.id = :idEquipe ");
 		}
@@ -900,11 +911,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (user != null) {
 			if (instanciaNova.getId() != null) {
 				Proposicao proposicao = findById(instanciaNova.getId());
-				if (instanciaNova.getPosicionamentoAtual() == null && proposicao.getPosicionamentoAtual() != null) {
-					// se antigo era diff null
+				if (instanciaNova.getPosicionamentoAtual() == null
+						|| instanciaNova.getPosicionamentoAtual().getPosicionamento() == null) {
+
 					instanciaNova.setPosicionamentoAtual(null);
 				} else if 
-				//@formatter:off
+//@formatter:off
 				(
 					(instanciaNova.getPosicionamentoAtual() != null && proposicao.getPosicionamentoAtual() == null)
 					|| (
@@ -923,9 +935,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 						)
 				){
 				//@formatter:on
-					
+
 					PosicionamentoProposicao posicionamentoProposicao = new PosicionamentoProposicao();
-					posicionamentoProposicao.setPosicionamento(instanciaNova.getPosicionamentoAtual().getPosicionamento());
+					posicionamentoProposicao.setPosicionamento(instanciaNova.getPosicionamentoAtual()
+							.getPosicionamento());
 					posicionamentoProposicao.setProposicao(proposicao);
 					posicionamentoProposicao.setPreliminar(instanciaNova.getPosicionamentoAtual().isPreliminar());
 					posicionamentoProposicao.setUsuario(user);

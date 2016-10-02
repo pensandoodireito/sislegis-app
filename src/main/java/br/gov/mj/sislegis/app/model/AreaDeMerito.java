@@ -32,6 +32,11 @@ public class AreaDeMerito extends AbstractEntity {
 
 	@Column(unique = true)
 	private String nome;
+	
+	@Column(name="contato_nome")
+	private String nomeContato;
+	@Column(name="contato_email")
+	private String emailContato;
 
 	@OneToOne
 	@JoinColumn(name = "contato_id", referencedColumnName = "id")
@@ -69,6 +74,22 @@ public class AreaDeMerito extends AbstractEntity {
 	@JsonIgnore
 	public List<AreaDeMeritoRevisao> getRevisoes() {
 		return revisoes;
+	}
+
+	public String getNomeContato() {
+		return nomeContato;
+	}
+
+	public void setNomeContato(String nomeContato) {
+		this.nomeContato = nomeContato;
+	}
+
+	public String getEmailContato() {
+		return emailContato;
+	}
+
+	public void setEmailContato(String emailContato) {
+		this.emailContato = emailContato;
 	}
 
 }

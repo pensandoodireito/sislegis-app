@@ -44,3 +44,19 @@ alter table proposicao ADD created timestamp not null;
 --changeset coutinho:160930-9
 alter table proposicao ADD updated timestamp not null;
 --rollback ALTER TABLE proposicao drop created
+
+--changeset coutinho:160930-10
+alter table areamerito ADD contato_nome varchar(128);
+--rollback ALTER TABLE areamerito drop contato_nome
+
+--changeset coutinho:160930-11
+alter table areamerito ADD contato_email varchar(128);
+--rollback ALTER TABLE areamerito drop created
+
+--changeset coutinho:160930-12
+ALTER TABLE areamerito alter contato_id  DROP NOT NULL;
+--rollback 
+
+
+
+
