@@ -1,6 +1,10 @@
 package br.gov.mj.sislegis.app.rest;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,6 +16,7 @@ import java.util.SortedSet;
 
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -27,6 +32,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.jboss.resteasy.annotations.cache.Cache;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
@@ -248,6 +259,7 @@ public class ProposicaoEndpoint {
 			@QueryParam("sigla") String sigla, @QueryParam("origem") String origem,
 			@QueryParam("estado") String estado, @QueryParam("isFavorita") String isFavorita,
 			@QueryParam("idEquipe") Long idEquipe, @QueryParam("limit") Integer limit,
+			@QueryParam("macrotema") String macrotema,
 			@QueryParam("offset") Integer offset) {
 
 		Map<String, Object> m = new HashMap<String, Object>();
@@ -257,6 +269,7 @@ public class ProposicaoEndpoint {
 		m.put("origem", origem);
 		m.put("isFavorita", isFavorita);
 		m.put("estado", estado);
+		m.put("macrotema", macrotema);
 		m.put("idEquipe", idEquipe);
 
 		List<Proposicao> results = proposicaoService.consultar(m, offset, limit);
@@ -394,7 +407,6 @@ public class ProposicaoEndpoint {
 
 	@GET
 	@Path("/{id:[0-9]+}/notatecnica")
-	@Cache(maxAge = 24, noStore = false, isPrivate = false, sMaxAge = 24)
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<NotaTecnica> listNotaTecnicas(@PathParam("id") Long id) throws Exception {
 		return proposicaoService.getNotaTecnicas(id);

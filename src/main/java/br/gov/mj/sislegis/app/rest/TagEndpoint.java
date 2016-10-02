@@ -25,18 +25,18 @@ import br.gov.mj.sislegis.app.service.TagService;
 
 @Path("/tags")
 public class TagEndpoint {
-	
+
 	@Inject
 	private TagService tagService;
-	
+
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(Tag entity) {
-		
+
 		tagService.save(entity);
-		return Response.created(
-				UriBuilder.fromResource(TagEndpoint.class)
-						.path(String.valueOf(entity.getId())).build()).build();
+		return Response
+				.created(UriBuilder.fromResource(TagEndpoint.class).path(String.valueOf(entity.getId())).build())
+				.build();
 	}
 
 	@DELETE
@@ -47,16 +47,23 @@ public class TagEndpoint {
 	}
 
 	@GET
-	@Path("/{id:[0-9][0-9]*}")
+	@Path("/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response findById(@PathParam("id") Long id) {
+	public Response findById(@PathParam("id") String id) {
 		Tag entity = tagService.findById(id);
 		if (entity == null) {
 			return Response.status(Status.NOT_FOUND).build();
 		}
 		return Response.ok(entity).build();
 	}
-
+	@DELETE
+	@Path("/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response remove(@PathParam("id") String id) {
+		
+		tagService.deleteById(id);
+		return Response.ok().build();
+	}
 
 	@GET
 	@Path("/listarTodos")
@@ -64,41 +71,43 @@ public class TagEndpoint {
 	public List<Tag> listAll() {
 		return tagService.listarTodasTags();
 	}
-	
+
 	@GET
 	@Path("/buscarPorSufixo")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Tag> buscarPorSufixo(@QueryParam("sufixo")String sufixo) {
+	public List<Tag> buscarPorSufixo(@QueryParam("sufixo") String sufixo) {
 		return tagService.buscaPorSufixo(sufixo);
 	}
 
 	@PUT
-	@Path("/{id:[0-9][0-9]*}")
+	@Path("/{id}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response update(Tag entity) {
+	public Response update(@PathParam("id") String id, Tag entity) {
 		try {
-			tagService.save(entity);
+			
+			
+			
+			tagService.replace(id,entity);
 		} catch (OptimisticLockException e) {
-			return Response.status(Response.Status.CONFLICT)
-					.entity(e.getEntity()).build();
+			return Response.status(Response.Status.CONFLICT).entity(e.getEntity()).build();
 		}
 
 		return Response.noContent().build();
 	}
-	
+
 	@GET
 	@Path("/listAllDropdownMultiple")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<DropdownMultiselectStringJSON> listAllDropdownMultiple() {
 		final List<Tag> results = tagService.listarTodasTags();
 		List<DropdownMultiselectStringJSON> listaDropdownMultiselectJSON = new ArrayList<DropdownMultiselectStringJSON>();
-		for(Tag tag:results){
+		for (Tag tag : results) {
 			DropdownMultiselectStringJSON dropdownMultiselectJSON = new DropdownMultiselectStringJSON();
 			dropdownMultiselectJSON.setLabel(tag.getTag());
 			dropdownMultiselectJSON.setId(tag.getTag());
 			listaDropdownMultiselectJSON.add(dropdownMultiselectJSON);
 		}
 		return listaDropdownMultiselectJSON;
-	}	
+	}
 
 }

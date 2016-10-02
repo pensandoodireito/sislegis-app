@@ -15,4 +15,8 @@ public interface TagService extends Service<Tag> {
 
     List<Tag> buscaPorSufixo(String sufixo);
 
+	void replace(String id, Tag entity);
+
+	void deleteById(String entity);
+
 }

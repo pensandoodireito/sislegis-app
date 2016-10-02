@@ -1,5 +1,6 @@
 package br.gov.mj.sislegis.app.model;
 
+import java.util.Collection;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -12,6 +13,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import org.json.JSONObject;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -62,5 +65,13 @@ public class Equipe extends AbstractEntity {
 	public String toString() {
 		return new StringBuilder(getClass().getSimpleName()).append(" ").append(nome).append("@").append(id).toString();
 
+	}
+
+	public JSONObject toJson() {
+		JSONObject json = new JSONObject();
+		json.put("id", id);
+		json.put("nome", this.nome);
+
+		return json;
 	}
 }
