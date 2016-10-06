@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -67,35 +69,11 @@ import br.gov.mj.sislegis.app.service.ejbs.TagServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.TarefaServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.TipoEncaminhamentoServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.UsuarioServiceEjb;
+import br.gov.mj.sislegis.app.util.SislegisUtil;
+import br.gov.mj.sislegis.app.web.ProposicaoPautadasPrimeiro;
 
 public class TestReport {
-	private final class ProposicaoPautadasPrimeiro implements Comparator<Proposicao> {
-		@Override
-		public int compare(Proposicao o1, Proposicao o2) {
-			if (o1.getPautaComissaoAtual() != null) {
-				if (o2.getPautaComissaoAtual() == null) {
-					return -1;
-				} else {
-					int compComissao = o1.getPautaComissaoAtual().getPautaReuniaoComissao().getComissao()
-							.compareTo(o2.getPautaComissaoAtual().getPautaReuniaoComissao().getComissao());
-					if (compComissao == 0) {
-						return o1.getPautaComissaoAtual().getOrdemPauta()
-								.compareTo(o2.getPautaComissaoAtual().getOrdemPauta());
-					} else {
-						return compComissao;
-					}
-
-				}
-
-			} else if (o2.getPautaComissaoAtual() != null) {
-				return 1;
-			} else {
-				return o1.getComissao().compareTo(o2.getComissao());
-			}
-
-		}
-	}
-
+	
 	private static final String EMAIL_USUARIO_PADRAO = "rafael.coutinho@gmail.com";
 	PosicionamentoService posicionamentoSvc;
 	ProposicaoService proposicaoService;
@@ -231,7 +209,7 @@ public class TestReport {
 
 			Map<String, Object> filtros = new HashMap<String, Object>();
 			filtros.put("origem", Origem.CAMARA.name());
-			filtros.put("estado", EstadoProposicao.DESPACHADA);
+			filtros.put("estado", EstadoProposicao.DESPACHADA.name());
 
 			camaraTable.removeRow(1);
 
@@ -242,7 +220,7 @@ public class TestReport {
 			sunday.set(Calendar.SECOND, 0);
 			sunday.set(Calendar.MILLISECOND, 0);
 
-			List<Proposicao> props = proposicaoService.consultar(filtros, 0, null);
+			List<Proposicao> props = proposicaoService.consultar(filtros, 0, 30);
 
 			Collections.sort(props, new ProposicaoPautadasPrimeiro());
 			populaProposicoesTabela(tableTemplate, camaraTable, props, sunday.getTime());
@@ -255,7 +233,7 @@ public class TestReport {
 			XWPFTable senadoTable = cloneTable(tableTemplateSenado, doc);
 			senadoTable.removeRow(1);
 			filtros.put("origem", Origem.SENADO.name());
-			List<Proposicao> propsSenado = proposicaoService.consultar(filtros, 0, null);
+			List<Proposicao> propsSenado = proposicaoService.consultar(filtros, 0, 30);
 			Collections.sort(propsSenado, new ProposicaoPautadasPrimeiro());
 			populaProposicoesTabela(tableTemplateSenado, senadoTable, propsSenado, sunday.getTime());
 
@@ -275,7 +253,7 @@ public class TestReport {
 		for (Iterator iterator = props.iterator(); iterator.hasNext();) {
 			Proposicao proposicao = (Proposicao) iterator.next();
 			XWPFTableRow row = createTableRow(camaraTable, tableTemplate.getRow(1));
-
+//			row.setRepeatHeader(true);
 			if (!proposicao.getLinkProposicao().isEmpty()) {
 				replaceText(row.getCell(0), "[PL]", "");
 				appendExternalHyperlink(proposicao.getLinkProposicao(), proposicao.getSigla(), row.getCell(0)
@@ -298,8 +276,12 @@ public class TestReport {
 				replaceText(row.getCell(3), "[POSICIONAMENTO]", "SEM POSICIONAMENTO");
 			}
 			replaceText(row.getCell(4), "[PRIORITARIO]", proposicao.isFavorita() ? "Sim" : "Não");
-			replaceText(row.getCell(5), "[COMISSAO]", proposicao.getComissao());
-			System.out.println(proposicao.getSigla());
+			if (proposicao.getComissao() == null) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING, "Proposicao "+proposicao.getSigla()+" não possui dados de comissão");
+				replaceText(row.getCell(5), "[COMISSAO]", "Comissão não identificada");
+			} else {
+				replaceText(row.getCell(5), "[COMISSAO]", proposicao.getComissao());
+			}			System.out.println(proposicao.getSigla());
 			if (proposicao.getPautaComissaoAtual() != null) {
 				System.out.println(proposicao.getPautaComissaoAtual().getPautaReuniaoComissao());
 				if (proposicao.getPautaComissaoAtual().getPautaReuniaoComissao() != null) {

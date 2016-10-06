@@ -8,7 +8,6 @@ import javax.persistence.PersistenceContext;
 
 import br.gov.mj.sislegis.app.model.AreaDeMerito;
 import br.gov.mj.sislegis.app.model.AreaDeMeritoRevisao;
-import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.AreaDeMeritoService;
 

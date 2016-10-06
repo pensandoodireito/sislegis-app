@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -45,43 +44,6 @@ import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 @WebServlet("/relatorio")
 public class ReportDownloadServlet extends HttpServlet {
-	private final class ProposicaoPautadasPrimeiro implements Comparator<Proposicao> {
-		@Override
-		public int compare(Proposicao o1, Proposicao o2) {
-			if (o1.getPautaComissaoAtual() != null) {
-				if (o2.getPautaComissaoAtual() == null) {
-					return -1;
-				} else {
-					int compComissao = o1.getPautaComissaoAtual().getPautaReuniaoComissao().getComissao()
-							.compareTo(o2.getPautaComissaoAtual().getPautaReuniaoComissao().getComissao());
-					if (compComissao == 0) {
-						return o1.getPautaComissaoAtual().getOrdemPauta()
-								.compareTo(o2.getPautaComissaoAtual().getOrdemPauta());
-					} else {
-						return compComissao;
-					}
-
-				}
-
-			} else if (o2.getPautaComissaoAtual() != null) {
-				return 1;
-			} else {
-				if (o1.getComissao() == null) {
-					if (o2.getComissao() == null) {
-						return 0;
-					} else {
-						return 1;
-					}
-				} else if (o2.getComissao() == null) {
-					return -1;
-				} else {
-					return o1.getComissao().compareTo(o2.getComissao());
-				}
-			}
-
-		}
-	}
-
 	@Inject
 	private ProposicaoService proposicaoService;
 

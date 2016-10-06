@@ -24,7 +24,6 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
@@ -35,7 +34,6 @@ import br.gov.mj.sislegis.app.model.AlteracaoProposicao;
 import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
-import br.gov.mj.sislegis.app.model.Equipe;
 import br.gov.mj.sislegis.app.model.EstadoProposicao;
 import br.gov.mj.sislegis.app.model.NotaTecnica;
 import br.gov.mj.sislegis.app.model.Posicionamento;
@@ -46,7 +44,6 @@ import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
 import br.gov.mj.sislegis.app.model.RoadmapComissao;
-import br.gov.mj.sislegis.app.model.Tag;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.Votacao;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
@@ -1195,7 +1192,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	@Override
 	public PautaReuniaoComissao savePautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao) throws IOException {
 		// check se proposicoes existem
-
+		
 		Set<ProposicaoPautaComissao> additionalProposicoes = new HashSet<ProposicaoPautaComissao>(
 				pautaReuniaoComissao.getProposicoesDaPauta());
 		PautaReuniaoComissao prc = findPautaReuniao(pautaReuniaoComissao.getComissao(), pautaReuniaoComissao.getData(),
@@ -1309,7 +1306,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 	}
 
-	private Proposicao findProposicaoBy(Origem origem, Integer idProposicao) {
+	@Override
+	public Proposicao findProposicaoBy(Origem origem, Integer idProposicao) {
 		Query q = em.createNamedQuery("findByUniques", Proposicao.class);
 		q.setParameter("origem", origem);
 		q.setParameter("idProposicao", idProposicao);

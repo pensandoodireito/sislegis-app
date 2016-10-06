@@ -1,7 +1,6 @@
 package br.gov.mj.sislegis.app.model;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.Date;
 
 import javax.persistence.Column;

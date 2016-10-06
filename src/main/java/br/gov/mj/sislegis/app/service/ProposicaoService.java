@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 
 import javax.ejb.Local;
 import javax.xml.rpc.ServiceException;
@@ -21,7 +20,6 @@ import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.Votacao;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
-import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 
 @Local
@@ -222,5 +220,7 @@ public interface ProposicaoService extends Service<Proposicao> {
 	void deleteNotaById(Long idNota);
 
 	Proposicao save(Proposicao instanciaNova, Usuario user);
+
+	Proposicao findProposicaoBy(Origem origem, Integer idProposicao);
 
 }

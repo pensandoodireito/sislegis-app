@@ -1,47 +1,31 @@
 package br.gov.mj.sislegis.app.parser;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
-import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.poi.xwpf.usermodel.XWPFRelation;
-import org.apache.poi.xwpf.usermodel.XWPFRun;
-import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.apache.poi.xwpf.usermodel.XWPFTableCell;
-import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTColor;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHyperlink;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTR;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRPr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRow;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTbl;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTText;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STUnderline;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
-import br.gov.mj.sislegis.app.model.EstadoProposicao;
+import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.TipoEncaminhamento;
+import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
+import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
+import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
 import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
+import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
+import br.gov.mj.sislegis.app.parser.senado.ParserPlenarioSenado;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
@@ -67,9 +51,10 @@ import br.gov.mj.sislegis.app.service.ejbs.TagServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.TarefaServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.TipoEncaminhamentoServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.UsuarioServiceEjb;
+import br.gov.mj.sislegis.app.util.Conversores;
 
 public class TestSyncPautas {
-	
+
 	PosicionamentoService posicionamentoSvc;
 	ProposicaoService proposicaoService;
 	ComissaoService comissaoService;
@@ -151,8 +136,96 @@ public class TestSyncPautas {
 	}
 
 	@Test
-	public void testBusca(){
-		
-	}
+	public void testBusca() throws Exception {
+		Calendar dataInicial = Calendar.getInstance();
+		Calendar dataFinal = Calendar.getInstance();
+		dataFinal.add(Calendar.WEEK_OF_YEAR, 1);
+		List<Comissao> ls = comissaoService.listarComissoesCamara();
+//		for (Iterator iterator = ls.iterator(); iterator.hasNext();) {
+//			Comissao comissao = (Comissao) iterator.next();
+//			System.out.println("Comissao " + comissao.getSigla());
+//			try {
+//				ParserPautaCamara parserPautaCamara = new ParserPautaCamara();
+//
+//				Set<PautaReuniaoComissao> pss = parserPautaCamara.getPautaComissao(comissao.getSigla(),
+//						comissao.getId(), Conversores.dateToString(dataInicial.getTime(), "yyyyMMdd"),
+//						Conversores.dateToString(dataFinal.getTime(), "yyyyMMdd"));
+//				// proposicaoService.buscarProposicoesPautaCamaraWS(comissao.getId(),
+//				// dataInicial.getTime(), dataFinal.getTime());
+//				for (Iterator<PautaReuniaoComissao> iterator2 = pss.iterator(); iterator2.hasNext();) {
+//					PautaReuniaoComissao object = (PautaReuniaoComissao) iterator2.next();
+//					System.out.println(object + " " + object.getData());
+//					SortedSet<ProposicaoPautaComissao> paraSalvar = new TreeSet<ProposicaoPautaComissao>();
+//					for (Iterator<ProposicaoPautaComissao> iterator3 = object.getProposicoesDaPauta().iterator(); iterator3
+//							.hasNext();) {
+//						ProposicaoPautaComissao propPauta = (ProposicaoPautaComissao) iterator3.next();
+//						Proposicao p = proposicaoService.findProposicaoBy(Origem.CAMARA, propPauta.getProposicao()
+//								.getIdProposicao());
+//						System.out.println("\t" + propPauta + " === " + p);
+//						if (p != null) {
+//							paraSalvar.add(propPauta);
+//						}
+//
+//					}
+//					if (!paraSalvar.isEmpty()) {
+//						EntityTransaction trans = em.getTransaction();
+//						trans.begin();
+//						object.setProposicoesDaPauta(paraSalvar);
+//						proposicaoService.savePautaReuniaoComissao(object);
+//						trans.commit();
+//					}
+//
+//				}
+//			} catch (Exception e) {
+//				System.err.println("Falhou ao buscar para a comissao " + comissao.getSigla() + " " + e.getMessage());
+//			}
+//		}
+		ls = comissaoService.listarComissoesSenado();
+		for (Iterator iterator = ls.iterator(); iterator.hasNext();) {
+			Comissao comissao = (Comissao) iterator.next();
+			System.out.println("Comissao " + comissao.getSigla());
+			try {
+				ParserPautaSenado parserSenado = new ParserPautaSenado();
+				ParserPlenarioSenado parserPlenarioSenado = new ParserPlenarioSenado();
+				Set<PautaReuniaoComissao> pss = null;
+				if (comissao.getSigla().equals("PLEN")) {
+					pss = parserPlenarioSenado.getProposicoes(Conversores.dateToString(dataInicial.getTime(),
+							"yyyyMMdd"));
+				} else {
+					pss = parserSenado.getPautaComissao(comissao.getSigla(),
+							Conversores.dateToString(dataInicial.getTime(), "yyyyMMdd"),
+							Conversores.dateToString(dataFinal.getTime(), "yyyyMMdd"));
+				}
+				// proposicaoService.buscarProposicoesPautaCamaraWS(comissao.getId(),
+				// dataInicial.getTime(), dataFinal.getTime());
+				for (Iterator<PautaReuniaoComissao> iterator2 = pss.iterator(); iterator2.hasNext();) {
+					PautaReuniaoComissao object = (PautaReuniaoComissao) iterator2.next();
+					System.out.println(object + " " + object.getData());
+					SortedSet<ProposicaoPautaComissao> paraSalvar = new TreeSet<ProposicaoPautaComissao>();
+					for (Iterator<ProposicaoPautaComissao> iterator3 = object.getProposicoesDaPauta().iterator(); iterator3
+							.hasNext();) {
+						ProposicaoPautaComissao propPauta = (ProposicaoPautaComissao) iterator3.next();
+						Proposicao p = proposicaoService.findProposicaoBy(Origem.SENADO, propPauta.getProposicao()
+								.getIdProposicao());
+						System.out.println("\t" + propPauta + " === " + p);
+						if (p != null) {
+							paraSalvar.add(propPauta);
+						}
 
+					}
+					if (!paraSalvar.isEmpty()) {
+//						EntityTransaction trans = em.getTransaction();
+//						trans.begin();
+						object.setProposicoesDaPauta(paraSalvar);
+						proposicaoService.savePautaReuniaoComissao(object);
+//						trans.commit();
+					}
+
+				}
+			} catch (Exception e) {
+				System.err.println("Falhou ao buscar para a comissao " + comissao.getSigla() + " " + e.getMessage());
+			}
+		}
+
+	}
 }
