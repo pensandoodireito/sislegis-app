@@ -310,8 +310,13 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 		setParams(sigla, null, autor, ementa, origem, isFavorita, estado, null, idEquipe, null, macrotema, null,
 				findByIdQuery);
-
-		List<Proposicao> proposicoes = findByIdQuery.setFirstResult(offset).setMaxResults(limit).getResultList();
+		if (offset != null) {
+			findByIdQuery.setFirstResult(offset);
+		}
+		if (limit != null) {
+			findByIdQuery.setMaxResults(limit);
+		}
+		List<Proposicao> proposicoes = findByIdQuery.getResultList();
 		popularDadosTransientes(proposicoes);
 
 		return proposicoes;
@@ -369,7 +374,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 		if (Objects.nonNull(macrotema)) {
 
-			findByIdQuery.setParameter("tag",  macrotema);
+			findByIdQuery.setParameter("tag", macrotema);
 		}
 		if (Objects.nonNull(idEquipe)) {
 
@@ -1434,6 +1439,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		this.reuniaoProposicaoService = (ReuniaoProposicaoService) injections[3];
 		this.comissaoService = (ComissaoService) injections[4];
 		comentarioService = (ComentarioService) injections[5];
+		encaminhamentoProposicaoService = (EncaminhamentoProposicaoService) injections[6];
+		areaMeritoService = (AreaDeMeritoService) injections[7];
 		parserPautaCamara = new ParserPautaCamara();
 		parserPautaSenado = new ParserPautaSenado();
 

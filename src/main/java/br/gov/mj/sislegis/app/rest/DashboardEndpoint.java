@@ -2,6 +2,8 @@ package br.gov.mj.sislegis.app.rest;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
 import java.util.TimeZone;
 
 import javax.ejb.Stateless;
@@ -15,8 +17,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import br.gov.mj.sislegis.app.model.Equipe;
 import br.gov.mj.sislegis.app.model.EstadoProposicao;
 import br.gov.mj.sislegis.app.model.Papel;
 import br.gov.mj.sislegis.app.model.Usuario;
@@ -88,7 +92,40 @@ public class DashboardEndpoint {
 					.createQuery("select count(p.id) from Proposicao p where p.estado=:estado")
 					.setParameter("estado", EstadoProposicao.ADESPACHAR).getSingleResult();
 			dashInfo.put("totalProposicoesADespachar", totalProposicoesADespachar);
+
 		}
+		List<Equipe> equipes = equipeService.listAll();
+		JSONArray equipesArr = new JSONArray();
+		for (Iterator iterator = equipes.iterator(); iterator.hasNext();) {
+			Equipe equipe = (Equipe) iterator.next();
+			if (equipe.getNome().contains("ASPAR")) {
+				continue;
+			}
+			JSONObject porEquipe = new JSONObject();
+			porEquipe.put("e", equipe.toJson());
+
+			Long totalEmAnalise = (Long) em
+					.createQuery(
+							"select count(p.id) from Proposicao p where p.estado=:estado and p.updated>:data and p.equipe.id=:idEquipe")
+					.setParameter("idEquipe", equipe.getId()).setParameter("data", inicioMes.getTime())
+					.setParameter("estado", EstadoProposicao.EMANALISE).getSingleResult();
+			Long totalEmAnalisada = (Long) em
+					.createQuery(
+							"select count(p.id) from Proposicao p where p.estado=:estado and p.updated>:data and p.equipe.id=:idEquipe")
+					.setParameter("idEquipe", equipe.getId()).setParameter("data", inicioMes.getTime())
+					.setParameter("estado", EstadoProposicao.ANALISADA).getSingleResult();
+
+			porEquipe.put("totalEmAnalise", totalEmAnalise);
+			porEquipe.put("totalAnalisada", totalEmAnalisada);
+			equipesArr.put(porEquipe);
+		}
+		Long totalSemEquipe = (Long) em
+				.createQuery(
+						"select count(p.id) from Proposicao p where p.estado=:estado and p.updated>:data and p.equipe.id is null")
+				.setParameter("data", inicioMes.getTime()).setParameter("estado", EstadoProposicao.EMANALISE)
+				.getSingleResult();
+		dashInfo.put("semEquipe", totalSemEquipe);
+		dashInfo.put("equipes", equipesArr);
 
 		return Response.ok(dashInfo.toString()).build();
 	}

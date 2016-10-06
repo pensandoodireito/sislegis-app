@@ -458,7 +458,8 @@ public class ImporterTests {
 
 								if (p.situacao != null && p.situacao.toLowerCase().contains("feita")) {
 									prop.setEstado(EstadoProposicao.ADESPACHAR);
-								} else if (p.drive != null && !p.drive.isEmpty()) {
+								} else if (p.drive != null && !p.drive.isEmpty() && p.posicaoSAL != null
+										&& !p.posicaoSAL.isEmpty()) {
 									prop.setEstado(EstadoProposicao.ADESPACHAR);
 								} else {
 									prop.setEstado(EstadoProposicao.EMANALISE);
@@ -606,9 +607,11 @@ public class ImporterTests {
 							e.printStackTrace();
 							System.err.println("Falhou ao processar " + p + " " + p.comissao.length() + " "
 									+ p.situacao.length());
-//							System.out.println(prop.getComissao().length() + " n:" + prop.getNumero().length() + " l:"
-//									+ prop.getLinkProposicao().length() + " sit:" + prop.getSituacao().length() + " a:"
-//									+ prop.getAutor().length());
+							// System.out.println(prop.getComissao().length() +
+							// " n:" + prop.getNumero().length() + " l:"
+							// + prop.getLinkProposicao().length() + " sit:" +
+							// prop.getSituacao().length() + " a:"
+							// + prop.getAutor().length());
 
 							p.printRow();
 

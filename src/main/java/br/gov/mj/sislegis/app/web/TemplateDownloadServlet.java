@@ -1,7 +1,5 @@
-package br.gov.mj.sislegis.app.rest;
+package br.gov.mj.sislegis.app.web;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
