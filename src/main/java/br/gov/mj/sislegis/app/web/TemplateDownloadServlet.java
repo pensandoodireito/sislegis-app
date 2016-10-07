@@ -48,7 +48,7 @@ public class TemplateDownloadServlet extends HttpServlet {
 				posicionamento = prop.getPosicionamentoAtual().getPosicionamento().getNome();
 			}
 			substituicoes.put("[P.POSICIONAMENTO]", posicionamento);
-			String explicacao = prop.getExplicacao();
+			String explicacao = prop.getParecerSAL();
 			if (explicacao == null) {
 				explicacao = "";
 			}
