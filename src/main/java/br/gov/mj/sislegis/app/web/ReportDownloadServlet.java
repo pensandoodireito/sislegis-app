@@ -205,7 +205,11 @@ public class ReportDownloadServlet extends HttpServlet {
 			for (XWPFRun r : p.getRuns()) {
 
 				String text = r.getText(0);
-				text = text.replace(chave, replacement);
+				if (text != null) {
+					text = text.replace(chave, replacement);
+				} else {
+					text = replacement;
+				}
 				r.setText(text, 0);
 			}
 		}

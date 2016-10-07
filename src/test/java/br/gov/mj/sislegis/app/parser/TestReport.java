@@ -73,7 +73,7 @@ import br.gov.mj.sislegis.app.util.SislegisUtil;
 import br.gov.mj.sislegis.app.web.ProposicaoPautadasPrimeiro;
 
 public class TestReport {
-	
+
 	private static final String EMAIL_USUARIO_PADRAO = "rafael.coutinho@gmail.com";
 	PosicionamentoService posicionamentoSvc;
 	ProposicaoService proposicaoService;
@@ -225,22 +225,21 @@ public class TestReport {
 			Collections.sort(props, new ProposicaoPautadasPrimeiro());
 			populaProposicoesTabela(tableTemplate, camaraTable, props, sunday.getTime());
 
-			
-			
-			
-			XWPFTable tableTemplateSenado = doc.getTables().get(1);
-
-			XWPFTable senadoTable = cloneTable(tableTemplateSenado, doc);
-			senadoTable.removeRow(1);
-			filtros.put("origem", Origem.SENADO.name());
-			List<Proposicao> propsSenado = proposicaoService.consultar(filtros, 0, 30);
-			Collections.sort(propsSenado, new ProposicaoPautadasPrimeiro());
-			populaProposicoesTabela(tableTemplateSenado, senadoTable, propsSenado, sunday.getTime());
+			// XWPFTable tableTemplateSenado = doc.getTables().get(1);
+			//
+			// XWPFTable senadoTable = cloneTable(tableTemplateSenado, doc);
+			// senadoTable.removeRow(1);
+			// filtros.put("origem", Origem.SENADO.name());
+			// List<Proposicao> propsSenado =
+			// proposicaoService.consultar(filtros, 0, 30);
+			// Collections.sort(propsSenado, new ProposicaoPautadasPrimeiro());
+			// populaProposicoesTabela(tableTemplateSenado, senadoTable,
+			// propsSenado, sunday.getTime());
 
 			doc.setTable(0, camaraTable);
 
 			// doc.setTable(1, senadoTable);
-			doc.write(new FileOutputStream("/home/sislegis/workspace/b/output2.docx"));
+			doc.write(new FileOutputStream("/home/sislegis/workspace/b/output12.docx"));
 
 		} finally {
 
@@ -253,7 +252,7 @@ public class TestReport {
 		for (Iterator iterator = props.iterator(); iterator.hasNext();) {
 			Proposicao proposicao = (Proposicao) iterator.next();
 			XWPFTableRow row = createTableRow(camaraTable, tableTemplate.getRow(1));
-//			row.setRepeatHeader(true);
+			// row.setRepeatHeader(true);
 			if (!proposicao.getLinkProposicao().isEmpty()) {
 				replaceText(row.getCell(0), "[PL]", "");
 				appendExternalHyperlink(proposicao.getLinkProposicao(), proposicao.getSigla(), row.getCell(0)
@@ -277,11 +276,13 @@ public class TestReport {
 			}
 			replaceText(row.getCell(4), "[PRIORITARIO]", proposicao.isFavorita() ? "Sim" : "Não");
 			if (proposicao.getComissao() == null) {
-				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING, "Proposicao "+proposicao.getSigla()+" não possui dados de comissão");
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING,
+						"Proposicao " + proposicao.getSigla() + " não possui dados de comissão");
 				replaceText(row.getCell(5), "[COMISSAO]", "Comissão não identificada");
 			} else {
 				replaceText(row.getCell(5), "[COMISSAO]", proposicao.getComissao());
-			}			System.out.println(proposicao.getSigla());
+			}
+			System.out.println(proposicao.getSigla());
 			if (proposicao.getPautaComissaoAtual() != null) {
 				System.out.println(proposicao.getPautaComissaoAtual().getPautaReuniaoComissao());
 				if (proposicao.getPautaComissaoAtual().getPautaReuniaoComissao() != null) {
@@ -311,7 +312,11 @@ public class TestReport {
 			for (XWPFRun r : p.getRuns()) {
 
 				String text = r.getText(0);
-				text = text.replace(chave, replacement);
+				if (text != null) {
+					text = text.replace(chave, replacement);
+				} else {
+					text = replacement;
+				}
 				r.setText(text, 0);
 			}
 		}
