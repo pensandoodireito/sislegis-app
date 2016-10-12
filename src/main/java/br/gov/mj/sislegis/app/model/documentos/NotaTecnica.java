@@ -1,4 +1,4 @@
-package br.gov.mj.sislegis.app.model;
+package br.gov.mj.sislegis.app.model.documentos;
 
 import java.util.Date;
 
@@ -19,6 +19,11 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import br.gov.mj.sislegis.app.model.AbstractEntity;
+import br.gov.mj.sislegis.app.model.Documento;
+import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Usuario;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -26,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @NamedQueries({ @NamedQuery(name = "listNotatecnicaProposicao", query = "select n from NotaTecnica n where n.proposicao.id=:idProposicao")
 
 })
-public class NotaTecnica extends AbstractEntity {
+public class NotaTecnica extends AbstractEntity implements DocRelated  {
 	/**
 	 * 
 	 */

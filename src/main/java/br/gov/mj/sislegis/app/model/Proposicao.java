@@ -39,6 +39,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.commons.collections.CollectionUtils;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.documentos.Briefing;
+import br.gov.mj.sislegis.app.model.documentos.Emenda;
+import br.gov.mj.sislegis.app.model.documentos.NotaTecnica;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.rest.serializers.CompactListRoadmapComissaoSerializer;
 import br.gov.mj.sislegis.app.rest.serializers.CompactSetProposicaoSerializer;
@@ -191,6 +194,10 @@ public class Proposicao extends AbstractEntity {
 	@Transient
 	private Integer totalNotasTecnicas = 0;
 	@Transient
+	private Integer totalEmendas = 0;
+	@Transient
+	private Integer totalBriefings = 0;
+	@Transient
 	private Integer totalParecerAreaMerito = 0;
 	@Transient
 	private Integer totalEncaminhamentos = 0;
@@ -219,6 +226,10 @@ public class Proposicao extends AbstractEntity {
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "proposicao", cascade = CascadeType.REMOVE)
 	private List<NotaTecnica> notatecnicas = new ArrayList<NotaTecnica>();
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "proposicao", cascade = CascadeType.REMOVE)
+	private List<Briefing> briefings = new ArrayList<Briefing>();
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "proposicao", cascade = CascadeType.REMOVE)
+	private List<Emenda> emendas = new ArrayList<Emenda>();
 
 	public Proposicao() {
 		super();
@@ -641,5 +652,21 @@ public class Proposicao extends AbstractEntity {
 	@PreUpdate
 	protected void onUpdate() {
 		updated = new Date();
+	}
+
+	public Integer getTotalEmendas() {
+		return totalEmendas;
+	}
+
+	public void setTotalEmendas(Integer totalEmendas) {
+		this.totalEmendas = totalEmendas;
+	}
+
+	public Integer getTotalBriefings() {
+		return totalBriefings;
+	}
+
+	public void setTotalBriefings(Integer totalBriefings) {
+		this.totalBriefings = totalBriefings;
 	}
 }

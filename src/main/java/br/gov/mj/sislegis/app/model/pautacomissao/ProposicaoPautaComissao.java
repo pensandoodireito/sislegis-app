@@ -163,8 +163,18 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 13;
+		int result = 1;
+		result = prime * result
+				+ ((pautaReuniaoComissaoId == null) ? super.hashCode() : pautaReuniaoComissaoId.hashCode());
+		result = prime * result + ((proposicaoId == null) ? super.hashCode() : proposicaoId.hashCode());
+		return result;
+	}
+
+	@Override
 	public String toString() {
 
-		return proposicaoId + ":" + pautaReuniaoComissaoId + " (" + resultado + ")@" + super.hashCode();
+		return proposicaoId + ":" + pautaReuniaoComissaoId + " (" + resultado + ")@" + hashCode();
 	}
 }

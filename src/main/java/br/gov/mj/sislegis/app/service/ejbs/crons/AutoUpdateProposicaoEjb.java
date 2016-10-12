@@ -1,34 +1,28 @@
 package br.gov.mj.sislegis.app.service.ejbs.crons;
 
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.Schedule;
-import javax.ejb.Singleton;
+import javax.ejb.Stateless;
+import javax.ejb.spi.EJBContainerProvider;
 import javax.inject.Inject;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
-import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
-import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
-import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
-import br.gov.mj.sislegis.app.parser.senado.ParserPlenarioSenado;
 import br.gov.mj.sislegis.app.service.AutoUpdateProposicaoService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.UsuarioService;
-import br.gov.mj.sislegis.app.util.Conversores;
+import br.gov.mj.sislegis.app.service.ejbs.EJBUnitTestable;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 /**
@@ -37,13 +31,15 @@ import br.gov.mj.sislegis.app.util.SislegisUtil;
  * @author rafael.coutinho
  *
  */
-@Singleton
-public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService {
+@Stateless
+public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService, EJBUnitTestable {
 	@Inject
 	ProposicaoService proposicaoService;
 
 	@Inject
 	UsuarioService usuarioService;
+	@Inject
+	private ComissaoService comissaoService;
 
 	@Override
 	@Schedule(dayOfWeek = "*", hour = "3", persistent = false, info = "Atualiza proposicoes da reuniao")
@@ -102,116 +98,61 @@ public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService {
 
 	}
 
-	@Inject
-	private ComissaoService comissaoService;
-
 	@Override
-	@Schedule(dayOfWeek = "*", hour = "6", persistent = false, info = "Atualiza todas as proposicoes pautadas")
+	@Schedule(dayOfWeek = "*", hour = "18", minute = "09", persistent = false, info = "Atualiza todas as proposicoes pautadas")
 	public void atualizaPautadas() {
 		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine(
 				"Atualiza pautas das reunioes anteriores e suas proposicoes");
 
-		Calendar dataInicial = Calendar.getInstance();
-		Calendar dataFinal = Calendar.getInstance();
-		dataFinal.add(Calendar.WEEK_OF_YEAR, 1);
+		updatePautasCamara();
+		updatePautasSenado();
+
+	}
+
+	@Override
+	public void updatePautasCamara() {
 		List<Comissao> ls;
 		try {
 			ls = comissaoService.listarComissoesCamara();
 
-			for (Iterator iterator = ls.iterator(); iterator.hasNext();) {
+			for (Iterator<Comissao> iterator = ls.iterator(); iterator.hasNext();) {
 				Comissao comissao = (Comissao) iterator.next();
 				System.out.println("Comissao " + comissao.getSigla());
-				try {
-					ParserPautaCamara parserPautaCamara = new ParserPautaCamara();
+				proposicaoService.syncPautaAtualComissao(Origem.CAMARA, comissao);
 
-					Set<PautaReuniaoComissao> pss = parserPautaCamara.getPautaComissao(comissao.getSigla(),
-							comissao.getId(), Conversores.dateToString(dataInicial.getTime(), "yyyyMMdd"),
-							Conversores.dateToString(dataFinal.getTime(), "yyyyMMdd"));
-					// proposicaoService.buscarProposicoesPautaCamaraWS(comissao.getId(),
-					// dataInicial.getTime(), dataFinal.getTime());
-					for (Iterator<PautaReuniaoComissao> iterator2 = pss.iterator(); iterator2.hasNext();) {
-						PautaReuniaoComissao object = (PautaReuniaoComissao) iterator2.next();
-						System.out.println(object + " " + object.getData());
-						SortedSet<ProposicaoPautaComissao> paraSalvar = new TreeSet<ProposicaoPautaComissao>();
-						for (Iterator<ProposicaoPautaComissao> iterator3 = object.getProposicoesDaPauta().iterator(); iterator3
-								.hasNext();) {
-							ProposicaoPautaComissao propPauta = (ProposicaoPautaComissao) iterator3.next();
-							Proposicao p = proposicaoService.findProposicaoBy(Origem.CAMARA, propPauta.getProposicao()
-									.getIdProposicao());
-							System.out.println("\t" + propPauta + " === " + p);
-							if (p != null) {
-								paraSalvar.add(propPauta);
-							}
-
-						}
-						if (!paraSalvar.isEmpty()) {
-							object.setProposicoesDaPauta(paraSalvar);
-							proposicaoService.savePautaReuniaoComissao(object);
-						}
-
-					}
-				} catch (Exception e) {
-					System.err
-							.println("Falhou ao buscar para a comissao " + comissao.getSigla() + " " + e.getMessage());
-				}
 			}
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+	}
+
+	@Override
+	public void updatePautasSenado() {
 		try {
-			ls = comissaoService.listarComissoesSenado();
-			for (Iterator iterator = ls.iterator(); iterator.hasNext();) {
+			List<Comissao> ls = comissaoService.listarComissoesSenado();
+			for (Iterator<Comissao> iterator = ls.iterator(); iterator.hasNext();) {
 				Comissao comissao = (Comissao) iterator.next();
+
 				System.out.println("Comissao " + comissao.getSigla());
 				try {
-					ParserPautaSenado parserSenado = new ParserPautaSenado();
-					ParserPlenarioSenado parserPlenarioSenado = new ParserPlenarioSenado();
-					Set<PautaReuniaoComissao> pss = null;
-					if (comissao.getSigla().equals("PLEN")) {
-						pss = parserPlenarioSenado.getProposicoes(Conversores.dateToString(dataInicial.getTime(),
-								"yyyyMMdd"));
-					} else {
-						pss = parserSenado.getPautaComissao(comissao.getSigla(),
-								Conversores.dateToString(dataInicial.getTime(), "yyyyMMdd"),
-								Conversores.dateToString(dataFinal.getTime(), "yyyyMMdd"));
-					}
-					// proposicaoService.buscarProposicoesPautaCamaraWS(comissao.getId(),
-					// dataInicial.getTime(), dataFinal.getTime());
-					for (Iterator<PautaReuniaoComissao> iterator2 = pss.iterator(); iterator2.hasNext();) {
-						PautaReuniaoComissao object = (PautaReuniaoComissao) iterator2.next();
-						System.out.println(object + " " + object.getData());
-						SortedSet<ProposicaoPautaComissao> paraSalvar = new TreeSet<ProposicaoPautaComissao>();
-						for (Iterator<ProposicaoPautaComissao> iterator3 = object.getProposicoesDaPauta().iterator(); iterator3
-								.hasNext();) {
-							ProposicaoPautaComissao propPauta = (ProposicaoPautaComissao) iterator3.next();
-							Proposicao p = proposicaoService.findProposicaoBy(Origem.SENADO, propPauta.getProposicao()
-									.getIdProposicao());
-							System.out.println("\t" + propPauta + " === " + p);
-							if (p != null) {
-								paraSalvar.add(propPauta);
-							}
+					proposicaoService.syncPautaAtualComissao(Origem.SENADO, comissao);
 
-						}
-						if (!paraSalvar.isEmpty()) {
-							// EntityTransaction trans = em.getTransaction();
-							// trans.begin();
-							object.setProposicoesDaPauta(paraSalvar);
-							proposicaoService.savePautaReuniaoComissao(object);
-							// trans.commit();
-						}
-
-					}
 				} catch (Exception e) {
-					System.err
-							.println("Falhou ao buscar para a comissao " + comissao.getSigla() + " " + e.getMessage());
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
+							"Falhou ao process comissao " + comissao, e);
 				}
 			}
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Falhou ao processar pautas senado ", e1);
 		}
+	}
 
+	@Override
+	public void setInjectedEntities(Object... injections) {
+		usuarioService = (UsuarioService) injections[0];
+		proposicaoService = (ProposicaoService) injections[1];
+		comissaoService = (ComissaoService) injections[2];
 	}
 
 }

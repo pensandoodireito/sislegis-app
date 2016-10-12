@@ -20,9 +20,11 @@ import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 
 import br.gov.mj.sislegis.app.model.Documento;
-import br.gov.mj.sislegis.app.model.NotaTecnica;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.model.documentos.Briefing;
+import br.gov.mj.sislegis.app.model.documentos.Emenda;
+import br.gov.mj.sislegis.app.model.documentos.NotaTecnica;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.DocumentoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
@@ -134,7 +136,7 @@ public class FileUploadEndpoint extends HttpServlet {
 			JSONObject respJson = new JSONObject();
 
 			switch (typeOfUpload) {
-			case 1:
+			case 1: {
 				Long proposicaoId = Long.parseLong(request.getParameter("idProposicao"));
 				Proposicao p = propService.findById(proposicaoId);
 				NotaTecnica nt = new NotaTecnica(p, user);
@@ -147,8 +149,38 @@ public class FileUploadEndpoint extends HttpServlet {
 				payload.put("usuario", nt.getUsuario().toJson());
 
 				respJson.put("payload", payload);
+			}
 				break;
+			case 2: {
+				Long proposicaoId = Long.parseLong(request.getParameter("idProposicao"));
+				Proposicao p = propService.findById(proposicaoId);
+				Briefing nt = new Briefing(p, user);
+				nt.setDocumento(documento);
+				propService.saveDocRelated(nt);
+				JSONObject payload = new JSONObject();
+				payload.put("id", nt.getId());
+				payload.put("dataCriacao", nt.getDataCriacao().getTime());
+				payload.put("documento", nt.getDocumento().toJson());
+				payload.put("usuario", nt.getUsuario().toJson());
 
+				respJson.put("payload", payload);
+			}
+				break;
+			case 3: {
+				Long proposicaoId = Long.parseLong(request.getParameter("idProposicao"));
+				Proposicao p = propService.findById(proposicaoId);
+				Emenda nt = new Emenda(p, user);
+				nt.setDocumento(documento);
+				propService.saveDocRelated(nt);
+				JSONObject payload = new JSONObject();
+				payload.put("id", nt.getId());
+				payload.put("dataCriacao", nt.getDataCriacao().getTime());
+				payload.put("documento", nt.getDocumento().toJson());
+				payload.put("usuario", nt.getUsuario().toJson());
+
+				respJson.put("payload", payload);
+			}
+				break;
 			default:
 				break;
 			}

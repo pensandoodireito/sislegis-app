@@ -35,7 +35,6 @@ import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
 import br.gov.mj.sislegis.app.model.EstadoProposicao;
-import br.gov.mj.sislegis.app.model.NotaTecnica;
 import br.gov.mj.sislegis.app.model.Posicionamento;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.ProcessoSei;
@@ -46,6 +45,10 @@ import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
 import br.gov.mj.sislegis.app.model.RoadmapComissao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.Votacao;
+import br.gov.mj.sislegis.app.model.documentos.Briefing;
+import br.gov.mj.sislegis.app.model.documentos.DocRelated;
+import br.gov.mj.sislegis.app.model.documentos.Emenda;
+import br.gov.mj.sislegis.app.model.documentos.NotaTecnica;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.SituacaoSessao;
@@ -1155,6 +1158,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			proposicao.setTotalEncaminhamentos(encaminhamentoProposicaoService.totalByProposicao(proposicao.getId()));
 			proposicao.setTotalPautasComissao(totalProposicaoPautaComissaoByProposicao(proposicao.getId()));
 			proposicao.setTotalNotasTecnicas(getNotaTecnicas(proposicao.getId()).size());
+			proposicao.setTotalBriefings(getBriefings(proposicao.getId()).size());
+			proposicao.setTotalEmendas(getEmendas(proposicao.getId()).size());
 			proposicao.setTotalParecerAreaMerito(areaMeritoService.listRevisoesProposicao(proposicao.getId()).size());
 
 			// PosicionamentoProposicao posicionamentoProposicao;
@@ -1188,11 +1193,11 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 	}
 
-	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	// @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public PautaReuniaoComissao savePautaReuniaoComissao(PautaReuniaoComissao pautaReuniaoComissao) throws IOException {
 		// check se proposicoes existem
-		
+
 		Set<ProposicaoPautaComissao> additionalProposicoes = new HashSet<ProposicaoPautaComissao>(
 				pautaReuniaoComissao.getProposicoesDaPauta());
 		PautaReuniaoComissao prc = findPautaReuniao(pautaReuniaoComissao.getComissao(), pautaReuniaoComissao.getData(),
@@ -1419,9 +1424,33 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 		return res;
 	}
+	@Override
+	public List<Emenda> getEmendas(Long proposicaoId) {
+		Query q = em.createNamedQuery("listEmendasProposicao", Emenda.class).setParameter("idProposicao", proposicaoId);
+		List<Emenda> res = q.getResultList();
+
+		return res;
+	}
+	@Override
+	public List<Briefing> getBriefings(Long proposicaoId) {
+		Query q = em.createNamedQuery("listBriefingProposicao").setParameter("idProposicao", proposicaoId);
+		List<Briefing> res = q.getResultList();
+
+		return res;
+	}
 
 	@Override
 	public void saveNotaTecnica(NotaTecnica nt) {
+		if (nt.getId() != null) {
+			em.merge(nt);
+		} else {
+			em.persist(nt);
+		}
+
+	}
+
+	@Override
+	public void saveDocRelated(DocRelated nt) {
 		if (nt.getId() != null) {
 			em.merge(nt);
 		} else {
@@ -1445,9 +1474,113 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public void deleteNotaById(Long idNota) {
-		getEntityManager().remove(getEntityManager().find(NotaTecnica.class, idNota));
+	public void deleteDocRelated(Long idNota,Class c) {
+		getEntityManager().remove(getEntityManager().find(c, idNota));
 
 	}
 
+	@Override
+	public Proposicao persistProposicaoAndPauta(Proposicao proposicao, PautaReuniaoComissao prc) throws Exception {
+		Proposicao proposicaoLocal = buscarPorIdProposicao(proposicao.getIdProposicao());
+		int result = -3;
+		if (proposicaoLocal == null) {
+			result = salvarProposicaoIndependente(proposicao);
+		} else {
+			proposicao = proposicaoLocal;
+		}
+
+		if (prc != null) {
+			try {
+				SortedSet<ProposicaoPautaComissao> ppcs = new TreeSet<ProposicaoPautaComissao>();
+				for (Iterator<ProposicaoPautaComissao> iterator2 = prc.getProposicoesDaPauta().iterator(); iterator2
+						.hasNext();) {
+					ProposicaoPautaComissao type = (ProposicaoPautaComissao) iterator2.next();
+					if (type.getProposicao().getIdProposicao().equals(proposicao.getIdProposicao())) {
+						ppcs.add(type);
+						break;
+					}
+				}
+				prc.setProposicoesDaPauta(ppcs);
+				savePautaReuniaoComissao(prc);
+				syncDadosPautaReuniaoComissao(prc);
+				return buscarPorIdProposicao(proposicao.getIdProposicao());
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			if (proposicao.getComissao() != null && !proposicao.getComissao().isEmpty()) {
+				Comissao comissao = new Comissao();
+				if (Origem.CAMARA.equals(proposicao.getOrigem())) {
+					comissao = comissaoService.getBySigla(proposicao.getComissao());
+				} else {
+					comissao.setSigla(proposicao.getComissao());
+				}
+
+				syncPautaAtualComissao(proposicao.getOrigem(), comissao);
+			}
+		}
+		return proposicao;
+	}
+
+	@Override
+	public void syncPautaAtualComissao(Origem origem, Comissao comissao) {
+		Calendar dataInicial = Calendar.getInstance();
+		dataInicial.add(Calendar.DAY_OF_YEAR, -1);
+		Calendar dataFinal = (Calendar) dataInicial.clone();
+		dataFinal.add(Calendar.WEEK_OF_YEAR, 1);
+
+		try {
+			Set<PautaReuniaoComissao> pss = null;
+			if (Origem.SENADO.equals(origem)) {
+				ParserPautaSenado parserSenado = new ParserPautaSenado();
+				ParserPlenarioSenado parserPlenarioSenado = new ParserPlenarioSenado();
+
+				if (comissao.getSigla().equals("PLEN")) {
+					pss = parserPlenarioSenado.getProposicoes(Conversores.dateToString(dataInicial.getTime(),
+							"yyyyMMdd"));
+				} else {
+					pss = parserSenado.getPautaComissao(comissao.getSigla(),
+							Conversores.dateToString(dataInicial.getTime(), "yyyyMMdd"),
+							Conversores.dateToString(dataFinal.getTime(), "yyyyMMdd"));
+				}
+
+			} else {
+				ParserPautaCamara parserPautaCamara = new ParserPautaCamara();
+
+				pss = parserPautaCamara.getPautaComissao(comissao.getSigla(), comissao.getId(),
+						Conversores.dateToString(dataInicial.getTime(), "yyyyMMdd"),
+						Conversores.dateToString(dataFinal.getTime(), "yyyyMMdd"));
+			}
+			persistePautaReuniaoComissao(pss, origem);
+		} catch (Exception e) {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Falhou ao process comissao " + comissao,
+					e);
+		}
+
+	}
+
+	private void persistePautaReuniaoComissao(Set<PautaReuniaoComissao> pss, Origem origem) throws IOException {
+
+		for (Iterator<PautaReuniaoComissao> iterator2 = pss.iterator(); iterator2.hasNext();) {
+			PautaReuniaoComissao object = (PautaReuniaoComissao) iterator2.next();
+			SortedSet<ProposicaoPautaComissao> paraSalvar = new TreeSet<ProposicaoPautaComissao>();
+			for (Iterator<ProposicaoPautaComissao> iterator3 = object.getProposicoesDaPauta().iterator(); iterator3
+					.hasNext();) {
+				ProposicaoPautaComissao propPauta = (ProposicaoPautaComissao) iterator3.next();
+				Proposicao p = findProposicaoBy(origem, propPauta.getProposicao().getIdProposicao());
+				if (p != null) {
+					paraSalvar.add(propPauta);
+				}
+
+			}
+			if (!paraSalvar.isEmpty()) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING, "Salvando " + object);
+				object.setProposicoesDaPauta(paraSalvar);
+				savePautaReuniaoComissao(object);
+			}
+
+		}
+	}
 }
