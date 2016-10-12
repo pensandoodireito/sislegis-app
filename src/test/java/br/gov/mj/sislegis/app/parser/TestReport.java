@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.poi.ss.usermodel.CreationHelper;
@@ -40,6 +41,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTText;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STUnderline;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.Equipe;
 import br.gov.mj.sislegis.app.model.EstadoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.TipoEncaminhamento;
@@ -153,6 +155,29 @@ public class TestReport {
 		((EJBUnitTestable) tipoEncaminhamentoService).setInjectedEntities(em);
 		((EJBUnitTestable) amSvc).setInjectedEntities(em);
 
+	}
+
+	@Test
+	public void testQuery() {
+		Equipe equipe = em.createQuery("select e from Equipe e", Equipe.class).setMaxResults(2).getResultList().get(1);
+		System.out.println(equipe);
+		Query q = em
+				.createNativeQuery(
+						"select eq.id as idEquipe,eq.nome as nomeEquipe,u.nome as nomeUsuario,u.email,u.id,count(p.id) from Usuario u left join (select id,responsavel_id from Proposicao where estado=:estado and updated>:data) p on p.responsavel_id=u.id, Equipe eq where eq.id=u.idequipe and eq.id=:idEquipe group by eq.id,eq.nome,u.id,u.nome,u.email")
+				.setParameter("idEquipe", equipe.getId())
+				.setParameter("data",new Date(0))				
+				.setParameter("estado", EstadoProposicao.EMANALISE.name());
+		List<Object[]> results = q.getResultList();
+		for (Iterator iterator = results.iterator(); iterator.hasNext();) {
+			Object[] objects = (Object[]) iterator.next();
+			System.out.println(objects[0]);
+			System.out.println(objects[1]);
+			System.out.println(objects[2]);
+			System.out.println(objects[3]);
+			System.out.println(objects[4]);
+			System.out.println(objects[5]);
+
+		}
 	}
 
 	/**
