@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +40,8 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STUnderline;
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.EstadoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
@@ -67,8 +70,7 @@ public class ReportDownloadServlet extends HttpServlet {
 	public static void appendExternalHyperlink(String url, String text, XWPFParagraph paragraph) {
 
 		// Add the link as External relationship
-		String id = paragraph.getDocument().getPackagePart()
-				.addExternalRelationship(url, XWPFRelation.HYPERLINK.getRelation()).getId();
+		String id = paragraph.getDocument().getPackagePart().addExternalRelationship(url, XWPFRelation.HYPERLINK.getRelation()).getId();
 
 		// Append the link and bind it to the relationship
 		CTHyperlink cLink = paragraph.getCTP().addNewHyperlink();
@@ -89,45 +91,61 @@ public class ReportDownloadServlet extends HttpServlet {
 		cLink.setRArray(new CTR[] { ctr });
 	}
 
-	public XWPFDocument gerarRelatorio() throws IOException, ParserConfigurationException {
+	public XWPFDocument gerarRelatorio(Map<String, Object> filtros) throws IOException, ParserConfigurationException {
 		try {
 
 			// Open the Word document file and instantiate the XWPFDocument
 			// class.
 			XWPFDocument doc = new XWPFDocument(this.getClass().getClassLoader().getResourceAsStream("relatorio.docx"));
-			XWPFTable tableTemplate = doc.getTables().get(0);
-			XWPFTable camaraTable = cloneTable(tableTemplate, doc);
 
-			Map<String, Object> filtros = new HashMap<String, Object>();
-			filtros.put("origem", Origem.CAMARA.name());
-			filtros.put("estado", EstadoProposicao.DESPACHADA.name());
+			boolean somenteCamara = false;
+			boolean somenteSenado = false;
+			if (Origem.CAMARA.name().equals(filtros.get("origem"))) {
+				somenteCamara = true;
+			} else if (Origem.SENADO.name().equals(filtros.get("origem"))) {
+				somenteSenado = true;
 
-			camaraTable.removeRow(1);
-
+			}
 			Calendar sunday = Calendar.getInstance();
 			sunday.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
 			sunday.set(Calendar.HOUR_OF_DAY, 0);
 			sunday.set(Calendar.MINUTE, 0);
 			sunday.set(Calendar.SECOND, 0);
 			sunday.set(Calendar.MILLISECOND, 0);
+			if (!somenteSenado) {
+				filtros.put("origem", Origem.CAMARA.name());
+				XWPFTable tableTemplate = doc.getTables().get(0);
+				XWPFTable camaraTable = cloneTable(tableTemplate, doc);
+				camaraTable.removeRow(1);
+	
+				List<Proposicao> props = proposicaoService.consultar(filtros, 0, null);
 
-			List<Proposicao> props = proposicaoService.consultar(filtros, 0, null);
+				Collections.sort(props, new ProposicaoPautadasPrimeiro());
+				populaProposicoesTabela(tableTemplate, camaraTable, props, sunday.getTime());
+				doc.setTable(0, camaraTable);
+				
+			}else{
+				XWPFTable tableTemplate = doc.getTables().get(0);
+				tableTemplate.removeRow(1);
+			}
+			if (!somenteCamara) {
+				XWPFTable tableTemplateSenado = doc.getTables().get(1);
 
-			Collections.sort(props, new ProposicaoPautadasPrimeiro());
-			populaProposicoesTabela(tableTemplate, camaraTable, props, sunday.getTime());
+				XWPFTable senadoTable = cloneTable(tableTemplateSenado, doc);
+				senadoTable.removeRow(1);
+				filtros.put("origem", Origem.SENADO.name());
+				List<Proposicao> propsSenado = proposicaoService.consultar(filtros, 0, null);
+				Collections.sort(propsSenado, new ProposicaoPautadasPrimeiro());
+				populaProposicoesTabela(tableTemplateSenado, senadoTable, propsSenado, sunday.getTime());
 
-			XWPFTable tableTemplateSenado = doc.getTables().get(1);
+				doc.setTable(1, senadoTable);
+			
 
-			XWPFTable senadoTable = cloneTable(tableTemplateSenado, doc);
-			senadoTable.removeRow(1);
-			filtros.put("origem", Origem.SENADO.name());
-			List<Proposicao> propsSenado = proposicaoService.consultar(filtros, 0, null);
-			Collections.sort(propsSenado, new ProposicaoPautadasPrimeiro());
-			populaProposicoesTabela(tableTemplateSenado, senadoTable, propsSenado, sunday.getTime());
-
-			doc.setTable(0, camaraTable);
-
-			doc.setTable(1, senadoTable);
+			}else{
+				XWPFTable tableTemplateSenado = doc.getTables().get(1);			
+				tableTemplateSenado.removeRow(1);
+//				tableTemplateSenado.removeRow(0);	
+			}
 			// doc.write(new
 			// FileOutputStream("/home/sislegis/workspace/b/output2.docx"));
 			return doc;
@@ -138,16 +156,14 @@ public class ReportDownloadServlet extends HttpServlet {
 
 	}
 
-	private void populaProposicoesTabela(XWPFTable tableTemplate, XWPFTable camaraTable, List<Proposicao> props,
-			Date ref) {
+	private void populaProposicoesTabela(XWPFTable tableTemplate, XWPFTable camaraTable, List<Proposicao> props, Date ref) {
 		for (Iterator iterator = props.iterator(); iterator.hasNext();) {
 			Proposicao proposicao = (Proposicao) iterator.next();
 			XWPFTableRow row = createTableRow(camaraTable, tableTemplate.getRow(1));
 
 			if (!proposicao.getLinkProposicao().isEmpty()) {
 				replaceText(row.getCell(0), "[PL]", "");
-				appendExternalHyperlink(proposicao.getLinkProposicao(), proposicao.getSigla(), row.getCell(0)
-						.getParagraphs().get(0));
+				appendExternalHyperlink(proposicao.getLinkProposicao(), proposicao.getSigla(), row.getCell(0).getParagraphs().get(0));
 			} else {
 				replaceText(row.getCell(0), "[PL]", proposicao.getSigla());
 			}
@@ -158,16 +174,14 @@ public class ReportDownloadServlet extends HttpServlet {
 			} else {
 				replaceText(row.getCell(2), "[EMENTA]", "Sem tema");
 			}
-			if (proposicao.getPosicionamentoAtual() != null
-					&& proposicao.getPosicionamentoAtual().getPosicionamento() != null) {
-				replaceText(row.getCell(3), "[POSICIONAMENTO]", proposicao.getPosicionamentoAtual().getPosicionamento()
-						.getNome());
+			if (proposicao.getPosicionamentoAtual() != null && proposicao.getPosicionamentoAtual().getPosicionamento() != null) {
+				replaceText(row.getCell(3), "[POSICIONAMENTO]", proposicao.getPosicionamentoAtual().getPosicionamento().getNome());
 			} else {
 				replaceText(row.getCell(3), "[POSICIONAMENTO]", "SEM POSICIONAMENTO");
 			}
 			replaceText(row.getCell(4), "[PRIORITARIO]", proposicao.isFavorita() ? "Sim" : "Não");
 			if (proposicao.getComissao() == null) {
-				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING, "Proposicao "+proposicao.getSigla()+" não possui dados de comissão");
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.WARNING, "Proposicao " + proposicao.getSigla() + " não possui dados de comissão");
 				replaceText(row.getCell(5), "[COMISSAO]", "Comissão não identificada");
 			} else {
 				replaceText(row.getCell(5), "[COMISSAO]", proposicao.getComissao());
@@ -237,9 +251,9 @@ public class ReportDownloadServlet extends HttpServlet {
 		ctTbl.set(table.getCTTbl());
 		XWPFTable table2 = new XWPFTable(ctTbl, doc);
 
-		doc.createParagraph();
-		doc.createTable(); // Create a empty table in the document
-		// doc.setTable(1, table2); // Replace the empty table to table2
+//		doc.createParagraph();
+		//doc.createTable(); // Create a empty table in the document
+
 		return table2;
 	}
 
@@ -253,22 +267,67 @@ public class ReportDownloadServlet extends HttpServlet {
 			response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 			response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
 
-			gerarRelatorio().write(response.getOutputStream());
-			// response.
-			// get your file as InputStream
-			// is = new FileInputStream(generated);
-			// // copy it to response's OutputStream
-			// org.apache.commons.io.IOUtils.copy(is,
-			// response.getOutputStream());
+			Map<String, Object> filtros = new HashMap<String, Object>();
+			filtros.put("estado", EstadoProposicao.DESPACHADA);
+			gerarRelatorio(filtros).write(response.getOutputStream());
+
 			response.flushBuffer();
 		} catch (IOException ex) {
 
-			throw new RuntimeException("IOError writing file to output stream", ex);
+			throw new RuntimeException("Erro ao gerar relatório", ex);
 		} catch (ParserConfigurationException e) {
-			throw new RuntimeException("IOError writing file to output stream", e);
+			throw new RuntimeException("Erro ao gerar relatório", e);
 		} finally {
 
 		}
 	}
 
+	@Inject
+	private UsuarioAutenticadoBean controleUsuarioAutenticado;
+
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException {
+		try {
+
+			String auth = req.getParameter("a");
+
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(auth);
+
+			String filename = "Relatorio_" + sdf.format(new Date()) + ".docx";
+
+			response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+			response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+
+			Map<String, Object> filtros = new HashMap<String, Object>();
+			Enumeration<String> nomesFiltro = req.getParameterNames();
+			while (nomesFiltro.hasMoreElements()) {
+				String k = nomesFiltro.nextElement();
+				if ("a".equals(k)) {
+					continue;
+				}
+				String valor = req.getParameter(k);
+				if (valor != null && !valor.isEmpty()) {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.INFO, "Adicionando filtro: " + k + "=" + req.getParameter(k));
+					if ("idEquipe".equals(k)) {
+						filtros.put(k, Long.valueOf(valor));
+					} else if ("estado".equals(k)) {
+						filtros.put(k, EstadoProposicao.valueOf(valor));
+					} else {
+						filtros.put(k, valor);
+					}
+				}
+			}
+
+			gerarRelatorio(filtros).write(response.getOutputStream());
+
+			response.flushBuffer();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("Erro ao gerar relatório", ex);
+		} catch (ParserConfigurationException e) {
+			throw new RuntimeException("Erro ao gerar relatório", e);
+		} finally {
+
+		}
+	}
 }
