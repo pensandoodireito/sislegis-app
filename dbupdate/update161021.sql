@@ -25,3 +25,15 @@ CREATE TABLE proposicao_emenda (
   FOREIGN KEY (usuario_id) REFERENCES usuario (id)
 );
 --rollback drop table proposicao_emenda
+
+
+
+	
+--changeset coutinho:161021-3
+alter table areamerito_revisao ADD documento_id bigint;	
+--rollback alter table areamerito_revisao drop documento_id
+
+--changeset coutinho:161021-4
+ALTER TABLE areamerito_revisao ADD CONSTRAINT fk_rev_doc FOREIGN KEY (documento_id)
+	REFERENCES documento (id);
+--rollback ALTER TABLE areamerito_revisao drop CONSTRAINT fk_rev_doc

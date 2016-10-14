@@ -23,7 +23,6 @@
 		<class>br.gov.mj.sislegis.app.model.EquipeUsuario</class>
 		<class>br.gov.mj.sislegis.app.model.EquipeUsuarioPK</class>
 		<class>br.gov.mj.sislegis.app.model.EstadoProposicao</class>
-		<class>br.gov.mj.sislegis.app.model.NotaTecnica</class>
 		<class>br.gov.mj.sislegis.app.model.Notificacao</class>
 		<class>br.gov.mj.sislegis.app.model.Orgao</class>
 		<class>br.gov.mj.sislegis.app.model.OrigemElaboracaoNormativa</class>
@@ -53,6 +52,10 @@
 		<class>br.gov.mj.sislegis.app.model.pautacomissao.Sessao</class>
 		<class>br.gov.mj.sislegis.app.model.pautacomissao.SituacaoSessao</class>
 		<class>br.gov.mj.sislegis.app.model.Documento</class>
+		<class>br.gov.mj.sislegis.app.model.documentos.NotaTecnica</class>
+		<class>br.gov.mj.sislegis.app.model.documentos.Briefing</class>
+		<class>br.gov.mj.sislegis.app.model.documentos.Emenda</class>
+
 
 
 

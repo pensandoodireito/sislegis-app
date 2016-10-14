@@ -1,53 +1,16 @@
 package br.gov.mj.sislegis.app.parser;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
-import javax.persistence.Query;
-import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.poi.xwpf.usermodel.XWPFRelation;
-import org.apache.poi.xwpf.usermodel.XWPFRun;
-import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.apache.poi.xwpf.usermodel.XWPFTableCell;
-import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTColor;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHyperlink;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTR;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRPr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRow;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTbl;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTText;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STUnderline;
 
-import br.gov.mj.sislegis.app.enumerated.Origem;
-import br.gov.mj.sislegis.app.model.Equipe;
-import br.gov.mj.sislegis.app.model.EstadoProposicao;
-import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.TipoEncaminhamento;
 import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
-import br.gov.mj.sislegis.app.service.AutoUpdateProposicaoService;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
@@ -74,8 +37,6 @@ import br.gov.mj.sislegis.app.service.ejbs.TarefaServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.TipoEncaminhamentoServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.UsuarioServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.crons.AutoUpdateProposicaoEjb;
-import br.gov.mj.sislegis.app.util.SislegisUtil;
-import br.gov.mj.sislegis.app.web.ProposicaoPautadasPrimeiro;
 
 public class TestAutoUpdater {
 
@@ -113,6 +74,7 @@ public class TestAutoUpdater {
 	@Before
 	public void setUp() {
 		try {
+			System.out.println("Setup");
 			emf = Persistence.createEntityManagerFactory("sislegis-persistence-unit-test");
 			initEJBS();
 		} catch (Exception e) {
@@ -166,7 +128,7 @@ public class TestAutoUpdater {
 	public void testQuery() {
 		EntityTransaction trans = em.getTransaction();
 		trans.begin();
-		autoUpd.atualizaPautadas();
+		autoUpd.atualizaPautadasSenado();
 		trans.commit();
 	}
 

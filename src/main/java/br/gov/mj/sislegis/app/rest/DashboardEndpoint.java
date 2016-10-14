@@ -3,7 +3,6 @@ package br.gov.mj.sislegis.app.rest;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;

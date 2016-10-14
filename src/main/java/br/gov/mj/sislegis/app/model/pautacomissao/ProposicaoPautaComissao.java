@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @Entity
 @Table(name = "Proposicao_PautaComissao")
 @IdClass(PropostaPautaPK.class)
+
 public class ProposicaoPautaComissao implements Serializable, Comparable<ProposicaoPautaComissao> {
 
 	/**

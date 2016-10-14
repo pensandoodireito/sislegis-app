@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @NamedQueries({ @NamedQuery(name = "listNotatecnicaProposicao", query = "select n from NotaTecnica n where n.proposicao.id=:idProposicao")
 
 })
-public class NotaTecnica extends AbstractEntity implements DocRelated  {
+public class NotaTecnica extends AbstractEntity implements DocRelated {
 	/**
 	 * 
 	 */
@@ -41,12 +41,12 @@ public class NotaTecnica extends AbstractEntity implements DocRelated  {
 	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.REMOVE)
+	@OneToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.REMOVE)
 	@JoinColumn(name = "documento_id", referencedColumnName = "id", nullable = true)
 	private Documento documento;
 
 	@JsonIgnore
-	@OneToOne(optional = true)
+	@ManyToOne(optional = false)
 	@JoinColumn(name = "proposicao_id", referencedColumnName = "id", nullable = false)
 	private Proposicao proposicao;
 
@@ -121,7 +121,6 @@ public class NotaTecnica extends AbstractEntity implements DocRelated  {
 	public Documento getDocumento() {
 		return documento;
 	}
-
 
 	public void setDocumento(Documento documento) {
 		this.documento = documento;

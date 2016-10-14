@@ -7,6 +7,7 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -31,12 +32,8 @@ import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 @Entity
-@Table(name = "PautaReuniaoComissao", uniqueConstraints = @UniqueConstraint(columnNames = { "comissao", "data",
-		"codigoReuniao" }))
-@NamedQueries({
-		@NamedQuery(name = "findByCodigoReuniao", query = "select p from PautaReuniaoComissao p where p.codigoReuniao=:codigoReuniao"),
-		@NamedQuery(name = "findByComissaoDataOrigem", query = "select p from PautaReuniaoComissao p where p.comissao=:comissao and p.data=:data and p.codigoReuniao=:codigoReuniao  "),
-		@NamedQuery(name = "findByIntervaloDatas", query = "select p from PautaReuniaoComissao p where p.data between :dataInicial and :dataFinal"),
+@Table(name = "PautaReuniaoComissao", uniqueConstraints = @UniqueConstraint(columnNames = { "comissao", "data", "codigoReuniao" }))
+@NamedQueries({ @NamedQuery(name = "findByCodigoReuniao", query = "select p from PautaReuniaoComissao p where p.codigoReuniao=:codigoReuniao"), @NamedQuery(name = "findByComissaoDataOrigem", query = "select p from PautaReuniaoComissao p where p.comissao=:comissao and p.data=:data and p.codigoReuniao=:codigoReuniao  "), @NamedQuery(name = "findByIntervaloDatas", query = "select p from PautaReuniaoComissao p where p.data between :dataInicial and :dataFinal"),
 		@NamedQuery(name = "findPendentes", query = "select p from PautaReuniaoComissao p where p.data < :date and p.situacao in :situacoesEmAberto order by p.data desc ")
 
 })
@@ -78,7 +75,7 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 	@Transient
 	private boolean manual = false;
 
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "pautaReuniaoComissao")
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "pautaReuniaoComissao", cascade = CascadeType.REMOVE)
 	@OrderBy("ordemPauta")
 	SortedSet<ProposicaoPautaComissao> proposicoesDaPauta = new TreeSet<ProposicaoPautaComissao>();
 
@@ -184,6 +181,8 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 	// Converte situacao do tipo String, da Camara ou do Senado
 	public void converterSituacao(String situacao) {
 		situacao = situacao.replaceAll("\\s", "");
+		situacao = situacao.replaceAll("ã", "a");
+		situacao = situacao.replaceAll("-", "");
 		switch (origem) {
 		case CAMARA:
 			try {
@@ -211,8 +210,7 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(comissao);
-		sb.append(" Código:{").append(codigoReuniao).append("}").append(getSituacao()).append(" contém ").append(proposicoesDaPauta.size())
-				.append(" proposicoes na pauta");
+		sb.append(" Código:{").append(codigoReuniao).append("}").append(getSituacao()).append(" contém ").append(proposicoesDaPauta.size()).append(" proposicoes na pauta");
 		return sb.toString();
 	}
 

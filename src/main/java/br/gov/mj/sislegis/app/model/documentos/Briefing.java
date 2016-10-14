@@ -41,12 +41,12 @@ public class Briefing extends AbstractEntity implements DocRelated {
 	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.REMOVE)
+	@OneToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.REMOVE)
 	@JoinColumn(name = "documento_id", referencedColumnName = "id", nullable = true)
 	private Documento documento;
 
 	@JsonIgnore
-	@OneToOne(optional = true)
+	@ManyToOne(optional = false)
 	@JoinColumn(name = "proposicao_id", referencedColumnName = "id", nullable = false)
 	private Proposicao proposicao;
 

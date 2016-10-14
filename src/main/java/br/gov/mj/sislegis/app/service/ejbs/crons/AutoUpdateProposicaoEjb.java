@@ -10,13 +10,11 @@ import java.util.logging.Logger;
 
 import javax.ejb.Schedule;
 import javax.ejb.Stateless;
-import javax.ejb.spi.EJBContainerProvider;
 import javax.inject.Inject;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.Proposicao;
-import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.service.AutoUpdateProposicaoService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
@@ -66,8 +64,7 @@ public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService, EJB
 					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Dados pauta sem alteracao");
 				}
 			} catch (IOException e) {
-				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
-						"Falhou ao atualizar proposicao " + proposicao.getSigla(), e);
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Falhou ao atualizar proposicao " + proposicao.getSigla(), e);
 			}
 		}
 	}
@@ -75,37 +72,40 @@ public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService, EJB
 	@Override
 	@Schedule(dayOfWeek = "*", hour = "4", persistent = false, info = "Atualiza pautas das reunioes passadas e suas proposicoes")
 	public void atualizaPautaReuniaoEProposicoes() {
-		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine(
-				"Atualiza pautas das reunioes anteriores e suas proposicoes");
+		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Atualiza pautas das reunioes anteriores e suas proposicoes");
 
 		List<PautaReuniaoComissao> prcLocalList = proposicaoService.findPautaReuniaoPendentes();
 
 		for (PautaReuniaoComissao prcLocal : prcLocalList) {
 			try {
 				if (proposicaoService.syncDadosPautaReuniaoComissao(prcLocal)) {
-					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine(
-							"Dados da pauta Reuniao e/ou Proposicao alterados");
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Dados da pauta Reuniao e/ou Proposicao alterados");
 				} else {
-					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).finest(
-							"Dados pauta Reuniao e/ou Proposicao sem alteracao");
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).finest("Dados pauta Reuniao e/ou Proposicao sem alteracao");
 				}
 
 			} catch (IOException e) {
-				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
-						"Falhou ao atualizar pauta reuniao e/ou proposicao " + prcLocal.getTitulo(), e);
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Falhou ao atualizar pauta reuniao e/ou proposicao " + prcLocal.getTitulo(), e);
 			}
 		}
 
 	}
 
 	@Override
-	@Schedule(dayOfWeek = "*", hour = "18", minute = "09", persistent = false, info = "Atualiza todas as proposicoes pautadas")
-	public void atualizaPautadas() {
-		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine(
-				"Atualiza pautas das reunioes anteriores e suas proposicoes");
+	@Schedule(dayOfWeek = "*", hour = "6", minute = "00", persistent = false, info = "Atualiza todas as proposicoes pautadas do senado")
+	public void atualizaPautadasSenado() {
+		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Atualiza pautas das reunioes anteriores e suas proposicoes do senado");
+
+		updatePautasSenado();
+
+	}
+
+	@Override
+	@Schedule(dayOfWeek = "*", hour = "5", minute = "30", persistent = false, info = "Atualiza todas as proposicoes pautadas do camara")
+	public void atualizaPautadasCamara() {
+		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Atualiza pautas das reunioes anteriores e suas proposicoes da camara");
 
 		updatePautasCamara();
-		updatePautasSenado();
 
 	}
 
@@ -139,8 +139,7 @@ public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService, EJB
 					proposicaoService.syncPautaAtualComissao(Origem.SENADO, comissao);
 
 				} catch (Exception e) {
-					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
-							"Falhou ao process comissao " + comissao, e);
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Falhou ao processo comissao " + comissao, e);
 				}
 			}
 		} catch (Exception e1) {

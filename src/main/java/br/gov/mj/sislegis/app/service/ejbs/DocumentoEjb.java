@@ -30,6 +30,16 @@ public class DocumentoEjb extends AbstractPersistence<Documento, Long> implement
 	}
 
 	@Override
+	public void remove(Documento entity) {
+		try {
+			new File(entity.getPath()).delete();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		super.remove(entity);
+	}
+
+	@Override
 	public Documento save(Documento documento, Part filePart) throws IOException {
 		save(documento);
 
