@@ -42,6 +42,7 @@ import br.gov.mj.sislegis.app.model.EstadoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
+import br.gov.mj.sislegis.app.rest.authentication.UsuarioNaoLogado;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.util.SislegisUtil;
 
@@ -117,14 +118,14 @@ public class ReportDownloadServlet extends HttpServlet {
 				XWPFTable tableTemplate = doc.getTables().get(0);
 				XWPFTable camaraTable = cloneTable(tableTemplate, doc);
 				camaraTable.removeRow(1);
-	
+
 				List<Proposicao> props = proposicaoService.consultar(filtros, 0, null);
 
 				Collections.sort(props, new ProposicaoPautadasPrimeiro());
 				populaProposicoesTabela(tableTemplate, camaraTable, props, sunday.getTime());
 				doc.setTable(0, camaraTable);
-				
-			}else{
+
+			} else {
 				XWPFTable tableTemplate = doc.getTables().get(0);
 				tableTemplate.removeRow(1);
 			}
@@ -139,12 +140,11 @@ public class ReportDownloadServlet extends HttpServlet {
 				populaProposicoesTabela(tableTemplateSenado, senadoTable, propsSenado, sunday.getTime());
 
 				doc.setTable(1, senadoTable);
-			
 
-			}else{
-				XWPFTable tableTemplateSenado = doc.getTables().get(1);			
+			} else {
+				XWPFTable tableTemplateSenado = doc.getTables().get(1);
 				tableTemplateSenado.removeRow(1);
-//				tableTemplateSenado.removeRow(0);	
+				// tableTemplateSenado.removeRow(0);
 			}
 			// doc.write(new
 			// FileOutputStream("/home/sislegis/workspace/b/output2.docx"));
@@ -251,8 +251,8 @@ public class ReportDownloadServlet extends HttpServlet {
 		ctTbl.set(table.getCTTbl());
 		XWPFTable table2 = new XWPFTable(ctTbl, doc);
 
-//		doc.createParagraph();
-		//doc.createTable(); // Create a empty table in the document
+		// doc.createParagraph();
+		// doc.createTable(); // Create a empty table in the document
 
 		return table2;
 	}
@@ -312,6 +312,8 @@ public class ReportDownloadServlet extends HttpServlet {
 						filtros.put(k, Long.valueOf(valor));
 					} else if ("estado".equals(k)) {
 						filtros.put(k, EstadoProposicao.valueOf(valor));
+					} else if ("somentePautadas".equals(k)) {
+						filtros.put(k, Boolean.TRUE);
 					} else {
 						filtros.put(k, valor);
 					}
@@ -321,6 +323,9 @@ public class ReportDownloadServlet extends HttpServlet {
 			gerarRelatorio(filtros).write(response.getOutputStream());
 
 			response.flushBuffer();
+		} catch (UsuarioNaoLogado ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("Para acessar este relatório você deve estar logado no Sislegis");
 		} catch (IOException ex) {
 			ex.printStackTrace();
 			throw new RuntimeException("Erro ao gerar relatório", ex);

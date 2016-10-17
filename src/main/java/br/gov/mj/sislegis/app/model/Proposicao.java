@@ -28,6 +28,7 @@ import javax.persistence.NamedNativeQuery;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
@@ -43,6 +44,7 @@ import br.gov.mj.sislegis.app.model.documentos.Briefing;
 import br.gov.mj.sislegis.app.model.documentos.Emenda;
 import br.gov.mj.sislegis.app.model.documentos.NotaTecnica;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
+import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissaoFutura;
 import br.gov.mj.sislegis.app.rest.serializers.CompactListRoadmapComissaoSerializer;
 import br.gov.mj.sislegis.app.rest.serializers.CompactSetProposicaoSerializer;
 
@@ -74,8 +76,15 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 			query = "select p from Proposicao p where p.idProposicao=:idProposicao and p.origem=:origem"),
 	@NamedQuery(
 				name = "findByPosicionamento", 
-				query = "select p from Proposicao p where p.posicionamentoAtual.id=:id")	
-
+				query = "select p from Proposicao p where p.posicionamentoAtual.id=:id"),
+	@NamedQuery(
+			name = "findPautadas", 
+			query = "select p from Proposicao p where p.ultima.pautaReuniaoComissao.data>:data")
+	,
+	@NamedQuery(
+			name = "findNaoPautadas",  
+			query = "select p from Proposicao p where p.ultima is null")
+	
 })
 //@formatter:on
 @XmlRootElement
@@ -101,6 +110,10 @@ public class Proposicao extends AbstractEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "estado")
 	private EstadoProposicao estado;
+	
+	@Enumerated(EnumType.STRING)
+	@Column(name = "estadofinal")
+	private EstadoFinal estadoFinal;
 
 	@Column
 	private String tipo;
@@ -166,8 +179,12 @@ public class Proposicao extends AbstractEntity {
 	private Equipe equipe;
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "proposicao")
-	@OrderBy("pautaReuniaoComissao")
-	private SortedSet<ProposicaoPautaComissao> pautasComissoes = new TreeSet<ProposicaoPautaComissao>();
+	// @OrderBy("pautaReuniaoComissao")
+	private Set<ProposicaoPautaComissao> pautasComissoes = new HashSet<ProposicaoPautaComissao>();
+
+	@OneToOne(fetch = FetchType.EAGER, optional = true)
+	@JoinColumn(name = "id", insertable = false, updatable = false, referencedColumnName = "proposicaoid", nullable = true)
+	ProposicaoPautaComissaoFutura ultima;
 
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	@JoinTable(name = "tagproposicao", joinColumns = { @JoinColumn(name = "proposicao_id", referencedColumnName = "id") }, inverseJoinColumns = { @JoinColumn(name = "tag_id", referencedColumnName = "id") })
@@ -317,7 +334,7 @@ public class Proposicao extends AbstractEntity {
 				// comissao atual está vazio.
 				// por exemplo:
 				// http://www.camara.gov.br/SitCamaraWS/Proposicoes.asmx/ListarProposicoes?sigla=PL&numero=2323&ano=2011&datApresentacaoIni=&datApresentacaoFim=&idTipoAutor=&parteNomeAutor=&siglaPartidoAutor=&siglaUFAutor=&generoAutor=&codEstado=&codOrgaoEstado=&emTramitacao=&v=4
-				return pautasComissoes.first().getPautaReuniaoComissao().getComissao();
+				return getUltima().getPautaReuniaoComissao().getComissao();// pautasComissoes.first().getPautaReuniaoComissao().getComissao();
 			}
 		}
 		return comissao;
@@ -570,17 +587,17 @@ public class Proposicao extends AbstractEntity {
 	}
 
 	@JsonIgnore
-	public SortedSet<ProposicaoPautaComissao> getPautasComissoes() {
+	public Set<ProposicaoPautaComissao> getPautasComissoes() {
 		return pautasComissoes;
 	}
 
 	public ProposicaoPautaComissao getPautaComissaoAtual() {
-		// TODO isto pode ficar melhor.
+		// // TODO isto pode ficar melhor.
 		ProposicaoPautaComissao mostRecent = null;
+		
 		for (Iterator<ProposicaoPautaComissao> iterator = pautasComissoes.iterator(); iterator.hasNext();) {
 			ProposicaoPautaComissao ppc = (ProposicaoPautaComissao) iterator.next();
-			if (mostRecent == null
-					|| mostRecent.getPautaReuniaoComissao().getData().before(ppc.getPautaReuniaoComissao().getData())) {
+			if (mostRecent == null || mostRecent.getPautaReuniaoComissao().getData().before(ppc.getPautaReuniaoComissao().getData())) {
 				mostRecent = ppc;
 			}
 
@@ -668,5 +685,13 @@ public class Proposicao extends AbstractEntity {
 
 	public void setTotalBriefings(Integer totalBriefings) {
 		this.totalBriefings = totalBriefings;
+	}
+
+	public ProposicaoPautaComissaoFutura getUltima() {
+		return ultima;
+	}
+
+	public void setUltima(ProposicaoPautaComissaoFutura ultima) {
+		this.ultima = ultima;
 	}
 }

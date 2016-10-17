@@ -37,3 +37,13 @@ alter table areamerito_revisao ADD documento_id bigint;
 ALTER TABLE areamerito_revisao ADD CONSTRAINT fk_rev_doc FOREIGN KEY (documento_id)
 	REFERENCES documento (id);
 --rollback ALTER TABLE areamerito_revisao drop CONSTRAINT fk_rev_doc
+	
+	
+--changeset coutinho:161021-5
+create view proposicao_pautacomissao_futura as
+select ppc.* from proposicao_pautacomissao ppc, pautareuniaocomissao reuniao where ppc.pautareuniaocomissaoid=reuniao.id  and data>now() order by data desc;
+--rollback drop view proposicao_pautacomissao_futura
+
+--changeset coutinho:161021-6
+alter table proposicao ADD estadofinal varchar(20) default null;
+--rollback alter table proposicao drop estadofinal

@@ -88,7 +88,7 @@ public class UsuarioAutenticadoBean {
 							"Falhou ao obter dados do usuario logado: '" + getContent(response));
 				}
 
-				throw new IOException("Não foi possível obter dados do usuáro logado. Http Status: "
+				throw new UsuarioNaoLogado("Não foi possível obter dados do usuáro logado. Http Status: "
 						+ response.getStatusLine().getStatusCode());
 			}
 

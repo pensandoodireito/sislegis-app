@@ -48,6 +48,7 @@
 		<class>br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao</class>
 		<class>br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao</class>
 		<class>br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao</class>
+		<class>br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissaoFutura</class>
 		<class>br.gov.mj.sislegis.app.model.pautacomissao.PropostaPautaPK</class>
 		<class>br.gov.mj.sislegis.app.model.pautacomissao.Sessao</class>
 		<class>br.gov.mj.sislegis.app.model.pautacomissao.SituacaoSessao</class>

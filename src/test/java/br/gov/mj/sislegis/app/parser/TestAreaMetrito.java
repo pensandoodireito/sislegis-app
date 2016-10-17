@@ -1,18 +1,26 @@
 package br.gov.mj.sislegis.app.parser;
 
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import br.gov.mj.sislegis.app.model.AreaDeMerito;
 import br.gov.mj.sislegis.app.model.AreaDeMeritoRevisao;
+import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.TipoEncaminhamento;
 import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
+import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
@@ -110,14 +118,52 @@ public class TestAreaMetrito {
 		((EJBUnitTestable) comentarioService).setInjectedEntities(em);
 		((EJBUnitTestable) tarefaService).setInjectedEntities(em, notiService);
 		((EJBUnitTestable) encaminhamentoService).setInjectedEntities(em, tarefaService);
-		((EJBUnitTestable) proposicaoService).setInjectedEntities(em, new ParserProposicaoCamara(), reuniaoEJB,
-				reuniaoProposicaoEJB, comissaoService, comentarioService);
+		((EJBUnitTestable) proposicaoService).setInjectedEntities(em, new ParserProposicaoCamara(), reuniaoEJB, reuniaoProposicaoEJB, comissaoService, comentarioService, encaminhamentoService, amSvc);
 		((EJBUnitTestable) userSvc).setInjectedEntities(em);
 		((EJBUnitTestable) posicionamentoSvc).setInjectedEntities(em);
 		((EJBUnitTestable) tagService).setInjectedEntities(em);
 		tipoEncaminhamentoService = new TipoEncaminhamentoServiceEjb();
 		((EJBUnitTestable) tipoEncaminhamentoService).setInjectedEntities(em);
 		((EJBUnitTestable) amSvc).setInjectedEntities(em);
+
+	}
+	@Test
+	public void testQuery() {
+		List<Proposicao> futuro = em.createNamedQuery("findPautadas",Proposicao.class).setParameter("data",new Date()).getResultList();
+//		List<Proposicao> passado = em.createNamedQuery("findNaoPautadas",Proposicao.class).getResultList();
+		List<Proposicao> passado = em.createQuery("select p from Proposicao p left join p.ultima pp where p.ultima IS NULL").getResultList();
+		
+		List<Proposicao> todas = proposicaoService.listAll();//em.createNamedQuery("findPautadas",Proposicao.class).setParameter("data",new Date(0)).getResultList();
+		System.out.println(futuro.size()+" "+passado.size());
+		System.out.println(todas.size());
+		for (Iterator iterator = todas.iterator(); iterator.hasNext();) {
+			Proposicao proposicao = (Proposicao) iterator.next();
+			System.out.println(proposicao.getSigla()+" "+proposicao.getUltima());
+			
+		}
+		
+	}
+	@Test
+	public void testUltima() {
+		Proposicao pp = proposicaoService.findById(840l);
+		System.out.println(pp.getPautasComissoes().size());
+		
+//		System.out.println(" "+pp.getPautasComissoes().get(0).equals(pp.getPautasComissoes().get(1)));
+		
+		System.out.println(pp.getUltima().getPautaReuniaoComissao().getData());
+		System.out.println(pp.getPautaComissaoAtual().getPautaReuniaoComissao().getData());
+		
+		List<Proposicao> props = proposicaoService.listAll();
+		for (Iterator iterator = props.iterator(); iterator.hasNext();) {
+			Proposicao p = (Proposicao) iterator.next();
+			if (p.getUltima() != null) {
+				System.out.println(p.getUltima().getPautaReuniaoComissao().getData());
+				System.out.println(p.getPautaComissaoAtual().getPautaReuniaoComissao().getData());
+				Assert.assertEquals(p.getId() + " " + p.getSigla(), p.getUltima().getPautaReuniaoComissaoId(), p.getPautaComissaoAtual().getPautaReuniaoComissaoId());
+
+			}
+
+		}
 
 	}
 
@@ -127,7 +173,7 @@ public class TestAreaMetrito {
 		AreaDeMerito am = em.find(AreaDeMerito.class, 17836l);
 		System.out.println(amSvc.listRevisoes(17836l, false).size());
 		System.out.println(amSvc.listRevisoesProposicao(3017l).size());
-		
+
 	}
 
 	@Test

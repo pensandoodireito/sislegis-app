@@ -6,9 +6,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -20,9 +17,8 @@ import br.gov.mj.sislegis.app.rest.serializers.CompactProposicaoComComentarioSer
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
-@Table(name = "Proposicao_PautaComissao")
-@IdClass(PropostaPautaPK.class)
-public class ProposicaoPautaComissao implements Serializable, Comparable<ProposicaoPautaComissao> {
+@Table(name = "proposicao_pautacomissao_futura")
+public class ProposicaoPautaComissaoFutura implements Serializable, Comparable<ProposicaoPautaComissao> {
 
 	/**
 	 * 
@@ -31,7 +27,6 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 
 	@Id
 	Long proposicaoId;
-	@Id
 	Long pautaReuniaoComissaoId;
 
 	@Column
@@ -51,7 +46,7 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 	@Column
 	String resultado;
 
-	ProposicaoPautaComissao() {
+	ProposicaoPautaComissaoFutura() {
 
 	}
 
@@ -64,10 +59,7 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 		return pautaReuniaoComissaoId;
 	}
 
-	public ProposicaoPautaComissao(PautaReuniaoComissao pc, Proposicao prop) {
-		setProposicao(prop);
-		setPautaReuniaoComissao(pc);
-	}
+	
 
 	public String getRelator() {
 		return relator;
@@ -148,22 +140,18 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 
 		} else {
 			if (obj instanceof ProposicaoPautaComissao) {
-				if (proposicaoId == null) {
-					System.out.println("propid false");
+				if (this.proposicao == null || proposicaoId == null) {
 					return false;
 				}
-				if (pautaReuniaoComissaoId == null) {
-					System.out.println("pautaReuniaoComissaoId false");
+				if (this.pautaReuniaoComissao == null || pautaReuniaoComissaoId == null) {
 					return false;
 				}
-				if (this.pautaReuniaoComissaoId.equals(((ProposicaoPautaComissao) obj).getPautaReuniaoComissaoId())
-						&& this.proposicaoId.equals(((ProposicaoPautaComissao) obj).getProposicaoId())) {
+				if (this.pautaReuniaoComissaoId.equals(((ProposicaoPautaComissao) obj).getPautaReuniaoComissaoId()) && this.proposicaoId.equals(((ProposicaoPautaComissao) obj).getProposicaoId())) {
 					return true;
 				}
 
 			}
 		}
-		System.out.println("out false");
 		return false;
 	}
 
@@ -171,8 +159,7 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 	public int hashCode() {
 		final int prime = 13;
 		int result = 1;
-		result = prime * result
-				+ ((pautaReuniaoComissaoId == null) ? super.hashCode() : pautaReuniaoComissaoId.hashCode());
+		result = prime * result + ((pautaReuniaoComissaoId == null) ? super.hashCode() : pautaReuniaoComissaoId.hashCode());
 		result = prime * result + ((proposicaoId == null) ? super.hashCode() : proposicaoId.hashCode());
 		return result;
 	}
