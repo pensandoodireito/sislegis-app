@@ -47,9 +47,12 @@ import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissaoFutura;
 import br.gov.mj.sislegis.app.rest.serializers.CompactListRoadmapComissaoSerializer;
 import br.gov.mj.sislegis.app.rest.serializers.CompactSetProposicaoSerializer;
+import br.gov.mj.sislegis.app.rest.serializers.EfetividadeSALDeserializer;
+import br.gov.mj.sislegis.app.rest.serializers.EquipeDeserializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
@@ -110,10 +113,11 @@ public class Proposicao extends AbstractEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "estado")
 	private EstadoProposicao estado;
-	
+
+	@JsonDeserialize(using = EfetividadeSALDeserializer.class)
 	@Enumerated(EnumType.STRING)
-	@Column(name = "estadofinal")
-	private EstadoFinal estadoFinal;
+	@Column(name = "efetividade")
+	private EfetividadeSAL efetividade;
 
 	@Column
 	private String tipo;
@@ -174,6 +178,8 @@ public class Proposicao extends AbstractEntity {
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	private Usuario responsavel;
+	
+	@JsonDeserialize(using = EquipeDeserializer.class)
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	@JoinColumn(name = "idequipe", referencedColumnName = "id")
 	private Equipe equipe;
@@ -594,7 +600,7 @@ public class Proposicao extends AbstractEntity {
 	public ProposicaoPautaComissao getPautaComissaoAtual() {
 		// // TODO isto pode ficar melhor.
 		ProposicaoPautaComissao mostRecent = null;
-		
+
 		for (Iterator<ProposicaoPautaComissao> iterator = pautasComissoes.iterator(); iterator.hasNext();) {
 			ProposicaoPautaComissao ppc = (ProposicaoPautaComissao) iterator.next();
 			if (mostRecent == null || mostRecent.getPautaReuniaoComissao().getData().before(ppc.getPautaReuniaoComissao().getData())) {
@@ -693,5 +699,13 @@ public class Proposicao extends AbstractEntity {
 
 	public void setUltima(ProposicaoPautaComissaoFutura ultima) {
 		this.ultima = ultima;
+	}
+
+	public EfetividadeSAL getEfetividade() {
+		return efetividade;
+	}
+
+	public void setEfetividade(EfetividadeSAL resultadoFinal) {
+		this.efetividade = resultadoFinal;
 	}
 }

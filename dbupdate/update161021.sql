@@ -45,5 +45,5 @@ select ppc.* from proposicao_pautacomissao ppc, pautareuniaocomissao reuniao whe
 --rollback drop view proposicao_pautacomissao_futura
 
 --changeset coutinho:161021-6
-alter table proposicao ADD estadofinal varchar(20) default null;
+alter table proposicao ADD efetividade varchar(40) default null;
 --rollback alter table proposicao drop estadofinal
