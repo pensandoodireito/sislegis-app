@@ -197,6 +197,9 @@ public class PautaReuniaoComissao extends AbstractEntity implements Serializable
 
 		case SENADO:
 			try {
+				if (situacao != null && situacao.startsWith("Continuaem")) {
+					situacao = SituacaoSenado.Adiada.name();
+				}
 				setSituacao(SituacaoSenado.valueOf(situacao).situacaoSessaoCorrespondente());
 
 			} catch (IllegalArgumentException e) {
