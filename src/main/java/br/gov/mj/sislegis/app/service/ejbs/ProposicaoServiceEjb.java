@@ -341,7 +341,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			Calendar c = Calendar.getInstance();
 			c.set(Calendar.HOUR_OF_DAY, 0);
 			c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-			findByIdQuery.setParameter("dataReuniao", c);
+			findByIdQuery.setParameter("dataReuniao", c.getTime());
 		}
 		if (Objects.nonNull(comissao) && !comissao.equals("")) {
 			findByIdQuery.setParameter("comissao", comissao + "%");
