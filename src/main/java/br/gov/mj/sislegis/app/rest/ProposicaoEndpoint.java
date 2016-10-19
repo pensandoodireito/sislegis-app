@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.inject.Inject;
@@ -46,9 +45,11 @@ import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.AreaDeMeritoService;
+import br.gov.mj.sislegis.app.service.AutoUpdateProposicaoService;
 import br.gov.mj.sislegis.app.service.DocumentoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.ReuniaoService;
+import br.gov.mj.sislegis.app.service.ejbs.crons.AutoUpdateProposicaoEjb;
 
 /**
  * 
@@ -278,7 +279,6 @@ public class ProposicaoEndpoint {
 		m.put("macrotema", macrotema);
 		m.put("idEquipe", idEquipe);
 		m.put("somentePautadas", pautadas);
-		
 
 		List<Proposicao> results = proposicaoService.consultar(m, offset, limit);
 		return results;
@@ -397,8 +397,8 @@ public class ProposicaoEndpoint {
 	@Path("/{id:[0-9]+}/revisaoMerito/{idRevisao:[0-9]+}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response apagaRevisao(@PathParam("id") Long id, @PathParam("idRevisao") Long idRevisao) throws Exception {
-//		AreaDeMeritoRevisao rev = areaMeritoRevisao.findRevisao(idRevisao);
-	
+		// AreaDeMeritoRevisao rev = areaMeritoRevisao.findRevisao(idRevisao);
+
 		areaMeritoRevisao.deleteRevisao(idRevisao);
 
 		return Response.ok().build();
@@ -580,6 +580,22 @@ public class ProposicaoEndpoint {
 			return null;
 		}
 
+	}
+
+	@Inject
+	AutoUpdateProposicaoService auto;
+
+	@GET
+	@Path("/autoCamara")
+	public void autoCamara() {
+		auto.atualizaPautadasCamara();
+	}
+
+	@GET
+	@Path("/autoSenado")
+	public void autoSenado() {
+		auto.atualizaPautadasSenado();
+		
 	}
 
 }

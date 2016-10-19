@@ -175,6 +175,7 @@ public class TemplateDownloadServlet extends HttpServlet {
 			tipo = siglasProjeto.get(tipo);
 		}
 		substituicoes.put("[P.TIPO]", tipo);
+		substituicoes.put("[P.TIPO_ABR]", prop.getTipo());
 		substituicoes.put("[P.AUTOR]", prop.getAutor());
 		substituicoes.put("[P.NUM]", prop.getNumero());
 		substituicoes.put("[P.ANO]", prop.getAno());
