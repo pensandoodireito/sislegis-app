@@ -180,7 +180,7 @@ public class Proposicao extends AbstractEntity {
 	private Usuario responsavel;
 	
 	@JsonDeserialize(using = EquipeDeserializer.class)
-	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "idequipe", referencedColumnName = "id")
 	private Equipe equipe;
 
