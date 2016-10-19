@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "areamerito")
-@XmlRootElement
 public class AreaDeMerito extends AbstractEntity {
 
 	private static final long serialVersionUID = -2801342641242367391L;
