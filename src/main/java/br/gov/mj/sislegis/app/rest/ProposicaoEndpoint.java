@@ -1,7 +1,9 @@
 package br.gov.mj.sislegis.app.rest;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,6 +33,7 @@ import org.jboss.resteasy.annotations.cache.Cache;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.AreaDeMeritoRevisao;
+import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.ProcessoSei;
 import br.gov.mj.sislegis.app.model.Proposicao;
@@ -46,6 +49,7 @@ import br.gov.mj.sislegis.app.parser.TipoProposicao;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.AreaDeMeritoService;
 import br.gov.mj.sislegis.app.service.AutoUpdateProposicaoService;
+import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.DocumentoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.ReuniaoService;
@@ -585,17 +589,48 @@ public class ProposicaoEndpoint {
 	@Inject
 	AutoUpdateProposicaoService auto;
 
+	@Inject
+	ComissaoService comissaoService;
+
 	@GET
-	@Path("/autoCamara")
-	public void autoCamara() {
+	@Path("/auto")
+	public void autoCamara(@QueryParam("s") String s, @QueryParam("o") String origem) {
 		auto.atualizaPautadasCamara();
+		if (s != null) {
+			List<Comissao> ls;
+			try {
+				Origem o = Origem.CAMARA;
+				if ("s".equals(origem)) {
+					o = Origem.SENADO;
+					ls = comissaoService.listarComissoesSenado();
+				} else {
+					ls = comissaoService.listarComissoesCamara();
+				}
+				SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy");
+
+				Calendar dataInicial = Calendar.getInstance();
+				dataInicial.setTimeInMillis(sdf.parse(s).getTime());
+				Calendar dataFinal = (Calendar) dataInicial.clone();
+				dataFinal.add(Calendar.WEEK_OF_YEAR, 1);
+				for (Iterator<Comissao> iterator = ls.iterator(); iterator.hasNext();) {
+					Comissao comissao = (Comissao) iterator.next();
+					System.out.println("Comissao " + comissao.getSigla());
+
+					proposicaoService.syncPautaAtualComissao(Origem.SENADO, comissao, dataInicial, dataFinal);
+
+				}
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
 	}
 
 	@GET
 	@Path("/autoSenado")
 	public void autoSenado() {
 		auto.atualizaPautadasSenado();
-		
+
 	}
 
 }

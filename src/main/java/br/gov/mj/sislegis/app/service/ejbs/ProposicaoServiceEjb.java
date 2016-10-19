@@ -1404,19 +1404,18 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				} else {
 					comissao.setSigla(proposicao.getComissao());
 				}
-
-				syncPautaAtualComissao(proposicao.getOrigem(), comissao);
+				Calendar dataInicial = Calendar.getInstance();
+				dataInicial.add(Calendar.DAY_OF_YEAR, -1);
+				Calendar dataFinal = (Calendar) dataInicial.clone();
+				dataFinal.add(Calendar.WEEK_OF_YEAR, 1);
+				syncPautaAtualComissao(proposicao.getOrigem(), comissao, dataFinal, dataFinal);
 			}
 		}
 		return proposicao;
 	}
 
 	@Override
-	public void syncPautaAtualComissao(Origem origem, Comissao comissao) {
-		Calendar dataInicial = Calendar.getInstance();
-		dataInicial.add(Calendar.DAY_OF_YEAR, -1);
-		Calendar dataFinal = (Calendar) dataInicial.clone();
-		dataFinal.add(Calendar.WEEK_OF_YEAR, 1);
+	public void syncPautaAtualComissao(Origem origem, Comissao comissao, Calendar dataInicial, Calendar dataFinal) {
 
 		try {
 			Set<PautaReuniaoComissao> pss = null;

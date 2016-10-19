@@ -2,6 +2,7 @@ package br.gov.mj.sislegis.app.service;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -228,7 +229,6 @@ public interface ProposicaoService extends Service<Proposicao> {
 	Proposicao persistProposicaoAndPauta(Proposicao proposicao, PautaReuniaoComissao pautaReuniaoComissao)
 			throws IOException, Exception;
 
-	void syncPautaAtualComissao(Origem camara, Comissao comissao);
 
 	void saveDocRelated(DocRelated nt);
 
@@ -237,5 +237,8 @@ public interface ProposicaoService extends Service<Proposicao> {
 	List<Emenda> getEmendas(Long proposicaoId);
 
 	void deleteDocRelated(Long idNota, Class c);
+
+
+	void syncPautaAtualComissao(Origem origem, Comissao comissao, Calendar dataInicial, Calendar dataFinal);
 
 }

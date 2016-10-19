@@ -1,6 +1,7 @@
 package br.gov.mj.sislegis.app.service.ejbs.crons;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -114,11 +115,15 @@ public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService, EJB
 		List<Comissao> ls;
 		try {
 			ls = comissaoService.listarComissoesCamara();
-
+			Calendar dataInicial = Calendar.getInstance();
+			dataInicial.add(Calendar.DAY_OF_YEAR, -1);
+			Calendar dataFinal = (Calendar) dataInicial.clone();
+			dataFinal.add(Calendar.WEEK_OF_YEAR, 1);
 			for (Iterator<Comissao> iterator = ls.iterator(); iterator.hasNext();) {
 				Comissao comissao = (Comissao) iterator.next();
 				System.out.println("Comissao " + comissao.getSigla());
-				proposicaoService.syncPautaAtualComissao(Origem.CAMARA, comissao);
+
+				proposicaoService.syncPautaAtualComissao(Origem.CAMARA, comissao, dataInicial, dataFinal);
 
 			}
 		} catch (Exception e1) {
@@ -130,13 +135,18 @@ public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService, EJB
 	@Override
 	public void updatePautasSenado() {
 		try {
+			Calendar dataInicial = Calendar.getInstance();
+			dataInicial.add(Calendar.DAY_OF_YEAR, -1);
+			Calendar dataFinal = (Calendar) dataInicial.clone();
+			dataFinal.add(Calendar.WEEK_OF_YEAR, 1);
 			List<Comissao> ls = comissaoService.listarComissoesSenado();
 			for (Iterator<Comissao> iterator = ls.iterator(); iterator.hasNext();) {
 				Comissao comissao = (Comissao) iterator.next();
 
 				System.out.println("Comissao " + comissao.getSigla());
 				try {
-					proposicaoService.syncPautaAtualComissao(Origem.SENADO, comissao);
+
+					proposicaoService.syncPautaAtualComissao(Origem.SENADO, comissao, dataInicial, dataFinal);
 
 				} catch (Exception e) {
 					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Falhou ao processo comissao " + comissao, e);
