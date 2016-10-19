@@ -311,7 +311,7 @@ public class ReportDownloadServlet extends HttpServlet {
 					if ("idEquipe".equals(k)) {
 						filtros.put(k, Long.valueOf(valor));
 					} else if ("estado".equals(k)) {
-						filtros.put(k, EstadoProposicao.valueOf(valor));
+						filtros.put(k, EstadoProposicao.valueOf(valor).name());
 					} else if ("somentePautadas".equals(k)) {
 						filtros.put(k, Boolean.TRUE);
 					} else {
