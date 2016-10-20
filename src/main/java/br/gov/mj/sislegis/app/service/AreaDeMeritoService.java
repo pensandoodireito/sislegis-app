@@ -23,4 +23,6 @@ public interface AreaDeMeritoService extends Service<AreaDeMerito> {
 
 	public void deleteRevisao(Long idRevisao);
 
+	public AreaDeMerito findAreaPorNome(String string);
+
 }

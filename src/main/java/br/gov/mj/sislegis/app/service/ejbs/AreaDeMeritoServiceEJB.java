@@ -5,6 +5,7 @@ import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 
 import br.gov.mj.sislegis.app.model.AreaDeMerito;
@@ -89,7 +90,16 @@ public class AreaDeMeritoServiceEJB extends AbstractPersistence<AreaDeMerito, Lo
 	@Override
 	public void deleteRevisao(Long idRevisao) {
 		getEntityManager().remove(findRevisao(idRevisao));
-		
+
+	}
+
+	@Override
+	public AreaDeMerito findAreaPorNome(String string) {
+		try {
+			return em.createNamedQuery("findAreaByName", AreaDeMerito.class).setParameter("nome", string).getSingleResult();
+		} catch (NoResultException r) {
+			return null;
+		}
 	}
 
 }
