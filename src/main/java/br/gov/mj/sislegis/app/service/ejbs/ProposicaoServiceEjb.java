@@ -364,14 +364,15 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (Objects.nonNull(idPosicionamento) && idPosicionamento != -1) {
 			findByIdQuery.setParameter("idPosicionamento", idPosicionamento);
 		}
-		if (Objects.nonNull(idResponsavel)) {
+		if (Objects.nonNull(idResponsavel) && idEquipe>0) {
+			
 			findByIdQuery.setParameter("idResponsavel", idResponsavel);
 		}
 		if (Objects.nonNull(macrotema)) {
 
 			findByIdQuery.setParameter("tag", macrotema);
 		}
-		if (Objects.nonNull(idEquipe)) {
+		if (Objects.nonNull(idEquipe) && idEquipe>0) {
 
 			findByIdQuery.setParameter("idEquipe", idEquipe);
 		}
@@ -419,14 +420,22 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			query.append(" AND  p.ultima.pautaReuniaoComissao.data>:dataReuniao");
 		}
 		if (Objects.nonNull(idResponsavel)) {
-			query.append(" AND p.responsavel.id = :idResponsavel");
+			if(idResponsavel==-1){
+				query.append(" AND p.responsavel is null");
+			}else{
+				query.append(" AND p.responsavel.id = :idResponsavel");
+			}
 		}
 		if (Objects.nonNull(macroTema)) {
 			query.append(" AND :tag in elements(p.tags)");
 		}
 
 		if (Objects.nonNull(idEquipe)) {
-			query.append(" AND  p.equipe.id = :idEquipe ");
+			if(idEquipe==-1){
+				query.append(" AND  p.equipe is null ");
+			}else{
+				query.append(" AND  p.equipe.id = :idEquipe ");
+			}
 		}
 		if (Objects.nonNull(idPosicionamento)) {
 			if (idPosicionamento == -1) {
