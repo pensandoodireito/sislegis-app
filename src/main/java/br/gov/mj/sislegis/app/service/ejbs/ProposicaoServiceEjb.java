@@ -375,7 +375,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 			findByIdQuery.setParameter("idEquipe", idEquipe);
 		}
-		if (Objects.nonNull(estado)) {
+		if (Objects.nonNull(estado) && !estado.isEmpty()) {
 			findByIdQuery.setParameter("estado", EstadoProposicao.valueOf(estado));
 		}
 
@@ -409,7 +409,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (Objects.nonNull(origem) && !origem.equals("")) {
 			query.append(" AND p.origem = :origem");
 		}
-		if (Objects.nonNull(estado) && !estado.equals("")) {
+		if (Objects.nonNull(estado) && !estado.isEmpty()) {
 			query.append(" AND p.estado = :estado");
 		}
 		if (Objects.nonNull(isFavorita) && !isFavorita.equals("")) {

@@ -385,6 +385,7 @@ public class ImporterTests {
 			Sheet sheet = wb.getSheetAt(0);// heet("Projetos");
 			int k = 0;
 			for (Row row : sheet) {
+
 				ParserPautaCamara pautaCamara = new ParserPautaCamara();
 				ParserPautaSenado pautaSenado = new ParserPautaSenado();
 				if (row.getCell(0) != null) {
@@ -392,11 +393,12 @@ public class ImporterTests {
 					String origem = "";
 					try {
 						origem = row.getCell(0).getStringCellValue();
+						origem = origem.trim();
 					} catch (Exception e) {
 
 					}
+					if ("Camara".equals(origem) || "Câmara".equals(origem) || "Senado".equals(origem) || "Congresso".equals(origem)) {
 
-					if ("Câmara".equals(origem) || "Senado".equals(origem)) {
 						ProposicalXLS p = new ProposicalXLS(row, CodigoEquipe);
 
 						// if (!p.numero.equals("30") || !p.ano.equals("2015"))
@@ -419,22 +421,43 @@ public class ImporterTests {
 							// if(!p.numero.equals("5202")){
 							// continue;
 							// }
-							Collection<Proposicao> proposicoesWS = parserPropCamara.searchProposicao(p.tipo, p.numero, Integer.parseInt(p.ano));
-							if (proposicoesWS.isEmpty()) {
-								if (p.hasMore()) {
-									proposicoesWS = parserPropCamara.searchProposicao(p.tipo, p.numero, Integer.parseInt(p.ano));
-								} else {
-									throw new Exception("Nao conseguiu encontrar " + p);
-								}
-
-							}
-							prop = proposicoesWS.iterator().next();
-							Proposicao propdb = proposicaoService.buscarPorIdProposicao(prop.getIdProposicao());
+							List l = proposicaoService.consultar(p.tipo + " " + p.numero + "/" + p.ano, null, null, p.origem.name(), null, 0, 1);
+							Proposicao propdb = null;
 							boolean existente = false;
-							if (propdb != null) {
+							if (l.size() > 0) {
+								propdb = (Proposicao) l.get(0);
 								existente = true;
 								prop = propdb;
+								if (prop.getPosicionamentoAtual() != null && prop.getPosicionamentoAtual().getPosicionamento() != null) {
+//									System.out.println("Existente1 e com posicionamento, nao vai mexer " + prop.getSigla());
+									continue;
+								}
+							} else {
+
+								Collection<Proposicao> proposicoesWS = parserPropCamara.searchProposicao(p.tipo, p.numero, Integer.parseInt(p.ano));
+								if (proposicoesWS.isEmpty()) {
+									if (p.hasMore()) {
+										proposicoesWS = parserPropCamara.searchProposicao(p.tipo, p.numero, Integer.parseInt(p.ano));
+									} else {
+										throw new Exception("Nao conseguiu encontrar " + p);
+									}
+
+								}
+								prop = proposicoesWS.iterator().next();
+								propdb = proposicaoService.buscarPorIdProposicao(prop.getIdProposicao());
+								if (propdb != null) {
+									prop = propdb;
+									existente = true;
+									if (prop.getPosicionamentoAtual() != null && prop.getPosicionamentoAtual().getPosicionamento() != null) {
+//										System.out.println("Existente e com posicionamento, nao vai mexer " + prop.getSigla());
+										continue;
+									}
+								}
 							}
+							// Proposicao
+
+							k++;
+
 							if (debug) {
 								trans = em.getTransaction();
 								trans.begin();
@@ -535,7 +558,23 @@ public class ImporterTests {
 								trans = em.getTransaction();
 								trans.begin();
 							}
-							if (p.areaDeMerito != null && p.areaDeMerito.length() > 0 && !"Não há".equals(p.areaDeMerito)) {
+							if (!existente && p.despachoInicial != null && p.despachoInicial.length() > 0) {
+								Comentario c = new Comentario();
+								if (responsavel != null) {
+									c.setAutor(responsavel);
+								} else {
+									c.setAutor(userSvc.findByEmail(EMAIL_USUARIO_PADRAO));
+								}
+								if (p.despachoInicial.length() > 255) {
+									p.despachoInicial = p.despachoInicial.substring(0, 252) + "..";
+								}
+								c.setDescricao(p.despachoInicial);
+
+								c.setProposicao(prop);
+								c.setDataCriacao(new Date());
+								em.persist(c);
+							}
+							if (!existente && p.areaDeMerito != null && p.areaDeMerito.length() > 0 && !"Não há".equals(p.areaDeMerito)) {
 								Comentario c = new Comentario();
 								if (responsavel != null) {
 									c.setAutor(responsavel);
@@ -578,8 +617,10 @@ public class ImporterTests {
 									if ("".equals(p.posicaoSAL)) {
 
 									} else {
-										String msg = "Posicionamento SAL da planilha não reconhecido: " + p.posicaoSAL;
-										criaComentario(prop, responsavel, msg);
+										if (!existente) {
+											String msg = "Posicionamento SAL da planilha não reconhecido: " + p.posicaoSAL;
+											criaComentario(prop, responsavel, msg);
+										}
 										System.err.println("Posicionamento inválido '" + p.posicaoSAL + "' para " + p);
 										// System.err.println("Posicionametno novo "
 										// + p.posicaoSAL);
@@ -601,25 +642,28 @@ public class ImporterTests {
 									if ("".equals(p.supar)) {
 
 									} else {
-										String msg = "Posicionamento SUPAR da planilha não reconhecido: " + p.supar;
-										criaComentario(prop, responsavel, msg);
+										if (!existente) {
+											String msg = "Posicionamento SUPAR da planilha não reconhecido: " + p.supar;
+											criaComentario(prop, responsavel, msg);
+										}
 										System.err.println("Posicionamento inválido supar '" + p.supar + "' para " + p);
 									}
 								}
 
 							}
 
-							if (p.pauta != null && p.pauta.length() > 0) {
-								trans = em.getTransaction();
-								trans.begin();
-								prop = proposicaoService.buscarPorIdProposicao(prop.getIdProposicao());
-								proposicaoService.syncDadosPautaProposicao(prop.getId());
-								trans.commit();
-							}
+							// if (p.pauta != null && p.pauta.length() > 0) {
+							// trans = em.getTransaction();
+							// trans.begin();
+							// prop =
+							// proposicaoService.buscarPorIdProposicao(prop.getIdProposicao());
+							// proposicaoService.syncDadosPautaProposicao(prop.getId());
+							// trans.commit();
+							// }
 
 						} catch (Exception e) {
 							e.printStackTrace();
-							System.err.println("Falhou ao processar " + p + " " + p.comissao.length() + " " + p.situacao.length());
+							System.err.println("Falhou ao processar " + p);
 							// System.out.println(prop.getComissao().length() +
 							// " n:" + prop.getNumero().length() + " l:"
 							// + prop.getLinkProposicao().length() + " sit:" +
@@ -636,7 +680,12 @@ public class ImporterTests {
 
 						}
 						list.add(p);
+					} else {
+						System.out.println("Não parece ter dados validos  " + row.getRowNum() + " " + origem);
 					}
+				}
+				if (k % 50 == 0) {
+					System.out.println(k + " proposicoes processadas, ate linha " + row.getRowNum());
 				}
 			}
 		}
@@ -793,14 +842,12 @@ class ProposicalXLS {
 	String tipo;
 	String numero;
 	String ano;
-	String tramitacao;
 
 	String drive;
 	static Pattern p = Pattern.compile("(\\w+)\\s+(\\d+.*?)/?\\s?(\\d+)\\s*(\\((\\w+)\\s+(\\d+)/(\\d+)\\))?");
 
 	boolean hasMore() {
 
-		// System.out.println(sigla);
 		if (m.find()) {
 			tipo = m.group(1);
 			numero = m.group(2);
@@ -885,16 +932,15 @@ class ProposicalXLS {
 			colunas.put("despachado", 7);
 			colunas.put("comissao", 8);
 
-			colunas.put("situacao", 9);
+			colunas.put("estagio", 9);
 			colunas.put("responsavel", 10);
 			colunas.put("providencias", 11);
 			colunas.put("pauta", 12);
 			colunas.put("asparTxt", 15);
-
+			colunas.put("situacao", 20);
 			colunas.put("despachoInicial", 20);
 			colunas.put("drive", 20);
 			colunas.put("macrotema", 20);
-			colunas.put("estagio", 20);
 			colunas.put("supar", 20);
 		} else if (tipoExecucao == ImporterTests.PESSOA) {
 			// Pessoa
@@ -927,7 +973,7 @@ class ProposicalXLS {
 			colunas.put("asparTxt", 9);
 			colunas.put("situacao", 4);
 			colunas.put("supar", 6);
-			colunas.put("tramitacao", 5);
+			colunas.put("despachoInicial", 5);
 
 			colunas.put("sigla", 30);
 			colunas.put("autoria", 30);
@@ -943,7 +989,6 @@ class ProposicalXLS {
 			colunas.put("providencias", 30);
 			colunas.put("pauta", 30);
 
-			colunas.put("despachoInicial", 30);
 			colunas.put("drive", 30);
 		}
 
@@ -954,13 +999,13 @@ class ProposicalXLS {
 		initColunas();
 		this.r = r;
 		rowNumber = r.getRowNum();
-
-		if ("Câmara".equals(r.getCell(colunas.get("origem")).getStringCellValue())) {
+		String o = r.getCell(colunas.get("origem")).getStringCellValue().trim();
+		if ("Câmara".equals(o) || "Camara".equals(o)) {
 			origem = Origem.CAMARA;
-		} else if ("Senado".equals(r.getCell(colunas.get("origem")).getStringCellValue())) {
+		} else if ("Senado".equals(o) || "Congresso".equals(o)) {
 			origem = Origem.SENADO;
 		} else {
-			throw new IllegalArgumentException("Origem errada " + r.getCell(colunas.get("origem")));
+			throw new IllegalArgumentException("Origem errada '" + r.getCell(colunas.get("origem")) + "'");
 		}
 		if (colunas.get("tipo") != null) {
 			sigla = r.getCell(colunas.get("tipo")).getStringCellValue().trim() + " " + r.getCell(colunas.get("numano")).getStringCellValue().trim();
@@ -1040,9 +1085,7 @@ class ProposicalXLS {
 		if (r.getCell(colunas.get("supar")) != null) {
 			supar = r.getCell(colunas.get("supar")).getStringCellValue();
 		}
-		if (r.getCell(colunas.get("tramitacao")) != null) {
-			tramitacao = r.getCell(colunas.get("tramitacao")).getStringCellValue();
-		}
+
 		// System.out.println(this);
 	}
 

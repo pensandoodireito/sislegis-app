@@ -26,8 +26,6 @@ CREATE TABLE proposicao_emenda (
 );
 --rollback drop table proposicao_emenda
 
-
-
 	
 --changeset coutinho:161021-3
 alter table areamerito_revisao ADD documento_id bigint;	
