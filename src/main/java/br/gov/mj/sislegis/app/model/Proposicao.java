@@ -48,7 +48,6 @@ import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissaoFutura;
 import br.gov.mj.sislegis.app.rest.serializers.CompactListRoadmapComissaoSerializer;
 import br.gov.mj.sislegis.app.rest.serializers.CompactSetProposicaoSerializer;
 import br.gov.mj.sislegis.app.rest.serializers.EfetividadeSALDeserializer;
-import br.gov.mj.sislegis.app.rest.serializers.EquipeDeserializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -179,7 +178,7 @@ public class Proposicao extends AbstractEntity {
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	private Usuario responsavel;
 	
-	@JsonDeserialize(using = EquipeDeserializer.class)
+	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "idequipe", referencedColumnName = "id")
 	private Equipe equipe;
