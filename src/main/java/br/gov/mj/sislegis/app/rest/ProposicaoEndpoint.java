@@ -267,11 +267,17 @@ public class ProposicaoEndpoint {
 	public List<Proposicao> listAll() {
 		return proposicaoService.listarTodos();
 	}
+	@GET
+	@Path("/autores")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<String> listAutores() {
+		return proposicaoService.listarTodosAutores();
+	}
 
 	@GET
 	@Path("/consultar")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Proposicao> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor, @QueryParam("sigla") String sigla, @QueryParam("origem") String origem, @QueryParam("estado") String estado, @QueryParam("isFavorita") String isFavorita, @QueryParam("idEquipe") Long idEquipe, @QueryParam("limit") Integer limit, @QueryParam("macrotema") String macrotema, @QueryParam("somentePautadas") Boolean pautadas, @QueryParam("offset") Integer offset) {
+	public List<Proposicao> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor, @QueryParam("sigla") String sigla, @QueryParam("origem") String origem, @QueryParam("estado") String estado, @QueryParam("isFavorita") String isFavorita,@QueryParam("idResponsavel") Long idResponsavel, @QueryParam("idEquipe") Long idEquipe, @QueryParam("limit") Integer limit, @QueryParam("macrotema") String macrotema, @QueryParam("somentePautadas") Boolean pautadas, @QueryParam("offset") Integer offset) {
 
 		Map<String, Object> m = new HashMap<String, Object>();
 		m.put("sigla", sigla);
@@ -282,6 +288,7 @@ public class ProposicaoEndpoint {
 		m.put("estado", estado);
 		m.put("macrotema", macrotema);
 		m.put("idEquipe", idEquipe);
+		m.put("idResponsavel", idResponsavel);
 		m.put("somentePautadas", pautadas);
 
 		List<Proposicao> results = proposicaoService.consultar(m, offset, limit);

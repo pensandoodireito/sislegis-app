@@ -296,12 +296,13 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		String macrotema = (String) filtros.get("macrotema");
 		Boolean somentePautadas = (Boolean) filtros.get("somentePautadas");
 		Long idEquipe = (Long) filtros.get("idEquipe");
+		Long idResponsavel = (Long) filtros.get("idResponsavel");
 
-		query.append(createWhereClause(sigla, null, autor, ementa, origem, isFavorita, estado, null, idEquipe, null, macrotema, somentePautadas, null));
+		query.append(createWhereClause(sigla, null, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, null, macrotema, somentePautadas, null));
 		query.append(" order by tipo,ano,numero");
 		TypedQuery<Proposicao> findByIdQuery = getEntityManager().createQuery(query.toString(), Proposicao.class);
 
-		setParams(sigla, null, autor, ementa, origem, isFavorita, estado, null, idEquipe, null, macrotema, somentePautadas, null, findByIdQuery);
+		setParams(sigla, null, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, null, macrotema, somentePautadas, null, findByIdQuery);
 		if (offset != null) {
 			findByIdQuery.setFirstResult(offset);
 		}
@@ -364,15 +365,15 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (Objects.nonNull(idPosicionamento) && idPosicionamento != -1) {
 			findByIdQuery.setParameter("idPosicionamento", idPosicionamento);
 		}
-		if (Objects.nonNull(idResponsavel) && idEquipe>0) {
-			
+		if (Objects.nonNull(idResponsavel) && idResponsavel > 0) {
+
 			findByIdQuery.setParameter("idResponsavel", idResponsavel);
 		}
 		if (Objects.nonNull(macrotema)) {
 
 			findByIdQuery.setParameter("tag", macrotema);
 		}
-		if (Objects.nonNull(idEquipe) && idEquipe>0) {
+		if (Objects.nonNull(idEquipe) && idEquipe > 0) {
 
 			findByIdQuery.setParameter("idEquipe", idEquipe);
 		}
@@ -420,9 +421,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			query.append(" AND  p.ultima.pautaReuniaoComissao.data>:dataReuniao");
 		}
 		if (Objects.nonNull(idResponsavel)) {
-			if(idResponsavel==-1){
+			if (idResponsavel == -1) {
 				query.append(" AND p.responsavel is null");
-			}else{
+			} else {
 				query.append(" AND p.responsavel.id = :idResponsavel");
 			}
 		}
@@ -431,9 +432,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 
 		if (Objects.nonNull(idEquipe)) {
-			if(idEquipe==-1){
+			if (idEquipe == -1) {
 				query.append(" AND  p.equipe is null ");
-			}else{
+			} else {
 				query.append(" AND  p.equipe.id = :idEquipe ");
 			}
 		}
@@ -1521,5 +1522,11 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.INFO, "Criou pauta reuniao " + pautaReuniaoComissao.getId());
 		}
 		return pautaReuniaoComissao;
+	}
+
+	@Override
+	public List<String> listarTodosAutores() {
+		return getEntityManager().createQuery("select distinct p.autor from Proposicao p", String.class).getResultList();
+
 	}
 }

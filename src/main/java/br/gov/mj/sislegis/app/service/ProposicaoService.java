@@ -241,4 +241,6 @@ public interface ProposicaoService extends Service<Proposicao> {
 
 	void syncPautaAtualComissao(Origem origem, Comissao comissao, Calendar dataInicial, Calendar dataFinal);
 
+	List<String> listarTodosAutores();
+
 }
