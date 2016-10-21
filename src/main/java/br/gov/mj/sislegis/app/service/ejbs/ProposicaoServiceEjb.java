@@ -1525,8 +1525,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	@Override
-	public List<String> listarTodosAutores() {
-		return getEntityManager().createQuery("select distinct p.autor from Proposicao p", String.class).getResultList();
+	public List<String> listarTodosAutores(String nome) {
+		return getEntityManager().createQuery("select distinct p.autor from Proposicao p where upper(p.autor) like :nome", String.class).setParameter("nome", nome.toUpperCase() + "%").setMaxResults(10).getResultList();
 
 	}
 }

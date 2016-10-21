@@ -30,6 +30,8 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import org.jboss.resteasy.annotations.cache.Cache;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.AreaDeMeritoRevisao;
@@ -267,17 +269,46 @@ public class ProposicaoEndpoint {
 	public List<Proposicao> listAll() {
 		return proposicaoService.listarTodos();
 	}
+
 	@GET
 	@Path("/autores")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<String> listAutores() {
-		return proposicaoService.listarTodosAutores();
+	public List<Autor> listAutores(@QueryParam("nome") String nome) {
+		List<Autor> au = new ArrayList<ProposicaoEndpoint.Autor>();
+		if (nome != null && !nome.trim().isEmpty()) {
+			List<String> l = proposicaoService.listarTodosAutores(nome);
+
+			for (Iterator iterator = l.iterator(); iterator.hasNext();) {
+				String string = (String) iterator.next();
+				Autor autor = new Autor();
+				autor.nome = string;
+
+				autor.id = au.size();
+				au.add(autor);
+			}
+		}
+		return au;
+
+	}
+
+	class Autor {
+		long id;
+		String nome;
+
+		public long getId() {
+			return id;
+		}
+
+		public String getNome() {
+			return nome;
+		}
 	}
 
 	@GET
 	@Path("/consultar")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Proposicao> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor, @QueryParam("sigla") String sigla, @QueryParam("origem") String origem, @QueryParam("estado") String estado, @QueryParam("isFavorita") String isFavorita,@QueryParam("idResponsavel") Long idResponsavel, @QueryParam("idEquipe") Long idEquipe, @QueryParam("limit") Integer limit, @QueryParam("macrotema") String macrotema, @QueryParam("somentePautadas") Boolean pautadas, @QueryParam("offset") Integer offset) {
+	public List<Proposicao> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor, @QueryParam("sigla") String sigla, @QueryParam("origem") String origem, @QueryParam("estado") String estado, @QueryParam("isFavorita") String isFavorita, @QueryParam("idResponsavel") Long idResponsavel, @QueryParam("idEquipe") Long idEquipe, @QueryParam("limit") Integer limit, @QueryParam("macrotema") String macrotema, @QueryParam("somentePautadas") Boolean pautadas,
+			@QueryParam("offset") Integer offset) {
 
 		Map<String, Object> m = new HashMap<String, Object>();
 		m.put("sigla", sigla);
