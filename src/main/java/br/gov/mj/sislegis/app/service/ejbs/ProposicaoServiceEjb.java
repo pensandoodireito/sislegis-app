@@ -1430,7 +1430,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				dataInicial.add(Calendar.DAY_OF_YEAR, -1);
 				Calendar dataFinal = (Calendar) dataInicial.clone();
 				dataFinal.add(Calendar.WEEK_OF_YEAR, 1);
-				syncPautaAtualComissao(proposicao.getOrigem(), comissao, dataFinal, dataFinal);
+				syncPautaAtualComissao(proposicao.getOrigem(), comissao, dataInicial, dataFinal);
 			}
 		}
 		return proposicao;

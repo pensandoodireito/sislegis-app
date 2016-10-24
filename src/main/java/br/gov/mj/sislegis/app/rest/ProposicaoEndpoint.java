@@ -657,8 +657,7 @@ public class ProposicaoEndpoint {
 
 	@GET
 	@Path("/auto")
-	public void autoCamara(@QueryParam("s") String s, @QueryParam("o") String origem) {
-		auto.atualizaPautadasCamara();
+	public void autoCamara(@QueryParam("s") String s, @QueryParam("o") String origem, @QueryParam("c") String comissaoParam) {
 		if (s != null) {
 			List<Comissao> ls;
 			try {
@@ -677,24 +676,22 @@ public class ProposicaoEndpoint {
 				dataFinal.add(Calendar.WEEK_OF_YEAR, 1);
 				for (Iterator<Comissao> iterator = ls.iterator(); iterator.hasNext();) {
 					Comissao comissao = (Comissao) iterator.next();
-					System.out.println("Comissao " + comissao.getSigla());
-
-					proposicaoService.syncPautaAtualComissao(o, comissao, dataInicial, dataFinal);
+					if (comissaoParam != null) {
+						if (comissaoParam.equals(comissao.getSigla().trim())) {
+							proposicaoService.syncPautaAtualComissao(o, comissao, dataInicial, dataFinal);
+						}
+					} else {
+						proposicaoService.syncPautaAtualComissao(o, comissao, dataInicial, dataFinal);
+					}
 
 				}
 			} catch (Exception e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		}
 	}
 
-	@GET
-	@Path("/autoSenado")
-	public void autoSenado() {
-		auto.atualizaPautadasSenado();
 
-	}
 
 }
 

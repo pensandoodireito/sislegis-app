@@ -169,8 +169,12 @@ public class ReportDownloadServlet extends HttpServlet {
 			}
 
 			replaceText(row.getCell(1), "[AUTOR]", proposicao.getAutor());
-			if (proposicao.getExplicacao() != null) {
-				replaceText(row.getCell(2), "[EMENTA]", proposicao.getExplicacao());
+			String tema = proposicao.getExplicacao();
+			if (tema == null || tema.isEmpty()) {
+				tema = proposicao.getEmenta();
+			}
+			if (tema != null) {
+				replaceText(row.getCell(2), "[EMENTA]", tema);
 			} else {
 				replaceText(row.getCell(2), "[EMENTA]", "Sem tema");
 			}

@@ -707,4 +707,12 @@ public class Proposicao extends AbstractEntity {
 	public void setEfetividade(EfetividadeSAL resultadoFinal) {
 		this.efetividade = resultadoFinal;
 	}
+
+	public Date getCreated() {
+		return created;
+	}
+
+	public Date getUpdated() {
+		return updated;
+	}
 }
