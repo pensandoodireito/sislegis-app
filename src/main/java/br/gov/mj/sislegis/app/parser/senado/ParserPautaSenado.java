@@ -52,9 +52,8 @@ public class ParserPautaSenado {
 
 	}
 
-	public Set<PautaReuniaoComissao> getPautaComissao(String siglaComissao, String datIni, String datFim)
-			throws Exception {
-
+	public Set<PautaReuniaoComissao> getPautaComissao(String siglaComissao, String datIni, String datFim) throws Exception {
+		siglaComissao = siglaComissao.trim();
 		Set<PautaReuniaoComissao> pautas = new HashSet<PautaReuniaoComissao>();
 
 		XStream xstream = new XStream();
@@ -98,8 +97,7 @@ public class ParserPautaSenado {
 			ReuniaoBeanSenado pautaReuniaoComissao = (ReuniaoBeanSenado) iterator.next();
 			Comissao comissao = new Comissao();
 			comissao.setSigla(siglaComissao);
-			PautaReuniaoComissao prc = new PautaReuniaoComissao(pautaReuniaoComissao.getDate(), comissao,
-					pautaReuniaoComissao.getCodigo());
+			PautaReuniaoComissao prc = new PautaReuniaoComissao(pautaReuniaoComissao.getDate(), comissao, pautaReuniaoComissao.getCodigo());
 			prc.setOrigem(Origem.SENADO);
 			prc.setTipo(pautaReuniaoComissao.getTipo());
 			prc.setTitulo(pautaReuniaoComissao.getTitulo());

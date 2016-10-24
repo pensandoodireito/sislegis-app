@@ -310,6 +310,8 @@ public class ReportDownloadServlet extends HttpServlet {
 					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.INFO, "Adicionando filtro: " + k + "=" + req.getParameter(k));
 					if ("idResponsavel".equals(k)) {
 						filtros.put(k, Long.valueOf(valor));
+					} else if ("idPosicionamento".equals(k)) {
+						filtros.put(k, Long.valueOf(valor));
 					} else if ("idEquipe".equals(k)) {
 						filtros.put(k, Long.valueOf(valor));
 					} else if ("estado".equals(k)) {

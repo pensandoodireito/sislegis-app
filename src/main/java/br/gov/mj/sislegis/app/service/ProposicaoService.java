@@ -243,4 +243,6 @@ public interface ProposicaoService extends Service<Proposicao> {
 
 	List<String> listarTodosAutores(String nome);
 
+	List<String> procurarRelatores(String nome);
+
 }

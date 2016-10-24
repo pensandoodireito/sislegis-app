@@ -143,7 +143,6 @@ public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService, EJB
 			for (Iterator<Comissao> iterator = ls.iterator(); iterator.hasNext();) {
 				Comissao comissao = (Comissao) iterator.next();
 
-				System.out.println("Comissao " + comissao.getSigla());
 				try {
 
 					proposicaoService.syncPautaAtualComissao(Origem.SENADO, comissao, dataInicial, dataFinal);

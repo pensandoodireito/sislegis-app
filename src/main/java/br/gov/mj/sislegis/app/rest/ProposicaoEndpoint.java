@@ -291,6 +291,28 @@ public class ProposicaoEndpoint {
 
 	}
 
+	@GET
+	@Path("/relatores")
+	@Produces(MediaType.APPLICATION_JSON)
+	// da pra usar o obj autor
+	public List<Autor> searchRelator(@QueryParam("nome") String nome) {
+		List<Autor> au = new ArrayList<ProposicaoEndpoint.Autor>();
+		if (nome != null && !nome.trim().isEmpty()) {
+			List<String> l = proposicaoService.procurarRelatores(nome);
+
+			for (Iterator iterator = l.iterator(); iterator.hasNext();) {
+				String string = (String) iterator.next();
+				Autor autor = new Autor();
+				autor.nome = string;
+
+				autor.id = au.size();
+				au.add(autor);
+			}
+		}
+		return au;
+
+	}
+
 	class Autor {
 		long id;
 		String nome;
@@ -307,20 +329,23 @@ public class ProposicaoEndpoint {
 	@GET
 	@Path("/consultar")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Proposicao> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor, @QueryParam("sigla") String sigla, @QueryParam("origem") String origem, @QueryParam("estado") String estado, @QueryParam("isFavorita") String isFavorita, @QueryParam("idResponsavel") Long idResponsavel, @QueryParam("idEquipe") Long idEquipe, @QueryParam("limit") Integer limit, @QueryParam("macrotema") String macrotema, @QueryParam("somentePautadas") Boolean pautadas,
-			@QueryParam("offset") Integer offset) {
+	public List<Proposicao> consultar(@QueryParam("relator") String relator, @QueryParam("comissao") String comissao, @QueryParam("ementa") String ementa, @QueryParam("autor") String autor, @QueryParam("sigla") String sigla, @QueryParam("origem") String origem, @QueryParam("estado") String estado, @QueryParam("isFavorita") String isFavorita, @QueryParam("idResponsavel") Long idResponsavel, @QueryParam("idPosicionamento") Long idPosicionamento, @QueryParam("idEquipe") Long idEquipe,
+			@QueryParam("limit") Integer limit, @QueryParam("macrotema") String macrotema, @QueryParam("somentePautadas") Boolean pautadas, @QueryParam("offset") Integer offset) {
 
 		Map<String, Object> m = new HashMap<String, Object>();
 		m.put("sigla", sigla);
 		m.put("ementa", ementa);
+		m.put("relator", relator);
 		m.put("autor", autor);
 		m.put("origem", origem);
 		m.put("isFavorita", isFavorita);
 		m.put("estado", estado);
 		m.put("macrotema", macrotema);
 		m.put("idEquipe", idEquipe);
+		m.put("idPosicionamento", idPosicionamento);
 		m.put("idResponsavel", idResponsavel);
 		m.put("somentePautadas", pautadas);
+		m.put("comissao", comissao);
 
 		List<Proposicao> results = proposicaoService.consultar(m, offset, limit);
 		return results;
@@ -654,7 +679,7 @@ public class ProposicaoEndpoint {
 					Comissao comissao = (Comissao) iterator.next();
 					System.out.println("Comissao " + comissao.getSigla());
 
-					proposicaoService.syncPautaAtualComissao(Origem.SENADO, comissao, dataInicial, dataFinal);
+					proposicaoService.syncPautaAtualComissao(o, comissao, dataInicial, dataFinal);
 
 				}
 			} catch (Exception e1) {
