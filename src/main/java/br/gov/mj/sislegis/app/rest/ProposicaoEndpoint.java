@@ -11,6 +11,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.inject.Inject;
@@ -48,6 +50,7 @@ import br.gov.mj.sislegis.app.model.documentos.NotaTecnica;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
+import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.AreaDeMeritoService;
 import br.gov.mj.sislegis.app.service.AutoUpdateProposicaoService;
@@ -56,6 +59,7 @@ import br.gov.mj.sislegis.app.service.DocumentoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.ReuniaoService;
 import br.gov.mj.sislegis.app.service.ejbs.crons.AutoUpdateProposicaoEjb;
+import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 /**
  * 
@@ -657,10 +661,13 @@ public class ProposicaoEndpoint {
 
 	@GET
 	@Path("/auto")
-	public void autoCamara(@QueryParam("s") String s, @QueryParam("o") String origem, @QueryParam("c") String comissaoParam) {
+	public void autoupdates(@QueryParam("s") String s, @QueryParam("o") String origem, @QueryParam("c") String comissaoParam, @HeaderParam("Authorization") String authorization) {
 		if (s != null) {
+
 			List<Comissao> ls;
 			try {
+				Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).warning(user.getEmail()+ " executando auto updates");
 				Origem o = Origem.CAMARA;
 				if ("s".equals(origem)) {
 					o = Origem.SENADO;
@@ -668,6 +675,21 @@ public class ProposicaoEndpoint {
 				} else {
 					ls = comissaoService.listarComissoesCamara();
 				}
+
+				if ("TRAMITACAO".equals(comissaoParam)) {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Atualizando tramitacoes");
+					Map<String, Object> filtros = new HashMap<String, Object>();
+					filtros.put("origem", o.name());
+//					filtros.put("somentePautadas", true);
+					List<Proposicao> props = proposicaoService.consultar(filtros, 0, null);
+					for (Iterator iterator = props.iterator(); iterator.hasNext();) {
+						Proposicao proposicao = (Proposicao) iterator.next();
+						proposicaoService.syncDadosProposicao(proposicao.getId());
+					}
+
+					return;
+				}
+
 				SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy");
 
 				Calendar dataInicial = Calendar.getInstance();
@@ -690,9 +712,6 @@ public class ProposicaoEndpoint {
 			}
 		}
 	}
-
-
-
 }
 
 class ProposicaoPautadaPautaWrapper {

@@ -633,6 +633,11 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				descricaoAlteracao.append("Alterado ano: ").append(local.getAno()).append("=>").append(remote.getAno()).append("\n");
 				local.setAno(remote.getAno());
 			}
+
+			if ((local.getTramitacao() == null && remote.getTramitacao() != null) || (remote.getTramitacao() != null && !local.getTramitacao().equals(remote.getTramitacao()))) {
+				descricaoAlteracao.append("Alterada tramitacao: ").append(local.getAno()).append("=>").append(remote.getTramitacao()).append("\n");
+				local.setTramitacao(remote.getTramitacao());
+			}
 			if (((local.getComissao() == null || "AVULSA".equals(local.getComissao())) && remote.getComissao() != null && !remote.getComissao().equals(local.getComissao()))) {
 				descricaoAlteracao.append("Alterada comissão: '").append(local.getComissao()).append("' => '").append(remote.getComissao()).append("'\n");
 				local.setComissao(remote.getComissao());
@@ -904,7 +909,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 					instanciaNova.setPosicionamentoAtual(posicionamentoProposicao);
 				}
 			}
-		}
+		}		
 
 		return super.save(instanciaNova);
 	}

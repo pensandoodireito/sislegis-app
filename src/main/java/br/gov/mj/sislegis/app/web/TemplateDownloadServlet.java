@@ -72,7 +72,7 @@ public class TemplateDownloadServlet extends HttpServlet {
 	private XWPFDocument geraBriefing(Proposicao prop, HttpServletResponse response) throws Exception {
 		InputStream fis = null;
 		try {
-			String filename = "Briefing_" + prop.getIdProposicao() + ".docx";
+			String filename = "ResumoAnalitico_" + prop.getIdProposicao() + ".docx";
 
 			response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 			response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
@@ -229,7 +229,12 @@ public class TemplateDownloadServlet extends HttpServlet {
 		substituicoes.put("[P.TEMA]", prop.getExplicacao());
 		substituicoes.put("[P.EMENTA]", ementa);
 
-		substituicoes.put("[P.TRAMITACAO]", "[SEM INFORMAÇÃO DE TRAMITAÇÃO]");
+		String tramitacao = prop.getTramitacao();
+		if (tramitacao == null || tramitacao.isEmpty()) {
+			substituicoes.put("[P.TRAMITACAO]", "[SEM INFORMAÇÃO DE TRAMITAÇÃO]");
+		} else {
+			substituicoes.put("[P.TRAMITACAO]", tramitacao);
+		}
 
 		return substituicoes;
 	}

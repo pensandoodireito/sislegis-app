@@ -107,8 +107,8 @@ public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService, EJB
 		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Atualiza pautas das reunioes anteriores e suas proposicoes da camara");
 
 		updatePautasCamara();
-
 	}
+
 
 	@Override
 	public void updatePautasCamara() {

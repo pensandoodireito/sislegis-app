@@ -55,16 +55,16 @@ public class ParserProposicaoCamara implements ProposicaoSearcher {
 
 	public static void main(String[] args) throws Exception {
 
-		Matcher m = p.matcher("PLS 268/1999 (PL 3494/2000 na Câmara)");
-		System.out.println(m.find());
-		System.out.println(m.group(1));
-		System.out.println(m.find());
-		System.out.println(m.group(1));
+//		Matcher m = p.matcher("PLS 268/1999 (PL 3494/2000 na Câmara)");
+//		System.out.println(m.find());
+//		System.out.println(m.group(1));
+//		System.out.println(m.find());
+//		System.out.println(m.group(1));
 		ParserProposicaoCamara parser = new ParserProposicaoCamara();
 		Long idProposicao = 1197825l; // TODO: Informação que vem do filtro
 		// System.out.println(parser.getProposicao(idProposicao).toString());
 		// System.out.println(parser.listaTipos());
-		Collection<Proposicao> prop = parser.searchProposicao("PL", "7922", 2014);
+		Collection<Proposicao> prop = parser.searchProposicao("PL", "4736", 2016);
 		for (Iterator iterator = prop.iterator(); iterator.hasNext();) {
 			Proposicao proposicaoLista = (Proposicao) iterator.next();
 			Proposicao proposicaoId = parser.getProposicao(proposicaoLista.getIdProposicao().longValue());

@@ -56,6 +56,9 @@ public class WatchProposicaoEjb implements WatchProposicaoService {
 		}
 	}
 
+	
+	
+
 	/**
 	 * Envia email notificando da alteração de pauta para todos os seguidores de
 	 * uma comissão

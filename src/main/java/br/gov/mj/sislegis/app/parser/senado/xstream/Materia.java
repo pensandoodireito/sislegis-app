@@ -1,5 +1,7 @@
 package br.gov.mj.sislegis.app.parser.senado.xstream;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,6 +28,9 @@ public class Materia {
 
 	@XStreamAlias("SituacaoAtual")
 	SituacaoAtual situacaoAtual;
+	
+	@XStreamAlias("Tramitacoes")
+	List<Tramitacao> tramitacoes;
 
 	@Override
 	public String toString() {
@@ -88,6 +93,7 @@ public class Materia {
 	}
 
 	public Proposicao toProposicao() {
+		
 		Proposicao p = new Proposicao();
 		if (identificacaoMateria == null) {
 			identificacaoMateria = new IdentificacaoMateria();
@@ -155,9 +161,15 @@ public class Materia {
 		xstream.processAnnotations(DadosBasicosMateria.class);
 		xstream.processAnnotations(AutoresPrincipais.class);
 		xstream.processAnnotations(AutorPrincipal.class);
+		
+		Tramitacao.configXstream(xstream);
 		Relatoria.configXstream(xstream);
 
 		SituacaoAtual.configXstream(xstream);
 
+	}
+
+	public List<Tramitacao> getTramitacoes() {
+		return tramitacoes;
 	}
 }
