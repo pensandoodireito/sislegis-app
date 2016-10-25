@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.parser.camara.ParserComissoesCamara;
 import br.gov.mj.sislegis.app.parser.senado.ParserComissoesSenado;
@@ -93,5 +94,25 @@ public class ComissaoServiceEjb extends AbstractPersistence<Comissao, Long> impl
 		parserComissoesSenado = new ParserComissoesSenado();
 		parserComissoesCamara = new ParserComissoesCamara();
 
+	}
+
+	@Override
+	public Comissao getComissao(Origem origem, String sigla) throws Exception {
+		String comissaoPorExtenso = sigla.trim().toLowerCase();
+		List<Comissao> lista = null;
+		if (Origem.CAMARA.equals(origem)) {
+			lista = listarComissoesCamara();
+
+		} else {
+			lista = listarComissoesSenado();
+		}
+		for (Iterator<Comissao> iterator = lista.iterator(); iterator.hasNext();) {
+			Comissao type = (Comissao) iterator.next();
+			if (type.getSigla().trim().toLowerCase().equals(comissaoPorExtenso)) {
+				return type;
+			}
+
+		}
+		return null;
 	}
 }

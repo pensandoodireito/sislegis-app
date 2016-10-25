@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -12,6 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -35,6 +37,10 @@ public class AreaDeMeritoRevisao extends AbstractEntity {
 	@ManyToOne(cascade = CascadeType.DETACH)
 	@JoinColumn(name = "areamerito_id", referencedColumnName = "id")
 	private AreaDeMerito areaMerito;
+	
+	@OneToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.REMOVE)
+	@JoinColumn(name = "documento_id", referencedColumnName = "id", nullable = true)
+	private Documento documento;
 
 	@ManyToOne(cascade = CascadeType.DETACH)
 	@JoinColumn(name = "posicionamento_id", referencedColumnName = "id", nullable = true)
@@ -114,6 +120,14 @@ public class AreaDeMeritoRevisao extends AbstractEntity {
 
 	public boolean isPendente() {
 		return posicionamento == null;
+	}
+
+	public Documento getDocumento() {
+		return documento;
+	}
+
+	public void setDocumento(Documento documento) {
+		this.documento = documento;
 	}
 
 }

@@ -2,26 +2,29 @@ package br.gov.mj.sislegis.app.service;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 
 import javax.ejb.Local;
 import javax.xml.rpc.ServiceException;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
-import br.gov.mj.sislegis.app.model.NotaTecnica;
+import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.ProcessoSei;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.Votacao;
+import br.gov.mj.sislegis.app.model.documentos.Briefing;
+import br.gov.mj.sislegis.app.model.documentos.DocRelated;
+import br.gov.mj.sislegis.app.model.documentos.Emenda;
+import br.gov.mj.sislegis.app.model.documentos.NotaTecnica;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
-import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 
 @Local
@@ -159,7 +162,7 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @param id
 	 * @param idPosicionamento
 	 * @param usuario
-	 * @return 
+	 * @return
 	 */
 	PosicionamentoProposicao alterarPosicionamento(Long id, Long idPosicionamento, boolean preliminar, Usuario usuario);
 
@@ -219,8 +222,25 @@ public interface ProposicaoService extends Service<Proposicao> {
 
 	void saveNotaTecnica(NotaTecnica nt);
 
-	void deleteNotaById(Long idNota);
-
 	Proposicao save(Proposicao instanciaNova, Usuario user);
+
+	Proposicao findProposicaoBy(Origem origem, Integer idProposicao);
+
+	Proposicao persistProposicaoAndPauta(Proposicao proposicao, PautaReuniaoComissao pautaReuniaoComissao)
+			throws IOException, Exception;
+
+
+	void saveDocRelated(DocRelated nt);
+
+	List<Briefing> getBriefings(Long proposicaoId);
+
+	List<Emenda> getEmendas(Long proposicaoId);
+
+	void deleteDocRelated(Long idNota, Class c);
+
+
+	void syncPautaAtualComissao(Origem origem, Comissao comissao, Calendar dataInicial, Calendar dataFinal);
+
+	List<String> listarTodosAutores(String nome);
 
 }

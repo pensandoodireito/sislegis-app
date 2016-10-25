@@ -42,7 +42,7 @@ public class UsuarioAutenticadoBean {
 	public synchronized Usuario carregaUsuarioAutenticado(String authorization) throws IOException {
 		JSONObject jsonUser = buscaDadosUsuarioDoKeycloak(authorization);
 		if (!jsonUser.has("email")) {
-			throw new IOException("Usuário de keycloak sem email configurado. Configure um email para o usuario.");
+			throw new UsuarioNaoLogado("Usuário de keycloak sem email configurado. Configure um email para o usuario.");
 		}
 		String email = jsonUser.getString("email");
 		Usuario authenticatedUser = usuarioService.findOrCreateByEmail(jsonUser.getString("name"), email);
@@ -88,7 +88,7 @@ public class UsuarioAutenticadoBean {
 							"Falhou ao obter dados do usuario logado: '" + getContent(response));
 				}
 
-				throw new IOException("Não foi possível obter dados do usuáro logado. Http Status: "
+				throw new UsuarioNaoLogado("Não foi possível obter dados do usuáro logado. Http Status: "
 						+ response.getStatusLine().getStatusCode());
 			}
 

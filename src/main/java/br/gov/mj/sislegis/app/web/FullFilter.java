@@ -1,4 +1,4 @@
-package br.gov.mj.sislegis.app.rest;
+package br.gov.mj.sislegis.app.web;
 
 import java.io.IOException;
 

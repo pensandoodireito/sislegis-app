@@ -17,4 +17,12 @@ public interface AreaDeMeritoService extends Service<AreaDeMerito> {
 	public AreaDeMeritoRevisao saveRevisao(AreaDeMeritoRevisao entity);
 	public AreaDeMerito saveAreaDeMerito(AreaDeMerito entity);
 
+	public AreaDeMeritoRevisao findRevisao(Long idRevisao);
+
+	public void deleteRevisao(AreaDeMeritoRevisao rev);
+
+	public void deleteRevisao(Long idRevisao);
+
+	public AreaDeMerito findAreaPorNome(String string);
+
 }

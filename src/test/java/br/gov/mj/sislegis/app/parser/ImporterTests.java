@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.AreaDeMerito;
 import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
 import br.gov.mj.sislegis.app.model.Equipe;
@@ -47,6 +48,7 @@ import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
 import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
 import br.gov.mj.sislegis.app.parser.senado.ParserPautaSenado;
 import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
+import br.gov.mj.sislegis.app.service.AreaDeMeritoService;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
@@ -58,6 +60,7 @@ import br.gov.mj.sislegis.app.service.TagService;
 import br.gov.mj.sislegis.app.service.TarefaService;
 import br.gov.mj.sislegis.app.service.TipoEncaminhamentoService;
 import br.gov.mj.sislegis.app.service.UsuarioService;
+import br.gov.mj.sislegis.app.service.ejbs.AreaDeMeritoServiceEJB;
 import br.gov.mj.sislegis.app.service.ejbs.ComentarioServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.ComissaoServiceEjb;
 import br.gov.mj.sislegis.app.service.ejbs.EJBDataCacherImpl;
@@ -83,6 +86,7 @@ public class ImporterTests {
 	TipoEncaminhamentoService tipoEncaminhamentoService;
 	EncaminhamentoProposicaoService encaminhamentoService;
 	TarefaService tarefaService;
+	AreaDeMeritoService areaService;
 	EquipeService equipeService;
 	NotificacaoService notiService;
 	ComentarioService comentarioService;
@@ -139,6 +143,7 @@ public class ImporterTests {
 		tarefaService = new TarefaServiceEjb();
 		notiService = new NotificacaoServiceEjb();
 		equipeService = new EquipeServiceEjb();
+		areaService = new AreaDeMeritoServiceEJB();
 
 		reuniaoProposicaoEJB = new ReuniaoProposicaoServiceEjb();
 		reuniaoProposicaoEJB.setInjectedEntities(em);
@@ -151,8 +156,9 @@ public class ImporterTests {
 		((EJBUnitTestable) comentarioService).setInjectedEntities(em);
 		((EJBUnitTestable) tarefaService).setInjectedEntities(em, notiService);
 		((EJBUnitTestable) encaminhamentoService).setInjectedEntities(em, tarefaService);
-		((EJBUnitTestable) proposicaoService).setInjectedEntities(em, new ParserProposicaoCamara(), reuniaoEJB,
-				reuniaoProposicaoEJB, comissaoService, comentarioService);
+		((EJBUnitTestable) areaService).setInjectedEntities(em);
+
+		((EJBUnitTestable) proposicaoService).setInjectedEntities(em, new ParserProposicaoCamara(), reuniaoEJB, reuniaoProposicaoEJB, comissaoService, comentarioService, encaminhamentoService, areaService);
 		((EJBUnitTestable) userSvc).setInjectedEntities(em);
 		((EJBUnitTestable) posicionamentoSvc).setInjectedEntities(em);
 		((EJBUnitTestable) tagService).setInjectedEntities(em);
@@ -172,18 +178,21 @@ public class ImporterTests {
 		posicionamentoCache.put("Pela rejeição.".toLowerCase(), posicionamentoSvc.getByName("Contrário"));
 		posicionamentoCache.put("Pela rejeição (16/09/16)".toLowerCase(), posicionamentoSvc.getByName("Contrário"));
 		posicionamentoCache.put("Previamente contrário".toLowerCase(), posicionamentoSvc.getByName("Contrário"));
+		posicionamentoCache.put("Contrária".toLowerCase(), posicionamentoSvc.getByName("Contrário"));
+		posicionamentoCache.put("Rejeição".toLowerCase(), posicionamentoSvc.getByName("Contrário"));
 
+		posicionamentoCache.put("Favorável com sugestão. Apensar ao PLS 559/13.".toLowerCase(), posicionamentoSvc.getByName("Favorável"));
 		posicionamentoCache.put("SUPAR: Liberar (19/09/16)".toLowerCase(), posicionamentoSvc.getByName("Favorável"));
 		posicionamentoCache.put("Liberar".toLowerCase(), posicionamentoSvc.getByName("Favorável"));
 		posicionamentoCache.put("Supar orientando por liberar".toLowerCase(), posicionamentoSvc.getByName("Favorável"));
 		posicionamentoCache.put("SUPAR: Liberar".toLowerCase(), posicionamentoSvc.getByName("Favorável"));
 
-		posicionamentoCache.put("Favorável com emendas".toLowerCase(),
-				posicionamentoSvc.getByName("Favorável com emendas"));
-		posicionamentoCache.put("Favorável com emendas".toLowerCase(),
-				posicionamentoSvc.getByName("Favorável com emendas"));
-		posicionamentoCache.put("Favorável com emenda".toLowerCase(),
-				posicionamentoSvc.getByName("Favorável com emendas"));
+		posicionamentoCache.put("Com a relatora (pela aprovação com Emenda).".toLowerCase(), posicionamentoSvc.getByName("Favorável com emendas"));
+		posicionamentoCache.put("Favorável com emendas".toLowerCase(), posicionamentoSvc.getByName("Favorável com emendas"));
+		posicionamentoCache.put("Favorável com emendas".toLowerCase(), posicionamentoSvc.getByName("Favorável com emendas"));
+		posicionamentoCache.put("Favorável com emenda".toLowerCase(), posicionamentoSvc.getByName("Favorável com emendas"));
+
+		posicionamentoCache.put("Aguardar".toLowerCase(), posicionamentoSvc.getByName("Monitorar"));
 
 		for (Iterator iterator = tipoEncaminhamentoService.listAll().iterator(); iterator.hasNext();) {
 			TipoEncaminhamento enc = (TipoEncaminhamento) iterator.next();
@@ -201,6 +210,22 @@ public class ImporterTests {
 		}
 
 		initUsers();
+		initAreas();
+
+	}
+
+	private void initAreas() {
+		String[] areas = { "DEPEN (Departamento Penitenciário Nacional)", "DPF (Departamento de Polícia Federal)", "DPRF (Departamento de Polícia Rodoviária Federal)", "SENACON (Secretaria Nacional do Consumidor)", "SENAD (Secretaria Nacional de Políticas sobre Drogas)", "SENASP (Secretaria Nacional de Segurança Pública)", "SESGE (Secretaria Extraordinária de Segurança para Grandes Eventos)", "SNJC (Secretaria Nacional de Justiça e Cidadania)",
+				"CADE (Conselho Administrativo de Defesa Econômica)", "FUNAI (Fundação Nacional do Índio)" };
+		for (int i = 0; i < areas.length; i++) {
+			String nome = areas[i];
+
+			if (areaService.findAreaPorNome(nome) == null) {
+				AreaDeMerito a = new AreaDeMerito();
+				a.setNome(nome);
+				areaService.saveAreaDeMerito(a);
+			}
+		}
 
 	}
 
@@ -273,40 +298,29 @@ public class ImporterTests {
 		checkCreate(userUp, userCompletoUp, userEmailUp, null, Papel.SECRETARIO);
 
 		String[] userASPAR = { "leandrog", "pl", "gb", "nr", "nn", "fs" };
-		String[] userComAspar = { "Leandro Guedes", "Paula Lacerda", "Gabriel Borges", "Natália Reis", "Nayara Nunes",
-				"Fernanda Soares" };
-		String[] userEmailAspar = { "leandro.guedes@mj.gov.br", "paula.lacerda@mj.gov.br", "gabriel.borges@mj.gov.br",
-				"natalia.reis.estagio@mj.gov.br", "nayara.nunes@mj.gov.br", "fernanda.msoares.terceirizado@mj.gov.br" };
+		String[] userComAspar = { "Leandro Guedes", "Paula Lacerda", "Gabriel Borges", "Natália Reis", "Nayara Nunes", "Fernanda Soares" };
+		String[] userEmailAspar = { "leandro.guedes@mj.gov.br", "paula.lacerda@mj.gov.br", "gabriel.borges@mj.gov.br", "natalia.reis.estagio@mj.gov.br", "nayara.nunes@mj.gov.br", "fernanda.msoares.terceirizado@mj.gov.br" };
 
 		checkCreate(userASPAR, userComAspar, userEmailAspar, getEquipe("ASPAR"), Papel.ASPAR);
 
 		String[] userEstadp = { "Eduarda", "Guilherme", "Leonardo", "Marcelo", "Natalia", "Paula", "Sem atribuição" };
-		String[] userCompletoEstado = { "Eduarda Cintra", "Guilherme Moraes Rego", "Leonardo Povoa", "Marcelo Bastos",
-				"Natalia Langenegger", "Paula Leal", "Sem atribuição" };
-		String[] userEmailEstado = { "eduarda.cintra@mj.gov.br", "guilherme.moraesrego@mj.gov.br",
-				"leonardo.povoa@mj.gov.br", "marcelo.bastos@mj.gov.br", "natalia.langenegger@mj.gov.br",
-				"paula.leal@mj.gov.br", null };
+		String[] userCompletoEstado = { "Eduarda Cintra", "Guilherme Moraes Rego", "Leonardo Povoa", "Marcelo Bastos", "Natalia Langenegger", "Paula Leal", "Sem atribuição" };
+		String[] userEmailEstado = { "eduarda.cintra@mj.gov.br", "guilherme.moraesrego@mj.gov.br", "leonardo.povoa@mj.gov.br", "marcelo.bastos@mj.gov.br", "natalia.langenegger@mj.gov.br", "paula.leal@mj.gov.br", null };
 		estado = getEquipe("Politica Legislativa e Organização do Estado");
 
 		checkCreate(userEstadp, userCompletoEstado, userEmailEstado, estado, Papel.EQUIPE);
 		setPapel("guilherme.moraesrego@mj.gov.br", Papel.DIRETOR);
 
-		String[] userPPessoa = { "Adriana", "Mariana", "Rodrigo", "Clarice", "Bernardo", "Fernando", "Frederico",
-				"Sem atribuição" };
-		String[] userCompPPessoa = { "Adriana Ligeiro", "Mariana Carvalho", "Rodrigo Mercante", "Clarice Oliveira",
-				"Bernardo Andrade", "Fernando Couto", "Frederico Moesch", "Sem atribuição" };
-		String[] userEmailPPessoa = { "adriana.ligeiro@mj.gov.br", "mariana.carvalho@mj.gov.br",
-				"rodrigo.mercante@mj.gov.br", "clarice.oliveira@mj.gov.br", "bernardo.andrade.estagio@mj.gov.br",
-				"fernando.couto@mj.gov.br", "frederico.moesch@mj.gov.br", null };
+		String[] userPPessoa = { "Adriana", "Mariana", "Rodrigo", "Clarice", "Bernardo", "Fernando", "Frederico", "Sem atribuição" };
+		String[] userCompPPessoa = { "Adriana Ligeiro", "Mariana Carvalho", "Rodrigo Mercante", "Clarice Oliveira", "Bernardo Andrade", "Fernando Couto", "Frederico Moesch", "Sem atribuição" };
+		String[] userEmailPPessoa = { "adriana.ligeiro@mj.gov.br", "mariana.carvalho@mj.gov.br", "rodrigo.mercante@mj.gov.br", "clarice.oliveira@mj.gov.br", "bernardo.andrade.estagio@mj.gov.br", "fernando.couto@mj.gov.br", "frederico.moesch@mj.gov.br", null };
 		pessoa = getEquipe("Equipe Politica Legislativa e Proteção da Pessoa");
 		checkCreate(userPPessoa, userCompPPessoa, userEmailPPessoa, pessoa, Papel.EQUIPE);
 		setPapel("clarice.oliveira@mj.gov.br", Papel.DIRETOR);
 
 		String[] userPenal = { "Karise", "Cláudio", "Melina", "Laura", "Silvana" };
-		String[] userCompletoPenal = { "Jocyane Figueroa", "Cláudio Teixeira", "Melina Siqueira", "Laura Souza",
-				"Silvana Nunes" };
-		String[] userEmailPenal = { "jocyane.figueroa@mj.gov.br", "claudio.teixeira@mj.gov.br",
-				"melina.siqueira@mj.gov.br", "laura.souza@mj.gov.br", "silvana.nunes@mj.gov.br" };
+		String[] userCompletoPenal = { "Jocyane Figueroa", "Cláudio Teixeira", "Melina Siqueira", "Laura Souza", "Silvana Nunes" };
+		String[] userEmailPenal = { "jocyane.figueroa@mj.gov.br", "claudio.teixeira@mj.gov.br", "melina.siqueira@mj.gov.br", "laura.souza@mj.gov.br", "silvana.nunes@mj.gov.br" };
 
 		penal = getEquipe("Politica Processo e Controle Penal");
 
@@ -342,6 +356,7 @@ public class ImporterTests {
 	static int PENAL = 2;
 	static int PESSOA = 1;
 	static int ESTADO = 3;
+	static int ASPAR = 4;
 	static int CodigoEquipe = ESTADO;
 
 	private void processaExcel() throws IOException {
@@ -355,9 +370,12 @@ public class ImporterTests {
 		} else if (CodigoEquipe == ESTADO) {
 			file = "/home/sislegis/workspace/b/src/main/resources/Acompanhamento PLs Estado.xlsx";
 			atual = estado;
+		} else if (CodigoEquipe == ASPAR) {
+			file = "/home/sislegis/workspace/b/src/main/resources/Projetos novos da Semana sem posicionamento.xlsx";
+			atual = null;
 		}
 
-		System.out.println("** PROCESSANDO PLANILHA DA EQUIPE " + atual.getNome() + " *************");
+		System.out.println("** PROCESSANDO PLANILHA DA EQUIPE " + (atual != null ? atual.getNome() : "ASPAR") + " *************");
 		XSSFWorkbook wb = new XSSFWorkbook(new FileInputStream(new File(file)));
 
 		List<ProposicalXLS> list = new ArrayList<ProposicalXLS>();
@@ -367,6 +385,7 @@ public class ImporterTests {
 			Sheet sheet = wb.getSheetAt(0);// heet("Projetos");
 			int k = 0;
 			for (Row row : sheet) {
+
 				ParserPautaCamara pautaCamara = new ParserPautaCamara();
 				ParserPautaSenado pautaSenado = new ParserPautaSenado();
 				if (row.getCell(0) != null) {
@@ -374,11 +393,12 @@ public class ImporterTests {
 					String origem = "";
 					try {
 						origem = row.getCell(0).getStringCellValue();
+						origem = origem.trim();
 					} catch (Exception e) {
 
 					}
+					if ("Camara".equals(origem) || "Câmara".equals(origem) || "Senado".equals(origem) || "Congresso".equals(origem)) {
 
-					if ("Câmara".equals(origem) || "Senado".equals(origem)) {
 						ProposicalXLS p = new ProposicalXLS(row, CodigoEquipe);
 
 						// if (!p.numero.equals("30") || !p.ano.equals("2015"))
@@ -401,24 +421,43 @@ public class ImporterTests {
 							// if(!p.numero.equals("5202")){
 							// continue;
 							// }
-							Collection<Proposicao> proposicoesWS = parserPropCamara.searchProposicao(p.tipo, p.numero,
-									Integer.parseInt(p.ano));
-							if (proposicoesWS.isEmpty()) {
-								if (p.hasMore()) {
-									proposicoesWS = parserPropCamara.searchProposicao(p.tipo, p.numero,
-											Integer.parseInt(p.ano));
-								} else {
-									throw new Exception("Nao conseguiu encontrar " + p);
-								}
-
-							}
-							prop = proposicoesWS.iterator().next();
-							Proposicao propdb = proposicaoService.buscarPorIdProposicao(prop.getIdProposicao());
+							List l = proposicaoService.consultar(p.tipo + " " + p.numero + "/" + p.ano, null, null, p.origem.name(), null, 0, 1);
+							Proposicao propdb = null;
 							boolean existente = false;
-							if (propdb != null) {
+							if (l.size() > 0) {
+								propdb = (Proposicao) l.get(0);
 								existente = true;
 								prop = propdb;
+								if (prop.getPosicionamentoAtual() != null && prop.getPosicionamentoAtual().getPosicionamento() != null) {
+//									System.out.println("Existente1 e com posicionamento, nao vai mexer " + prop.getSigla());
+									continue;
+								}
+							} else {
+
+								Collection<Proposicao> proposicoesWS = parserPropCamara.searchProposicao(p.tipo, p.numero, Integer.parseInt(p.ano));
+								if (proposicoesWS.isEmpty()) {
+									if (p.hasMore()) {
+										proposicoesWS = parserPropCamara.searchProposicao(p.tipo, p.numero, Integer.parseInt(p.ano));
+									} else {
+										throw new Exception("Nao conseguiu encontrar " + p);
+									}
+
+								}
+								prop = proposicoesWS.iterator().next();
+								propdb = proposicaoService.buscarPorIdProposicao(prop.getIdProposicao());
+								if (propdb != null) {
+									prop = propdb;
+									existente = true;
+									if (prop.getPosicionamentoAtual() != null && prop.getPosicionamentoAtual().getPosicionamento() != null) {
+//										System.out.println("Existente e com posicionamento, nao vai mexer " + prop.getSigla());
+										continue;
+									}
+								}
 							}
+							// Proposicao
+
+							k++;
+
 							if (debug) {
 								trans = em.getTransaction();
 								trans.begin();
@@ -427,7 +466,7 @@ public class ImporterTests {
 							}
 							Usuario responsavel = atribuidoToResponsavel.get(p.responsavel);
 
-							if (p.tema.length() > 5000) {
+							if (p.tema != null && p.tema.length() > 5000) {
 								p.tema = p.tema.substring(0, 5000);
 							}
 							if (debug) {
@@ -451,14 +490,15 @@ public class ImporterTests {
 								trans.commit();
 								trans = em.getTransaction();
 							}
-
-							if (p.despachado) {
+							if (CodigoEquipe == ASPAR) {
+								prop.setEstado(EstadoProposicao.EMANALISE);
+							} else if (p.despachado) {
 								prop.setEstado(EstadoProposicao.DESPACHADA);
 							} else {
 
 								if (p.situacao != null && p.situacao.toLowerCase().contains("feita")) {
 									prop.setEstado(EstadoProposicao.ADESPACHAR);
-								} else if (p.drive != null && !p.drive.isEmpty()) {
+								} else if (p.drive != null && !p.drive.isEmpty() && p.posicaoSAL != null && !p.posicaoSAL.isEmpty()) {
 									prop.setEstado(EstadoProposicao.ADESPACHAR);
 								} else {
 									prop.setEstado(EstadoProposicao.EMANALISE);
@@ -492,8 +532,7 @@ public class ImporterTests {
 								trans = em.getTransaction();
 								trans.begin();
 							}
-							if (p.comissao != null && p.comissao.length() > 0
-									&& p.comissao.length() < "COMISSÃO ESPECIAL".length()) {
+							if (p.comissao != null && p.comissao.length() > 0 && p.comissao.length() < "COMISSÃO ESPECIAL".length()) {
 								prop.setComissao(p.comissao);
 							}
 
@@ -519,8 +558,23 @@ public class ImporterTests {
 								trans = em.getTransaction();
 								trans.begin();
 							}
-							if (p.areaDeMerito != null && p.areaDeMerito.length() > 0
-									&& !"Não há".equals(p.areaDeMerito)) {
+							if (!existente && p.despachoInicial != null && p.despachoInicial.length() > 0) {
+								Comentario c = new Comentario();
+								if (responsavel != null) {
+									c.setAutor(responsavel);
+								} else {
+									c.setAutor(userSvc.findByEmail(EMAIL_USUARIO_PADRAO));
+								}
+								if (p.despachoInicial.length() > 255) {
+									p.despachoInicial = p.despachoInicial.substring(0, 252) + "..";
+								}
+								c.setDescricao(p.despachoInicial);
+
+								c.setProposicao(prop);
+								c.setDataCriacao(new Date());
+								em.persist(c);
+							}
+							if (!existente && p.areaDeMerito != null && p.areaDeMerito.length() > 0 && !"Não há".equals(p.areaDeMerito)) {
 								Comentario c = new Comentario();
 								if (responsavel != null) {
 									c.setAutor(responsavel);
@@ -563,8 +617,10 @@ public class ImporterTests {
 									if ("".equals(p.posicaoSAL)) {
 
 									} else {
-										String msg = "Posicionamento SAL da planilha não reconhecido: " + p.posicaoSAL;
-										criaComentario(prop, responsavel, msg);
+										if (!existente) {
+											String msg = "Posicionamento SAL da planilha não reconhecido: " + p.posicaoSAL;
+											criaComentario(prop, responsavel, msg);
+										}
 										System.err.println("Posicionamento inválido '" + p.posicaoSAL + "' para " + p);
 										// System.err.println("Posicionametno novo "
 										// + p.posicaoSAL);
@@ -586,34 +642,37 @@ public class ImporterTests {
 									if ("".equals(p.supar)) {
 
 									} else {
-										String msg = "Posicionamento SUPAR da planilha não reconhecido: " + p.supar;
-										criaComentario(prop, responsavel, msg);
+										if (!existente) {
+											String msg = "Posicionamento SUPAR da planilha não reconhecido: " + p.supar;
+											criaComentario(prop, responsavel, msg);
+										}
 										System.err.println("Posicionamento inválido supar '" + p.supar + "' para " + p);
 									}
 								}
 
 							}
 
-							if (p.pauta.length() > 0) {
-								trans = em.getTransaction();
-								trans.begin();
-								prop = proposicaoService.buscarPorIdProposicao(prop.getIdProposicao());
-								proposicaoService.syncDadosPautaProposicao(prop.getId());
-								trans.commit();
-							}
+							// if (p.pauta != null && p.pauta.length() > 0) {
+							// trans = em.getTransaction();
+							// trans.begin();
+							// prop =
+							// proposicaoService.buscarPorIdProposicao(prop.getIdProposicao());
+							// proposicaoService.syncDadosPautaProposicao(prop.getId());
+							// trans.commit();
+							// }
 
 						} catch (Exception e) {
 							e.printStackTrace();
-							System.err.println("Falhou ao processar " + p + " " + p.comissao.length() + " "
-									+ p.situacao.length());
-//							System.out.println(prop.getComissao().length() + " n:" + prop.getNumero().length() + " l:"
-//									+ prop.getLinkProposicao().length() + " sit:" + prop.getSituacao().length() + " a:"
-//									+ prop.getAutor().length());
+							System.err.println("Falhou ao processar " + p);
+							// System.out.println(prop.getComissao().length() +
+							// " n:" + prop.getNumero().length() + " l:"
+							// + prop.getLinkProposicao().length() + " sit:" +
+							// prop.getSituacao().length() + " a:"
+							// + prop.getAutor().length());
 
 							p.printRow();
 
-							Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
-									"Falhou ao processar " + p, e);
+							Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Falhou ao processar " + p, e);
 							if (trans.isActive()) {
 								trans.rollback();
 							}
@@ -621,7 +680,12 @@ public class ImporterTests {
 
 						}
 						list.add(p);
+					} else {
+						System.out.println("Não parece ter dados validos  " + row.getRowNum() + " " + origem);
 					}
+				}
+				if (k % 50 == 0) {
+					System.out.println(k + " proposicoes processadas, ate linha " + row.getRowNum());
 				}
 			}
 		}
@@ -697,22 +761,6 @@ public class ImporterTests {
 	}
 
 	@Test
-	public void testA() {
-
-		try {
-			List l = em.createQuery("SELECT p FROM Proposicao p WHERE :tag in elements(p.tags)  ", Proposicao.class)
-					.setParameter("tag", "DH - mulheres").getResultList();
-			System.out.println(l.size());
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-
-			fail();
-		}
-	}
-
-	@Test
 	public void testImportPenal() {
 
 		try {
@@ -756,6 +804,21 @@ public class ImporterTests {
 			fail();
 		}
 	}
+
+	@Test
+	public void testImportNovos() {
+
+		try {
+			CodigoEquipe = ASPAR;
+			processaExcel();
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			fail();
+		}
+	}
 }
 
 class ProposicalXLS {
@@ -779,12 +842,12 @@ class ProposicalXLS {
 	String tipo;
 	String numero;
 	String ano;
+
 	String drive;
 	static Pattern p = Pattern.compile("(\\w+)\\s+(\\d+.*?)/?\\s?(\\d+)\\s*(\\((\\w+)\\s+(\\d+)/(\\d+)\\))?");
 
 	boolean hasMore() {
 
-		// System.out.println(sigla);
 		if (m.find()) {
 			tipo = m.group(1);
 			numero = m.group(2);
@@ -869,16 +932,15 @@ class ProposicalXLS {
 			colunas.put("despachado", 7);
 			colunas.put("comissao", 8);
 
-			colunas.put("situacao", 9);
+			colunas.put("estagio", 9);
 			colunas.put("responsavel", 10);
 			colunas.put("providencias", 11);
 			colunas.put("pauta", 12);
 			colunas.put("asparTxt", 15);
-
+			colunas.put("situacao", 20);
 			colunas.put("despachoInicial", 20);
 			colunas.put("drive", 20);
 			colunas.put("macrotema", 20);
-			colunas.put("estagio", 20);
 			colunas.put("supar", 20);
 		} else if (tipoExecucao == ImporterTests.PESSOA) {
 			// Pessoa
@@ -903,6 +965,31 @@ class ProposicalXLS {
 			colunas.put("drive", 20);
 
 			colunas.put("situacao", 17);
+		} else if (tipoExecucao == ImporterTests.ASPAR) {
+			// Pessoa
+			colunas.put("origem", 0);
+			colunas.put("tipo", 1);
+			colunas.put("numano", 2);
+			colunas.put("asparTxt", 9);
+			colunas.put("situacao", 4);
+			colunas.put("supar", 6);
+			colunas.put("despachoInicial", 5);
+
+			colunas.put("sigla", 30);
+			colunas.put("autoria", 30);
+			colunas.put("tema", 30);
+			colunas.put("areaDeMerito", 30);
+			colunas.put("posicaoSAL", 30);
+			colunas.put("prioritario", 30);
+			colunas.put("despachado", 30);
+			colunas.put("comissao", 30);
+			colunas.put("macrotema", 30);
+			colunas.put("estagio", 30);
+			colunas.put("responsavel", 30);
+			colunas.put("providencias", 30);
+			colunas.put("pauta", 30);
+
+			colunas.put("drive", 30);
 		}
 
 	}
@@ -912,52 +999,70 @@ class ProposicalXLS {
 		initColunas();
 		this.r = r;
 		rowNumber = r.getRowNum();
-
-		if ("Câmara".equals(r.getCell(colunas.get("origem")).getStringCellValue())) {
+		String o = r.getCell(colunas.get("origem")).getStringCellValue().trim();
+		if ("Câmara".equals(o) || "Camara".equals(o)) {
 			origem = Origem.CAMARA;
-		} else if ("Senado".equals(r.getCell(colunas.get("origem")).getStringCellValue())) {
+		} else if ("Senado".equals(o) || "Congresso".equals(o)) {
 			origem = Origem.SENADO;
 		} else {
-			throw new IllegalArgumentException("Origem errada " + r.getCell(colunas.get("origem")));
+			throw new IllegalArgumentException("Origem errada '" + r.getCell(colunas.get("origem")) + "'");
 		}
+		if (colunas.get("tipo") != null) {
+			sigla = r.getCell(colunas.get("tipo")).getStringCellValue().trim() + " " + r.getCell(colunas.get("numano")).getStringCellValue().trim();
 
-		sigla = r.getCell(colunas.get("sigla")).getStringCellValue();
+		} else {
+			sigla = r.getCell(colunas.get("sigla")).getStringCellValue();
+		}
 		m = p.matcher(sigla);
 		hasMore();
-
-		autoria = r.getCell(colunas.get("autoria")).getStringCellValue();
-		tema = r.getCell(colunas.get("tema")).getStringCellValue();
-		areaDeMerito = r.getCell(colunas.get("areaDeMerito")).getStringCellValue();
-		posicaoSAL = r.getCell(colunas.get("posicaoSAL")).getStringCellValue();
-		String prioStr = r.getCell(colunas.get("prioritario")).getStringCellValue();
-
-		if ("Sim".equals(prioStr)) {
-			prioritario = true;
-		} else if ("Não".equals(prioStr) || prioStr.isEmpty()) {
-			prioritario = false;
-		} else {
-			throw new IllegalArgumentException("prioritario errada " + prioStr);
+		if (r.getCell(colunas.get("autoria")) != null) {
+			autoria = r.getCell(colunas.get("autoria")).getStringCellValue();
 		}
-
-		String desp = r.getCell(colunas.get("despachado")).getStringCellValue();
-
-		if ("ok".equalsIgnoreCase(desp)) {
-			despachado = true;
-		} else if (desp.isEmpty()) {
-			despachado = false;
-		} else {
-			System.err.println("despachado errada " + desp + " " + r.getRowNum());
+		if (r.getCell(colunas.get("tema")) != null) {
+			tema = r.getCell(colunas.get("tema")).getStringCellValue();
 		}
+		if (r.getCell(colunas.get("areaDeMerito")) != null) {
+			areaDeMerito = r.getCell(colunas.get("areaDeMerito")).getStringCellValue();
+		}
+		if (r.getCell(colunas.get("posicaoSAL")) != null) {
+			posicaoSAL = r.getCell(colunas.get("posicaoSAL")).getStringCellValue();
+		}
+		if (r.getCell(colunas.get("prioritario")) != null) {
+			String prioStr = r.getCell(colunas.get("prioritario")).getStringCellValue();
+			if ("Sim".equals(prioStr)) {
+				prioritario = true;
+			} else if ("Não".equals(prioStr) || prioStr.isEmpty()) {
+				prioritario = false;
+			} else {
+				throw new IllegalArgumentException("prioritario errada " + prioStr);
+			}
+		}
+		if (r.getCell(colunas.get("despachado")) != null) {
+			String desp = r.getCell(colunas.get("despachado")).getStringCellValue();
 
-		comissao = r.getCell(colunas.get("comissao")).getStringCellValue();
-		providencias = r.getCell(colunas.get("providencias")).getStringCellValue();
+			if ("ok".equalsIgnoreCase(desp)) {
+				despachado = true;
+			} else if (desp.isEmpty()) {
+				despachado = false;
+			} else {
+				System.err.println("despachado errada " + desp + " " + r.getRowNum());
+			}
+		}
+		if (r.getCell(colunas.get("comissao")) != null) {
+			comissao = r.getCell(colunas.get("comissao")).getStringCellValue();
+		}
+		if (r.getCell(colunas.get("providencias")) != null) {
+			providencias = r.getCell(colunas.get("providencias")).getStringCellValue();
+		}
 		if (r.getCell(colunas.get("estagio")) != null) {
 			estagio = r.getCell(colunas.get("estagio")).getStringCellValue();
 		}
 		if (r.getCell(colunas.get("despachoInicial")) != null) {
 			despachoInicial = r.getCell(colunas.get("despachoInicial")).getStringCellValue();
 		}
-		responsavel = r.getCell(colunas.get("responsavel")).getStringCellValue();
+		if (r.getCell(colunas.get("responsavel")) != null) {
+			responsavel = r.getCell(colunas.get("responsavel")).getStringCellValue();
+		}
 		if (r.getCell(colunas.get("drive")) != null) {
 			Hyperlink link = r.getCell(colunas.get("drive")).getHyperlink();
 			if (link != null) {
@@ -967,7 +1072,9 @@ class ProposicalXLS {
 		if (r.getCell(colunas.get("macrotema")) != null) {
 			macrotema = r.getCell(colunas.get("macrotema")).getStringCellValue();
 		}
-		pauta = r.getCell(colunas.get("pauta")).getStringCellValue();
+		if (r.getCell(colunas.get("pauta")) != null) {
+			pauta = r.getCell(colunas.get("pauta")).getStringCellValue();
+		}
 		if (r.getCell(colunas.get("asparTxt")) != null) {
 			asparTxt = r.getCell(colunas.get("asparTxt")).getStringCellValue();
 		}
@@ -978,6 +1085,7 @@ class ProposicalXLS {
 		if (r.getCell(colunas.get("supar")) != null) {
 			supar = r.getCell(colunas.get("supar")).getStringCellValue();
 		}
+
 		// System.out.println(this);
 	}
 

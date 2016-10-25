@@ -4,8 +4,6 @@ import java.util.List;
 
 import javax.ejb.Local;
 
-import br.gov.mj.sislegis.app.model.Equipe;
-
 
 @Local
 public interface Service<T> {

@@ -1,10 +1,9 @@
 package br.gov.mj.sislegis.app.rest;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,11 +11,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -32,30 +29,33 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.poi.xwpf.usermodel.XWPFRun;
-import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.apache.poi.xwpf.usermodel.XWPFTableCell;
-import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.jboss.resteasy.annotations.cache.Cache;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.AreaDeMeritoRevisao;
-import br.gov.mj.sislegis.app.model.NotaTecnica;
+import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.ProcessoSei;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.Votacao;
+import br.gov.mj.sislegis.app.model.documentos.Briefing;
+import br.gov.mj.sislegis.app.model.documentos.Emenda;
+import br.gov.mj.sislegis.app.model.documentos.NotaTecnica;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.AreaDeMeritoService;
+import br.gov.mj.sislegis.app.service.AutoUpdateProposicaoService;
+import br.gov.mj.sislegis.app.service.ComissaoService;
+import br.gov.mj.sislegis.app.service.DocumentoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.ReuniaoService;
+import br.gov.mj.sislegis.app.service.ejbs.crons.AutoUpdateProposicaoEjb;
 
 /**
  * 
@@ -69,12 +69,13 @@ public class ProposicaoEndpoint {
 
 	@Inject
 	private AreaDeMeritoService areaMeritoRevisao;
+	@Inject
+	private DocumentoService docService;
 
 	@GET
 	@Path("/proposicoesPautaCamara")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Set<PautaReuniaoComissao> buscarProposicoesPautaCamara(@QueryParam("idComissao") Long idComissao,
-			@QueryParam("data") Date data) throws Exception {
+	public Set<PautaReuniaoComissao> buscarProposicoesPautaCamara(@QueryParam("idComissao") Long idComissao, @QueryParam("data") Date data) throws Exception {
 
 		Map<String, Object> parametros = new HashMap<String, Object>();
 		parametros.put("idComissao", idComissao);
@@ -88,8 +89,7 @@ public class ProposicaoEndpoint {
 	@GET
 	@Path("/proposicoesPautaSenado")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Set<PautaReuniaoComissao> buscarProposicoesPautaSenado(@QueryParam("siglaComissao") String siglaComissao,
-			@QueryParam("data") Date data) throws Exception {
+	public Set<PautaReuniaoComissao> buscarProposicoesPautaSenado(@QueryParam("siglaComissao") String siglaComissao, @QueryParam("data") Date data) throws Exception {
 
 		Map<String, Object> parametros = new HashMap<>();
 		parametros.put("siglaComissao", siglaComissao);
@@ -152,6 +152,28 @@ public class ProposicaoEndpoint {
 	}
 
 	@POST
+	@Path("/salvarProposicoesGenericas")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response salvarProposicoesGenericas(ProposicaoPautadaPautaWrapper propPautadas) {
+		try {
+			List<Proposicao> responses = new ArrayList<>();
+			Iterator<PautaReuniaoComissao> prs = propPautadas.getPautas().iterator();
+			for (Iterator iterator = propPautadas.getProposicoes().iterator(); iterator.hasNext();) {
+				Proposicao proposicao = (Proposicao) iterator.next();
+				PautaReuniaoComissao prc = prs.next();
+				responses.add(proposicaoService.persistProposicaoAndPauta(proposicao, prc));
+
+			}
+			return Response.ok(responses, MediaType.APPLICATION_JSON).build();
+		} catch (EJBTransactionRolledbackException e) {
+			return Response.status(Response.Status.CONFLICT).build();
+		} catch (Exception e) {
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+		}
+
+	}
+
+	@POST
 	@Path("/salvarProposicoesExtras")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response salvarProposicoesExtras(List<Proposicao> proposicoes) {
@@ -200,9 +222,7 @@ public class ProposicaoEndpoint {
 		try {
 			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
 			proposicaoService.save(entity, user);
-			return Response.ok(
-					UriBuilder.fromResource(ProposicaoEndpoint.class).path(String.valueOf(entity.getId())).build())
-					.build();
+			return Response.ok(UriBuilder.fromResource(ProposicaoEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return Response.status(Response.Status.BAD_REQUEST).build();
@@ -216,9 +236,7 @@ public class ProposicaoEndpoint {
 		try {
 			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
 			proposicaoService.save(entity, user);
-			return Response.created(
-					UriBuilder.fromResource(ProposicaoEndpoint.class).path(String.valueOf(entity.getId())).build())
-					.build();
+			return Response.created(UriBuilder.fromResource(ProposicaoEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return Response.status(Response.Status.BAD_REQUEST).build();
@@ -253,13 +271,43 @@ public class ProposicaoEndpoint {
 	}
 
 	@GET
+	@Path("/autores")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Autor> listAutores(@QueryParam("nome") String nome) {
+		List<Autor> au = new ArrayList<ProposicaoEndpoint.Autor>();
+		if (nome != null && !nome.trim().isEmpty()) {
+			List<String> l = proposicaoService.listarTodosAutores(nome);
+
+			for (Iterator iterator = l.iterator(); iterator.hasNext();) {
+				String string = (String) iterator.next();
+				Autor autor = new Autor();
+				autor.nome = string;
+
+				autor.id = au.size();
+				au.add(autor);
+			}
+		}
+		return au;
+
+	}
+
+	class Autor {
+		long id;
+		String nome;
+
+		public long getId() {
+			return id;
+		}
+
+		public String getNome() {
+			return nome;
+		}
+	}
+
+	@GET
 	@Path("/consultar")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Proposicao> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor,
-			@QueryParam("sigla") String sigla, @QueryParam("origem") String origem,
-			@QueryParam("estado") String estado, @QueryParam("isFavorita") String isFavorita,
-			@QueryParam("idEquipe") Long idEquipe, @QueryParam("limit") Integer limit,
-			@QueryParam("macrotema") String macrotema,
+	public List<Proposicao> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor, @QueryParam("sigla") String sigla, @QueryParam("origem") String origem, @QueryParam("estado") String estado, @QueryParam("isFavorita") String isFavorita, @QueryParam("idResponsavel") Long idResponsavel, @QueryParam("idEquipe") Long idEquipe, @QueryParam("limit") Integer limit, @QueryParam("macrotema") String macrotema, @QueryParam("somentePautadas") Boolean pautadas,
 			@QueryParam("offset") Integer offset) {
 
 		Map<String, Object> m = new HashMap<String, Object>();
@@ -271,6 +319,8 @@ public class ProposicaoEndpoint {
 		m.put("estado", estado);
 		m.put("macrotema", macrotema);
 		m.put("idEquipe", idEquipe);
+		m.put("idResponsavel", idResponsavel);
+		m.put("somentePautadas", pautadas);
 
 		List<Proposicao> results = proposicaoService.consultar(m, offset, limit);
 		return results;
@@ -286,8 +336,7 @@ public class ProposicaoEndpoint {
 	@GET
 	@Path("/buscaIndependente/{origem:[A-Z]*}/{tipo:[A-Z\\.]*}/{ano:[0-9]{4}}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Collection<Proposicao> buscaIndependente(@PathParam("origem") String origem, @PathParam("tipo") String tipo,
-			@QueryParam("numero") String numero, @PathParam("ano") Integer ano) throws Exception {
+	public Collection<Proposicao> buscaIndependente(@PathParam("origem") String origem, @PathParam("tipo") String tipo, @QueryParam("numero") String numero, @PathParam("ano") Integer ano) throws Exception {
 
 		return proposicaoService.buscaProposicaoIndependentePor(Origem.valueOf(origem), tipo, numero, ano);
 
@@ -366,13 +415,10 @@ public class ProposicaoEndpoint {
 	@POST
 	@Path("/alterarPosicionamento")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response alterarPosicionamento(PosicionamentoProposicaoWrapper posicionamentoProposicaoWrapper,
-			@HeaderParam("Authorization") String authorization) {
+	public Response alterarPosicionamento(PosicionamentoProposicaoWrapper posicionamentoProposicaoWrapper, @HeaderParam("Authorization") String authorization) {
 		try {
 			Usuario usuarioLogado = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
-			PosicionamentoProposicao pp = proposicaoService.alterarPosicionamento(
-					posicionamentoProposicaoWrapper.getId(), posicionamentoProposicaoWrapper.getIdPosicionamento(),
-					posicionamentoProposicaoWrapper.preliminar, usuarioLogado);
+			PosicionamentoProposicao pp = proposicaoService.alterarPosicionamento(posicionamentoProposicaoWrapper.getId(), posicionamentoProposicaoWrapper.getIdPosicionamento(), posicionamentoProposicaoWrapper.preliminar, usuarioLogado);
 
 			return Response.ok(pp).build();
 
@@ -387,6 +433,31 @@ public class ProposicaoEndpoint {
 	@Path("/historicoPosicionamentos/{id:[0-9]+}")
 	public List<PosicionamentoProposicao> historicoPosicionamentos(@PathParam("id") Long id) {
 		return proposicaoService.listarHistoricoPosicionamentos(id);
+	}
+
+	@DELETE
+	@Path("/{id:[0-9]+}/revisaoMerito/{idRevisao:[0-9]+}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response apagaRevisao(@PathParam("id") Long id, @PathParam("idRevisao") Long idRevisao) throws Exception {
+		// AreaDeMeritoRevisao rev = areaMeritoRevisao.findRevisao(idRevisao);
+
+		areaMeritoRevisao.deleteRevisao(idRevisao);
+
+		return Response.ok().build();
+	}
+
+	@DELETE
+	@Path("/{id:[0-9]+}/revisaoMerito/{idRevisao:[0-9]+}/anexo")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response removeAnexoRevisao(@PathParam("id") Long id, @PathParam("idRevisao") Long idRevisao) throws Exception {
+		AreaDeMeritoRevisao rev = areaMeritoRevisao.findRevisao(idRevisao);
+		if (rev.getDocumento() != null) {
+			Long idDoc = rev.getDocumento().getId();
+			rev.setDocumento(null);
+			areaMeritoRevisao.saveRevisao(rev);
+			docService.deleteById(idDoc);
+		}
+		return Response.ok().build();
 	}
 
 	@GET
@@ -412,11 +483,55 @@ public class ProposicaoEndpoint {
 		return proposicaoService.getNotaTecnicas(id);
 	}
 
+	@DELETE
+	@Path("/{id:[0-9]+}/docrelated/{type:[0-9]+}/{docId:[0-9]+}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response removeDocRelated(@PathParam("id") Long id, @PathParam("docId") Long docId, @PathParam("type") Integer type, @HeaderParam("Authorization") String authorization) {
+		try {
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+
+			switch (type) {
+			case 1:
+				proposicaoService.deleteDocRelated(docId, NotaTecnica.class);
+				break;
+			case 2:
+				proposicaoService.deleteDocRelated(docId, Briefing.class);
+				break;
+			case 3:
+				proposicaoService.deleteDocRelated(docId, Emenda.class);
+				break;
+			default:
+				throw new IllegalArgumentException("tipo invalido");
+			}
+			return Response.ok().build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+
+	@GET
+	@Path("/{id:[0-9]+}/docrelated/{type:[0-9]+}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List listDocRelated(@PathParam("id") Long id, @PathParam("type") Integer type) throws Exception {
+		switch (type) {
+		case 1:
+			return proposicaoService.getNotaTecnicas(id);
+		case 2:
+			return proposicaoService.getBriefings(id);
+		case 3:
+			return proposicaoService.getEmendas(id);
+
+		default:
+			break;
+		}
+		return proposicaoService.getNotaTecnicas(id);
+	}
+
 	@POST
 	@Path("/{id:[0-9]+}/notatecnica")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response createNotaTecnica(@PathParam("id") Long id, NotaTecnica nt,
-			@HeaderParam("Authorization") String authorization) {
+	public Response createNotaTecnica(@PathParam("id") Long id, NotaTecnica nt, @HeaderParam("Authorization") String authorization) {
 		try {
 			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
 			nt.setUsuario(user);
@@ -433,12 +548,10 @@ public class ProposicaoEndpoint {
 	@DELETE
 	@Path("/{id:[0-9]+}/notatecnica/{idNota:[0-9]+}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response removeNotaTecnica(@PathParam("id") Long id, @PathParam("idNota") Long idNota,
-			@HeaderParam("Authorization") String authorization) {
+	public Response removeNotaTecnica(@PathParam("id") Long id, @PathParam("idNota") Long idNota, @HeaderParam("Authorization") String authorization) {
 		try {
 			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
-			proposicaoService.deleteNotaById(idNota);
-
+			proposicaoService.deleteDocRelated(idNota, NotaTecnica.class);
 			return Response.ok().build();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -450,7 +563,7 @@ public class ProposicaoEndpoint {
 	@Path("/{id:[0-9]+}/pautas")
 	@Cache(maxAge = 24, noStore = false, isPrivate = false, sMaxAge = 24)
 	@Produces(MediaType.APPLICATION_JSON)
-	public SortedSet<ProposicaoPautaComissao> listPautasProposicao(@PathParam("id") Long id) throws Exception {
+	public Set<ProposicaoPautaComissao> listPautasProposicao(@PathParam("id") Long id) throws Exception {
 		return proposicaoService.findById(id).getPautasComissoes();
 	}
 
@@ -459,8 +572,7 @@ public class ProposicaoEndpoint {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response setRoadmapComissoes(RoadmapComissoesWrapper roadmapComissoesWrapper) {
 		try {
-			proposicaoService.setRoadmapComissoes(roadmapComissoesWrapper.getIdProposicao(),
-					roadmapComissoesWrapper.getComissoes());
+			proposicaoService.setRoadmapComissoes(roadmapComissoesWrapper.getIdProposicao(), roadmapComissoesWrapper.getComissoes());
 			return Response.ok().build();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -474,8 +586,7 @@ public class ProposicaoEndpoint {
 	@Produces(MediaType.APPLICATION_JSON)
 	public ProcessoSei inserirProcessoSei(ProcessoSeiWrapper processoSeiWrapper) {
 		try {
-			ProcessoSei processoSei = proposicaoService.vincularProcessoSei(processoSeiWrapper.getId(),
-					processoSeiWrapper.getProtocolo());
+			ProcessoSei processoSei = proposicaoService.vincularProcessoSei(processoSeiWrapper.getId(), processoSeiWrapper.getProtocolo());
 			return processoSei;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -499,14 +610,11 @@ public class ProposicaoEndpoint {
 	@GET
 	@Path("/listarVotacoes")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Votacao> listarVotacoes(@QueryParam("idProposicao") String idProposicao,
-			@QueryParam("tipo") String tipo, @QueryParam("numero") String numero, @QueryParam("ano") String ano,
-			@QueryParam("origem") String origem) {
+	public List<Votacao> listarVotacoes(@QueryParam("idProposicao") String idProposicao, @QueryParam("tipo") String tipo, @QueryParam("numero") String numero, @QueryParam("ano") String ano, @QueryParam("origem") String origem) {
 
 		try {
 			Integer idProp = (idProposicao == null || "".equals(idProposicao)) ? null : Integer.valueOf(idProposicao);
-			List<Votacao> votacoes = proposicaoService
-					.listarVotacoes(idProp, tipo, numero, ano, Origem.valueOf(origem));
+			List<Votacao> votacoes = proposicaoService.listarVotacoes(idProp, tipo, numero, ano, Origem.valueOf(origem));
 			return votacoes;
 
 		} catch (Exception e) {
@@ -514,6 +622,75 @@ public class ProposicaoEndpoint {
 			return null;
 		}
 
+	}
+
+	@Inject
+	AutoUpdateProposicaoService auto;
+
+	@Inject
+	ComissaoService comissaoService;
+
+	@GET
+	@Path("/auto")
+	public void autoCamara(@QueryParam("s") String s, @QueryParam("o") String origem) {
+		auto.atualizaPautadasCamara();
+		if (s != null) {
+			List<Comissao> ls;
+			try {
+				Origem o = Origem.CAMARA;
+				if ("s".equals(origem)) {
+					o = Origem.SENADO;
+					ls = comissaoService.listarComissoesSenado();
+				} else {
+					ls = comissaoService.listarComissoesCamara();
+				}
+				SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy");
+
+				Calendar dataInicial = Calendar.getInstance();
+				dataInicial.setTimeInMillis(sdf.parse(s).getTime());
+				Calendar dataFinal = (Calendar) dataInicial.clone();
+				dataFinal.add(Calendar.WEEK_OF_YEAR, 1);
+				for (Iterator<Comissao> iterator = ls.iterator(); iterator.hasNext();) {
+					Comissao comissao = (Comissao) iterator.next();
+					System.out.println("Comissao " + comissao.getSigla());
+
+					proposicaoService.syncPautaAtualComissao(Origem.SENADO, comissao, dataInicial, dataFinal);
+
+				}
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+	}
+
+	@GET
+	@Path("/autoSenado")
+	public void autoSenado() {
+		auto.atualizaPautadasSenado();
+
+	}
+
+}
+
+class ProposicaoPautadaPautaWrapper {
+	List<Proposicao> proposicoes;
+	List<PautaReuniaoComissao> pautas;
+
+	public List<Proposicao> getProposicoes() {
+		return proposicoes;
+	}
+
+	public void setProposicoes(List<Proposicao> proposicoes) {
+		this.proposicoes = proposicoes;
+	}
+
+	public List<PautaReuniaoComissao> getPautas() {
+		return pautas;
+	}
+
+	public void setPautas(List<PautaReuniaoComissao> pautas) {
+		this.pautas = pautas;
 	}
 
 }

@@ -1,4 +1,4 @@
-package br.gov.mj.sislegis.app.model;
+package br.gov.mj.sislegis.app.model.documentos;
 
 import java.util.Date;
 
@@ -15,19 +15,23 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
-import javax.persistence.PreRemove;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import br.gov.mj.sislegis.app.model.AbstractEntity;
+import br.gov.mj.sislegis.app.model.Documento;
+import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Usuario;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table(name = "proposicao_notatecnica")
-@NamedQueries({ @NamedQuery(name = "listNotatecnicaProposicao", query = "select n from NotaTecnica n where n.proposicao.id=:idProposicao")
+@Table(name = "proposicao_emenda")
+@NamedQueries({ @NamedQuery(name = "listEmendasProposicao", query = "select n from Emenda n where n.proposicao.id=:idProposicao")
 
 })
-public class NotaTecnica extends AbstractEntity {
+public class Emenda extends AbstractEntity implements DocRelated {
 	/**
 	 * 
 	 */
@@ -37,12 +41,12 @@ public class NotaTecnica extends AbstractEntity {
 	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.REMOVE)
+	@OneToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.REMOVE)
 	@JoinColumn(name = "documento_id", referencedColumnName = "id", nullable = true)
 	private Documento documento;
 
 	@JsonIgnore
-	@OneToOne(optional = true)
+	@ManyToOne(optional = false)
 	@JoinColumn(name = "proposicao_id", referencedColumnName = "id", nullable = false)
 	private Proposicao proposicao;
 
@@ -52,17 +56,14 @@ public class NotaTecnica extends AbstractEntity {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date dataCriacao = new Date();
 
-	@Column(length = 20000)
-	private String nota;
-
 	@Column(length = 256)
 	private String url_arquivo;
 
-	protected NotaTecnica() {
+	protected Emenda() {
 		dataCriacao = new Date();
 	}
 
-	public NotaTecnica(Proposicao p, Usuario u) {
+	public Emenda(Proposicao p, Usuario u) {
 		this.proposicao = p;
 		this.usuario = u;
 		dataCriacao = new Date();
@@ -71,14 +72,6 @@ public class NotaTecnica extends AbstractEntity {
 	@Override
 	public Number getId() {
 		return id;
-	}
-
-	public String getNota() {
-		return nota;
-	}
-
-	public void setNota(String nota) {
-		this.nota = nota;
 	}
 
 	public Proposicao getProposicao() {
@@ -117,7 +110,6 @@ public class NotaTecnica extends AbstractEntity {
 	public Documento getDocumento() {
 		return documento;
 	}
-
 
 	public void setDocumento(Documento documento) {
 		this.documento = documento;

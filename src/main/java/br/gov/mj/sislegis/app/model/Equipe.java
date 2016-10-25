@@ -1,6 +1,5 @@
 package br.gov.mj.sislegis.app.model;
 
-import java.util.Collection;
 import java.util.Set;
 
 import javax.persistence.CascadeType;

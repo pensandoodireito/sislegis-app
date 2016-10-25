@@ -20,7 +20,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.EstadoProposicao;
+import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.TipoEncaminhamento;
 import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
+import br.gov.mj.sislegis.app.service.ProposicaoService;
+import br.gov.mj.sislegis.app.service.TipoEncaminhamentoService;
 
 @Path("/encaminhamentoProposicao")
 public class EncaminhamentoProposicaoEndpoint {
@@ -28,14 +33,32 @@ public class EncaminhamentoProposicaoEndpoint {
 	@Inject
 	private EncaminhamentoProposicaoService service;
 
+	@Inject
+	private TipoEncaminhamentoService tipoSvc;
+
+	@Inject
+	private ProposicaoService propSvc;
+
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(EncaminhamentoProposicao entity, @HeaderParam("Referer") String referer) {
 		EncaminhamentoProposicao savedEntity = service.salvarEncaminhamentoProposicao(entity);
-		
-		return Response.created(
-				UriBuilder.fromResource(TipoEncaminhamentoEndpoint.class)
-						.path(String.valueOf(savedEntity.getId())).build()).build();
+
+		return Response.created(UriBuilder.fromResource(EncaminhamentoProposicaoEndpoint.class).path(String.valueOf(savedEntity.getId())).build()).build();
+	}
+
+	@POST
+	@Path("/despachoPresencial")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response createDespachoPresencial(EncaminhamentoProposicao entity, @HeaderParam("Referer") String referer) {
+		TipoEncaminhamento tipo = tipoSvc.buscarTipoEncaminhamentoDespachoPresencial();
+		entity.setTipoEncaminhamento(tipo);
+		EncaminhamentoProposicao savedEntity = service.salvarEncaminhamentoProposicao(entity);
+		Proposicao prop = propSvc.findById(savedEntity.getProposicao().getId());
+		prop.setEstado(EstadoProposicao.ADESPACHAR_PRESENCA);
+		propSvc.save(prop);
+
+		return Response.created(UriBuilder.fromResource(EncaminhamentoProposicaoEndpoint.class).path(String.valueOf(savedEntity.getId())).build()).build();
 	}
 
 	@DELETE
@@ -54,13 +77,12 @@ public class EncaminhamentoProposicaoEndpoint {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<EncaminhamentoProposicao> listAll(@QueryParam("start") Integer startPosition,
-			@QueryParam("max") Integer maxResult) {
+	public List<EncaminhamentoProposicao> listAll(@QueryParam("start") Integer startPosition, @QueryParam("max") Integer maxResult) {
 		return service.listAll();
 	}
 
 	@PUT
-	@Path("/{id:[0-9][0-9]*}")
+	@Path("/{id:[0-9][0-9]+}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response update(EncaminhamentoProposicao entity) {
 		try {
@@ -73,7 +95,7 @@ public class EncaminhamentoProposicaoEndpoint {
 	}
 
 	@GET
-	@Path("/proposicao/{id:[0-9][0-9]*}")
+	@Path("/proposicao/{id:[0-9][0-9]+}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<EncaminhamentoProposicao> findByProposicao(@PathParam("id") Long id) {
 		final List<EncaminhamentoProposicao> results = service.findByProposicao(id);
@@ -83,7 +105,7 @@ public class EncaminhamentoProposicaoEndpoint {
 	@POST
 	@Path("/finalizar")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response finalizar(@FormParam("idEncaminhamentoProposicao") Long idEncaminhamentoProposicao, @FormParam("descricaoComentario") String descricaoComentario){
+	public Response finalizar(@FormParam("idEncaminhamentoProposicao") Long idEncaminhamentoProposicao, @FormParam("descricaoComentario") String descricaoComentario) {
 		service.finalizar(idEncaminhamentoProposicao, descricaoComentario);
 		return Response.ok().build();
 	}

@@ -11,6 +11,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -20,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "areamerito")
-@XmlRootElement
+@NamedQueries({ @NamedQuery(name = "findAreaByName", query = "select p from AreaDeMerito p where p.nome=:nome") })
 public class AreaDeMerito extends AbstractEntity {
 
 	private static final long serialVersionUID = -2801342641242367391L;
@@ -32,10 +34,10 @@ public class AreaDeMerito extends AbstractEntity {
 
 	@Column(unique = true)
 	private String nome;
-	
-	@Column(name="contato_nome")
+
+	@Column(name = "contato_nome")
 	private String nomeContato;
-	@Column(name="contato_email")
+	@Column(name = "contato_email")
 	private String emailContato;
 
 	@OneToOne

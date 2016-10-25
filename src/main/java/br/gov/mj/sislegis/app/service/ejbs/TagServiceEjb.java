@@ -6,7 +6,6 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import br.gov.mj.sislegis.app.model.ElaboracaoNormativaCoAutores;
 import br.gov.mj.sislegis.app.model.Tag;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.TagService;

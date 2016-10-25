@@ -2,16 +2,15 @@ package br.gov.mj.sislegis.app.service.ejbs;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaUpdate;
 
 import br.gov.mj.sislegis.app.model.TipoEncaminhamento;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.TipoEncaminhamentoService;
 
 @Stateless
-public class TipoEncaminhamentoServiceEjb extends AbstractPersistence<TipoEncaminhamento, Long> implements
-		TipoEncaminhamentoService, EJBUnitTestable {
+public class TipoEncaminhamentoServiceEjb extends AbstractPersistence<TipoEncaminhamento, Long> implements TipoEncaminhamentoService, EJBUnitTestable {
 
 	@PersistenceContext
 	private EntityManager em;
@@ -28,10 +27,7 @@ public class TipoEncaminhamentoServiceEjb extends AbstractPersistence<TipoEncami
 	@Override
 	public void deleteById(Long id) {
 
-		int deleted = em
-				.createNativeQuery(
-						"delete from tarefa where encaminhamentoproposicao_id in (select id from encaminhamentoproposicao where tipo_encaminhamento_id=:id)")
-				.setParameter("id", id).executeUpdate();
+		int deleted = em.createNativeQuery("delete from tarefa where encaminhamentoproposicao_id in (select id from encaminhamentoproposicao where tipo_encaminhamento_id=:id)").setParameter("id", id).executeUpdate();
 		super.deleteById(id);
 	}
 
@@ -41,4 +37,18 @@ public class TipoEncaminhamentoServiceEjb extends AbstractPersistence<TipoEncami
 
 	}
 
+	@Override
+	public TipoEncaminhamento buscarTipoEncaminhamentoDespachoPresencial() {
+		String value = "Despacho presencial";
+		try {
+			TipoEncaminhamento t = getEntityManager().createNamedQuery("tipoPorNome", TipoEncaminhamento.class).setParameter("nome", value).setMaxResults(1).getSingleResult();
+			return t;
+		} catch (NoResultException e) {
+			TipoEncaminhamento t = new TipoEncaminhamento();
+			t.setNome(value);
+			save(t);
+			return t;
+		}
+
+	}
 }
