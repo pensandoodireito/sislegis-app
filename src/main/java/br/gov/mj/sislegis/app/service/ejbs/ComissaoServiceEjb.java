@@ -2,6 +2,8 @@ package br.gov.mj.sislegis.app.service.ejbs;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -15,6 +17,7 @@ import br.gov.mj.sislegis.app.parser.senado.ParserComissoesSenado;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.EJBDataCacher;
+import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 @Stateless
 public class ComissaoServiceEjb extends AbstractPersistence<Comissao, Long> implements ComissaoService, EJBUnitTestable {
@@ -77,13 +80,17 @@ public class ComissaoServiceEjb extends AbstractPersistence<Comissao, Long> impl
 
 	@Override
 	public String getComissaoCamara(Long idComissao) throws Exception {
-
+		if (idComissao == null) {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Idcomissao invalido em getComissaoCamara");
+			return null;
+		}
 		for (Iterator<Comissao> iterator = listarComissoesCamara().iterator(); iterator.hasNext();) {
 			Comissao c = iterator.next();
-			if (c.getId() == idComissao) {
+			if (idComissao.equals(c.getId())) {
 				return c.getSigla();
 			}
 		}
+		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Não encontrou comissão da camara baseado no ID " + idComissao);
 		return null;
 	}
 

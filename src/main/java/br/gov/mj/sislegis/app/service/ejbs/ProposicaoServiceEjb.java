@@ -3,6 +3,8 @@ package br.gov.mj.sislegis.app.service.ejbs;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.rmi.RemoteException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -166,7 +168,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 		String dataIni = Conversores.dateToString(dataInicial, "yyyyMMdd");
 		String dataFim = Conversores.dateToString(dataFinal, "yyyyMMdd");
-		return populaUltimoComentarioDePauta(parserPautaCamara.getPautaComissao(comissaoService.getComissaoCamara(idComissao), idComissao, dataIni, dataFim));
+		String nomeComissao = comissaoService.getComissaoCamara(idComissao);
+		return populaUltimoComentarioDePauta(parserPautaCamara.getPautaComissao(nomeComissao, idComissao, dataIni, dataFim));
 	}
 
 	@Override
@@ -300,11 +303,20 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		Long idPosicionamento = (Long) filtros.get("idPosicionamento");
 		String comissao = (String) filtros.get("comissao");
 		String relator = (String) filtros.get("relator");
-		query.append(createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, idPosicionamento, relator, macrotema, somentePautadas, null));
+		String inseridaAposStr = (String) filtros.get("inseridaApos");
+		Date inseridaApos = null;
+		if (inseridaAposStr != null && !inseridaAposStr.isEmpty()) {
+			try {
+				inseridaApos = new SimpleDateFormat("d-M-yyyy").parse(inseridaAposStr);
+			} catch (ParseException p) {
+				p.printStackTrace();
+			}
+		}
+		query.append(createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, idPosicionamento, relator, inseridaApos, macrotema, somentePautadas, null));
 		query.append(" order by tipo,ano,numero");
 		TypedQuery<Proposicao> findByIdQuery = getEntityManager().createQuery(query.toString(), Proposicao.class);
 
-		setParams(sigla, comissao, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, idPosicionamento, relator, macrotema, somentePautadas, null, findByIdQuery);
+		setParams(sigla, comissao, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, idPosicionamento, relator, inseridaApos, macrotema, somentePautadas, null, findByIdQuery);
 		if (offset != null) {
 			findByIdQuery.setFirstResult(offset);
 		}
@@ -333,10 +345,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	private void setParams(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, Long idResponsavel, Long idPosicionamento, Integer[] idProposicoes, TypedQuery findByIdQuery) {
-		setParams(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null, idPosicionamento, null, null, null, null, findByIdQuery);
+		setParams(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null, idPosicionamento, null, null, null, null, null, findByIdQuery);
 	}
 
-	private void setParams(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento, String relator, String macrotema, Boolean somentePautadas, Integer[] idProposicoes, TypedQuery findByIdQuery) {
+	private void setParams(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento, String relator, Date inseridaApos, String macrotema, Boolean somentePautadas, Integer[] idProposicoes, TypedQuery findByIdQuery) {
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			findByIdQuery.setParameter("sigla", "%" + sigla + "%");
 		}
@@ -351,6 +363,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 		if (Objects.nonNull(comissao) && !comissao.equals("")) {
 			findByIdQuery.setParameter("comissao", comissao + "%");
+		}
+
+		if (Objects.nonNull(inseridaApos)) {
+			findByIdQuery.setParameter("inseridaApos", inseridaApos);
 		}
 		if (Objects.nonNull(ementa) && !ementa.equals("")) {
 			findByIdQuery.setParameter("ementa", "%" + ementa + "%");
@@ -396,10 +412,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, Long idResponsavel, Long idPosicionamento, Integer[] idProposicao) {
-		return createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null, idPosicionamento, null, null, null, idProposicao);
+		return createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null, idPosicionamento, null, null, null, null, idProposicao);
 	}
 
-	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento, String relator, String macroTema, Boolean somentePautadas, Integer[] idProposicao) {
+	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento, String relator, Date inseridaApos, String macroTema, Boolean somentePautadas, Integer[] idProposicao) {
 		StringBuilder query = new StringBuilder();
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			query.append(" AND upper(CONCAT(p.tipo,' ',p.numero,'/',p.ano)) like upper(:sigla)");
@@ -415,6 +431,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 		if (Objects.nonNull(origem) && !origem.equals("")) {
 			query.append(" AND p.origem = :origem");
+		}
+		if (Objects.nonNull(inseridaApos)) {
+			query.append(" AND p.created >= :inseridaApos ");
 		}
 		if (Objects.nonNull(estado) && !estado.isEmpty()) {
 			query.append(" AND p.estado = :estado");
@@ -909,7 +928,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 					instanciaNova.setPosicionamentoAtual(posicionamentoProposicao);
 				}
 			}
-		}		
+		}
 
 		return super.save(instanciaNova);
 	}

@@ -334,7 +334,7 @@ public class ProposicaoEndpoint {
 	@Path("/consultar")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Proposicao> consultar(@QueryParam("relator") String relator, @QueryParam("comissao") String comissao, @QueryParam("ementa") String ementa, @QueryParam("autor") String autor, @QueryParam("sigla") String sigla, @QueryParam("origem") String origem, @QueryParam("estado") String estado, @QueryParam("isFavorita") String isFavorita, @QueryParam("idResponsavel") Long idResponsavel, @QueryParam("idPosicionamento") Long idPosicionamento, @QueryParam("idEquipe") Long idEquipe,
-			@QueryParam("limit") Integer limit, @QueryParam("macrotema") String macrotema, @QueryParam("somentePautadas") Boolean pautadas, @QueryParam("offset") Integer offset) {
+			@QueryParam("limit") Integer limit, @QueryParam("inseridaApos") String inseridaApos, @QueryParam("macrotema") String macrotema, @QueryParam("somentePautadas") Boolean pautadas, @QueryParam("offset") Integer offset) {
 
 		Map<String, Object> m = new HashMap<String, Object>();
 		m.put("sigla", sigla);
@@ -350,6 +350,7 @@ public class ProposicaoEndpoint {
 		m.put("idResponsavel", idResponsavel);
 		m.put("somentePautadas", pautadas);
 		m.put("comissao", comissao);
+		m.put("inseridaApos", inseridaApos);
 
 		List<Proposicao> results = proposicaoService.consultar(m, offset, limit);
 		return results;
@@ -667,7 +668,7 @@ public class ProposicaoEndpoint {
 			List<Comissao> ls;
 			try {
 				Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
-				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).warning(user.getEmail()+ " executando auto updates");
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).warning(user.getEmail() + " executando auto updates");
 				Origem o = Origem.CAMARA;
 				if ("s".equals(origem)) {
 					o = Origem.SENADO;
@@ -680,7 +681,7 @@ public class ProposicaoEndpoint {
 					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Atualizando tramitacoes");
 					Map<String, Object> filtros = new HashMap<String, Object>();
 					filtros.put("origem", o.name());
-//					filtros.put("somentePautadas", true);
+					// filtros.put("somentePautadas", true);
 					List<Proposicao> props = proposicaoService.consultar(filtros, 0, null);
 					for (Iterator iterator = props.iterator(); iterator.hasNext();) {
 						Proposicao proposicao = (Proposicao) iterator.next();

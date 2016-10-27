@@ -60,8 +60,7 @@ public class ParserPautaCamara {
 		return pauta;
 	}
 
-	public Set<PautaReuniaoComissao> getPautaComissao(String comissaoNome, Long idComissao, String datIni, String datFim) throws IOException, ParseException {
-		comissaoNome = comissaoNome.trim();
+	public Set<PautaReuniaoComissao> getPautaComissao(String __nomecomissaonaousado, Long idComissao, String datIni, String datFim) throws IOException, ParseException {
 		Set<PautaReuniaoComissao> pautas = new HashSet<PautaReuniaoComissao>();
 		String wsURL = new StringBuilder("http://www.camara.gov.br/SitCamaraWS/Orgaos.asmx/ObterPauta?IDOrgao=").append(idComissao).append("&datIni=").append(datIni).append("&datFim=").append(datFim).toString();
 
