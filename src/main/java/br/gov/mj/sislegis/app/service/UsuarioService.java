@@ -2,9 +2,11 @@ package br.gov.mj.sislegis.app.service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import javax.ejb.Local;
 
+import br.gov.mj.sislegis.app.model.Papel;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
@@ -36,5 +38,7 @@ public interface UsuarioService extends Service<Usuario> {
 
 
 	Usuario findOrCreateByEmail(String string, String email);
+
+	Set<Usuario> listUsuariosPorPapel(Papel secretario);
 
 }

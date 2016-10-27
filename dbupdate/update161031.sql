@@ -17,3 +17,8 @@ alter table proposicao ADD foiRevisada BIGINT default null;
 --changeset coutinho:161031-5
 alter table proposicao ADD foiDespachada BIGINT default null;
 --rollback alter table proposicao drop foiDespachada
+
+--changeset coutinho:161031-6
+alter table proposicao ADD comAtencaoEspecial BIGINT default null;
+--rollback alter table proposicao drop foiMarcadaRevisaoMinistro
+

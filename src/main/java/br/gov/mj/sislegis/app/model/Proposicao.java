@@ -113,6 +113,8 @@ public class Proposicao extends AbstractEntity {
 	@Column(name = "estado")
 	private EstadoProposicao estado;
 
+	@Column(name = "comAtencaoEspecial", nullable = true)
+	private Long comAtencaoEspecial;
 	@Column(name = "foiencaminhada", nullable = true)
 	private Long foiEncaminhada;
 	@Column(name = "foianalisada", nullable = true)
@@ -765,5 +767,17 @@ public class Proposicao extends AbstractEntity {
 
 	public void setFoiDespachada(Long foiDespachada) {
 		this.foiDespachada = foiDespachada;
+	}
+
+	public Long getComAtencaoEspecial() {
+		return comAtencaoEspecial;
+	}
+
+	public void marcarAtencaoEspecial() {
+		comAtencaoEspecial = System.currentTimeMillis();
+	}
+
+	public void desmarcarAtencaoEspecial() {
+		comAtencaoEspecial = null;
 	}
 }

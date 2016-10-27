@@ -298,6 +298,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		String estado = (String) filtros.get("estado");
 		String macrotema = (String) filtros.get("macrotema");
 		Boolean somentePautadas = (Boolean) filtros.get("somentePautadas");
+		Boolean comAtencaoEspecial = (Boolean) filtros.get("comAtencaoEspecial");
+
 		Long idEquipe = (Long) filtros.get("idEquipe");
 		Long idResponsavel = (Long) filtros.get("idResponsavel");
 		Long idPosicionamento = (Long) filtros.get("idPosicionamento");
@@ -312,7 +314,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				p.printStackTrace();
 			}
 		}
-		query.append(createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, idPosicionamento, relator, inseridaApos, macrotema, somentePautadas, null));
+		query.append(createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, idPosicionamento, relator, inseridaApos, macrotema, comAtencaoEspecial, somentePautadas, null));
 		query.append(" order by tipo,ano,numero");
 		TypedQuery<Proposicao> findByIdQuery = getEntityManager().createQuery(query.toString(), Proposicao.class);
 
@@ -412,10 +414,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, Long idResponsavel, Long idPosicionamento, Integer[] idProposicao) {
-		return createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null, idPosicionamento, null, null, null, null, idProposicao);
+		return createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null, idPosicionamento, null, null, null, null, null, idProposicao);
 	}
 
-	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento, String relator, Date inseridaApos, String macroTema, Boolean somentePautadas, Integer[] idProposicao) {
+	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento, String relator, Date inseridaApos, String macroTema, Boolean comAtencaoEspecial, Boolean somentePautadas, Integer[] idProposicao) {
 		StringBuilder query = new StringBuilder();
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			query.append(" AND upper(CONCAT(p.tipo,' ',p.numero,'/',p.ano)) like upper(:sigla)");
@@ -446,6 +448,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 		if (Objects.nonNull(somentePautadas) && Boolean.TRUE.equals(somentePautadas)) {
 			query.append(" AND  p.ultima.pautaReuniaoComissao.data>:dataReuniao");
+		}
+		if (Objects.nonNull(comAtencaoEspecial) && Boolean.TRUE.equals(comAtencaoEspecial)) {
+			query.append(" AND  p.comAtencaoEspecial IS NOT NULL ");
 		}
 		if (Objects.nonNull(idResponsavel)) {
 			if (idResponsavel == -1) {

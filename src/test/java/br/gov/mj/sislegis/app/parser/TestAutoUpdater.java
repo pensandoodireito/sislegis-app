@@ -1,5 +1,7 @@
 package br.gov.mj.sislegis.app.parser;
 
+import java.util.Set;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -9,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import br.gov.mj.sislegis.app.model.Papel;
 import br.gov.mj.sislegis.app.model.TipoEncaminhamento;
 import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
 import br.gov.mj.sislegis.app.service.ComentarioService;
@@ -126,10 +129,12 @@ public class TestAutoUpdater {
 
 	@Test
 	public void testQuery() {
-		EntityTransaction trans = em.getTransaction();
-		trans.begin();
-		autoUpd.atualizaPautadasSenado();
-		trans.commit();
+		Set s = userSvc.listUsuariosPorPapel(Papel.SECRETARIO);
+		System.out.println(s.size());
+//		EntityTransaction trans = em.getTransaction();
+//		trans.begin();
+//		autoUpd.atualizaPautadasSenado();
+//		trans.commit();
 	}
 
 }

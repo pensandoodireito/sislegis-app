@@ -197,12 +197,6 @@ public class ReportDownloadServlet extends HttpServlet {
 					if (proposicao.getPautaComissaoAtual().getPautaReuniaoComissao().getData().after(ref)) {
 						replaceText(row.getCell(6), "[PAUTA]", "Pautada");
 
-						// replaceText(row.getCell(6), "[PAUTA]",
-						// "Pautada para ("
-						// + proposicao.getPautaComissaoAtual().getOrdemPauta()
-						// + ") "
-						// +
-						// proposicao.getPautaComissaoAtual().getPautaReuniaoComissao().getData());
 					} else {
 						replaceText(row.getCell(6), "[PAUTA]", "Não Pautada");
 					}
@@ -272,7 +266,7 @@ public class ReportDownloadServlet extends HttpServlet {
 			response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
 
 			Map<String, Object> filtros = new HashMap<String, Object>();
-			filtros.put("estado", EstadoProposicao.DESPACHADA);
+			filtros.put("estado", EstadoProposicao.DESPACHADA.name());
 			gerarRelatorio(filtros).write(response.getOutputStream());
 
 			response.flushBuffer();
@@ -321,6 +315,8 @@ public class ReportDownloadServlet extends HttpServlet {
 					} else if ("estado".equals(k)) {
 						filtros.put(k, EstadoProposicao.valueOf(valor).name());
 					} else if ("somentePautadas".equals(k)) {
+						filtros.put(k, Boolean.TRUE);
+					} else if ("comAtencaoEspecial".equals(k)) {
 						filtros.put(k, Boolean.TRUE);
 					} else {
 						filtros.put(k, valor);
