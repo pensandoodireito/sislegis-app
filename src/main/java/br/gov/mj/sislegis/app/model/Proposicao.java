@@ -425,6 +425,7 @@ public class Proposicao extends AbstractEntity {
 		return this.listaComentario;
 	}
 
+	@JsonIgnore
 	public void setListaComentario(final List<Comentario> listaComentario) {
 		this.listaComentario = listaComentario;
 	}
