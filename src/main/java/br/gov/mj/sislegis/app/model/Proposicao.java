@@ -203,7 +203,7 @@ public class Proposicao extends AbstractEntity {
 	@JoinColumn(name = "id", insertable = false, updatable = false, referencedColumnName = "proposicaoid", nullable = true)
 	ProposicaoPautaComissaoFutura ultima;
 
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "tagproposicao", joinColumns = { @JoinColumn(name = "proposicao_id", referencedColumnName = "id") }, inverseJoinColumns = { @JoinColumn(name = "tag_id", referencedColumnName = "id") })
 	private List<Tag> tags;
 

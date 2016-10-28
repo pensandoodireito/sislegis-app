@@ -315,7 +315,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			}
 		}
 		query.append(createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, idPosicionamento, relator, inseridaApos, macrotema, comAtencaoEspecial, somentePautadas, null));
-		query.append(" order by tipo,ano,numero");
+		query.append(" order by created desc, tipo, ano, numero");
 		TypedQuery<Proposicao> findByIdQuery = getEntityManager().createQuery(query.toString(), Proposicao.class);
 
 		setParams(sigla, comissao, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, idPosicionamento, relator, inseridaApos, macrotema, somentePautadas, null, findByIdQuery);
@@ -701,12 +701,25 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				local.setTipo(remote.getTipo());
 			}
 
-			if ((local.getSituacao() == null && remote.getSituacao() != null) || !local.getSituacao().equals(remote.getSituacao())) {
+			if (areDiff(local.getSituacao(), remote.getSituacao())) {
 				descricaoAlteracao.append("Alterado situação: '").append(local.getSituacao()).append("' => '").append(remote.getSituacao()).append("' \n");
 				local.setSituacao(remote.getSituacao());
 			}
 
 			return descricaoAlteracao.length();
+		}
+
+		boolean areDiff(Object local, Object remote) {
+			if (local == null && remote != null) {
+				return true;
+			} else if (local != null && remote == null) {
+				return false;// nao vamos apagar
+			} else if (local == null && remote == null) {
+				return false;
+			} else {
+				return !local.equals(remote);
+
+			}
 		}
 
 		public String getDescricaoAlteracao() {

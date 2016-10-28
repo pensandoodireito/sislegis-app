@@ -322,14 +322,14 @@ public class ReportDownloadServlet extends HttpServlet {
 						filtros.put(k, valor);
 					}
 				}
-			}
+			}	
 
 			gerarRelatorio(filtros).write(response.getOutputStream());
 
 			response.flushBuffer();
 		} catch (UsuarioNaoLogado ex) {
-			ex.printStackTrace();
-			throw new RuntimeException("Para acessar este relatório você deve estar logado no Sislegis");
+			response.getWriter().write("<html><body><b style='color:red'>Você precisa estar autenticado no Sislegis para acessar essa funcionalidade</b></body></html>");
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Usuário não autenticado gerando relatorio", ex);
 		} catch (IOException ex) {
 			ex.printStackTrace();
 			throw new RuntimeException("Erro ao gerar relatório", ex);

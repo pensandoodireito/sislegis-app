@@ -115,4 +115,6 @@
 	<include relativeToChangelogFile="true" file="update160930.sql" />
     <include relativeToChangelogFile="true" file="update161021.sql" />
 
+    <include relativeToChangelogFile="true" file="update161031.sql" />
+
 </databaseChangeLog>
