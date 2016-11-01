@@ -17,6 +17,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.json.JSONObject;
@@ -27,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @XmlRootElement
+
 public class Usuario extends AbstractEntity {
 
 	private static final long serialVersionUID = -8092650497855683601L;
@@ -116,8 +119,7 @@ public class Usuario extends AbstractEntity {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(getClass().getSimpleName()).append(" ").append(getId()).append(":").append(email).append(" > ")
-				.append(equipe);
+		sb.append(getClass().getSimpleName()).append(" ").append(getId()).append(":").append(email).append(" > ").append(equipe);
 
 		return sb.toString();
 	}

@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -25,9 +27,13 @@ import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import br.gov.mj.sislegis.app.model.AreaDeMeritoRevisao;
 import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
+import br.gov.mj.sislegis.app.rest.authentication.UsuarioNaoLogado;
 import br.gov.mj.sislegis.app.service.AreaDeMeritoService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
+import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 @WebServlet("/template")
 public class TemplateDownloadServlet extends HttpServlet {
@@ -42,10 +48,15 @@ public class TemplateDownloadServlet extends HttpServlet {
 
 	@Inject
 	private AreaDeMeritoService areaMeritoService;
+	@Inject
+	private UsuarioAutenticadoBean controleUsuarioAutenticado;
 
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException {
 		try {
+			String auth = req.getParameter("a");
+
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(auth);
 			Long id = Long.parseLong(req.getParameter("id"));
 			Proposicao prop = proposicaoService.findById(id);
 			String type = req.getParameter("type");
@@ -62,6 +73,9 @@ public class TemplateDownloadServlet extends HttpServlet {
 			}
 
 			response.flushBuffer();
+		} catch (UsuarioNaoLogado ex) {
+			response.getWriter().write("<html><body><b style='color:red'>Você precisa estar autenticado no Sislegis para acessar essa funcionalidade</b></body></html>");
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Usuário não autenticado", ex);
 		} catch (Exception ex) {
 
 			throw new RuntimeException("Error criando modelo", ex);
@@ -72,7 +86,7 @@ public class TemplateDownloadServlet extends HttpServlet {
 	private XWPFDocument geraBriefing(Proposicao prop, HttpServletResponse response) throws Exception {
 		InputStream fis = null;
 		try {
-			String filename = "Briefing_" + prop.getIdProposicao() + ".docx";
+			String filename = "ResumoAnalitico_" + prop.getIdProposicao() + ".docx";
 
 			response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 			response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
@@ -105,8 +119,13 @@ public class TemplateDownloadServlet extends HttpServlet {
 					for (Iterator<String> iterator = substituicoes.keySet().iterator(); iterator.hasNext();) {
 						String chave = (String) iterator.next();
 						if (text != null && text.contains(chave)) {
-							text = text.replace(chave, substituicoes.get(chave));
+							String substituto = "";
+							if (substituicoes.get(chave) != null) {
+								substituto = substituicoes.get(chave);
+							}
+							text = text.replace(chave, substituto);
 							r.setText(text, 0);
+
 						}
 					}
 				}
@@ -121,7 +140,11 @@ public class TemplateDownloadServlet extends HttpServlet {
 							for (Iterator<String> iterator = substituicoes.keySet().iterator(); iterator.hasNext();) {
 								String chave = (String) iterator.next();
 								if (text != null && text.contains(chave)) {
-									text = text.replace(chave, substituicoes.get(chave));
+									String substituto = "";
+									if (substituicoes.get(chave) != null) {
+										substituto = substituicoes.get(chave);
+									}
+									text = text.replace(chave, substituto);
 									r.setText(text, 0);
 								}
 							}
@@ -229,7 +252,12 @@ public class TemplateDownloadServlet extends HttpServlet {
 		substituicoes.put("[P.TEMA]", prop.getExplicacao());
 		substituicoes.put("[P.EMENTA]", ementa);
 
-		substituicoes.put("[P.TRAMITACAO]", "[SEM INFORMAÇÃO DE TRAMITAÇÃO]");
+		String tramitacao = prop.getTramitacao();
+		if (tramitacao == null || tramitacao.isEmpty()) {
+			substituicoes.put("[P.TRAMITACAO]", "[SEM INFORMAÇÃO DE TRAMITAÇÃO]");
+		} else {
+			substituicoes.put("[P.TRAMITACAO]", tramitacao);
+		}
 
 		return substituicoes;
 	}

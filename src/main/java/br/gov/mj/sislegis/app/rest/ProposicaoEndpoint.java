@@ -7,10 +7,12 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.ejb.EJBTransactionRolledbackException;
 import javax.inject.Inject;
@@ -30,16 +32,16 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import org.jboss.resteasy.annotations.cache.Cache;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.AreaDeMeritoRevisao;
 import br.gov.mj.sislegis.app.model.Comissao;
+import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.ProcessoSei;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
+import br.gov.mj.sislegis.app.model.TipoEncaminhamento;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.Votacao;
 import br.gov.mj.sislegis.app.model.documentos.Briefing;
@@ -53,9 +55,11 @@ import br.gov.mj.sislegis.app.service.AreaDeMeritoService;
 import br.gov.mj.sislegis.app.service.AutoUpdateProposicaoService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.DocumentoService;
+import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.ReuniaoService;
-import br.gov.mj.sislegis.app.service.ejbs.crons.AutoUpdateProposicaoEjb;
+import br.gov.mj.sislegis.app.service.TipoEncaminhamentoService;
+import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 /**
  * 
@@ -71,6 +75,9 @@ public class ProposicaoEndpoint {
 	private AreaDeMeritoService areaMeritoRevisao;
 	@Inject
 	private DocumentoService docService;
+
+	@Inject
+	private EncaminhamentoProposicaoService encaminhamentoProposicaoService;
 
 	@GET
 	@Path("/proposicoesPautaCamara")
@@ -214,6 +221,36 @@ public class ProposicaoEndpoint {
 
 	}
 
+	@Inject
+	private TipoEncaminhamentoService tipoSvc;
+
+	@POST
+	@Path("/{id:[0-9][0-9]+}/desmarcaAtencaoEspecial")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response desmarcarAtencaoEspecial(@PathParam("id") Long id) {
+		Proposicao p = proposicaoService.findById(id);
+		if (p.getComAtencaoEspecial() != null) {
+			p.desmarcarAtencaoEspecial();
+			Set<EncaminhamentoProposicao> encs = new HashSet<EncaminhamentoProposicao>(encaminhamentoProposicaoService.findByProposicao(id));
+			if (encs.size() > 0) {
+				TipoEncaminhamento marcadoComAtencao = tipoSvc.buscarTipoEncaminhamentoDespachoMinisterial();
+				for (Iterator iterator = encs.iterator(); iterator.hasNext();) {
+					EncaminhamentoProposicao encaminhamentoProposicao = (EncaminhamentoProposicao) iterator.next();
+					if (marcadoComAtencao.equals(encaminhamentoProposicao.getTipoEncaminhamento())) {
+						if (!encaminhamentoProposicao.isFinalizado()) {
+							encaminhamentoProposicaoService.finalizar(encaminhamentoProposicao.getId(), "Proposição foi removida do status de atenção especial");
+						}
+					}
+				}
+			}
+			return Response.ok().build();
+
+		} else {
+			return Response.notModified().build();
+		}
+
+	}
+
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -291,6 +328,28 @@ public class ProposicaoEndpoint {
 
 	}
 
+	@GET
+	@Path("/relatores")
+	@Produces(MediaType.APPLICATION_JSON)
+	// da pra usar o obj autor
+	public List<Autor> searchRelator(@QueryParam("nome") String nome) {
+		List<Autor> au = new ArrayList<ProposicaoEndpoint.Autor>();
+		if (nome != null && !nome.trim().isEmpty()) {
+			List<String> l = proposicaoService.procurarRelatores(nome);
+
+			for (Iterator iterator = l.iterator(); iterator.hasNext();) {
+				String string = (String) iterator.next();
+				Autor autor = new Autor();
+				autor.nome = string;
+
+				autor.id = au.size();
+				au.add(autor);
+			}
+		}
+		return au;
+
+	}
+
 	class Autor {
 		long id;
 		String nome;
@@ -307,20 +366,26 @@ public class ProposicaoEndpoint {
 	@GET
 	@Path("/consultar")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Proposicao> consultar(@QueryParam("ementa") String ementa, @QueryParam("autor") String autor, @QueryParam("sigla") String sigla, @QueryParam("origem") String origem, @QueryParam("estado") String estado, @QueryParam("isFavorita") String isFavorita, @QueryParam("idResponsavel") Long idResponsavel, @QueryParam("idEquipe") Long idEquipe, @QueryParam("limit") Integer limit, @QueryParam("macrotema") String macrotema, @QueryParam("somentePautadas") Boolean pautadas,
-			@QueryParam("offset") Integer offset) {
+	public List<Proposicao> consultar(@QueryParam("relator") String relator, @QueryParam("comissao") String comissao, @QueryParam("ementa") String ementa, @QueryParam("autor") String autor, @QueryParam("sigla") String sigla, @QueryParam("origem") String origem, @QueryParam("estado") String estado, @QueryParam("isFavorita") String isFavorita, @QueryParam("idResponsavel") Long idResponsavel, @QueryParam("idPosicionamento") Long idPosicionamento, @QueryParam("idEquipe") Long idEquipe,
+			@QueryParam("limit") Integer limit, @QueryParam("inseridaApos") String inseridaApos, @QueryParam("macrotema") String macrotema, @QueryParam("comAtencaoEspecial") Boolean comAtencaoEspecial, @QueryParam("somentePautadas") Boolean pautadas, @QueryParam("offset") Integer offset) {
 
 		Map<String, Object> m = new HashMap<String, Object>();
 		m.put("sigla", sigla);
 		m.put("ementa", ementa);
+		m.put("relator", relator);
 		m.put("autor", autor);
 		m.put("origem", origem);
 		m.put("isFavorita", isFavorita);
 		m.put("estado", estado);
 		m.put("macrotema", macrotema);
 		m.put("idEquipe", idEquipe);
+		m.put("idPosicionamento", idPosicionamento);
 		m.put("idResponsavel", idResponsavel);
 		m.put("somentePautadas", pautadas);
+		m.put("comAtencaoEspecial", comAtencaoEspecial);
+
+		m.put("comissao", comissao);
+		m.put("inseridaApos", inseridaApos);
 
 		List<Proposicao> results = proposicaoService.consultar(m, offset, limit);
 		return results;
@@ -632,11 +697,13 @@ public class ProposicaoEndpoint {
 
 	@GET
 	@Path("/auto")
-	public void autoCamara(@QueryParam("s") String s, @QueryParam("o") String origem) {
-		auto.atualizaPautadasCamara();
+	public void autoupdates(@QueryParam("s") String s, @QueryParam("o") String origem, @QueryParam("c") String comissaoParam, @HeaderParam("Authorization") String authorization) {
 		if (s != null) {
+
 			List<Comissao> ls;
 			try {
+				Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).warning(user.getEmail() + " executando auto updates");
 				Origem o = Origem.CAMARA;
 				if ("s".equals(origem)) {
 					o = Origem.SENADO;
@@ -644,6 +711,21 @@ public class ProposicaoEndpoint {
 				} else {
 					ls = comissaoService.listarComissoesCamara();
 				}
+
+				if ("TRAMITACAO".equals(comissaoParam)) {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Atualizando tramitacoes");
+					Map<String, Object> filtros = new HashMap<String, Object>();
+					filtros.put("origem", o.name());
+					// filtros.put("somentePautadas", true);
+					List<Proposicao> props = proposicaoService.consultar(filtros, 0, null);
+					for (Iterator iterator = props.iterator(); iterator.hasNext();) {
+						Proposicao proposicao = (Proposicao) iterator.next();
+						proposicaoService.syncDadosProposicao(proposicao.getId());
+					}
+
+					return;
+				}
+
 				SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy");
 
 				Calendar dataInicial = Calendar.getInstance();
@@ -652,25 +734,20 @@ public class ProposicaoEndpoint {
 				dataFinal.add(Calendar.WEEK_OF_YEAR, 1);
 				for (Iterator<Comissao> iterator = ls.iterator(); iterator.hasNext();) {
 					Comissao comissao = (Comissao) iterator.next();
-					System.out.println("Comissao " + comissao.getSigla());
-
-					proposicaoService.syncPautaAtualComissao(Origem.SENADO, comissao, dataInicial, dataFinal);
+					if (comissaoParam != null) {
+						if (comissaoParam.equals(comissao.getSigla().trim())) {
+							proposicaoService.syncPautaAtualComissao(o, comissao, dataInicial, dataFinal);
+						}
+					} else {
+						proposicaoService.syncPautaAtualComissao(o, comissao, dataInicial, dataFinal);
+					}
 
 				}
 			} catch (Exception e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		}
 	}
-
-	@GET
-	@Path("/autoSenado")
-	public void autoSenado() {
-		auto.atualizaPautadasSenado();
-
-	}
-
 }
 
 class ProposicaoPautadaPautaWrapper {

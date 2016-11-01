@@ -107,8 +107,8 @@ public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService, EJB
 		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Atualiza pautas das reunioes anteriores e suas proposicoes da camara");
 
 		updatePautasCamara();
-
 	}
+
 
 	@Override
 	public void updatePautasCamara() {
@@ -143,7 +143,6 @@ public class AutoUpdateProposicaoEjb implements AutoUpdateProposicaoService, EJB
 			for (Iterator<Comissao> iterator = ls.iterator(); iterator.hasNext();) {
 				Comissao comissao = (Comissao) iterator.next();
 
-				System.out.println("Comissao " + comissao.getSigla());
 				try {
 
 					proposicaoService.syncPautaAtualComissao(Origem.SENADO, comissao, dataInicial, dataFinal);

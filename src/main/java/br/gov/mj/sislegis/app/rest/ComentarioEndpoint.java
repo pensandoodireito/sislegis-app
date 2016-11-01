@@ -23,6 +23,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.jboss.resteasy.annotations.GZIP;
 
 import br.gov.mj.sislegis.app.model.Comentario;
+import br.gov.mj.sislegis.app.model.Papel;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.ComentarioService;
@@ -55,16 +56,37 @@ public class ComentarioEndpoint {
 			e.printStackTrace();
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 		}
-		return Response
-				.created(UriBuilder.fromResource(ComentarioEndpoint.class).path(String.valueOf(entity.getId())).build())
-				.header("Access-Control-Expose-Headers", "Location").build();
+		return Response.created(UriBuilder.fromResource(ComentarioEndpoint.class).path(String.valueOf(entity.getId())).build()).header("Access-Control-Expose-Headers", "Location").build();
 	}
 
 	@DELETE
 	@Path("/{id:[0-9][0-9]*}")
-	public Response deleteById(@PathParam("id") Long id) {
-		comentarioService.deleteById(id);
-		return Response.noContent().build();
+	public Response deleteById(@PathParam("id") Long id, @HeaderParam("Authorization") String authorization) {
+
+		try {
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+			if (user.getPapeis().contains(Papel.ADMIN)) {
+				comentarioService.deleteById(id);
+			} else {
+				Comentario comentario = comentarioService.findById(id);
+				if (comentario.getAutor().equals(user)) {
+					comentarioService.deleteById(id);
+				} else {
+					throw new IllegalAccessException("Não é o autor do cometnario. Não pode apagá-lo");
+				}
+			}
+
+		} catch (OptimisticLockException e) {
+			return Response.status(Response.Status.CONFLICT).entity(e.getEntity()).build();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.FORBIDDEN).build();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+		}
+
+		return Response.ok().build();
 	}
 
 	@GET
@@ -98,8 +120,7 @@ public class ComentarioEndpoint {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response update(Comentario entity, @HeaderParam("Authorization") String authorization) {
 		try {
-			comentarioService.salvarComentario(entity,
-					controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization));
+			comentarioService.salvarComentario(entity, controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization));
 
 		} catch (OptimisticLockException e) {
 			return Response.status(Response.Status.CONFLICT).entity(e.getEntity()).build();

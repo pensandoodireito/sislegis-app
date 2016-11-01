@@ -3,6 +3,8 @@ package br.gov.mj.sislegis.app.service.ejbs;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.rmi.RemoteException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -166,7 +168,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 		String dataIni = Conversores.dateToString(dataInicial, "yyyyMMdd");
 		String dataFim = Conversores.dateToString(dataFinal, "yyyyMMdd");
-		return populaUltimoComentarioDePauta(parserPautaCamara.getPautaComissao(comissaoService.getComissaoCamara(idComissao), idComissao, dataIni, dataFim));
+		String nomeComissao = comissaoService.getComissaoCamara(idComissao);
+		return populaUltimoComentarioDePauta(parserPautaCamara.getPautaComissao(nomeComissao, idComissao, dataIni, dataFim));
 	}
 
 	@Override
@@ -286,7 +289,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	@Override
 	public List<Proposicao> consultar(Map<String, Object> filtros, Integer offset, Integer limit) {
-		StringBuilder query = new StringBuilder("SELECT p FROM Proposicao p WHERE 1=1");
+		StringBuilder query = new StringBuilder("SELECT distinct p FROM Proposicao p WHERE 1=1");
 		String sigla = (String) filtros.get("sigla");
 		String autor = (String) filtros.get("autor");
 		String ementa = (String) filtros.get("ementa");
@@ -295,14 +298,27 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		String estado = (String) filtros.get("estado");
 		String macrotema = (String) filtros.get("macrotema");
 		Boolean somentePautadas = (Boolean) filtros.get("somentePautadas");
+		Boolean comAtencaoEspecial = (Boolean) filtros.get("comAtencaoEspecial");
+
 		Long idEquipe = (Long) filtros.get("idEquipe");
 		Long idResponsavel = (Long) filtros.get("idResponsavel");
-
-		query.append(createWhereClause(sigla, null, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, null, macrotema, somentePautadas, null));
-		query.append(" order by tipo,ano,numero");
+		Long idPosicionamento = (Long) filtros.get("idPosicionamento");
+		String comissao = (String) filtros.get("comissao");
+		String relator = (String) filtros.get("relator");
+		String inseridaAposStr = (String) filtros.get("inseridaApos");
+		Date inseridaApos = null;
+		if (inseridaAposStr != null && !inseridaAposStr.isEmpty()) {
+			try {
+				inseridaApos = new SimpleDateFormat("d-M-yyyy").parse(inseridaAposStr);
+			} catch (ParseException p) {
+				p.printStackTrace();
+			}
+		}
+		query.append(createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, idPosicionamento, relator, inseridaApos, macrotema, comAtencaoEspecial, somentePautadas, null));
+		query.append(" order by created desc, tipo, ano, numero");
 		TypedQuery<Proposicao> findByIdQuery = getEntityManager().createQuery(query.toString(), Proposicao.class);
 
-		setParams(sigla, null, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, null, macrotema, somentePautadas, null, findByIdQuery);
+		setParams(sigla, comissao, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, idPosicionamento, relator, inseridaApos, macrotema, somentePautadas, null, findByIdQuery);
 		if (offset != null) {
 			findByIdQuery.setFirstResult(offset);
 		}
@@ -331,10 +347,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	private void setParams(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, Long idResponsavel, Long idPosicionamento, Integer[] idProposicoes, TypedQuery findByIdQuery) {
-		setParams(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null, idPosicionamento, null, null, null, findByIdQuery);
+		setParams(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null, idPosicionamento, null, null, null, null, null, findByIdQuery);
 	}
 
-	private void setParams(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento, String macrotema, Boolean somentePautadas, Integer[] idProposicoes, TypedQuery findByIdQuery) {
+	private void setParams(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento, String relator, Date inseridaApos, String macrotema, Boolean somentePautadas, Integer[] idProposicoes, TypedQuery findByIdQuery) {
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			findByIdQuery.setParameter("sigla", "%" + sigla + "%");
 		}
@@ -350,11 +366,18 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (Objects.nonNull(comissao) && !comissao.equals("")) {
 			findByIdQuery.setParameter("comissao", comissao + "%");
 		}
+
+		if (Objects.nonNull(inseridaApos)) {
+			findByIdQuery.setParameter("inseridaApos", inseridaApos);
+		}
 		if (Objects.nonNull(ementa) && !ementa.equals("")) {
 			findByIdQuery.setParameter("ementa", "%" + ementa + "%");
 		}
 		if (Objects.nonNull(autor) && !autor.equals("")) {
 			findByIdQuery.setParameter("autor", "%" + autor + "%");
+		}
+		if (Objects.nonNull(relator) && !relator.isEmpty()) {
+			findByIdQuery.setParameter("relator", "%" + relator + "%");
 		}
 		if (Objects.nonNull(origem) && !origem.equals("")) {
 			findByIdQuery.setParameter("origem", Origem.valueOf(origem));
@@ -391,10 +414,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, Long idResponsavel, Long idPosicionamento, Integer[] idProposicao) {
-		return createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null, idPosicionamento, null, null, idProposicao);
+		return createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null, idPosicionamento, null, null, null, null, null, idProposicao);
 	}
 
-	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento, String macroTema, Boolean somentePautadas, Integer[] idProposicao) {
+	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento, String relator, Date inseridaApos, String macroTema, Boolean comAtencaoEspecial, Boolean somentePautadas, Integer[] idProposicao) {
 		StringBuilder query = new StringBuilder();
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			query.append(" AND upper(CONCAT(p.tipo,' ',p.numero,'/',p.ano)) like upper(:sigla)");
@@ -411,14 +434,23 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (Objects.nonNull(origem) && !origem.equals("")) {
 			query.append(" AND p.origem = :origem");
 		}
+		if (Objects.nonNull(inseridaApos)) {
+			query.append(" AND p.created >= :inseridaApos ");
+		}
 		if (Objects.nonNull(estado) && !estado.isEmpty()) {
 			query.append(" AND p.estado = :estado");
 		}
 		if (Objects.nonNull(isFavorita) && !isFavorita.equals("")) {
 			query.append(" AND p.isFavorita = :isFavorita");
 		}
+		if (Objects.nonNull(relator) && !relator.isEmpty()) {
+			query.append(" AND upper(p.ultima.relator) like upper(:relator)");
+		}
 		if (Objects.nonNull(somentePautadas) && Boolean.TRUE.equals(somentePautadas)) {
 			query.append(" AND  p.ultima.pautaReuniaoComissao.data>:dataReuniao");
+		}
+		if (Objects.nonNull(comAtencaoEspecial) && Boolean.TRUE.equals(comAtencaoEspecial)) {
+			query.append(" AND  p.comAtencaoEspecial IS NOT NULL ");
 		}
 		if (Objects.nonNull(idResponsavel)) {
 			if (idResponsavel == -1) {
@@ -625,6 +657,11 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				descricaoAlteracao.append("Alterado ano: ").append(local.getAno()).append("=>").append(remote.getAno()).append("\n");
 				local.setAno(remote.getAno());
 			}
+
+			if ((local.getTramitacao() == null && remote.getTramitacao() != null) || (remote.getTramitacao() != null && !local.getTramitacao().equals(remote.getTramitacao()))) {
+				descricaoAlteracao.append("Alterada tramitacao: ").append(local.getAno()).append("=>").append(remote.getTramitacao()).append("\n");
+				local.setTramitacao(remote.getTramitacao());
+			}
 			if (((local.getComissao() == null || "AVULSA".equals(local.getComissao())) && remote.getComissao() != null && !remote.getComissao().equals(local.getComissao()))) {
 				descricaoAlteracao.append("Alterada comissão: '").append(local.getComissao()).append("' => '").append(remote.getComissao()).append("'\n");
 				local.setComissao(remote.getComissao());
@@ -664,12 +701,25 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				local.setTipo(remote.getTipo());
 			}
 
-			if ((local.getSituacao() == null && remote.getSituacao() != null) || !local.getSituacao().equals(remote.getSituacao())) {
+			if (areDiff(local.getSituacao(), remote.getSituacao())) {
 				descricaoAlteracao.append("Alterado situação: '").append(local.getSituacao()).append("' => '").append(remote.getSituacao()).append("' \n");
 				local.setSituacao(remote.getSituacao());
 			}
 
 			return descricaoAlteracao.length();
+		}
+
+		boolean areDiff(Object local, Object remote) {
+			if (local == null && remote != null) {
+				return true;
+			} else if (local != null && remote == null) {
+				return false;// nao vamos apagar
+			} else if (local == null && remote == null) {
+				return false;
+			} else {
+				return !local.equals(remote);
+
+			}
 		}
 
 		public String getDescricaoAlteracao() {
@@ -1411,6 +1461,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				Comissao comissao = new Comissao();
 				if (Origem.CAMARA.equals(proposicao.getOrigem())) {
 					comissao = comissaoService.getBySigla(proposicao.getComissao());
+					if (comissao == null) {
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Não foi possível obter dados da comissao " + proposicao.getComissao() + " da câmara!");
+						return null;
+					}
 				} else {
 					comissao.setSigla(proposicao.getComissao());
 				}
@@ -1418,7 +1472,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				dataInicial.add(Calendar.DAY_OF_YEAR, -1);
 				Calendar dataFinal = (Calendar) dataInicial.clone();
 				dataFinal.add(Calendar.WEEK_OF_YEAR, 1);
-				syncPautaAtualComissao(proposicao.getOrigem(), comissao, dataFinal, dataFinal);
+				syncPautaAtualComissao(proposicao.getOrigem(), comissao, dataInicial, dataFinal);
 			}
 		}
 		return proposicao;
@@ -1439,10 +1493,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 					pss = parserSenado.getPautaComissao(comissao.getSigla(), Conversores.dateToString(dataInicial.getTime(), "yyyyMMdd"), Conversores.dateToString(dataFinal.getTime(), "yyyyMMdd"));
 				}
 
-			} else {
+			} else if (Origem.CAMARA.equals(origem)) {
 				ParserPautaCamara parserPautaCamara = new ParserPautaCamara();
 
 				pss = parserPautaCamara.getPautaComissao(comissao.getSigla(), comissao.getId(), Conversores.dateToString(dataInicial.getTime(), "yyyyMMdd"), Conversores.dateToString(dataFinal.getTime(), "yyyyMMdd"));
+			} else {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Origem nao identificada " + origem);
 			}
 			persistePautaReuniaoComissao(pss, origem);
 		} catch (IOException e) {
@@ -1526,7 +1582,14 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	@Override
 	public List<String> listarTodosAutores(String nome) {
-		return getEntityManager().createQuery("select distinct p.autor from Proposicao p where upper(p.autor) like :nome", String.class).setParameter("nome", nome.toUpperCase() + "%").setMaxResults(10).getResultList();
+		return getEntityManager().createQuery("select distinct p.autor from Proposicao p where upper(p.autor) like :nome", String.class).setParameter("nome", "%" + nome.toUpperCase() + "%").setMaxResults(10).getResultList();
+
+	}
+
+	@Override
+	public List<String> procurarRelatores(String nome) {
+
+		return getEntityManager().createQuery("select distinct p.relator from ProposicaoPautaComissao p where upper(p.relator) like :nome", String.class).setParameter("nome", "%" + nome.toUpperCase() + "%").setMaxResults(10).getResultList();
 
 	}
 }

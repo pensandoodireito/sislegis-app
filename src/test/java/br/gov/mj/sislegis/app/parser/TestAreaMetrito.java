@@ -1,8 +1,11 @@
 package br.gov.mj.sislegis.app.parser;
 
+import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -14,14 +17,17 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.AreaDeMerito;
 import br.gov.mj.sislegis.app.model.AreaDeMeritoRevisao;
+import br.gov.mj.sislegis.app.model.EstadoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.TipoEncaminhamento;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
+import br.gov.mj.sislegis.app.parser.senado.ParserProposicaoSenado;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
@@ -127,32 +133,75 @@ public class TestAreaMetrito {
 		((EJBUnitTestable) amSvc).setInjectedEntities(em);
 
 	}
+
 	@Test
 	public void testQuery() {
-		List<Proposicao> futuro = em.createNamedQuery("findPautadas",Proposicao.class).setParameter("data",new Date()).getResultList();
-//		List<Proposicao> passado = em.createNamedQuery("findNaoPautadas",Proposicao.class).getResultList();
+		List<Proposicao> futuro = em.createNamedQuery("findPautadas", Proposicao.class).setParameter("data", new Date()).getResultList();
+		// List<Proposicao> passado =
+		// em.createNamedQuery("findNaoPautadas",Proposicao.class).getResultList();
 		List<Proposicao> passado = em.createQuery("select p from Proposicao p left join p.ultima pp where p.ultima IS NULL").getResultList();
-		
-		List<Proposicao> todas = proposicaoService.listAll();//em.createNamedQuery("findPautadas",Proposicao.class).setParameter("data",new Date(0)).getResultList();
-		System.out.println(futuro.size()+" "+passado.size());
+
+		List<Proposicao> todas = proposicaoService.listAll();// em.createNamedQuery("findPautadas",Proposicao.class).setParameter("data",new
+																// Date(0)).getResultList();
+		System.out.println(futuro.size() + " " + passado.size());
 		System.out.println(todas.size());
 		for (Iterator iterator = todas.iterator(); iterator.hasNext();) {
 			Proposicao proposicao = (Proposicao) iterator.next();
-			System.out.println(proposicao.getSigla()+" "+proposicao.getUltima());
-			
+			System.out.println(proposicao.getSigla() + " " + proposicao.getUltima());
+
 		}
-		
+
 	}
+	@Test
+	public void test2() throws IOException {
+		Map<String, Object> filtros = new HashMap<String, Object>();
+		filtros.put("estado", EstadoProposicao.FORADEPAUTA.name());
+		filtros.put("origem", Origem.SENADO.name());
+		
+		List<Proposicao> props = proposicaoService.consultar(filtros, 0, 2);
+		Proposicao p =  props.get(0);
+	}
+
+	@Test
+	public void testPautadas() throws IOException {
+		Map<String, Object> filtros = new HashMap<String, Object>();
+		filtros.put("origem", Origem.CAMARA.name());
+		filtros.put("somentePautadas",true);
+//		filtros.put("origem", Origem.SENADO.name());
+//
+//		ParserProposicaoSenado pps = new ParserProposicaoSenado();
+//
+		
+//		for (Iterator iterator = props.iterator(); iterator.hasNext();) {
+//			Proposicao proposicao = (Proposicao) iterator.next();
+//			Proposicao p = pps.getProposicao(proposicao.getIdProposicao().longValue());
+//			System.out.println("http://legis.senado.leg.br/dadosabertos/materia/movimentacoes/"+p.getIdProposicao()+"?v=4");
+//			System.out.println("\t" + p.getTramitacao());
+//		}
+//		
+		filtros.put("origem", Origem.CAMARA.name());
+		filtros.put("somentePautadas",true);
+		List<Proposicao> props = proposicaoService.consultar(filtros, 0, 100);
+		ParserProposicaoCamara ppc = new ParserProposicaoCamara();
+
+		for (Iterator iterator = props.iterator(); iterator.hasNext();) {
+			Proposicao proposicao = (Proposicao) iterator.next();
+			Proposicao p = ppc.getProposicao(proposicao.getIdProposicao().longValue());
+			System.out.println("http://www.camara.gov.br/SitCamaraWS/Proposicoes.asmx/ObterProposicaoPorID?idProp="+p.getIdProposicao());
+			System.out.println("\t" + p.getTramitacao());
+		}
+	}
+
 	@Test
 	public void testUltima() {
 		Proposicao pp = proposicaoService.findById(840l);
 		System.out.println(pp.getPautasComissoes().size());
-		
-//		System.out.println(" "+pp.getPautasComissoes().get(0).equals(pp.getPautasComissoes().get(1)));
-		
+
+		// System.out.println(" "+pp.getPautasComissoes().get(0).equals(pp.getPautasComissoes().get(1)));
+
 		System.out.println(pp.getUltima().getPautaReuniaoComissao().getData());
 		System.out.println(pp.getPautaComissaoAtual().getPautaReuniaoComissao().getData());
-		
+
 		List<Proposicao> props = proposicaoService.listAll();
 		for (Iterator iterator = props.iterator(); iterator.hasNext();) {
 			Proposicao p = (Proposicao) iterator.next();

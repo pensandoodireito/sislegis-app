@@ -51,4 +51,18 @@ public class TipoEncaminhamentoServiceEjb extends AbstractPersistence<TipoEncami
 		}
 
 	}
+	@Override
+	public TipoEncaminhamento buscarTipoEncaminhamentoDespachoMinisterial() {
+		String value = "Despacho com ministro";
+		try {
+			TipoEncaminhamento t = getEntityManager().createNamedQuery("tipoPorNome", TipoEncaminhamento.class).setParameter("nome", value).setMaxResults(1).getSingleResult();
+			return t;
+		} catch (NoResultException e) {
+			TipoEncaminhamento t = new TipoEncaminhamento();
+			t.setNome(value);
+			save(t);
+			return t;
+		}
+
+	}
 }

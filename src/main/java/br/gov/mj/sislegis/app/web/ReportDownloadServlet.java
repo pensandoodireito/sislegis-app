@@ -169,8 +169,12 @@ public class ReportDownloadServlet extends HttpServlet {
 			}
 
 			replaceText(row.getCell(1), "[AUTOR]", proposicao.getAutor());
-			if (proposicao.getExplicacao() != null) {
-				replaceText(row.getCell(2), "[EMENTA]", proposicao.getExplicacao());
+			String tema = proposicao.getExplicacao();
+			if (tema == null || tema.isEmpty()) {
+				tema = proposicao.getEmenta();
+			}
+			if (tema != null) {
+				replaceText(row.getCell(2), "[EMENTA]", tema);
 			} else {
 				replaceText(row.getCell(2), "[EMENTA]", "Sem tema");
 			}
@@ -193,12 +197,6 @@ public class ReportDownloadServlet extends HttpServlet {
 					if (proposicao.getPautaComissaoAtual().getPautaReuniaoComissao().getData().after(ref)) {
 						replaceText(row.getCell(6), "[PAUTA]", "Pautada");
 
-						// replaceText(row.getCell(6), "[PAUTA]",
-						// "Pautada para ("
-						// + proposicao.getPautaComissaoAtual().getOrdemPauta()
-						// + ") "
-						// +
-						// proposicao.getPautaComissaoAtual().getPautaReuniaoComissao().getData());
 					} else {
 						replaceText(row.getCell(6), "[PAUTA]", "Não Pautada");
 					}
@@ -268,7 +266,7 @@ public class ReportDownloadServlet extends HttpServlet {
 			response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
 
 			Map<String, Object> filtros = new HashMap<String, Object>();
-			filtros.put("estado", EstadoProposicao.DESPACHADA);
+			filtros.put("estado", EstadoProposicao.DESPACHADA.name());
 			gerarRelatorio(filtros).write(response.getOutputStream());
 
 			response.flushBuffer();
@@ -310,24 +308,28 @@ public class ReportDownloadServlet extends HttpServlet {
 					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.INFO, "Adicionando filtro: " + k + "=" + req.getParameter(k));
 					if ("idResponsavel".equals(k)) {
 						filtros.put(k, Long.valueOf(valor));
+					} else if ("idPosicionamento".equals(k)) {
+						filtros.put(k, Long.valueOf(valor));
 					} else if ("idEquipe".equals(k)) {
 						filtros.put(k, Long.valueOf(valor));
 					} else if ("estado".equals(k)) {
 						filtros.put(k, EstadoProposicao.valueOf(valor).name());
 					} else if ("somentePautadas".equals(k)) {
 						filtros.put(k, Boolean.TRUE);
+					} else if ("comAtencaoEspecial".equals(k)) {
+						filtros.put(k, Boolean.TRUE);
 					} else {
 						filtros.put(k, valor);
 					}
 				}
-			}
+			}	
 
 			gerarRelatorio(filtros).write(response.getOutputStream());
 
 			response.flushBuffer();
 		} catch (UsuarioNaoLogado ex) {
-			ex.printStackTrace();
-			throw new RuntimeException("Para acessar este relatório você deve estar logado no Sislegis");
+			response.getWriter().write("<html><body><b style='color:red'>Você precisa estar autenticado no Sislegis para acessar essa funcionalidade</b></body></html>");
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Usuário não autenticado gerando relatorio", ex);
 		} catch (IOException ex) {
 			ex.printStackTrace();
 			throw new RuntimeException("Erro ao gerar relatório", ex);

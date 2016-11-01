@@ -2,7 +2,9 @@ package br.gov.mj.sislegis.app.service.ejbs;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,6 +23,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
+import br.gov.mj.sislegis.app.model.Papel;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao;
@@ -41,8 +44,7 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 		controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 		controls.setTimeLimit(1000);// maximo 1 segundo de espera
 		controls.setCountLimit(20); // maximo 20 resultados
-		controls.setReturningAttributes(new String[] { "cn", "userPrincipalName", "displayName", "department",
-				"sAMAccountName" });
+		controls.setReturningAttributes(new String[] { "cn", "userPrincipalName", "displayName", "department", "sAMAccountName" });
 	}
 
 	@Override
@@ -53,8 +55,7 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 	@Override
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public Usuario findByEmail(String email) {
-		TypedQuery<Usuario> findByIdQuery = em.createQuery(
-				"SELECT u FROM Usuario u WHERE upper(u.email) like upper(:email) ORDER BY u.email ASC", Usuario.class);
+		TypedQuery<Usuario> findByIdQuery = em.createQuery("SELECT u FROM Usuario u WHERE upper(u.email) like upper(:email) ORDER BY u.email ASC", Usuario.class);
 		findByIdQuery.setParameter("email", email);
 
 		try {
@@ -82,8 +83,7 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 
 	@Override
 	public List<Usuario> listUsuariosSeguidoresDeComissao(AgendaComissao agenda) {
-		TypedQuery<Usuario> findByIdQuery = em.createQuery(
-				"SELECT u FROM Usuario u join u.agendasSeguidas agendas where agendas.id=:idAgenda", Usuario.class);
+		TypedQuery<Usuario> findByIdQuery = em.createQuery("SELECT u FROM Usuario u join u.agendasSeguidas agendas where agendas.id=:idAgenda", Usuario.class);
 
 		findByIdQuery.setParameter("idAgenda", agenda.getId());
 		return findByIdQuery.getResultList();
@@ -92,8 +92,7 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 
 	@Override
 	public List<Usuario> listUsuariosSeguidoresDeProposicao(Proposicao proposicao) {
-		TypedQuery<Usuario> findByIdQuery = em.createQuery(
-				"SELECT u FROM Usuario u join u.proposicoesSeguidas prop where prop.id=:idProp", Usuario.class);
+		TypedQuery<Usuario> findByIdQuery = em.createQuery("SELECT u FROM Usuario u join u.proposicoesSeguidas prop where prop.id=:idProp", Usuario.class);
 
 		findByIdQuery.setParameter("idProp", proposicao.getId());
 		return findByIdQuery.getResultList();
@@ -102,8 +101,7 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 
 	@Override
 	public List<Usuario> findByNome(String nome) {
-		TypedQuery<Usuario> findByIdQuery = em.createQuery(
-				"SELECT u FROM Usuario u WHERE upper(u.nome) like upper(:nome) ORDER BY u.nome ASC", Usuario.class);
+		TypedQuery<Usuario> findByIdQuery = em.createQuery("SELECT u FROM Usuario u WHERE upper(u.nome) like upper(:nome) ORDER BY u.nome ASC", Usuario.class);
 		findByIdQuery.setParameter("nome", "%" + nome + "%");
 		return findByIdQuery.getResultList();
 	}
@@ -111,10 +109,7 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 	@Override
 	public List<Usuario> findByIdEquipe(Long idEquipe) {
 
-		Query query = em.createNativeQuery("SELECT u.* FROM Usuario u "
-				+ " inner join equipe_usuario eu on u.id = eu.usuario_id "
-				+ " inner join Equipe e on e.id = eu.equipe_id " + "	WHERE e.id = :idEquipe ORDER BY u.nome ASC",
-				Usuario.class);
+		Query query = em.createNativeQuery("SELECT u.* FROM Usuario u " + " inner join equipe_usuario eu on u.id = eu.usuario_id " + " inner join Equipe e on e.id = eu.equipe_id " + "	WHERE e.id = :idEquipe ORDER BY u.nome ASC", Usuario.class);
 		query.setParameter("idEquipe", idEquipe);
 		List<Usuario> usuarios = query.getResultList();
 
@@ -150,8 +145,7 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 		try {
 			ldapContext = (InitialDirContext) InitialContext.doLookup("java:global/federation/ldap/mjldap");
 
-			NamingEnumeration<SearchResult> results = ldapContext.search("OU=SISLEGIS", "(&(objectclass=person)(cn="
-					+ nome + "*))", controls);
+			NamingEnumeration<SearchResult> results = ldapContext.search("OU=SISLEGIS", "(&(objectclass=person)(cn=" + nome + "*))", controls);
 			if (results.hasMoreElements()) {
 				while (results.hasMoreElements()) {
 					SearchResult searchResult = (SearchResult) results.nextElement();
@@ -167,15 +161,12 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 			try {
 				if (e.getRootCause().getCause().getCause().getCause() instanceof CommunicationException) {
 					if (Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).isLoggable(Level.FINE)) {
-						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
-								"Não foi possível carregar o recurso do LDAP. Sua rede pode acessar o LDAP do MJ?");
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Não foi possível carregar o recurso do LDAP. Sua rede pode acessar o LDAP do MJ?");
 					} else {
-						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
-								"Não foi possível carregar o recurso do LDAP. Sua rede pode acessar o LDAP do MJ?", e);
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Não foi possível carregar o recurso do LDAP. Sua rede pode acessar o LDAP do MJ?", e);
 					}
 				} else {
-					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE,
-							"Houve um erro consultando o LDAP", e);
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Houve um erro consultando o LDAP", e);
 				}
 			} catch (Exception e1) {
 				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.SEVERE, "Houve um erro consultando o LDAP", e);
@@ -203,6 +194,13 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 	public void setInjectedEntities(Object... injections) {
 		this.em = (EntityManager) injections[0];
 
+	}
+
+	@Override
+	public Set<Usuario> listUsuariosPorPapel(Papel secretario) {
+		
+		
+		return new HashSet<Usuario>(getEntityManager().createNativeQuery("select u.* from usuario_papel up, usuario u where up.usuario_id=u.id and up.papel=:papel", Usuario.class).setParameter("papel", secretario.name()).getResultList());
 	}
 
 }

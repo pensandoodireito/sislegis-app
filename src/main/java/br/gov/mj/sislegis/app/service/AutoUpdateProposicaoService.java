@@ -19,4 +19,6 @@ public interface AutoUpdateProposicaoService {
 	void updatePautasSenado();
 
 	void atualizaPautadasCamara();
+
+	
 }

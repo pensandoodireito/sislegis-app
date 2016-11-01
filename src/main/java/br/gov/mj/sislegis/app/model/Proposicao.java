@@ -113,6 +113,17 @@ public class Proposicao extends AbstractEntity {
 	@Column(name = "estado")
 	private EstadoProposicao estado;
 
+	@Column(name = "comAtencaoEspecial", nullable = true)
+	private Long comAtencaoEspecial;
+	@Column(name = "foiencaminhada", nullable = true)
+	private Long foiEncaminhada;
+	@Column(name = "foianalisada", nullable = true)
+	private Long foiAnalisada;
+	@Column(name = "foirevisada", nullable = true)
+	private Long foiRevisada;
+	@Column(name = "foidespachada", nullable = true)
+	private Long foiDespachada;
+
 	@JsonDeserialize(using = EfetividadeSALDeserializer.class)
 	@Enumerated(EnumType.STRING)
 	@Column(name = "efetividade")
@@ -132,6 +143,8 @@ public class Proposicao extends AbstractEntity {
 
 	@Column(name = "parecer_sal", length = 5000)
 	private String parecerSAL;
+	@Column(name = "tramitacao", length = 5000)
+	private String tramitacao;
 
 	@Column(name = "explicacao_sal", length = 5000)
 	private String explicacao;
@@ -177,8 +190,7 @@ public class Proposicao extends AbstractEntity {
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	private Usuario responsavel;
-	
-	
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "idequipe", referencedColumnName = "id")
 	private Equipe equipe;
@@ -191,7 +203,7 @@ public class Proposicao extends AbstractEntity {
 	@JoinColumn(name = "id", insertable = false, updatable = false, referencedColumnName = "proposicaoid", nullable = true)
 	ProposicaoPautaComissaoFutura ultima;
 
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "tagproposicao", joinColumns = { @JoinColumn(name = "proposicao_id", referencedColumnName = "id") }, inverseJoinColumns = { @JoinColumn(name = "tag_id", referencedColumnName = "id") })
 	private List<Tag> tags;
 
@@ -413,6 +425,7 @@ public class Proposicao extends AbstractEntity {
 		return this.listaComentario;
 	}
 
+	@JsonIgnore
 	public void setListaComentario(final List<Comentario> listaComentario) {
 		this.listaComentario = listaComentario;
 	}
@@ -706,5 +719,66 @@ public class Proposicao extends AbstractEntity {
 
 	public void setEfetividade(EfetividadeSAL resultadoFinal) {
 		this.efetividade = resultadoFinal;
+	}
+
+	public Date getCreated() {
+		return created;
+	}
+
+	public Date getUpdated() {
+		return updated;
+	}
+
+	public void setTramitacao(String tramitacao) {
+		this.tramitacao = tramitacao;
+
+	}
+
+	public String getTramitacao() {
+		return tramitacao;
+	}
+
+	public Long getFoiEncaminhada() {
+		return foiEncaminhada;
+	}
+
+	public void setFoiEncaminhada(Long foiEncaminhada) {
+		this.foiEncaminhada = foiEncaminhada;
+	}
+
+	public Long getFoiAnalisada() {
+		return foiAnalisada;
+	}
+
+	public void setFoiAnalisada(Long foiAnalisada) {
+		this.foiAnalisada = foiAnalisada;
+	}
+
+	public Long getFoiRevisada() {
+		return foiRevisada;
+	}
+
+	public void setFoiRevisada(Long foiRevisada) {
+		this.foiRevisada = foiRevisada;
+	}
+
+	public Long getFoiDespachada() {
+		return foiDespachada;
+	}
+
+	public void setFoiDespachada(Long foiDespachada) {
+		this.foiDespachada = foiDespachada;
+	}
+
+	public Long getComAtencaoEspecial() {
+		return comAtencaoEspecial;
+	}
+
+	public void marcarAtencaoEspecial() {
+		comAtencaoEspecial = System.currentTimeMillis();
+	}
+
+	public void desmarcarAtencaoEspecial() {
+		comAtencaoEspecial = null;
 	}
 }

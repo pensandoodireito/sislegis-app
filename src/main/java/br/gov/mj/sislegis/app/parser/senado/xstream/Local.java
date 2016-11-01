@@ -10,5 +10,10 @@ class Local {
 	String NomeCasaLocal;
 	String SiglaLocal;
 	String NomeLocal;
+	
+	@Override
+	public String toString() {
+		return NomeLocal+" Sigla: "+SiglaCasaLocal+ " Codigo:"+CodigoLocal;
+	}
 
 }
