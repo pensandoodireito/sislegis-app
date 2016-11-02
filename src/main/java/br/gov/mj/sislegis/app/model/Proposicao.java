@@ -77,6 +77,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 			name = "findByUniques", 
 			query = "select p from Proposicao p where p.idProposicao=:idProposicao and p.origem=:origem"),
 	@NamedQuery(
+				name = "findWithNotas", 
+				query = "select p from Proposicao p where p.notatecnicas is not empty"),
+	@NamedQuery(
 				name = "findByPosicionamento", 
 				query = "select p from Proposicao p where p.posicionamentoAtual.id=:id"),
 	@NamedQuery(

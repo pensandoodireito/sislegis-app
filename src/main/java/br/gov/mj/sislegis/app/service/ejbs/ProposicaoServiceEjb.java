@@ -299,6 +299,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		String macrotema = (String) filtros.get("macrotema");
 		Boolean somentePautadas = (Boolean) filtros.get("somentePautadas");
 		Boolean comAtencaoEspecial = (Boolean) filtros.get("comAtencaoEspecial");
+		Boolean comNotaTecnica = (Boolean) filtros.get("comNotaTecnica");
 
 		Long idEquipe = (Long) filtros.get("idEquipe");
 		Long idResponsavel = (Long) filtros.get("idResponsavel");
@@ -306,29 +307,46 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		String comissao = (String) filtros.get("comissao");
 		String relator = (String) filtros.get("relator");
 		String inseridaAposStr = (String) filtros.get("inseridaApos");
-		Date inseridaApos = null;
-		if (inseridaAposStr != null && !inseridaAposStr.isEmpty()) {
-			try {
-				inseridaApos = new SimpleDateFormat("d-M-yyyy").parse(inseridaAposStr);
-			} catch (ParseException p) {
-				p.printStackTrace();
-			}
+		Date inseridaApos = getDateFromSTR(inseridaAposStr);
+		Date foiDespachadaApos = getDateFromSTR((String) filtros.get("foiDespachadaApos"));
+		Date foiDespachadaAte = getDateFromSTR((String) filtros.get("foiDespachadaAte"));
+		if (Objects.nonNull(foiDespachadaApos) || Objects.nonNull(foiDespachadaAte)) {
+			estado = EstadoProposicao.DESPACHADA.name();
 		}
-		query.append(createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, idPosicionamento, relator, inseridaApos, macrotema, comAtencaoEspecial, somentePautadas, null));
+		query.append(createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, idPosicionamento, relator, inseridaApos, foiDespachadaApos, foiDespachadaAte, macrotema, comNotaTecnica, comAtencaoEspecial, somentePautadas, null));
 		query.append(" order by created desc, tipo, ano, numero");
 		TypedQuery<Proposicao> findByIdQuery = getEntityManager().createQuery(query.toString(), Proposicao.class);
 
-		setParams(sigla, comissao, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, idPosicionamento, relator, inseridaApos, macrotema, somentePautadas, null, findByIdQuery);
+		setParams(sigla, comissao, autor, ementa, origem, isFavorita, estado, idResponsavel, idEquipe, idPosicionamento, relator, inseridaApos, foiDespachadaApos, foiDespachadaAte, macrotema, somentePautadas, null, findByIdQuery);
 		if (offset != null) {
 			findByIdQuery.setFirstResult(offset);
 		}
 		if (limit != null) {
 			findByIdQuery.setMaxResults(limit);
 		}
+
 		List<Proposicao> proposicoes = findByIdQuery.getResultList();
 		popularDadosTransientes(proposicoes);
 
 		return proposicoes;
+	}
+
+	private Date getDateFromSTR(String inseridaAposStr) {
+		Date inseridaApos = null;
+		if (inseridaAposStr != null && !inseridaAposStr.isEmpty()) {
+			try {
+				if (inseridaAposStr.contains("-")) {
+
+					inseridaApos = new SimpleDateFormat("dd-MM-yyyy").parse(inseridaAposStr);
+				} else {
+					inseridaApos = new SimpleDateFormat("dd/MM/yyyy").parse(inseridaAposStr);
+				}
+			} catch (ParseException p) {
+				p.printStackTrace();
+
+			}
+		}
+		return inseridaApos;
 	}
 
 	@Override
@@ -347,10 +365,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	private void setParams(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, Long idResponsavel, Long idPosicionamento, Integer[] idProposicoes, TypedQuery findByIdQuery) {
-		setParams(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null, idPosicionamento, null, null, null, null, null, findByIdQuery);
+		setParams(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null, idPosicionamento, null, null, null, null, null, null, null, findByIdQuery);
 	}
 
-	private void setParams(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento, String relator, Date inseridaApos, String macrotema, Boolean somentePautadas, Integer[] idProposicoes, TypedQuery findByIdQuery) {
+	private void setParams(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento, String relator, Date inseridaApos, Date foiDespachadaApos, Date foiDespachadaAte, String macrotema, Boolean somentePautadas, Integer[] idProposicoes, TypedQuery findByIdQuery) {
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			findByIdQuery.setParameter("sigla", "%" + sigla + "%");
 		}
@@ -369,6 +387,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 		if (Objects.nonNull(inseridaApos)) {
 			findByIdQuery.setParameter("inseridaApos", inseridaApos);
+		}
+		if (Objects.nonNull(foiDespachadaApos)) {
+			findByIdQuery.setParameter("foiDespachadaApos", foiDespachadaApos.getTime());
+		}
+		if (Objects.nonNull(foiDespachadaAte)) {
+			findByIdQuery.setParameter("foiDespachadaAte", foiDespachadaAte.getTime());
 		}
 		if (Objects.nonNull(ementa) && !ementa.equals("")) {
 			findByIdQuery.setParameter("ementa", "%" + ementa + "%");
@@ -414,10 +438,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, Long idResponsavel, Long idPosicionamento, Integer[] idProposicao) {
-		return createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null, idPosicionamento, null, null, null, null, null, idProposicao);
+		return createWhereClause(sigla, comissao, autor, ementa, origem, isFavorita, null, idResponsavel, null, idPosicionamento, null, null, null, null, null, null, null, null, idProposicao);
 	}
 
-	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento, String relator, Date inseridaApos, String macroTema, Boolean comAtencaoEspecial, Boolean somentePautadas, Integer[] idProposicao) {
+	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento, String relator, Date inseridaApos, Date foiDespachadaApos, Date foiDespachadaAte, String macroTema, Boolean comNotatecnica, Boolean comAtencaoEspecial, Boolean somentePautadas, Integer[] idProposicao) {
 		StringBuilder query = new StringBuilder();
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			query.append(" AND upper(CONCAT(p.tipo,' ',p.numero,'/',p.ano)) like upper(:sigla)");
@@ -436,6 +460,15 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 		if (Objects.nonNull(inseridaApos)) {
 			query.append(" AND p.created >= :inseridaApos ");
+		}
+		if (Objects.nonNull(foiDespachadaApos)) {
+			query.append(" AND p.foiDespachada >= :foiDespachadaApos ");
+		}
+		if (Objects.nonNull(foiDespachadaAte)) {
+			query.append(" AND p.foiDespachada <= :foiDespachadaAte ");
+		}
+		if (Objects.nonNull(foiDespachadaApos) || Objects.nonNull(foiDespachadaAte)) {
+			query.append(" AND p.foiDespachada IS NOT NULL ");
 		}
 		if (Objects.nonNull(estado) && !estado.isEmpty()) {
 			query.append(" AND p.estado = :estado");
@@ -469,6 +502,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			} else {
 				query.append(" AND  p.equipe.id = :idEquipe ");
 			}
+		}
+		if (Objects.nonNull(comNotatecnica) && Boolean.TRUE.equals(comNotatecnica)) {
+			query.append(" AND p.notatecnicas is not empty ");
 		}
 		if (Objects.nonNull(idPosicionamento)) {
 			if (idPosicionamento == -1) {
@@ -1365,7 +1401,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 
 	@Override
 	public List<NotaTecnica> getNotaTecnicas(Long proposicaoId) {
-		Query q = em.createNamedQuery("listNotatecnicaProposicao").setParameter("idProposicao", proposicaoId);
+		Query q = em.createNamedQuery("listNotatecnicaProposicao", NotaTecnica.class).setParameter("idProposicao", proposicaoId);
 		List<NotaTecnica> res = q.getResultList();
 
 		return res;
