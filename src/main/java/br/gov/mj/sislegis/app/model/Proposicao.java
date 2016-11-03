@@ -349,7 +349,7 @@ public class Proposicao extends AbstractEntity {
 
 	public String getComissao() {
 		if (comissao == null || comissao.length() == 0) {
-			if (!pautasComissoes.isEmpty()) {
+			if (!pautasComissoes.isEmpty() && getUltima() != null && getUltima().getPautaReuniaoComissao() != null) {
 				// para algumas proposicoes da camara o campo com dados da
 				// comissao atual está vazio.
 				// por exemplo:
