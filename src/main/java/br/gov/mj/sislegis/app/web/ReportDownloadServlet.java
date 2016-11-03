@@ -313,7 +313,11 @@ public class ReportDownloadServlet extends HttpServlet {
 					} else if ("idEquipe".equals(k)) {
 						filtros.put(k, Long.valueOf(valor));
 					} else if ("estado".equals(k)) {
-						filtros.put(k, EstadoProposicao.valueOf(valor).name());
+						try {
+							filtros.put(k, EstadoProposicao.valueOf(valor).name());
+						} catch (Exception e) {
+							Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.INFO, "valor do enum de estado de proposicao invalido para o filtro: " + valor);
+						}
 					} else if ("somentePautadas".equals(k)) {
 						filtros.put(k, Boolean.TRUE);
 
