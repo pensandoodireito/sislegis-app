@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 import org.junit.After;
 import org.junit.Before;
@@ -20,6 +21,7 @@ import br.gov.mj.sislegis.app.enumerated.Origem;
 import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.TipoEncaminhamento;
+import br.gov.mj.sislegis.app.model.documentos.NotaTecnica;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao;
 import br.gov.mj.sislegis.app.parser.camara.ParserPautaCamara;
@@ -133,6 +135,21 @@ public class TestSyncPautas {
 		((EJBUnitTestable) tipoEncaminhamentoService).setInjectedEntities(em);
 		((EJBUnitTestable) amSvc).setInjectedEntities(em);
 
+	}
+	
+
+	@Test
+	public void testComNotas() throws Exception {
+		List<Proposicao> ps = em.createNamedQuery("findWithNotas").getResultList();// em.createQuery("select p from Proposicao where p.notatecnicas is not empty",Proposicao.class).getResultList();
+		ps = em.createQuery("select p from Proposicao p where p.notatecnicas is not empty").getResultList();
+		for (Iterator iterator = ps.iterator(); iterator.hasNext();) {
+			Proposicao proposicao = (Proposicao) iterator.next();
+			
+			Query q = em.createNamedQuery("listNotatecnicaProposicao").setParameter("idProposicao", proposicao.getId());
+			List<NotaTecnica> res = q.getResultList();
+			System.out.println(proposicao.getTotalNotasTecnicas()+" "+res.size());
+		}
+		
 	}
 
 	@Test

@@ -316,13 +316,16 @@ public class ReportDownloadServlet extends HttpServlet {
 						filtros.put(k, EstadoProposicao.valueOf(valor).name());
 					} else if ("somentePautadas".equals(k)) {
 						filtros.put(k, Boolean.TRUE);
+
+					} else if ("comNotaTecnica".equals(k)) {
+						filtros.put(k, Boolean.TRUE);
 					} else if ("comAtencaoEspecial".equals(k)) {
 						filtros.put(k, Boolean.TRUE);
 					} else {
 						filtros.put(k, valor);
 					}
 				}
-			}	
+			}
 
 			gerarRelatorio(filtros).write(response.getOutputStream());
 

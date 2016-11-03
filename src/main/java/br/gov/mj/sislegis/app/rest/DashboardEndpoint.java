@@ -147,9 +147,9 @@ public class DashboardEndpoint {
 			JSONObject porEquipe = new JSONObject();
 			porEquipe.put("e", equipe.toJson());
 
-			Long totalEmTrabalhoDaEquip = (Long) em.createQuery("select count(p.id) from Proposicao p where (p.estado=:estado1 or p.estado=:estado2) and p.updated>:data and p.equipe.id=:idEquipe")
+			Long totalEmTrabalhoDaEquip = (Long) em.createQuery("select count(p.id) from Proposicao p where (p.estado=:estado1 or p.estado=:estado2) and  p.equipe.id=:idEquipe")
 					.setParameter("idEquipe", equipe.getId())
-					.setParameter("data", inicioMes.getTime())
+//					.setParameter("data", inicioMes.getTime())
 					.setParameter("estado1", EstadoProposicao.ANALISADA)
 					.setParameter("estado2", EstadoProposicao.EMANALISE).getSingleResult();
 			Long totalProcessadaPelaEquipe = (Long) em.createQuery("select count(p.id) from Proposicao p where (p.estado<>:estado1 and p.estado<>:estado2) and p.updated>:data and p.equipe.id=:idEquipe")
@@ -161,7 +161,7 @@ public class DashboardEndpoint {
 			porEquipe.put("totalProcessada", totalProcessadaPelaEquipe);
 			equipesArr.put(porEquipe);
 		}
-		Long totalSemEquipe = (Long) em.createQuery("select count(p.id) from Proposicao p where p.estado=:estado and p.updated>:data and p.equipe.id is null").setParameter("data", inicioMes.getTime()).setParameter("estado", EstadoProposicao.EMANALISE).getSingleResult();
+		Long totalSemEquipe = (Long) em.createQuery("select count(p.id) from Proposicao p where p.equipe is null").getSingleResult();
 		dashInfo.put("semEquipe", totalSemEquipe);
 		dashInfo.put("equipes", equipesArr);
 
