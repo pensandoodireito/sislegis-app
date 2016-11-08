@@ -13,20 +13,27 @@ import javax.persistence.TypedQuery;
 
 import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.EstadoProposicao;
+import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Tarefa;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
+import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.TarefaService;
+import br.gov.mj.sislegis.app.service.TipoEncaminhamentoService;
 
 @Stateless
-public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<EncaminhamentoProposicao, Long> implements
-		EncaminhamentoProposicaoService, EJBUnitTestable {
+public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<EncaminhamentoProposicao, Long> implements EncaminhamentoProposicaoService, EJBUnitTestable {
 
 	@PersistenceContext
 	private EntityManager em;
 
 	@Inject
 	private TarefaService tarefaService;
+	@Inject
+	private TipoEncaminhamentoService tipoEncSvc;
+	@Inject
+	private ProposicaoService propSvc;
 
 	public EncaminhamentoProposicaoServiceEjb() {
 		super(EncaminhamentoProposicao.class);
@@ -34,8 +41,7 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 
 	@Override
 	public void deleteById(Long id) {
-		int deleted = em.createQuery("delete Tarefa where encaminhamentoProposicao.id=:id").setParameter("id", id)
-				.executeUpdate();
+		int deleted = em.createQuery("delete Tarefa where encaminhamentoProposicao.id=:id").setParameter("id", id).executeUpdate();
 		super.deleteById(id);
 	}
 
@@ -53,9 +59,7 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 
 	@Override
 	public List<EncaminhamentoProposicao> findByProposicao(Long idProposicao) {
-		TypedQuery<EncaminhamentoProposicao> findByIdQuery = em.createQuery(
-				"SELECT c FROM EncaminhamentoProposicao c where c.proposicao.id=:entityId",
-				EncaminhamentoProposicao.class);
+		TypedQuery<EncaminhamentoProposicao> findByIdQuery = em.createQuery("SELECT c FROM EncaminhamentoProposicao c where c.proposicao.id=:entityId", EncaminhamentoProposicao.class);
 		findByIdQuery.setParameter("entityId", idProposicao);
 		final List<EncaminhamentoProposicao> results = findByIdQuery.getResultList();
 
@@ -67,10 +71,7 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 
 	@Deprecated
 	public List<EncaminhamentoProposicao> findByProposicao2(Long idProposicao) {
-		TypedQuery<EncaminhamentoProposicao> findByIdQuery = em.createQuery("SELECT c FROM EncaminhamentoProposicao c "
-				+ "INNER JOIN FETCH c.responsavel res " + "INNER JOIN FETCH c.comentario com "
-				+ "INNER JOIN FETCH c.tipoEncaminhamento enc "
-				+ "INNER JOIN FETCH c.proposicao p WHERE p.id = :entityId", EncaminhamentoProposicao.class);
+		TypedQuery<EncaminhamentoProposicao> findByIdQuery = em.createQuery("SELECT c FROM EncaminhamentoProposicao c " + "INNER JOIN FETCH c.responsavel res " + "INNER JOIN FETCH c.comentario com " + "INNER JOIN FETCH c.tipoEncaminhamento enc " + "INNER JOIN FETCH c.proposicao p WHERE p.id = :entityId", EncaminhamentoProposicao.class);
 		findByIdQuery.setParameter("entityId", idProposicao);
 		final List<EncaminhamentoProposicao> results = findByIdQuery.getResultList();
 
@@ -79,8 +80,7 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 
 	@Override
 	public Integer totalByProposicao(Long idProposicao) {
-		Query query = em
-				.createNativeQuery("SELECT COUNT(1) FROM encaminhamentoproposicao WHERE proposicao_id = :idProposicao");
+		Query query = em.createNativeQuery("SELECT COUNT(1) FROM encaminhamentoproposicao WHERE proposicao_id = :idProposicao");
 		query.setParameter("idProposicao", idProposicao);
 		BigInteger total = (BigInteger) query.getSingleResult();
 		return total.intValue();
@@ -89,6 +89,7 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 	@Override
 	public void finalizar(Long idEncaminhamentoProposicao, String descricaoComentario) {
 		EncaminhamentoProposicao encaminhamento = findById(idEncaminhamentoProposicao);
+
 		encaminhamento.setFinalizado(true);
 
 		Comentario comentario = new Comentario();
@@ -107,6 +108,13 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 										// (cascade)
 		} else {
 			save(encaminhamento);
+		}
+		if (encaminhamento.getTipoEncaminhamento().equals(tipoEncSvc.buscarTipoEncaminhamentoDespachoPresencial())) {
+			if (EstadoProposicao.ADESPACHAR_PRESENCA.equals(encaminhamento.getProposicao().getEstado())) {
+				Proposicao prop = propSvc.findById(encaminhamento.getProposicao().getId());
+				prop.setEstado(EstadoProposicao.DESPACHADA);
+				propSvc.save(prop, null);
+			}
 		}
 	}
 
