@@ -231,6 +231,7 @@ public class ProposicaoEndpoint {
 		Proposicao p = proposicaoService.findById(id);
 		if (p.getComAtencaoEspecial() != null) {
 			p.desmarcarAtencaoEspecial();
+			proposicaoService.save(p);
 			Set<EncaminhamentoProposicao> encs = new HashSet<EncaminhamentoProposicao>(encaminhamentoProposicaoService.findByProposicao(id));
 			if (encs.size() > 0) {
 				TipoEncaminhamento marcadoComAtencao = tipoSvc.buscarTipoEncaminhamentoDespachoMinisterial();
@@ -243,6 +244,7 @@ public class ProposicaoEndpoint {
 					}
 				}
 			}
+
 			return Response.ok().build();
 
 		} else {
@@ -383,7 +385,7 @@ public class ProposicaoEndpoint {
 		m.put("idResponsavel", idResponsavel);
 		m.put("somentePautadas", pautadas);
 		m.put("comNotaTecnica", comNotaTecnica);
-		
+
 		m.put("comAtencaoEspecial", comAtencaoEspecial);
 
 		m.put("comissao", comissao);
