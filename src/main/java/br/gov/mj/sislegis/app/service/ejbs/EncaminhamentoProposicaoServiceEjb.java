@@ -16,6 +16,8 @@ import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
 import br.gov.mj.sislegis.app.model.EstadoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Tarefa;
+import br.gov.mj.sislegis.app.model.TipoEncaminhamento;
+import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
@@ -54,6 +56,18 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 	public EncaminhamentoProposicao salvarEncaminhamentoProposicao(EncaminhamentoProposicao encaminhamentoProposicao) {
 		EncaminhamentoProposicao savedEntity = this.save(encaminhamentoProposicao);
 		tarefaService.updateTarefa(savedEntity);
+		return savedEntity;
+	}
+
+	@Override
+	public EncaminhamentoProposicao salvarEncaminhamentoProposicaoAutomatico(String detalhe, Proposicao p, Usuario responsavel) {
+		EncaminhamentoProposicao eprop = new EncaminhamentoProposicao();
+		eprop.setDetalhes(detalhe);
+		TipoEncaminhamento tipo = tipoEncSvc.buscarTipoEncaminhamentoAlteracaoProposicao();
+		eprop.setTipoEncaminhamento(tipo);
+		eprop.setProposicao(p);
+		eprop.setResponsavel(responsavel);
+		EncaminhamentoProposicao savedEntity = salvarEncaminhamentoProposicao(eprop);
 		return savedEntity;
 	}
 

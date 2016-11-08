@@ -6,5 +6,6 @@ public interface TipoEncaminhamentoService extends Service<TipoEncaminhamento> {
 
 	TipoEncaminhamento buscarTipoEncaminhamentoDespachoPresencial();
 	TipoEncaminhamento buscarTipoEncaminhamentoDespachoMinisterial();
+	TipoEncaminhamento buscarTipoEncaminhamentoAlteracaoProposicao();
 	
 }

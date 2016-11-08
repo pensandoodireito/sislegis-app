@@ -23,6 +23,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
+import br.gov.mj.sislegis.app.model.Equipe;
 import br.gov.mj.sislegis.app.model.Papel;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Usuario;
@@ -198,9 +199,14 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 
 	@Override
 	public Set<Usuario> listUsuariosPorPapel(Papel secretario) {
-		
-		
+
 		return new HashSet<Usuario>(getEntityManager().createNativeQuery("select u.* from usuario_papel up, usuario u where up.usuario_id=u.id and up.papel=:papel", Usuario.class).setParameter("papel", secretario.name()).getResultList());
+	}
+
+	@Override
+	public Set<Usuario> listUsuariosPorPapelDeEquipe(Papel papel, Equipe equipe) {
+		return new HashSet<Usuario>(getEntityManager().createNativeQuery("select u.* from usuario_papel up, usuario u where up.usuario_id=u.id and up.papel=:papel and u.idequipe=:equipe", Usuario.class).setParameter("papel", papel.name()).setParameter("equipe", equipe.getId()).getResultList());
+
 	}
 
 }

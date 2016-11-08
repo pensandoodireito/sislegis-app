@@ -5,7 +5,9 @@ import java.util.List;
 import javax.ejb.Local;
 
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.TipoEncaminhamento;
+import br.gov.mj.sislegis.app.model.Usuario;
 
 @Local
 public interface EncaminhamentoProposicaoService extends Service<EncaminhamentoProposicao> {
@@ -17,6 +19,8 @@ public interface EncaminhamentoProposicaoService extends Service<EncaminhamentoP
 	Integer totalByProposicao(Long idProposicao);
 
 	void finalizar(Long idEncaminhamentoProposicao, String descricaoComentario);
+
+	EncaminhamentoProposicao salvarEncaminhamentoProposicaoAutomatico(String detalhe, Proposicao p, Usuario responsavel);
 
 	
 }

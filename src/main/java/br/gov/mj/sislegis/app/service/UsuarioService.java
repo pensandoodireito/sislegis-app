@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.ejb.Local;
 
+import br.gov.mj.sislegis.app.model.Equipe;
 import br.gov.mj.sislegis.app.model.Papel;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Usuario;
@@ -40,5 +41,7 @@ public interface UsuarioService extends Service<Usuario> {
 	Usuario findOrCreateByEmail(String string, String email);
 
 	Set<Usuario> listUsuariosPorPapel(Papel secretario);
+
+	Set<Usuario> listUsuariosPorPapelDeEquipe(Papel diretor, Equipe equipe);
 
 }
