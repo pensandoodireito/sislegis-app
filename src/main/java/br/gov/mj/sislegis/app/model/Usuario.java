@@ -3,6 +3,7 @@ package br.gov.mj.sislegis.app.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -29,7 +30,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @XmlRootElement
-
 public class Usuario extends AbstractEntity {
 
 	private static final long serialVersionUID = -8092650497855683601L;
@@ -55,11 +55,11 @@ public class Usuario extends AbstractEntity {
 	@JoinColumn(name = "idequipe", referencedColumnName = "id", nullable = true)
 	private Equipe equipe = null;
 
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
 	@JoinTable(name = "Usuario_ProposicaoSeguida")
 	private Set<Proposicao> proposicoesSeguidas = new HashSet<Proposicao>();
 
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
 	@JoinTable(name = "Usuario_Agendas")
 	private Set<AgendaComissao> agendasSeguidas = new HashSet<AgendaComissao>();
 

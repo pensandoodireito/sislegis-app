@@ -12,6 +12,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -23,6 +25,10 @@ import br.gov.mj.sislegis.app.enumerated.TipoTarefa;
 
 @Entity
 @Table(name = "tarefa")
+@NamedQueries({ 
+	@NamedQuery(name = "getAllTarefa4Usuario", query = "select c from Tarefa c where c.usuario.id=:userId")
+
+})
 @XmlRootElement
 public class Tarefa extends AbstractEntity {
 	public static Tarefa createTarefaEncaminhamento(Usuario usuario, EncaminhamentoProposicao encaminhamento) {

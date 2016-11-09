@@ -24,7 +24,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Table(name = "areamerito_revisao")
 @NamedQueries({
 		@NamedQuery(name = "AreaDeMeritoRevisaoByProposicao", query = "SELECT ag FROM AreaDeMeritoRevisao ag where ag.proposicao.id=:prop"),
-		@NamedQuery(name = "AreaDeMeritoRevisaoByArea", query = "SELECT ag FROM AreaDeMeritoRevisao ag where ag.areaMerito.id=:idArea") })
+		@NamedQuery(name = "AreaDeMeritoRevisaoByArea", query = "SELECT ag FROM AreaDeMeritoRevisao ag where ag.areaMerito.id=:idArea"),
+		@NamedQuery(name = "listRevisaoByUser", query = "select n from AreaDeMeritoRevisao n where n.documento.usuario.id=:userId")
+		
+})
 public class AreaDeMeritoRevisao extends AbstractEntity {
 
 	private static final long serialVersionUID = -2801342641242367391L;

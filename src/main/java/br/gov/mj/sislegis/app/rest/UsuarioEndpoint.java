@@ -20,6 +20,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
@@ -55,14 +56,18 @@ public class UsuarioEndpoint {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(Usuario entity) {
 		service.save(entity);
-		return Response.created(
-				UriBuilder.fromResource(UsuarioEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
+		return Response.created(UriBuilder.fromResource(UsuarioEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
 	}
 
 	@DELETE
 	@Path("/{id:[0-9][0-9]*}")
-	public Response deleteById(@PathParam("id") Long id) {
-		service.deleteById(id);
+	public Response deleteById(@PathParam("id") Long id, @QueryParam("f") Boolean force) {
+		if (Boolean.TRUE.equals(force)) {
+			service.deleteByIdForce(id);
+			
+		}else{
+			service.deleteById(id);
+		}
 		return Response.noContent().build();
 	}
 

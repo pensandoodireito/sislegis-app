@@ -44,4 +44,6 @@ public interface UsuarioService extends Service<Usuario> {
 
 	Set<Usuario> listUsuariosPorPapelDeEquipe(Papel diretor, Equipe equipe);
 
+	void deleteByIdForce(Long id);
+
 }

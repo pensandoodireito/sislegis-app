@@ -9,6 +9,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
@@ -21,6 +23,10 @@ import org.json.JSONObject;
 
 @Entity
 @Table(name = "documento")
+@NamedQueries({ 
+	@NamedQuery(name = "getAllDocumentos4Usuario", query = "select c from Documento c where c.usuario.id=:userId")
+
+})
 @XmlRootElement
 public class Documento extends AbstractEntity {
 
