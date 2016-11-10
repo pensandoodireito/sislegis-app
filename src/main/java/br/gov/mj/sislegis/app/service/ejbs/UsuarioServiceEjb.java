@@ -286,11 +286,7 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 			em.remove(emenda);
 		}
 
-		List<PosicionamentoProposicao> listaPosicionamentoProposicao = getEntityManager().createNamedQuery("getAllPosicionamentoProposicao4Usuario", PosicionamentoProposicao.class).setParameter("userId", id).getResultList();
-		for (Iterator iterator = listaPosicionamentoProposicao.iterator(); iterator.hasNext();) {
-			PosicionamentoProposicao posicionamentoProposicao = (PosicionamentoProposicao) iterator.next();
-			em.remove(posicionamentoProposicao);
-		}
+		
 		List<Proposicao> listaProposicaoPosicionada = getEntityManager().createNamedQuery("getAllProposicaoPosicionada4Usuario", Proposicao.class).setParameter("userId", id).getResultList();
 		for (Iterator iterator = listaProposicaoPosicionada.iterator(); iterator.hasNext();) {
 			Proposicao proposicao = (Proposicao) iterator.next();
@@ -299,6 +295,11 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 			proposicao.setPosicionamentoAtual(null);
 			
 			propSvc.save(proposicao, null);
+		}
+		List<PosicionamentoProposicao> listaPosicionamentoProposicao = getEntityManager().createNamedQuery("getAllPosicionamentoProposicao4Usuario", PosicionamentoProposicao.class).setParameter("userId", id).getResultList();
+		for (Iterator iterator = listaPosicionamentoProposicao.iterator(); iterator.hasNext();) {
+			PosicionamentoProposicao posicionamentoProposicao = (PosicionamentoProposicao) iterator.next();
+			em.remove(posicionamentoProposicao);
 		}
 		
 		List<Proposicao> listaProposicao = getEntityManager().createNamedQuery("getAllProposicao4Usuario", Proposicao.class).setParameter("userId", id).getResultList();
