@@ -11,6 +11,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -23,6 +25,11 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
 @XmlRootElement
+
+@NamedQueries({ 
+	@NamedQuery(name = "getAllEncaminhamentoProposicao4Usuario", query = "select c from EncaminhamentoProposicao c where c.responsavel.id=:userId")
+
+})
 @JsonIgnoreProperties({ "idProposicao" })
 public class EncaminhamentoProposicao extends AbstractEntity {
 

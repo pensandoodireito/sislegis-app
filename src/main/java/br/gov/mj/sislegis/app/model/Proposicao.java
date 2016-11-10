@@ -87,6 +87,12 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 			query = "select p from Proposicao p where p.ultima.pautaReuniaoComissao.data>:data")
 	,
 	@NamedQuery(
+			name = "getAllProposicao4Usuario", 
+			query = "select p from Proposicao p where p.responsavel.id=:userId"),
+			@NamedQuery(
+					name = "getAllProposicaoPosicionada4Usuario", 
+					query = "select p from Proposicao p where p.posicionamentoAtual.usuario.id=:userId"),
+	@NamedQuery(
 			name = "findNaoPautadas",  
 			query = "select p from Proposicao p where p.ultima is null")
 	
@@ -271,7 +277,7 @@ public class Proposicao extends AbstractEntity {
 	public Proposicao() {
 		super();
 		this.created = this.updated = new Date();
-		this.estado = EstadoProposicao.FORADEPAUTA;
+		this.estado = EstadoProposicao.INCLUIDO;
 	}
 
 	public String getSigla() {

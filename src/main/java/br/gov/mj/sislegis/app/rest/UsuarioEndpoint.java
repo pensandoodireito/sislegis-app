@@ -55,14 +55,18 @@ public class UsuarioEndpoint {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(Usuario entity) {
 		service.save(entity);
-		return Response.created(
-				UriBuilder.fromResource(UsuarioEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
+		return Response.created(UriBuilder.fromResource(UsuarioEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
 	}
 
 	@DELETE
 	@Path("/{id:[0-9][0-9]*}")
-	public Response deleteById(@PathParam("id") Long id) {
-		service.deleteById(id);
+	public Response deleteById(@PathParam("id") Long id, @QueryParam("f") Boolean force) {
+		if (Boolean.TRUE.equals(force)) {
+			service.deleteByIdForce(id);
+			
+		}else{
+			service.deleteById(id);
+		}
 		return Response.noContent().build();
 	}
 

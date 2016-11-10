@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import br.gov.mj.sislegis.app.model.AreaDeMeritoRevisao;
 import br.gov.mj.sislegis.app.model.Papel;
 import br.gov.mj.sislegis.app.model.TipoEncaminhamento;
 import br.gov.mj.sislegis.app.parser.camara.ParserProposicaoCamara;
@@ -129,8 +130,7 @@ public class TestAutoUpdater {
 
 	@Test
 	public void testQuery() {
-		Set s = userSvc.listUsuariosPorPapel(Papel.SECRETARIO);
-		System.out.println(s.size());
+		em.createNamedQuery("listRevisaoByUser", AreaDeMeritoRevisao.class).setParameter("userId", 23559l).getResultList();
 //		EntityTransaction trans = em.getTransaction();
 //		trans.begin();
 //		autoUpd.atualizaPautadasSenado();

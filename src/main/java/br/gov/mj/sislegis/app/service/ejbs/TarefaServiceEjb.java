@@ -13,11 +13,15 @@ import javax.persistence.TypedQuery;
 
 import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.EstadoProposicao;
 import br.gov.mj.sislegis.app.model.Notificacao;
+import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Tarefa;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.NotificacaoService;
+import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.TarefaService;
+import br.gov.mj.sislegis.app.service.TipoEncaminhamentoService;
 
 @Stateless
 public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implements TarefaService, EJBUnitTestable {
@@ -26,7 +30,11 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 	@PersistenceContext
 	private EntityManager em;
 	@Inject
-	NotificacaoService notificacaoService;
+	private NotificacaoService notificacaoService;
+	@Inject
+	private TipoEncaminhamentoService tipoEncSvc;
+	@Inject
+	private ProposicaoService propSvc;
 
 	public TarefaServiceEjb() {
 		super(Tarefa.class);
@@ -68,8 +76,7 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 
 	@Override
 	public Tarefa buscarPorId(Long idTarefa) {
-		TypedQuery<Tarefa> findByIdQuery = em
-				.createQuery("SELECT t FROM Tarefa t WHERE t.id = :idTarefa", Tarefa.class);
+		TypedQuery<Tarefa> findByIdQuery = em.createQuery("SELECT t FROM Tarefa t WHERE t.id = :idTarefa", Tarefa.class);
 		findByIdQuery.setParameter("idTarefa", idTarefa);
 		List<Tarefa> resultList = findByIdQuery.getResultList();
 
@@ -86,8 +93,7 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 
 	@Override
 	public List<Tarefa> buscarPorUsuario(Long idUsuario) {
-		TypedQuery<Tarefa> findByIdQuery = em.createQuery("SELECT t FROM Tarefa t WHERE t.usuario.id = :idUsuario",
-				Tarefa.class);
+		TypedQuery<Tarefa> findByIdQuery = em.createQuery("SELECT t FROM Tarefa t WHERE t.usuario.id = :idUsuario", Tarefa.class);
 		findByIdQuery.setParameter("idUsuario", idUsuario);
 		List<Tarefa> resultList = findByIdQuery.getResultList();
 
@@ -96,9 +102,7 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 
 	@Override
 	public Tarefa buscarPorEncaminhamentoProposicaoId(Long idEncaminhamentoProposicao) {
-		TypedQuery<Tarefa> findByIdQuery = em.createQuery(
-				"SELECT t FROM Tarefa t WHERE t.encaminhamentoProposicao.id = :idEncaminhamentoProposicao",
-				Tarefa.class);
+		TypedQuery<Tarefa> findByIdQuery = em.createQuery("SELECT t FROM Tarefa t WHERE t.encaminhamentoProposicao.id = :idEncaminhamentoProposicao", Tarefa.class);
 		findByIdQuery.setParameter("idEncaminhamentoProposicao", idEncaminhamentoProposicao);
 		List<Tarefa> resultList = findByIdQuery.getResultList();
 
@@ -170,6 +174,14 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 		tarefa.getEncaminhamentoProposicao().setComentarioFinalizacao(comentario);
 
 		save(tarefa);
+
+		if (tarefa.getEncaminhamentoProposicao().getTipoEncaminhamento().equals(tipoEncSvc.buscarTipoEncaminhamentoDespachoPresencial())) {
+			if (EstadoProposicao.ADESPACHAR_PRESENCA.equals(tarefa.getEncaminhamentoProposicao().getProposicao().getEstado())) {
+				Proposicao prop = propSvc.findById(tarefa.getEncaminhamentoProposicao().getProposicao().getId());
+				prop.setEstado(EstadoProposicao.DESPACHADA);
+				propSvc.save(prop, null);
+			}
+		}
 	}
 
 	@Override

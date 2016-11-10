@@ -10,6 +10,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -18,6 +20,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @XmlRootElement
+@NamedQueries({ 
+	@NamedQuery(name = "getAllComentarios4Usuario", query = "select c from Comentario c where c.autor.id=:userId")
+
+})
 @JsonIgnoreProperties({ "idProposicao" })
 public class Comentario extends AbstractEntity {
 

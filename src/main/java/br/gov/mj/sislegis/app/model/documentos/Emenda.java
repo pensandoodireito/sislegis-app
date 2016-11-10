@@ -28,7 +28,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "proposicao_emenda")
-@NamedQueries({ @NamedQuery(name = "listEmendasProposicao", query = "select n from Emenda n where n.proposicao.id=:idProposicao")
+@NamedQueries({
+	@NamedQuery(name = "listEmendasProposicao", query = "select n from Emenda n where n.proposicao.id=:idProposicao"),
+	@NamedQuery(name = "listEmendasByUser", query = "select n from Emenda n where n.documento.usuario.id=:userId")
 
 })
 public class Emenda extends AbstractEntity implements DocRelated {

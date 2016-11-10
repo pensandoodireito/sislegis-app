@@ -109,7 +109,7 @@ public class DashboardEndpoint {
 				Query q1 = em.createNativeQuery("select eq.id as idEquipe,eq.nome as nomeEquipe,u.nome as nomeUsuario,u.email,u.id,count(p.id) from Usuario u left join (select id,responsavel_id from Proposicao where (estado<>:estado1 and estado<>:estado2) and idequipe=:idEquipe and updated>:data) p on p.responsavel_id=u.id, Equipe eq where eq.id=u.idequipe and eq.id=:idEquipe group by eq.id,eq.nome,u.id,u.nome,u.email")
 						.setParameter("idEquipe", equipe.getId())
 						.setParameter("data", inicioMes.getTime())
-						.setParameter("estado1", EstadoProposicao.FORADEPAUTA.name())
+						.setParameter("estado1", EstadoProposicao.INCLUIDO.name())
 						.setParameter("estado2", EstadoProposicao.EMANALISE.name());
 				List<Object[]> resultadoAnalisadasPorMembro = q1.getResultList();
 				long totalProcessadas = 0;
@@ -154,7 +154,7 @@ public class DashboardEndpoint {
 					.setParameter("estado2", EstadoProposicao.EMANALISE).getSingleResult();
 			Long totalProcessadaPelaEquipe = (Long) em.createQuery("select count(p.id) from Proposicao p where (p.estado<>:estado1 and p.estado<>:estado2) and p.updated>:data and p.equipe.id=:idEquipe")
 					.setParameter("idEquipe", equipe.getId()).setParameter("data", inicioMes.getTime())
-					.setParameter("estado1", EstadoProposicao.FORADEPAUTA)
+					.setParameter("estado1", EstadoProposicao.INCLUIDO)
 					.setParameter("estado2", EstadoProposicao.EMANALISE).getSingleResult();
 
 			porEquipe.put("totalEmAnalise", totalEmTrabalhoDaEquip);

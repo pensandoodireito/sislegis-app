@@ -36,7 +36,9 @@ import br.gov.mj.sislegis.app.model.AlteracaoProposicao;
 import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
+import br.gov.mj.sislegis.app.model.Equipe;
 import br.gov.mj.sislegis.app.model.EstadoProposicao;
+import br.gov.mj.sislegis.app.model.Papel;
 import br.gov.mj.sislegis.app.model.Posicionamento;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.ProcessoSei;
@@ -952,8 +954,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				if (instanciaNova.getPosicionamentoAtual() == null || instanciaNova.getPosicionamentoAtual().getPosicionamento() == null) {
 
 					instanciaNova.setPosicionamentoAtual(null);
-				} else if 
-//@formatter:off
+				} else if//@formatter:off 
+				
 				(
 					(instanciaNova.getPosicionamentoAtual() != null && proposicao.getPosicionamentoAtual() == null)
 					|| (
@@ -980,6 +982,26 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 					posicionamentoProposicao.setUsuario(user);
 					em.persist(posicionamentoProposicao);
 					instanciaNova.setPosicionamentoAtual(posicionamentoProposicao);
+					if (user.getPapeis().contains(Papel.SECRETARIO)) {
+						Equipe equipe = null;
+						if (instanciaNova.getEquipe() != null) {
+							equipe = instanciaNova.getEquipe();
+						} else if (instanciaNova.getResponsavel() != null) {
+							equipe = instanciaNova.getResponsavel().getEquipe();
+						}
+						if (equipe != null) {
+							Set<Usuario> diretores = usuarioService.listUsuariosPorPapelDeEquipe(Papel.DIRETOR, equipe);
+							for (Iterator iterator = diretores.iterator(); iterator.hasNext();) {
+								Usuario usuario = (Usuario) iterator.next();
+								encaminhamentoProposicaoService.salvarEncaminhamentoProposicaoAutomatico("Posicionamento alterado pelo Secretário", instanciaNova, usuario);
+							}
+						}
+
+					} else if (user.getPapeis().contains(Papel.DIRETOR)) {
+						if (instanciaNova.getResponsavel() != null) {
+							encaminhamentoProposicaoService.salvarEncaminhamentoProposicaoAutomatico("Posicionamento alterado pelo Diretor", instanciaNova, instanciaNova.getResponsavel());
+						}
+					}
 				}
 			}
 		}
