@@ -3,7 +3,6 @@ package br.gov.mj.sislegis.app.parser.senado;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;

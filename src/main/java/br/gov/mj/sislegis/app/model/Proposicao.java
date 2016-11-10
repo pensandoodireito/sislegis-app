@@ -277,7 +277,7 @@ public class Proposicao extends AbstractEntity {
 	public Proposicao() {
 		super();
 		this.created = this.updated = new Date();
-		this.estado = EstadoProposicao.FORADEPAUTA;
+		this.estado = EstadoProposicao.INCLUIDO;
 	}
 
 	public String getSigla() {

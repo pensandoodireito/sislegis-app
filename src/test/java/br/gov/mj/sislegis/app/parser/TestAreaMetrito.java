@@ -155,7 +155,7 @@ public class TestAreaMetrito {
 	@Test
 	public void test2() throws IOException {
 		Map<String, Object> filtros = new HashMap<String, Object>();
-		filtros.put("estado", EstadoProposicao.FORADEPAUTA.name());
+		filtros.put("estado", EstadoProposicao.FORADECOMPETENCIA.name());
 		filtros.put("origem", Origem.SENADO.name());
 		
 		List<Proposicao> props = proposicaoService.consultar(filtros, 0, 2);
