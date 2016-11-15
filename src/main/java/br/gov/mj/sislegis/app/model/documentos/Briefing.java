@@ -28,10 +28,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "proposicao_briefing")
-@NamedQueries({
-	@NamedQuery(name = "listBriefingProposicao", query = "select n from Briefing n where n.proposicao.id=:idProposicao"),
-	@NamedQuery(name = "listBriefingByUser", query = "select n from Briefing n where n.documento.usuario.id=:userId")
-
+@NamedQueries({ @NamedQuery(name = "listBriefingProposicao", query = "select n from Briefing n where n.proposicao.id=:idProposicao"), @NamedQuery(name = "listBriefingByUser", query = "select n from Briefing n where n.documento.usuario.id=:userId")
 
 })
 public class Briefing extends AbstractEntity implements DocRelated {
@@ -56,20 +53,18 @@ public class Briefing extends AbstractEntity implements DocRelated {
 	@ManyToOne(optional = false)
 	private Usuario usuario;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date dataCriacao = new Date();
+	@Column(name = "criacao")
+	private Long dataCriacao;
 
 	@Column(length = 256)
 	private String url_arquivo;
 
 	protected Briefing() {
-		dataCriacao = new Date();
 	}
 
 	public Briefing(Proposicao p, Usuario u) {
 		this.proposicao = p;
 		this.usuario = u;
-		dataCriacao = new Date();
 	}
 
 	@Override
@@ -85,7 +80,7 @@ public class Briefing extends AbstractEntity implements DocRelated {
 		return usuario;
 	}
 
-	public Date getDataCriacao() {
+	public Long getDataCriacao() {
 		return dataCriacao;
 	}
 
@@ -107,7 +102,7 @@ public class Briefing extends AbstractEntity implements DocRelated {
 
 	@PrePersist
 	protected void onCreate() {
-		dataCriacao = new Date();
+		dataCriacao = System.currentTimeMillis();
 	}
 
 	public Documento getDocumento() {

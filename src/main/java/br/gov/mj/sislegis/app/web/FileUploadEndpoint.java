@@ -165,7 +165,7 @@ public class FileUploadEndpoint extends HttpServlet {
 				propService.saveNotaTecnica(nt);
 				JSONObject payload = new JSONObject();
 				payload.put("id", nt.getId());
-				payload.put("dataCriacao", nt.getDataCriacao().getTime());
+				payload.put("dataCriacao", nt.getDataCriacao());
 				payload.put("documento", nt.getDocumento().toJson());
 				payload.put("usuario", nt.getUsuario().toJson());
 
@@ -180,7 +180,7 @@ public class FileUploadEndpoint extends HttpServlet {
 				propService.saveDocRelated(nt);
 				JSONObject payload = new JSONObject();
 				payload.put("id", nt.getId());
-				payload.put("dataCriacao", nt.getDataCriacao().getTime());
+				payload.put("dataCriacao", nt.getDataCriacao());
 				payload.put("documento", nt.getDocumento().toJson());
 				payload.put("usuario", nt.getUsuario().toJson());
 
@@ -195,7 +195,7 @@ public class FileUploadEndpoint extends HttpServlet {
 				propService.saveDocRelated(nt);
 				JSONObject payload = new JSONObject();
 				payload.put("id", nt.getId());
-				payload.put("dataCriacao", nt.getDataCriacao().getTime());
+				payload.put("dataCriacao", nt.getDataCriacao());
 				payload.put("documento", nt.getDocumento().toJson());
 				payload.put("usuario", nt.getUsuario().toJson());
 
@@ -204,7 +204,7 @@ public class FileUploadEndpoint extends HttpServlet {
 				break;
 			case 4: {
 				Long idRevisao = Long.parseLong(request.getParameter("idRevisao"));
-				System.out.println("id Revisao "+idRevisao);
+				System.out.println("id Revisao " + idRevisao);
 				AreaDeMeritoRevisao p = areaService.findRevisao(idRevisao);
 				p.setDocumento(documento);
 				areaService.saveRevisao(p);

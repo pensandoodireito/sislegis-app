@@ -951,6 +951,12 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (user != null) {
 			if (instanciaNova.getId() != null) {
 				Proposicao proposicao = findById(instanciaNova.getId());
+				if (instanciaNova.getResponsavel() != null) {
+					if (proposicao.getResponsavel() == null || proposicao.getResponsavel().getId() != instanciaNova.getResponsavel().getId()) {
+						instanciaNova.setFoiAtribuida(System.currentTimeMillis());
+					}
+				}
+
 				if (instanciaNova.getPosicionamentoAtual() == null || instanciaNova.getPosicionamentoAtual().getPosicionamento() == null) {
 
 					instanciaNova.setPosicionamentoAtual(null);

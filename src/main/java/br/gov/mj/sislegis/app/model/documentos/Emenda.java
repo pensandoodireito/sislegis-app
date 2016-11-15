@@ -55,20 +55,18 @@ public class Emenda extends AbstractEntity implements DocRelated {
 	@ManyToOne(optional = false)
 	private Usuario usuario;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date dataCriacao = new Date();
+	@Column(name="criacao")
+	private Long dataCriacao;
 
 	@Column(length = 256)
 	private String url_arquivo;
 
 	protected Emenda() {
-		dataCriacao = new Date();
 	}
 
 	public Emenda(Proposicao p, Usuario u) {
 		this.proposicao = p;
 		this.usuario = u;
-		dataCriacao = new Date();
 	}
 
 	@Override
@@ -84,7 +82,7 @@ public class Emenda extends AbstractEntity implements DocRelated {
 		return usuario;
 	}
 
-	public Date getDataCriacao() {
+	public Long getDataCriacao() {
 		return dataCriacao;
 	}
 
@@ -106,7 +104,7 @@ public class Emenda extends AbstractEntity implements DocRelated {
 
 	@PrePersist
 	protected void onCreate() {
-		dataCriacao = new Date();
+		dataCriacao = System.currentTimeMillis();
 	}
 
 	public Documento getDocumento() {
