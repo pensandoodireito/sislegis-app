@@ -30,7 +30,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Table(name = "proposicao_notatecnica")
 @NamedQueries({ 
 	@NamedQuery(name = "listNotatecnicaProposicao", query = "select n from NotaTecnica n where n.proposicao.id=:idProposicao"),
-	@NamedQuery(name = "listNotaTecnicaByUser", query = "select n from NotaTecnica n where n.documento.usuario.id=:userId")
+	@NamedQuery(name = "listNotaTecnicaByUser", query = "select n from NotaTecnica n where n.documento.usuario.id=:userId"),
+	@NamedQuery(name = "listNotasProposicaoPorUsuarioData", query = "select n from NotaTecnica n where n.usuario.id=:userId and n.dataCriacao>:s and n.dataCriacao<=:e and n.proposicao.id=:idProposicao")
 
 })
 public class NotaTecnica extends AbstractEntity implements DocRelated {

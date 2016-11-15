@@ -28,7 +28,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "proposicao_briefing")
-@NamedQueries({ @NamedQuery(name = "listBriefingProposicao", query = "select n from Briefing n where n.proposicao.id=:idProposicao"), @NamedQuery(name = "listBriefingByUser", query = "select n from Briefing n where n.documento.usuario.id=:userId")
+@NamedQueries({ @NamedQuery(name = "listBriefingProposicao", query = "select n from Briefing n where n.proposicao.id=:idProposicao"), 
+	@NamedQuery(name = "listBriefingByUser", query = "select n from Briefing n where n.documento.usuario.id=:userId"),
+@NamedQuery(name = "listBriefingProposicaoPorUsuarioData", query = "select n from Briefing n where n.usuario.id=:userId and n.dataCriacao>:s and n.dataCriacao<=:e and n.proposicao.id=:idProposicao")
 
 })
 public class Briefing extends AbstractEntity implements DocRelated {

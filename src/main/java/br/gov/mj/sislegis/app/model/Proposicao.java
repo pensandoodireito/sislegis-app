@@ -95,7 +95,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 	@NamedQuery(
 			name = "findNaoPautadas",  
 			query = "select p from Proposicao p where p.ultima is null"),
-			
+			@NamedQuery(
+					name = "getAllProposicaoPosicionada4UsuarioPeriodo", 
+					query = "select p from Proposicao p where p.posicionamentoAtual.usuario.id=:userId and p.foiAtribuida>:s and p.foiAnalisada<=:e and p.posicionamentoAtual.posicionamento=:posicionamento"),		
 			
 	@NamedQuery(
 			name = "contadorPosicionamentosPorEquipe",  

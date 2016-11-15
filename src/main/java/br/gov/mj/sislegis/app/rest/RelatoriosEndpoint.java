@@ -27,11 +27,21 @@ import javax.ws.rs.core.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.Equipe;
 import br.gov.mj.sislegis.app.model.EstadoProposicao;
+import br.gov.mj.sislegis.app.model.Posicionamento;
+import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.model.documentos.Briefing;
+import br.gov.mj.sislegis.app.model.documentos.Emenda;
+import br.gov.mj.sislegis.app.model.documentos.NotaTecnica;
 import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
+import br.gov.mj.sislegis.app.service.ComissaoService;
 import br.gov.mj.sislegis.app.service.EquipeService;
+import br.gov.mj.sislegis.app.service.PosicionamentoService;
+import br.gov.mj.sislegis.app.service.ProposicaoService;
+import br.gov.mj.sislegis.app.service.UsuarioService;
 import br.gov.mj.sislegis.app.service.ejbs.EJBUnitTestable;
 
 /**
@@ -39,10 +49,18 @@ import br.gov.mj.sislegis.app.service.ejbs.EJBUnitTestable;
  */
 @Stateless
 @Path("/report")
-public class RelatoriosEndpoint  {
+public class RelatoriosEndpoint {
 
 	@Inject
 	private EquipeService equipeService;
+	@Inject
+	private UsuarioService userService;
+	@Inject
+	private PosicionamentoService posicionamentoService;
+	@Inject
+	ComissaoService comissaoService;
+	@Inject
+	ProposicaoService proposicaoService;
 	@Inject
 	private UsuarioAutenticadoBean controleUsuarioAutenticado;
 	@PersistenceContext
@@ -163,7 +181,78 @@ public class RelatoriosEndpoint  {
 
 	}
 
-	
+	@GET
+	@Path("corpoTecnicoResponsavel")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getCorpoResponsavel(@HeaderParam("Authorization") String authorization, @QueryParam("r") Long idReponsavel, @QueryParam("i") String iniciostr, @QueryParam("f") String fimstr) throws IOException, ParseException {
+		Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+		Date inicio = new SimpleDateFormat("dd-MM-yyyy").parse(iniciostr);
+		Date fim = new SimpleDateFormat("dd-MM-yyyy").parse(fimstr);
+		Usuario responsavel = userService.findById(idReponsavel);
+
+		JSONObject dashInfo = new JSONObject();
+		List<Posicionamento> posicionamentos = posicionamentoService.listAll();
+		JSONArray posicionamentosArray = new JSONArray();
+
+		for (Iterator iterator = posicionamentos.iterator(); iterator.hasNext();) {
+			Posicionamento posicionamento = (Posicionamento) iterator.next();
+			JSONObject posicionamentoJson = new JSONObject();
+			posicionamentoJson.put("id", posicionamento.getId());
+			posicionamentoJson.put("nome", posicionamento.getNome());
+
+			List<Proposicao> props = em.createNamedQuery("getAllProposicaoPosicionada4UsuarioPeriodo", Proposicao.class).setParameter("userId", idReponsavel).setParameter("e", fim.getTime()).setParameter("s", inicio.getTime()).setParameter("posicionamento", posicionamento).getResultList();
+			posicionamentoJson.put("total", props.size());
+			JSONArray propsArray = new JSONArray();
+			Double tempoTotalGasto = 0d;
+			for (Iterator<Proposicao> iterator2 = props.iterator(); iterator2.hasNext();) {
+				Proposicao proposicao = (Proposicao) iterator2.next();
+
+				JSONObject propJson = new JSONObject();
+				propJson.put("id", proposicao.getId());
+				propJson.put("sigla", proposicao.getSigla());
+				propJson.put("tema", proposicao.getExplicacao());
+				propJson.put("ementa", proposicao.getEmenta());
+				propJson.put("comissao", proposicao.getEmenta());
+				String comissaoPorExtenso = proposicao.getComissao();
+				Comissao comissao = null;
+				try {
+					comissao = comissaoService.getComissao(proposicao.getOrigem(), proposicao.getComissao());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if (comissao != null) {
+					comissaoPorExtenso = comissao.getNome();
+				}
+				propJson.put("comissaoPorExtenso", comissaoPorExtenso);
+				propJson.put("origem", proposicao.getOrigem().name());
+
+				JSONObject totaisJson = new JSONObject();
+				totaisJson.put("notas", em.createNamedQuery("listNotasProposicaoPorUsuarioData", NotaTecnica.class).setParameter("userId", idReponsavel).setParameter("idProposicao", proposicao.getId()).setParameter("e", fim.getTime()).setParameter("s", inicio.getTime()).getResultList().size());
+				totaisJson.put("briefings", em.createNamedQuery("listBriefingProposicaoPorUsuarioData", Briefing.class).setParameter("userId", idReponsavel).setParameter("idProposicao", proposicao.getId()).setParameter("e", fim.getTime()).setParameter("s", inicio.getTime()).getResultList().size());
+				totaisJson.put("emendas", em.createNamedQuery("listEmendasProposicaoPorUsuarioData", Emenda.class).setParameter("userId", idReponsavel).setParameter("idProposicao", proposicao.getId()).setParameter("e", fim.getTime()).setParameter("s", inicio.getTime()).getResultList().size());
+				propJson.put("totais", totaisJson);
+				propsArray.put(propJson);
+
+				if (proposicao.getFoiAnalisada() != null && proposicao.getFoiAtribuida() != null) {
+					tempoTotalGasto += (proposicao.getFoiAnalisada() - proposicao.getFoiAtribuida());
+				}
+				propJson.put("foiAnalisada", proposicao.getFoiAnalisada());
+				propJson.put("foiAtribuida", proposicao.getFoiAtribuida());
+
+			}
+			posicionamentoJson.put("proposicoes",propsArray);
+			posicionamentoJson.put("total", props.size());
+			posicionamentoJson.put("tempoTotalGasto", tempoTotalGasto);
+			posicionamentosArray.put(posicionamentoJson);
+
+		}
+		dashInfo.put("posicionamentos", posicionamentosArray);
+
+		return Response.ok(dashInfo.toString()).build();
+
+	}
+
 	@GET
 	@Path("corpoTecnicoPosicoes")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -177,7 +266,7 @@ public class RelatoriosEndpoint  {
 		JSONArray equipesArr = new JSONArray();
 		dashInfo.put("equipes", equipesArr);
 		List<Equipe> equipes = equipeService.listAll();
-		
+
 		Map<String, String> mapa = new HashMap<String, String>();
 		mapa.put("Contrário", "contrario");
 		mapa.put("Nada a opor", "nadaaopor");
@@ -190,16 +279,16 @@ public class RelatoriosEndpoint  {
 				continue;
 			}
 			JSONObject equipeJson = equipe.toJson();
-			
+
 			List<Object> list = em.createNamedQuery("contadorPosicionamentosPorEquipe").setParameter("equipe", equipe).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime()).getResultList();
-			
+
 			long totalEquipe = 0;
 			for (Iterator iterator2 = list.iterator(); iterator2.hasNext();) {
 				Object[] object = (Object[]) iterator2.next();
-				
+
+				totalEquipe += (Long) object[0];
 				equipeJson.put(mapa.get((String) object[2]), object[0]);
 
-				
 			}
 			equipeJson.put("total", totalEquipe);
 

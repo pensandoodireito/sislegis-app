@@ -30,7 +30,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Table(name = "proposicao_emenda")
 @NamedQueries({
 	@NamedQuery(name = "listEmendasProposicao", query = "select n from Emenda n where n.proposicao.id=:idProposicao"),
-	@NamedQuery(name = "listEmendasByUser", query = "select n from Emenda n where n.documento.usuario.id=:userId")
+	@NamedQuery(name = "listEmendasByUser", query = "select n from Emenda n where n.documento.usuario.id=:userId"),
+	@NamedQuery(name = "listEmendasProposicaoPorUsuarioData", query = "select n from Emenda n where n.usuario.id=:userId and n.dataCriacao>:s and n.dataCriacao<=:e and n.proposicao.id=:idProposicao")
 
 })
 public class Emenda extends AbstractEntity implements DocRelated {
