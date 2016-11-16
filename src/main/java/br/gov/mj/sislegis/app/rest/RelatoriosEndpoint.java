@@ -236,12 +236,13 @@ public class RelatoriosEndpoint {
 
 				if (proposicao.getFoiAnalisada() != null && proposicao.getFoiAtribuida() != null) {
 					tempoTotalGasto += (proposicao.getFoiAnalisada() - proposicao.getFoiAtribuida());
+					propJson.put("tempoGasto", (proposicao.getFoiAnalisada() - proposicao.getFoiAtribuida()));
 				}
 				propJson.put("foiAnalisada", proposicao.getFoiAnalisada());
 				propJson.put("foiAtribuida", proposicao.getFoiAtribuida());
 
 			}
-			posicionamentoJson.put("proposicoes",propsArray);
+			posicionamentoJson.put("proposicoes", propsArray);
 			posicionamentoJson.put("total", props.size());
 			posicionamentoJson.put("tempoTotalGasto", tempoTotalGasto);
 			posicionamentosArray.put(posicionamentoJson);

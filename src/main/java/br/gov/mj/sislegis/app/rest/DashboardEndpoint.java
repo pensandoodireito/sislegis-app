@@ -137,6 +137,12 @@ public class DashboardEndpoint {
 				dashInfo.put("minhaEquipe", minhaEquipe);
 			}
 		}
+		
+		Long totalProposicoesEmAnaliseParaMim = (Long) em.createQuery("select count(p.id) from Proposicao p where p.estado=:estado and p.responsavel=:responsavel")
+				.setParameter("responsavel",user)
+				.setParameter("estado", EstadoProposicao.EMANALISE).getSingleResult();
+				dashInfo.put("totalProposicoesEmAnaliseParaMim", totalProposicoesEmAnaliseParaMim);
+		
 		List<Equipe> equipes = equipeService.listAll();
 		JSONArray equipesArr = new JSONArray();
 		for (Iterator<Equipe> iterator = equipes.iterator(); iterator.hasNext();) {
