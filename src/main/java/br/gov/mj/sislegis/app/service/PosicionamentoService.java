@@ -6,6 +6,8 @@ import br.gov.mj.sislegis.app.model.Posicionamento;
 
 @Local
 public interface PosicionamentoService extends Service<Posicionamento> {
+
+	Posicionamento getByName(String string);
 	
 
 }

@@ -1,6 +1,7 @@
 package br.gov.mj.sislegis.app.model;
 
 import java.util.Date;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,17 +11,25 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import br.gov.mj.sislegis.app.rest.serializers.CompactProposicaoSerializer;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
 @XmlRootElement
+
+@NamedQueries({ 
+	@NamedQuery(name = "getAllEncaminhamentoProposicao4Usuario", query = "select c from EncaminhamentoProposicao c where c.responsavel.id=:userId")
+
+})
 @JsonIgnoreProperties({ "idProposicao" })
 public class EncaminhamentoProposicao extends AbstractEntity {
 
@@ -39,7 +48,7 @@ public class EncaminhamentoProposicao extends AbstractEntity {
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private Comentario comentarioFinalizacao;
 
-	@OneToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "tipo_encaminhamento_id")
 	private TipoEncaminhamento tipoEncaminhamento;
 

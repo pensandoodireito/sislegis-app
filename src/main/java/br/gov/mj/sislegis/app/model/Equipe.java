@@ -13,6 +13,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.json.JSONObject;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "equipe")
 @XmlRootElement
@@ -28,8 +32,8 @@ public class Equipe extends AbstractEntity {
 	@Column
 	private String nome;
 
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "equipe", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, orphanRemoval = true)
-	private Set<EquipeUsuario> listaEquipeUsuario;
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "equipe", cascade = { CascadeType.MERGE })
+	private Set<Usuario> listaEquipeUsuario;
 
 	public Long getId() {
 		return this.id;
@@ -47,20 +51,26 @@ public class Equipe extends AbstractEntity {
 		this.nome = nome;
 	}
 
-	public Set<EquipeUsuario> getListaEquipeUsuario() {
+	@JsonIgnore
+	public Set<Usuario> getListaEquipeUsuario() {
 		return listaEquipeUsuario;
 	}
 
-	public void setListaEquipeUsuario(Set<EquipeUsuario> listaEquipeUsuario) {
+	public void setListaEquipeUsuario(Set<Usuario> listaEquipeUsuario) {
 		this.listaEquipeUsuario = listaEquipeUsuario;
 	}
 
 	@Override
 	public String toString() {
-		String result = getClass().getSimpleName() + " ";
-		if (nome != null && !nome.trim().isEmpty())
-			result += "nome: " + nome;
+		return new StringBuilder(getClass().getSimpleName()).append(" ").append(nome).append("@").append(id).toString();
 
-		return result;
+	}
+
+	public JSONObject toJson() {
+		JSONObject json = new JSONObject();
+		json.put("id", id);
+		json.put("nome", this.nome);
+
+		return json;
 	}
 }

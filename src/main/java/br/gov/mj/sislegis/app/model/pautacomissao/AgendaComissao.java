@@ -1,6 +1,5 @@
 package br.gov.mj.sislegis.app.model.pautacomissao;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;

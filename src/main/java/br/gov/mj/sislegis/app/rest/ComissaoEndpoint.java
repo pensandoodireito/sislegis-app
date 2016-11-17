@@ -12,7 +12,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -72,8 +71,7 @@ public class ComissaoEndpoint {
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Comissao> listAll(@QueryParam("start") Integer startPosition,
-			@QueryParam("max") Integer maxResult) {
+	public List<Comissao> listAll() {
 		final List<Comissao> results = service.listAll();
 		return results;
 	}	

@@ -31,6 +31,7 @@ public class Proposicoes {
 		xstream.processAnnotations(Proposicoes.class);
 		xstream.processAnnotations(Autor.class);
 		xstream.processAnnotations(OrgaoNumerador.class);
+		xstream.processAnnotations(Despacho.class);
 		xstream.processAnnotations(ProposicaoWS.class);
 		xstream.processAnnotations(TipoProposicao.class);
 		xstream.processAnnotations(Autor.class);
@@ -38,6 +39,13 @@ public class Proposicoes {
 		Situacao.configXstream(xstream);
 
 	}
+}
+
+@XStreamAlias("ultimoDespacho")
+class Despacho {
+	String datDespacho;
+	String txtDespacho;
+
 }
 
 @XStreamAlias("proposicao")
@@ -52,6 +60,8 @@ class ProposicaoWS {
 	Autor autor1;
 	OrgaoNumerador orgaoNumerador;
 
+	Despacho ultimoDespacho;
+
 	public Proposicao toProposicao() {
 		Proposicao proposicao = new Proposicao();
 		proposicao.setAno(ano);
@@ -62,6 +72,10 @@ class ProposicaoWS {
 		proposicao.setEmenta(txtEmenta);
 		proposicao.setOrigem(Origem.CAMARA);
 		proposicao.setAutor(autor1.txtNomeAutor);
+		if (ultimoDespacho != null) {
+			proposicao.setTramitacao(ultimoDespacho.txtDespacho);
+		}
+
 		if (situacao != null) {
 			proposicao.setComissao(situacao.orgao.siglaOrgaoEstado.trim());
 		} else {
@@ -70,8 +84,7 @@ class ProposicaoWS {
 			}
 		}
 		proposicao.setSituacao(situacao.getDescricao());
-		proposicao.setLinkProposicao("http://www2.camara.leg.br/proposicoesWeb/fichadetramitacao?idProposicao="
-				+ proposicao.getIdProposicao());
+		proposicao.setLinkProposicao("http://www2.camara.leg.br/proposicoesWeb/fichadetramitacao?idProposicao=" + proposicao.getIdProposicao());
 		return proposicao;
 	}
 }

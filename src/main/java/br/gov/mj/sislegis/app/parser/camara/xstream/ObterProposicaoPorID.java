@@ -39,12 +39,16 @@ public class ObterProposicaoPorID {
 
 	@XStreamAlias("Situacao")
 	String situacao;
+	
+	@XStreamAlias("UltimoDespacho")
+	String ultimoDespacho;
 
 	@XStreamAlias("LinkInteiroTeor")
 	String linkInteiroTeor;
 
 	@XStreamAlias("tema")
 	String tema;
+	
 
 	public static void config(XStream xstream) {
 		xstream.processAnnotations(ObterProposicaoPorID.class);
@@ -70,6 +74,7 @@ public class ObterProposicaoPorID {
 		proposicao.setOrigem(Origem.CAMARA);
 		proposicao.setTipo(tipo.trim());
 		proposicao.setSituacao(situacao.trim());
+		proposicao.setTramitacao(ultimoDespacho);
 		return proposicao;
 	}
 

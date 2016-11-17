@@ -5,12 +5,10 @@ import static org.junit.Assert.fail;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.FlushModeType;
 import javax.persistence.Persistence;
 
 import org.junit.After;

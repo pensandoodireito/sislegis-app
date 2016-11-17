@@ -146,10 +146,12 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 
 		} else {
 			if (obj instanceof ProposicaoPautaComissao) {
-				if (this.proposicao == null || proposicaoId == null) {
+				if (proposicaoId == null) {
+					System.out.println("propid false");
 					return false;
 				}
-				if (this.pautaReuniaoComissao == null || pautaReuniaoComissaoId == null) {
+				if (pautaReuniaoComissaoId == null) {
+					System.out.println("pautaReuniaoComissaoId false");
 					return false;
 				}
 				if (this.pautaReuniaoComissaoId.equals(((ProposicaoPautaComissao) obj).getPautaReuniaoComissaoId())
@@ -159,12 +161,23 @@ public class ProposicaoPautaComissao implements Serializable, Comparable<Proposi
 
 			}
 		}
+		System.out.println("out false");
 		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 13;
+		int result = 1;
+		result = prime * result
+				+ ((pautaReuniaoComissaoId == null) ? super.hashCode() : pautaReuniaoComissaoId.hashCode());
+		result = prime * result + ((proposicaoId == null) ? super.hashCode() : proposicaoId.hashCode());
+		return result;
 	}
 
 	@Override
 	public String toString() {
 
-		return proposicaoId + ":" + pautaReuniaoComissaoId + " (" + resultado + ")@" + super.hashCode();
+		return proposicaoId + ":" + pautaReuniaoComissaoId + " (" + resultado + ")@" + hashCode();
 	}
 }

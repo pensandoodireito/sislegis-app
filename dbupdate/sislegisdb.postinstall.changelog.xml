@@ -3,6 +3,8 @@
 	objectQuotingStrategy="QUOTE_ALL_OBJECTS" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+	<include relativeToChangelogFile="true"
+		file="sislegisdb.install.changelog.xml" />
 	<include relativeToChangelogFile="true" file="update151002.sql" />
 
 	<!-- Alteracoes pós 151002 e pré 151101 -->
@@ -93,7 +95,8 @@
 		</createIndex>
 	</changeSet>
 	<changeSet author="sislegis (generated)" id="1447161377822-21">
-		<createIndex tableName="encaminhamentoproposicao" indexName="idx_totalEncPorProposicao">
+		<createIndex tableName="encaminhamentoproposicao"
+			indexName="idx_totalEncPorProposicao">
 			<column name="proposicao_id" type="BIGINT"></column>
 		</createIndex>
 	</changeSet>
@@ -102,8 +105,17 @@
 			<column name="reuniao_id" type="BIGINT"></column>
 		</createIndex>
 	</changeSet>
-	
+
 	<include relativeToChangelogFile="true" file="update151101.sql" />
 	<include relativeToChangelogFile="true" file="update151102.sql" />
 	<include relativeToChangelogFile="true" file="update151201.sql" />
+	<include relativeToChangelogFile="true" file="update160101.sql" />
+	<include relativeToChangelogFile="true" file="update160902.sql" />
+	<include relativeToChangelogFile="true" file="update160916.sql" />
+	<include relativeToChangelogFile="true" file="update160930.sql" />
+    <include relativeToChangelogFile="true" file="update161021.sql" />
+
+    <include relativeToChangelogFile="true" file="update161031.sql" />
+	<include relativeToChangelogFile="true" file="update161111.sql" />
 </databaseChangeLog>
+

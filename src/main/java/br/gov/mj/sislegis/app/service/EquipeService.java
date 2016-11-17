@@ -8,6 +8,9 @@ import br.gov.mj.sislegis.app.model.Equipe;
 public interface EquipeService extends Service<Equipe> {
 	
 	public Equipe salvarEquipe(Equipe e);
+
+	public Equipe getByName(String string);
+	public Equipe findByIdFull(Long id);
 	
 
 }

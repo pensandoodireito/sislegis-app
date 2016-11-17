@@ -1,6 +1,8 @@
 package br.gov.mj.sislegis.app.service;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -8,12 +10,20 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.ejb.Local;
+import javax.xml.rpc.ServiceException;
 
 import br.gov.mj.sislegis.app.enumerated.Origem;
+import br.gov.mj.sislegis.app.model.Comissao;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
+import br.gov.mj.sislegis.app.model.ProcessoSei;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.model.Votacao;
+import br.gov.mj.sislegis.app.model.documentos.Briefing;
+import br.gov.mj.sislegis.app.model.documentos.DocRelated;
+import br.gov.mj.sislegis.app.model.documentos.Emenda;
+import br.gov.mj.sislegis.app.model.documentos.NotaTecnica;
 import br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao;
 import br.gov.mj.sislegis.app.parser.TipoProposicao;
 
@@ -59,6 +69,8 @@ public interface ProposicaoService extends Service<Proposicao> {
 	List<Proposicao> consultar(String sigla, String autor, String ementa, String origem, String isFavorita,
 			Integer offset, Integer limit);
 
+	List<Proposicao> consultar(Map<String, Object> filtros, Integer offset, Integer limit);
+
 	/**
 	 * Faz buscas por proposições diretamente dos webservices da origem, não
 	 * tendo a necessidade delas estarem no banco do sislegis.
@@ -68,7 +80,7 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @param ano
 	 * @return Lista de proposicoes encontradas na origem
 	 */
-	Collection<Proposicao> buscaProposicaoIndependentePor(Origem origem, String tipo, Integer numero, Integer ano)
+	Collection<Proposicao> buscaProposicaoIndependentePor(Origem origem, String tipo, String numero, Integer ano)
 			throws IOException;
 
 	Collection<TipoProposicao> listTipos(Origem valueOf) throws IOException;
@@ -150,8 +162,9 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @param id
 	 * @param idPosicionamento
 	 * @param usuario
+	 * @return
 	 */
-	void alterarPosicionamento(Long id, Long idPosicionamento, boolean preliminar, Usuario usuario);
+	PosicionamentoProposicao alterarPosicionamento(Long id, Long idPosicionamento, boolean preliminar, Usuario usuario);
 
 	/**
 	 * Retorna o historico de alteracoes de posicionamento por id da proposicao
@@ -169,5 +182,67 @@ public interface ProposicaoService extends Service<Proposicao> {
 	 * @param comissoes
 	 */
 	void setRoadmapComissoes(Long idProposicao, List<String> comissoes);
+
+	/**
+	 * Busca o processo no SEI (via WS) e insere objeto de identificacao com
+	 * link para este processo, relacionando com a Proposicao
+	 *
+	 * @param id
+	 *            id da proposicao
+	 * @param protocolo
+	 *            numero de protocolo do SEI
+	 */
+	ProcessoSei vincularProcessoSei(Long id, String protocolo) throws ServiceException, RemoteException;
+
+	/**
+	 * Remove vinculo de processo do SEI
+	 *
+	 * @param idProcesso
+	 *            id do processoSei
+	 */
+	void excluirProcessoSei(Long idProcesso);
+
+	/*
+	 * Retorna a lista de votacoes por proposicao
+	 * 
+	 * @param idProposicao atributo idProposicao da entidade Proposicao
+	 * 
+	 * @param tipo
+	 * 
+	 * @param numero
+	 * 
+	 * @param ano
+	 * 
+	 * @param origem
+	 */
+	List<Votacao> listarVotacoes(Integer idProposicao, String tipo, String numero, String ano, Origem origem)
+			throws Exception;
+
+	List<NotaTecnica> getNotaTecnicas(Long proposicaoId);
+
+	void saveNotaTecnica(NotaTecnica nt);
+
+	Proposicao save(Proposicao instanciaNova, Usuario user);
+
+	Proposicao findProposicaoBy(Origem origem, Integer idProposicao);
+
+	Proposicao persistProposicaoAndPauta(Proposicao proposicao, PautaReuniaoComissao pautaReuniaoComissao)
+			throws IOException, Exception;
+
+
+	void saveDocRelated(DocRelated nt);
+
+	List<Briefing> getBriefings(Long proposicaoId);
+
+	List<Emenda> getEmendas(Long proposicaoId);
+
+	void deleteDocRelated(Long idNota, Class c);
+
+
+	void syncPautaAtualComissao(Origem origem, Comissao comissao, Calendar dataInicial, Calendar dataFinal);
+
+	List<String> listarTodosAutores(String nome);
+
+	List<String> procurarRelatores(String nome);
 
 }

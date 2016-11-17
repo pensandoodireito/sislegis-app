@@ -1,7 +1,9 @@
 package br.gov.mj.sislegis.app.service;
 
 import java.util.List;
+
 import javax.ejb.Local;
+
 import br.gov.mj.sislegis.app.model.Tag;
 
 @Local
@@ -12,5 +14,9 @@ public interface TagService extends Service<Tag> {
     List<Tag> listarTodasTags();
 
     List<Tag> buscaPorSufixo(String sufixo);
+
+	void replace(String id, Tag entity);
+
+	void deleteById(String entity);
 
 }

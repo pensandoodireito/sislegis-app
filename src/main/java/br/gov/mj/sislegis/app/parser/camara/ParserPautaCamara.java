@@ -25,9 +25,9 @@ public class ParserPautaCamara {
 		ParserPautaCamara parser = new ParserPautaCamara();
 
 		// TODO: Informação que vem do filtro
-		Long idComissao = 2001L;
-		String datIni = "20151102";
-		String datFim = "20151109";
+		Long idComissao = 2014L;
+		String datIni = "20120228";
+		String datFim = "20120301";
 		Set<PautaReuniaoComissao> pautas = parser.getPautaComissao("", idComissao, datIni, datFim);
 		for (Iterator iterator = pautas.iterator(); iterator.hasNext();) {
 			PautaReuniaoComissao pautaReuniaoComissao = (PautaReuniaoComissao) iterator.next();
@@ -47,8 +47,7 @@ public class ParserPautaCamara {
 	}
 
 	public PautaBean getPauta(Long idComissao, String datIni, String datFim) throws IOException {
-		String wsURL = new StringBuilder("http://www.camara.gov.br/SitCamaraWS/Orgaos.asmx/ObterPauta?IDOrgao=")
-				.append(idComissao).append("&datIni=").append(datIni).append("&datFim=").append(datFim).toString();
+		String wsURL = new StringBuilder("http://www.camara.gov.br/SitCamaraWS/Orgaos.asmx/ObterPauta?IDOrgao=").append(idComissao).append("&datIni=").append(datIni).append("&datFim=").append(datFim).toString();
 
 		XStream xstream = new XStream();
 		xstream.ignoreUnknownElements();
@@ -61,12 +60,9 @@ public class ParserPautaCamara {
 		return pauta;
 	}
 
-	public Set<PautaReuniaoComissao> getPautaComissao(String comissaoNome, Long idComissao, String datIni, String datFim)
-			throws IOException, ParseException {
-
+	public Set<PautaReuniaoComissao> getPautaComissao(String __nomecomissaonaousado, Long idComissao, String datIni, String datFim) throws IOException, ParseException {
 		Set<PautaReuniaoComissao> pautas = new HashSet<PautaReuniaoComissao>();
-		String wsURL = new StringBuilder("http://www.camara.gov.br/SitCamaraWS/Orgaos.asmx/ObterPauta?IDOrgao=")
-				.append(idComissao).append("&datIni=").append(datIni).append("&datFim=").append(datFim).toString();
+		String wsURL = new StringBuilder("http://www.camara.gov.br/SitCamaraWS/Orgaos.asmx/ObterPauta?IDOrgao=").append(idComissao).append("&datIni=").append(datIni).append("&datFim=").append(datFim).toString();
 
 		XStream xstream = new XStream();
 		xstream.ignoreUnknownElements();
@@ -101,12 +97,9 @@ public class ParserPautaCamara {
 			}
 			comissao.setSigla(sigla);
 
-			PautaReuniaoComissao pautaReuniaoComissao = new PautaReuniaoComissao(reuniao.getDate(), comissao,
-					reuniao.getCodigo());
+			PautaReuniaoComissao pautaReuniaoComissao = new PautaReuniaoComissao(reuniao.getDate(), comissao, reuniao.getCodigo());
 			pautaReuniaoComissao.setOrigem(Origem.CAMARA);
-			pautaReuniaoComissao
-					.setLinkPauta("http://www.camara.leg.br/internet/ordemdodia/ordemDetalheReuniaoCom.asp?codReuniao="
-							+ reuniao.getCodigo().toString());
+			pautaReuniaoComissao.setLinkPauta("http://www.camara.leg.br/internet/ordemdodia/ordemDetalheReuniaoCom.asp?codReuniao=" + reuniao.getCodigo().toString());
 			pautaReuniaoComissao.converterSituacao(reuniao.getSituacao());
 			pautaReuniaoComissao.setTipo(reuniao.getTipo());
 			pautaReuniaoComissao.setTitulo(reuniao.getTitulo());

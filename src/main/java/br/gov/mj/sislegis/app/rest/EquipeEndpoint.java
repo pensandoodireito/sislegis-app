@@ -1,6 +1,7 @@
 package br.gov.mj.sislegis.app.rest;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -19,8 +20,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import br.gov.mj.sislegis.app.model.Equipe;
+import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.service.EquipeService;
-import br.gov.mj.sislegis.app.service.Service;
 
 /**
  * 
@@ -28,25 +29,22 @@ import br.gov.mj.sislegis.app.service.Service;
 @Stateless
 @Path("/equipes")
 public class EquipeEndpoint {
-	@Inject
-	private Service<Equipe> service;
-	
+
 	@Inject
 	private EquipeService equipeService;
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response create(Equipe entity) {
-		equipeService.salvarEquipe(entity);
+	public Response create(EquipeWrapper entityw) {
+		Equipe entity = equipeService.salvarEquipe(entityw.equipe);
 		return Response.created(
-				UriBuilder.fromResource(EquipeEndpoint.class)
-						.path(String.valueOf(entity.getId())).build()).build();
+				UriBuilder.fromResource(EquipeEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
 	}
 
 	@DELETE
 	@Path("/{id:[0-9][0-9]*}")
 	public Response deleteById(@PathParam("id") Long id) {
-		service.deleteById(id);
+		equipeService.deleteById(id);
 		return Response.noContent().build();
 	}
 
@@ -54,34 +52,63 @@ public class EquipeEndpoint {
 	@Path("/{id:[0-9][0-9]*}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response findById(@PathParam("id") Long id) {
-		Equipe equipe = service.findById(id);
-/*		List<EquipeUsuario> lista = new ArrayList<EquipeUsuario>(equipe.getListaEquipeUsuario());
-		equipe.setListaEquipeUsuario(new ArrayList<EquipeUsuario>());
-		for(EquipeUsuario equipeUsuario: lista){
-			equipe.getListaEquipeUsuario().add(new EquipeUsuario(equipeUsuario.getEquipeUsuarioPK(), 
-					equipeUsuario.getEquipe(), equipeUsuario.getUsuario(), equipeUsuario.getIsCoordenador()));
-		}*/
-		return Response.ok(equipe).build();
+		Equipe equipe = equipeService.findByIdFull(id);
+		return Response.ok(new EquipeWrapper(equipe)).build();
 	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Equipe> listAll(@QueryParam("start") Integer startPosition,
-			@QueryParam("max") Integer maxResult) {
-		return service.listAll();
+	public List<Equipe> listAll(@QueryParam("start") Integer startPosition, @QueryParam("max") Integer maxResult) {
+		return equipeService.listAll();
 	}
 
 	@PUT
 	@Path("/{id:[0-9][0-9]*}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response update(Equipe entity) {
+	public Response update(EquipeWrapper entity) {
 		try {
-			entity = equipeService.salvarEquipe(entity);
+			Equipe equipe = equipeService.salvarEquipe(entity.equipe);
 		} catch (OptimisticLockException e) {
-			return Response.status(Response.Status.CONFLICT)
-					.entity(e.getEntity()).build();
+			return Response.status(Response.Status.CONFLICT).entity(e.getEntity()).build();
 		}
-
-		return Response.noContent().build();
+		return Response.ok(UriBuilder.fromResource(EquipeEndpoint.class).path(String.valueOf(entity.getId())).build())
+				.build();
 	}
+}
+
+class EquipeWrapper {
+	Equipe equipe;
+
+	EquipeWrapper(Equipe e) {
+		this.equipe = e;
+	}
+
+	EquipeWrapper() {
+		this.equipe = new Equipe();
+	}
+
+	public void setId(Long id) {
+		this.equipe.setId(id);
+	}
+
+	public Long getId() {
+		return equipe.getId();
+	}
+
+	public void setNome(String id) {
+		this.equipe.setNome(id);
+	}
+
+	public String getNome() {
+		return equipe.getNome();
+	}
+
+	public Set<Usuario> getListaEquipeUsuario() {
+		return equipe.getListaEquipeUsuario();
+	}
+
+	public void setListaEquipeUsuario(Set<Usuario> id) {
+		this.equipe.setListaEquipeUsuario(id);
+	}
+
 }

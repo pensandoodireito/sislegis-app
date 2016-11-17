@@ -70,3 +70,11 @@ Para configurar o Keycloak inicie o WildFly e acesse a interface administrativa 
 	  Clique em adicionar Realm (botão no topo direito). Selecione o arquivo do ambiente sislegis `configuracoes/keycloak/keycloak.json` 
   No ambiente de desenveolvimento utilize 
 	  `configuracoes/keycloak/keycloak.json.desenvolvimento` 
+
+Integração com o SEI
+-------------------------
+
+A chamada para o webservice do SEI por padrão utiliza a URL em produção: http://sei.mj.gov.br.
+Para acessar o SEI em outro ambiente ou servidor, adicionar a variável de ambiente SEI_URL. Ex:
+
+    export SEI_URL=http://localhost/sei

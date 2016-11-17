@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+
+	<persistence-unit name="sislegis-persistence-unit-test"
+		transaction-type="RESOURCE_LOCAL">
+		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+		<class>br.gov.mj.sislegis.app.model.Posicionamento</class>
+		<class>br.gov.mj.sislegis.app.model.AlteracaoProposicao</class>
+		<class>br.gov.mj.sislegis.app.model.AreaConsultada</class>
+		<class>br.gov.mj.sislegis.app.model.AreaDeMerito</class>
+		<class>br.gov.mj.sislegis.app.model.AreaDeMeritoRevisao</class>
+		<class>br.gov.mj.sislegis.app.model.Comentario</class>
+		<class>br.gov.mj.sislegis.app.model.ElaboracaoNormativaCoAutores</class>
+
+		<class>br.gov.mj.sislegis.app.model.ElaboracaoNormativaCoAutoresPK</class>
+		<class>br.gov.mj.sislegis.app.model.ElaboracaoNormativaConsulta</class>
+		<class>br.gov.mj.sislegis.app.model.ElaboracaoNormativa</class>
+		<class>br.gov.mj.sislegis.app.model.ElaboracaoNormativaTiposMarcados</class>
+		<class>br.gov.mj.sislegis.app.model.EncaminhamentoProposicao</class>
+		<class>br.gov.mj.sislegis.app.model.Equipe</class>
+		<class>br.gov.mj.sislegis.app.model.EquipeUsuario</class>
+		<class>br.gov.mj.sislegis.app.model.EquipeUsuarioPK</class>
+		<class>br.gov.mj.sislegis.app.model.EstadoProposicao</class>
+		<class>br.gov.mj.sislegis.app.model.Notificacao</class>
+		<class>br.gov.mj.sislegis.app.model.Orgao</class>
+		<class>br.gov.mj.sislegis.app.model.OrigemElaboracaoNormativa</class>
+		<class>br.gov.mj.sislegis.app.model.Papel</class>
+		<class>br.gov.mj.sislegis.app.model.PosicionamentoProposicao</class>
+		<class>br.gov.mj.sislegis.app.model.ProcessoSei</class>
+		<class>br.gov.mj.sislegis.app.model.Proposicao</class>
+		<class>br.gov.mj.sislegis.app.model.Reuniao</class>
+		<class>br.gov.mj.sislegis.app.model.ReuniaoProposicao</class>
+		<class>br.gov.mj.sislegis.app.model.RoadmapComissao</class>
+		<class>br.gov.mj.sislegis.app.model.RoadmapComissaoPK</class>
+		<class>br.gov.mj.sislegis.app.model.SituacaoLegislativa</class>
+		<class>br.gov.mj.sislegis.app.model.StatusSidof</class>
+		<class>br.gov.mj.sislegis.app.model.TagElaboracaoNormativa</class>
+		<class>br.gov.mj.sislegis.app.model.TagElaboracaoNormativaPK</class>
+		<class>br.gov.mj.sislegis.app.model.Tag</class>
+		<class>br.gov.mj.sislegis.app.model.TagProposicaoPK</class>
+		<class>br.gov.mj.sislegis.app.model.Tarefa</class>
+		<class>br.gov.mj.sislegis.app.model.TipoEncaminhamento</class>
+		<class>br.gov.mj.sislegis.app.model.Usuario</class>
+		<class>br.gov.mj.sislegis.app.model.Votacao</class>
+		<class>br.gov.mj.sislegis.app.model.Voto</class>
+		<class>br.gov.mj.sislegis.app.model.pautacomissao.AgendaComissao</class>
+		<class>br.gov.mj.sislegis.app.model.pautacomissao.PautaReuniaoComissao</class>
+		<class>br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissao</class>
+		<class>br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissaoFutura</class>
+		<class>br.gov.mj.sislegis.app.model.pautacomissao.PropostaPautaPK</class>
+		<class>br.gov.mj.sislegis.app.model.pautacomissao.Sessao</class>
+		<class>br.gov.mj.sislegis.app.model.pautacomissao.SituacaoSessao</class>
+		<class>br.gov.mj.sislegis.app.model.Documento</class>
+		<class>br.gov.mj.sislegis.app.model.documentos.NotaTecnica</class>
+		<class>br.gov.mj.sislegis.app.model.documentos.Briefing</class>
+		<class>br.gov.mj.sislegis.app.model.documentos.Emenda</class>
+
+
+
+
+		<properties>
+			<property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/sislegis" />
+			<property name="javax.persistence.jdbc.user" value="sislegis" />
+			<property name="javax.persistence.jdbc.password" value="sislegis" />
+			<property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" />
+			<property name="hibernate.show_sql" value="false" />
+			<property name="hibernate.format_sql" value="true" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
+
+
+		</properties>
+	</persistence-unit>
+</persistence>

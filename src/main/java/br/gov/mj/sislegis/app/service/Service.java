@@ -15,4 +15,5 @@ public interface Service<T> {
 	public T findByProperty(String property, Object value);
 	public void deleteById(Long id);
 	
+	
 }

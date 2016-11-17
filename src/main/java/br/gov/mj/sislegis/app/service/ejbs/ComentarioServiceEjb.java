@@ -10,12 +10,13 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import br.gov.mj.sislegis.app.model.Comentario;
+import br.gov.mj.sislegis.app.model.Papel;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ComentarioService;
 
 @Stateless
-public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> implements ComentarioService {
+public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> implements ComentarioService, EJBUnitTestable {
 
 	@PersistenceContext
 	private EntityManager em;
@@ -36,8 +37,7 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> 
 
 	@Override
 	public List<Comentario> findByIdProposicao(Integer id, boolean incluiOcultos) {
-		StringBuilder query = new StringBuilder(
-				"SELECT DISTINCT c FROM Comentario c INNER JOIN FETCH c.autor a INNER JOIN FETCH c.proposicao p WHERE p.idProposicao = :entityId ");
+		StringBuilder query = new StringBuilder("SELECT DISTINCT c FROM Comentario c INNER JOIN FETCH c.autor a INNER JOIN FETCH c.proposicao p WHERE p.idProposicao = :entityId ");
 		if (!incluiOcultos) {
 			query.append("AND c.oculto = FALSE");
 		}
@@ -59,8 +59,7 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> 
 	@Override
 	public List<Comentario> findByProposicaoId(Long id, boolean incluiOcultos) {
 
-		StringBuilder query = new StringBuilder(
-				"SELECT DISTINCT c FROM Comentario c INNER JOIN FETCH c.autor a INNER JOIN FETCH c.proposicao p WHERE p.id = :entityId ");
+		StringBuilder query = new StringBuilder("SELECT DISTINCT c FROM Comentario c INNER JOIN FETCH c.autor a INNER JOIN FETCH c.proposicao p WHERE p.id = :entityId ");
 		if (!incluiOcultos) {
 			query.append("AND c.oculto = FALSE");
 		}
@@ -75,7 +74,7 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> 
 	public void salvarComentario(Comentario comentario, Usuario autor) throws IllegalAccessException {
 		if (comentario.getId() != null) {
 			if (comentario.getAutor() != null) {
-				if (!comentario.getAutor().getEmail().equals(autor.getEmail())) {
+				if (!autor.getPapeis().contains(Papel.ADMIN) && !comentario.getAutor().getEmail().equals(autor.getEmail())) {
 					throw new IllegalAccessException("Somente autor do comentário pode alterá-lo.");
 				}
 			}
@@ -86,8 +85,7 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> 
 
 	@Override
 	public Integer totalByProposicao(Long idProposicao) {
-		Query query = em
-				.createNativeQuery("SELECT COUNT(1) FROM comentario WHERE proposicao_id = :idProposicao AND oculto = FALSE ");
+		Query query = em.createNativeQuery("SELECT COUNT(1) FROM comentario WHERE proposicao_id = :idProposicao AND oculto = FALSE ");
 		query.setParameter("idProposicao", idProposicao);
 		BigInteger total = (BigInteger) query.getSingleResult();
 		return total.intValue();
@@ -98,5 +96,11 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> 
 		Comentario comentario = findById(idComentario);
 		comentario.setOculto(true);
 		save(comentario);
+	}
+
+	@Override
+	public void setInjectedEntities(Object... injections) {
+		this.em = (EntityManager) injections[0];
+
 	}
 }

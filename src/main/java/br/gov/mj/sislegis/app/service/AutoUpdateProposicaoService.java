@@ -11,4 +11,14 @@ public interface AutoUpdateProposicaoService {
 	void atualizaProposicoesDaReuniao();
 
 	void atualizaPautaReuniaoEProposicoes();
+
+	void atualizaPautadasSenado();
+
+	void updatePautasCamara();
+
+	void updatePautasSenado();
+
+	void atualizaPautadasCamara();
+
+	
 }

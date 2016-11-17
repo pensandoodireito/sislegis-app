@@ -1,5 +1,6 @@
 package br.gov.mj.sislegis.app.parser.senado.xstream;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,6 +27,9 @@ public class Materia {
 
 	@XStreamAlias("SituacaoAtual")
 	SituacaoAtual situacaoAtual;
+	
+	@XStreamAlias("Tramitacoes")
+	List<Tramitacao> tramitacoes;
 
 	@Override
 	public String toString() {
@@ -88,6 +92,7 @@ public class Materia {
 	}
 
 	public Proposicao toProposicao() {
+		
 		Proposicao p = new Proposicao();
 		if (identificacaoMateria == null) {
 			identificacaoMateria = new IdentificacaoMateria();
@@ -134,7 +139,9 @@ public class Materia {
 			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER)
 					.log(Level.FINEST, "Nao carregou autuacoes da situacao atual");
 		} else if (!situacaoAtual.autuacoes.autuacoes.isEmpty()) {
-			p.setComissao(situacaoAtual.autuacoes.autuacoes.get(0).Local.SiglaLocal);
+			if (situacaoAtual.autuacoes.autuacoes.get(0).Local != null) {
+				p.setComissao(situacaoAtual.autuacoes.autuacoes.get(0).Local.SiglaLocal);
+			}
 			p.setSituacao(situacaoAtual.autuacoes.autuacoes.get(0).Situacao.SiglaSituacao);
 		}
 		if (DadosBasicosMateria != null) {
@@ -153,9 +160,15 @@ public class Materia {
 		xstream.processAnnotations(DadosBasicosMateria.class);
 		xstream.processAnnotations(AutoresPrincipais.class);
 		xstream.processAnnotations(AutorPrincipal.class);
+		
+		Tramitacao.configXstream(xstream);
 		Relatoria.configXstream(xstream);
 
 		SituacaoAtual.configXstream(xstream);
 
+	}
+
+	public List<Tramitacao> getTramitacoes() {
+		return tramitacoes;
 	}
 }

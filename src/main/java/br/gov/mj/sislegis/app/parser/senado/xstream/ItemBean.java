@@ -1,6 +1,6 @@
 package br.gov.mj.sislegis.app.parser.senado.xstream;
 
-import br.gov.mj.sislegis.app.model.*;
+import br.gov.mj.sislegis.app.model.Proposicao;
 
 public class ItemBean {
 	protected Integer seqOrdemPauta;

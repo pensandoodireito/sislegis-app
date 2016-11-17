@@ -18,7 +18,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import br.gov.mj.sislegis.app.model.Proposicao;
@@ -38,18 +37,36 @@ public class UsuarioEndpoint {
 	@Inject
 	private UsuarioAutenticadoBean controleUsuarioAutenticado;
 
+	@GET
+	@Path("/me")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getMe(@HeaderParam("Authorization") String authorization) {
+		try {
+			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+
+			return Response.ok(user).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Response.Status.FORBIDDEN).build();
+		}
+	}
+
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response create(Usuario entity) {
 		service.save(entity);
-		return Response.created(
-				UriBuilder.fromResource(UsuarioEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
+		return Response.created(UriBuilder.fromResource(UsuarioEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
 	}
 
 	@DELETE
 	@Path("/{id:[0-9][0-9]*}")
-	public Response deleteById(@PathParam("id") Long id) {
-		service.deleteById(id);
+	public Response deleteById(@PathParam("id") Long id, @QueryParam("f") Boolean force) {
+		if (Boolean.TRUE.equals(force)) {
+			service.deleteByIdForce(id);
+			
+		}else{
+			service.deleteById(id);
+		}
 		return Response.noContent().build();
 	}
 

@@ -1,11 +1,19 @@
 package br.gov.mj.sislegis.app.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @XmlRootElement
@@ -20,6 +28,11 @@ public class Posicionamento extends AbstractEntity {
 
 	@Column(unique = true)
 	private String nome;
+	
+	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "posicionamento", fetch = FetchType.LAZY)
+	private List<PosicionamentoProposicao> posicoes = new ArrayList<PosicionamentoProposicao>();
+	@OneToMany(cascade = CascadeType.REMOVE, mappedBy = "posicionamento", fetch = FetchType.LAZY)
+	private List<AreaDeMeritoRevisao> revisoes = new ArrayList<AreaDeMeritoRevisao>();
 
 	public Long getId() {
 		return this.id;
@@ -43,5 +56,10 @@ public class Posicionamento extends AbstractEntity {
 		if (nome != null && !nome.trim().isEmpty())
 			result += "nome: " + nome;
 		return result;
+	}
+
+	@JsonIgnore
+	public List<PosicionamentoProposicao> getPosicoes() {
+		return posicoes;
 	}
 }
