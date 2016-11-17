@@ -951,6 +951,61 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (user != null) {
 			if (instanciaNova.getId() != null) {
 				Proposicao proposicao = findById(instanciaNova.getId());
+				if (instanciaNova.getResponsavel() != null) {
+					if (proposicao.getResponsavel() == null || proposicao.getResponsavel().getId() != instanciaNova.getResponsavel().getId()) {
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Setando atribuicao");
+						instanciaNova.setFoiAtribuida(System.currentTimeMillis());
+					}
+				} else {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Removando atribuicao");
+					instanciaNova.setFoiAtribuida(null);
+				}
+
+				// checa mudanca de estado:
+				if (!instanciaNova.getEstado().equals(proposicao.getEstado())) {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Alterando estado de " + instanciaNova.getSigla() + " de " + proposicao.getEstado().name() + " para " + instanciaNova.getEstado().name());
+					switch (instanciaNova.getEstado()) {
+
+					case EMANALISE:
+						if (instanciaNova.getFoiAtribuida() == null && instanciaNova.getResponsavel() != null) {
+							Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Setando atribuicao dado estado");
+							instanciaNova.setFoiAtribuida(System.currentTimeMillis());
+						}
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Limpando horario de analisada");
+
+						instanciaNova.setFoiAnalisada(null);
+					case ANALISADA:
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Limpando horario de Revisao");
+						instanciaNova.setFoiRevisada(null);
+					case ADESPACHAR:
+					case ADESPACHAR_PRESENCA:
+						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Limpando horario de despacho");
+						instanciaNova.setFoiDespachada(null);
+					case DESPACHADA:
+
+						break;
+
+					default:
+						break;
+					}
+					switch (instanciaNova.getEstado()) {
+					case EMANALISE:
+						instanciaNova.setFoiEncaminhada(System.currentTimeMillis());
+						break;
+					case ANALISADA:
+						instanciaNova.setFoiAnalisada(System.currentTimeMillis());
+						break;
+					case ADESPACHAR:
+						instanciaNova.setFoiRevisada(System.currentTimeMillis());
+						break;
+					case DESPACHADA:
+						instanciaNova.setFoiDespachada(System.currentTimeMillis());
+						break;
+
+					default:
+						break;
+					}
+				}
 				if (instanciaNova.getPosicionamentoAtual() == null || instanciaNova.getPosicionamentoAtual().getPosicionamento() == null) {
 
 					instanciaNova.setPosicionamentoAtual(null);
@@ -991,7 +1046,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 						}
 						if (equipe != null) {
 							Set<Usuario> diretores = usuarioService.listUsuariosPorPapelDeEquipe(Papel.DIRETOR, equipe);
-							for (Iterator iterator = diretores.iterator(); iterator.hasNext();) {
+							for (Iterator<Usuario> iterator = diretores.iterator(); iterator.hasNext();) {
 								Usuario usuario = (Usuario) iterator.next();
 								encaminhamentoProposicaoService.salvarEncaminhamentoProposicaoAutomatico("Posicionamento alterado pelo Secretário", instanciaNova, usuario);
 							}
