@@ -27,7 +27,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @XmlRootElement
 
 @NamedQueries({ 
-	@NamedQuery(name = "getAllEncaminhamentoProposicao4Usuario", query = "select c from EncaminhamentoProposicao c where c.responsavel.id=:userId")
+	@NamedQuery(name = "getAllEncaminhamentoProposicao4Usuario", query = "select c from EncaminhamentoProposicao c where c.responsavel.id=:userId"),
+	@NamedQuery(name = "getAllEncaminhamentoProposicao", query = "select c from EncaminhamentoProposicao c where c.responsavel=:responsavel and c.tipoEncaminhamento=:tipo and c.proposicao=:proposicao "),
+	@NamedQuery(name = "getEnc4Comentario", query = "select c from EncaminhamentoProposicao c where c.comentarioFinalizacao.id=:comentarioId"),
+	
 
 })
 @JsonIgnoreProperties({ "idProposicao" })

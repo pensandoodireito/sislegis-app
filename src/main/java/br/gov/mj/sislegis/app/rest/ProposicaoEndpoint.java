@@ -78,6 +78,8 @@ public class ProposicaoEndpoint {
 
 	@Inject
 	private EncaminhamentoProposicaoService encaminhamentoProposicaoService;
+	@Inject
+	private UsuarioAutenticadoBean controleUsuarioAutenticado;
 
 	@GET
 	@Path("/proposicoesPautaCamara")
@@ -227,7 +229,7 @@ public class ProposicaoEndpoint {
 	@POST
 	@Path("/{id:[0-9][0-9]+}/desmarcaAtencaoEspecial")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response desmarcarAtencaoEspecial(@PathParam("id") Long id) {
+	public Response desmarcarAtencaoEspecial(@PathParam("id") Long id, @HeaderParam("Authorization") String authorization) throws IOException {
 		Proposicao p = proposicaoService.findById(id);
 		if (p.getComAtencaoEspecial() != null) {
 			p.desmarcarAtencaoEspecial();
@@ -239,7 +241,8 @@ public class ProposicaoEndpoint {
 					EncaminhamentoProposicao encaminhamentoProposicao = (EncaminhamentoProposicao) iterator.next();
 					if (marcadoComAtencao.equals(encaminhamentoProposicao.getTipoEncaminhamento())) {
 						if (!encaminhamentoProposicao.isFinalizado()) {
-							encaminhamentoProposicaoService.finalizar(encaminhamentoProposicao.getId(), "Proposição foi removida do status de atenção especial");
+							Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+							encaminhamentoProposicaoService.finalizar(encaminhamentoProposicao.getId(), "Proposição foi removida do status de atenção especial", user);
 						}
 					}
 				}
@@ -261,7 +264,7 @@ public class ProposicaoEndpoint {
 		try {
 			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
 			proposicaoService.save(entity, user);
-			return Response.ok(UriBuilder.fromResource(ProposicaoEndpoint.class).path(String.valueOf(entity.getId())).build()).build();
+			return Response.ok(entity).build();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return Response.status(Response.Status.BAD_REQUEST).build();
@@ -433,9 +436,7 @@ public class ProposicaoEndpoint {
 
 	}
 
-	@Inject
-	private UsuarioAutenticadoBean controleUsuarioAutenticado;
-
+	
 	@POST
 	@Path("/follow/{id:[0-9]+}")
 	public Response follow(@PathParam("id") Long id, @HeaderParam("Authorization") String authorization) {

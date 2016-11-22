@@ -136,6 +136,26 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 	}
 
 	@Override
+	public void refreshTarefa(EncaminhamentoProposicao savedEntity, String newText) {
+		Tarefa tarefaPorEncaminhamentoProposicaoId = buscarPorEncaminhamentoProposicaoId(savedEntity.getId());
+		if (tarefaPorEncaminhamentoProposicaoId != null) {
+			if (tarefaPorEncaminhamentoProposicaoId.getComentarioFinalizacao() != null) {
+				em.remove(tarefaPorEncaminhamentoProposicaoId.getComentarioFinalizacao());
+			}
+			tarefaPorEncaminhamentoProposicaoId.setFinalizada(false);
+			save(tarefaPorEncaminhamentoProposicaoId);
+			Notificacao not = new Notificacao(savedEntity.getResponsavel(), newText, tarefaPorEncaminhamentoProposicaoId.getId().toString(), CATEGORIA_TAREFAS);
+			notificacaoService.save(not);
+		} else {
+			if (savedEntity.getResponsavel() != null) {
+				// Criamos a nova tarefa
+				Tarefa tarefa = Tarefa.createTarefaEncaminhamento(savedEntity.getResponsavel(), savedEntity);
+				save(tarefa);
+			}
+		}
+	}
+
+	@Override
 	public void updateTarefa(EncaminhamentoProposicao savedEntity) {
 		// Caso uma tarefa já exista, significa que foi atualizada. Excluímos a
 		// antiga antes de atualizar.
@@ -163,15 +183,16 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 		tarefa.setFinalizada(true);
 		tarefa.getEncaminhamentoProposicao().setFinalizado(true);
 		deleteNotificacaoAssociada(idTarefa);
+		if (comentarioFinalizacao != null && comentarioFinalizacao.length() > 0) {
+			Comentario comentario = new Comentario();
+			comentario.setProposicao(tarefa.getEncaminhamentoProposicao().getProposicao());
+			comentario.setDescricao(comentarioFinalizacao);
+			comentario.setDataCriacao(new Date());
+			comentario.setAutor(tarefa.getUsuario());
 
-		Comentario comentario = new Comentario();
-		comentario.setProposicao(tarefa.getEncaminhamentoProposicao().getProposicao());
-		comentario.setDescricao(comentarioFinalizacao);
-		comentario.setDataCriacao(new Date());
-		comentario.setAutor(tarefa.getUsuario());
-
-		tarefa.setComentarioFinalizacao(comentario);
-		tarefa.getEncaminhamentoProposicao().setComentarioFinalizacao(comentario);
+			tarefa.setComentarioFinalizacao(comentario);
+			tarefa.getEncaminhamentoProposicao().setComentarioFinalizacao(comentario);
+		}
 
 		save(tarefa);
 
@@ -189,6 +210,17 @@ public class TarefaServiceEjb extends AbstractPersistence<Tarefa, Long> implemen
 		this.em = (EntityManager) injections[0];
 		this.notificacaoService = (NotificacaoService) injections[1];
 
+	}
+
+	@Override
+	public Tarefa getTarefaDeComentario(Long id) {
+		try {
+			return em.createNamedQuery("getTarefa4Comentario", Tarefa.class).setParameter("comentarioId", id).getSingleResult();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }

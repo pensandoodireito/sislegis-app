@@ -48,6 +48,7 @@ import br.gov.mj.sislegis.app.model.pautacomissao.ProposicaoPautaComissaoFutura;
 import br.gov.mj.sislegis.app.rest.serializers.CompactListRoadmapComissaoSerializer;
 import br.gov.mj.sislegis.app.rest.serializers.CompactSetProposicaoSerializer;
 import br.gov.mj.sislegis.app.rest.serializers.EfetividadeSALDeserializer;
+import br.gov.mj.sislegis.app.rest.serializers.ResultadoCongressoDeserializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -106,7 +107,22 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 					
 	@NamedQuery(
 			name = "contadorPosicionamentosPorResponavel",  
-			query = "select count(p.id),p.posicionamentoAtual.posicionamento.nome from Proposicao p where p.responsavel=:responsavel and p.foiAtribuida>:s and  p.foiAtribuida<=:e and p.foiAnalisada<=:e group by p.posicionamentoAtual.posicionamento.nome")
+			query = "select count(p.id),p.posicionamentoAtual.posicionamento.nome from Proposicao p where p.responsavel=:responsavel and p.foiAtribuida>:s and  p.foiAtribuida<=:e and p.foiAnalisada<=:e and p.foiAnalisada is not null and p.estado<>:estado group by p.posicionamentoAtual.posicionamento.nome"),
+	
+	@NamedQuery(
+			name = "getAllProposicaoPosicionadaComResultado",  
+			query = "select p from Proposicao p where p.resultadoCongresso is not null and p.resultadoCongresso<>:emTramitacao and p.teveResultado>:s and  p.teveResultado<=:e and p.posicionamentoAtual.posicionamento=:posicionamento "),
+	@NamedQuery(
+			name = "contadorResultadoCongressoPorPosicionamento",  
+			query = "select count(p.id) from Proposicao p where p.teveResultado>:s and p.teveResultado<=:e and p.posicionamentoAtual.posicionamento=:posicionamento and p.resultadoCongresso=:resultadoCongresso"),
+	@NamedQuery(
+			name = "contadorEmendasComResultado",  
+			query = "select count(p.id) from Proposicao p where p.teveResultado>:s and p.teveResultado<=:e and p.efetividade=:emendas and p.resultadoCongresso<>:resultadoCongresso"),
+	@NamedQuery(
+			name = "contadorComResultado",  
+			query = "select count(p.id) from Proposicao p where p.teveResultado>:s and p.teveResultado<=:e and p.resultadoCongresso<>:resultadoCongresso")			
+						
+	
 	
 })
 //@formatter:on
@@ -147,10 +163,18 @@ public class Proposicao extends AbstractEntity {
 	@Column(name = "foidespachada", nullable = true)
 	private Long foiDespachada;
 
+	@Column(name = "teveresultado", nullable = true)
+	private Long teveResultado;
+
 	@JsonDeserialize(using = EfetividadeSALDeserializer.class)
 	@Enumerated(EnumType.STRING)
 	@Column(name = "efetividade")
 	private EfetividadeSAL efetividade;
+
+	@JsonDeserialize(using = ResultadoCongressoDeserializer.class)
+	@Enumerated(EnumType.STRING)
+	@Column(name = "resultado_congresso")
+	private ResultadoCongresso resultadoCongresso;
 
 	@Column
 	private String tipo;
@@ -457,6 +481,7 @@ public class Proposicao extends AbstractEntity {
 		return listaEncaminhamentoProposicao;
 	}
 
+	@JsonIgnore
 	public void setListaEncaminhamentoProposicao(Set<EncaminhamentoProposicao> listaEncaminhamentoProposicao) {
 		this.listaEncaminhamentoProposicao = listaEncaminhamentoProposicao;
 	}
@@ -811,5 +836,21 @@ public class Proposicao extends AbstractEntity {
 
 	public void setFoiAtribuida(Long foiAtribuida) {
 		this.foiAtribuida = foiAtribuida;
+	}
+
+	public ResultadoCongresso getResultadoCongresso() {
+		return resultadoCongresso;
+	}
+
+	public void setResultadoCongresso(ResultadoCongresso resultadoCongresso) {
+		this.resultadoCongresso = resultadoCongresso;
+	}
+
+	public Long getTeveResultado() {
+		return teveResultado;
+	}
+
+	public void setTeveResultado(Long teveResultado) {
+		this.teveResultado = teveResultado;
 	}
 }

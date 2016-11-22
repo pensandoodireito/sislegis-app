@@ -1,5 +1,6 @@
 package br.gov.mj.sislegis.app.rest;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -19,6 +20,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
@@ -27,6 +29,7 @@ import br.gov.mj.sislegis.app.model.Papel;
 import br.gov.mj.sislegis.app.model.Proposicao;
 import br.gov.mj.sislegis.app.model.TipoEncaminhamento;
 import br.gov.mj.sislegis.app.model.Usuario;
+import br.gov.mj.sislegis.app.rest.authentication.UsuarioAutenticadoBean;
 import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.TipoEncaminhamentoService;
@@ -45,6 +48,8 @@ public class EncaminhamentoProposicaoEndpoint {
 	private ProposicaoService propSvc;
 	@Inject
 	private UsuarioService userSvc;
+	@Inject
+	private UsuarioAutenticadoBean controleUsuarioAutenticado;
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -60,26 +65,24 @@ public class EncaminhamentoProposicaoEndpoint {
 	public Response createDespachoMinistro(EncaminhamentoProposicao entity, @HeaderParam("Referer") String referer) {
 		Set<Usuario> usuarios = userSvc.listUsuariosPorPapel(Papel.SECRETARIO);
 
-		TipoEncaminhamento tipo = tipoSvc.buscarTipoEncaminhamentoDespachoPresencial();
+		TipoEncaminhamento tipo = tipoSvc.buscarTipoEncaminhamentoDespachoMinisterial();
 		entity.setTipoEncaminhamento(tipo);
 		Proposicao prop = propSvc.findById(entity.getProposicao().getId());
 		for (Iterator iterator = usuarios.iterator(); iterator.hasNext();) {
 			Usuario usuario = (Usuario) iterator.next();
 			EncaminhamentoProposicao enc = new EncaminhamentoProposicao();
-			enc.setComentario(entity.getComentario());
+			enc.setDetalhes(entity.getDetalhes());
 			enc.setDataHoraLimite(entity.getDataHoraLimite());
-			enc.setProposicao(prop);		
+			enc.setProposicao(prop);
 			enc.setResponsavel(usuario);
 			enc.setTipoEncaminhamento(tipo);
-			 service.salvarEncaminhamentoProposicao(enc);
+			service.salvarEncaminhamentoProposicao(enc);
 
 		}
 		prop.marcarAtencaoEspecial();
 		propSvc.save(prop);
 		return Response.ok().build();
 	}
-
-	
 
 	@POST
 	@Path("/despachoPresencial")
@@ -139,8 +142,15 @@ public class EncaminhamentoProposicaoEndpoint {
 	@POST
 	@Path("/finalizar")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public Response finalizar(@FormParam("idEncaminhamentoProposicao") Long idEncaminhamentoProposicao, @FormParam("descricaoComentario") String descricaoComentario) {
-		service.finalizar(idEncaminhamentoProposicao, descricaoComentario);
-		return Response.ok().build();
+	public Response finalizar(@FormParam("idEncaminhamentoProposicao") Long idEncaminhamentoProposicao, @FormParam("descricaoComentario") String descricaoComentario, @HeaderParam("Authorization") String authorization) {
+		Usuario user;
+		try {
+			user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+			service.finalizar(idEncaminhamentoProposicao, descricaoComentario, user);
+			return Response.ok().build();
+		} catch (IOException e) {
+			return Response.status(Status.FORBIDDEN).build();
+		}
+
 	}
 }
