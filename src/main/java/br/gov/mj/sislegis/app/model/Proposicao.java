@@ -94,7 +94,19 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 					query = "select p from Proposicao p where p.posicionamentoAtual.usuario.id=:userId"),
 	@NamedQuery(
 			name = "findNaoPautadas",  
-			query = "select p from Proposicao p where p.ultima is null")
+			query = "select p from Proposicao p where p.ultima is null"),
+			@NamedQuery(
+					name = "getAllProposicaoPosicionada4UsuarioPeriodo", 
+					query = "select p from Proposicao p where p.posicionamentoAtual.usuario.id=:userId and p.foiAtribuida>:s and p.foiAnalisada<=:e and p.posicionamentoAtual.posicionamento=:posicionamento"),		
+			
+	@NamedQuery(
+			name = "contadorPosicionamentosPorEquipe",  
+			query = "select count(p.id),p.responsavel.equipe.nome,p.posicionamentoAtual.posicionamento.nome from Proposicao p where p.responsavel.equipe=:equipe and p.foiAnalisada>:s and p.foiAnalisada<=:e and p.posicionamentoAtual is not null group by p.responsavel.equipe.nome, p.posicionamentoAtual.posicionamento.nome"),
+					
+					
+	@NamedQuery(
+			name = "contadorPosicionamentosPorResponavel",  
+			query = "select count(p.id),p.posicionamentoAtual.posicionamento.nome from Proposicao p where p.responsavel=:responsavel and p.foiAtribuida>:s and  p.foiAtribuida<=:e and p.foiAnalisada<=:e group by p.posicionamentoAtual.posicionamento.nome")
 	
 })
 //@formatter:on
@@ -126,6 +138,8 @@ public class Proposicao extends AbstractEntity {
 	private Long comAtencaoEspecial;
 	@Column(name = "foiencaminhada", nullable = true)
 	private Long foiEncaminhada;
+	@Column(name = "foiatribuida", nullable = true)
+	private Long foiAtribuida;
 	@Column(name = "foianalisada", nullable = true)
 	private Long foiAnalisada;
 	@Column(name = "foirevisada", nullable = true)
@@ -789,5 +803,13 @@ public class Proposicao extends AbstractEntity {
 
 	public void desmarcarAtencaoEspecial() {
 		comAtencaoEspecial = null;
+	}
+
+	public Long getFoiAtribuida() {
+		return foiAtribuida;
+	}
+
+	public void setFoiAtribuida(Long foiAtribuida) {
+		this.foiAtribuida = foiAtribuida;
 	}
 }
