@@ -4,16 +4,21 @@ import java.math.BigInteger;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import br.gov.mj.sislegis.app.model.Comentario;
+import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
 import br.gov.mj.sislegis.app.model.Papel;
+import br.gov.mj.sislegis.app.model.Tarefa;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.service.AbstractPersistence;
 import br.gov.mj.sislegis.app.service.ComentarioService;
+import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
+import br.gov.mj.sislegis.app.service.TarefaService;
 
 @Stateless
 public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> implements ComentarioService, EJBUnitTestable {
@@ -97,6 +102,26 @@ public class ComentarioServiceEjb extends AbstractPersistence<Comentario, Long> 
 		comentario.setOculto(true);
 		save(comentario);
 	}
+
+	@Inject
+	TarefaService tarefaService;
+	@Inject
+	EncaminhamentoProposicaoService encService;
+
+	public void deleteById(Long id) {
+		Tarefa tarefa = tarefaService.getTarefaDeComentario(id);
+		if (tarefa != null) {
+			tarefa.setComentarioFinalizacao(null);
+			em.merge(tarefa);
+		}
+		EncaminhamentoProposicao enc = encService.getByComentarioFinalizacao(id);
+		if (enc != null) {
+			enc.setComentarioFinalizacao(null);
+			em.merge(enc);
+		}
+		super.deleteById(id);
+
+	};
 
 	@Override
 	public void setInjectedEntities(Object... injections) {

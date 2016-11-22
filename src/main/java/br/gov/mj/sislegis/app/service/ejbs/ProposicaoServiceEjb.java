@@ -43,6 +43,7 @@ import br.gov.mj.sislegis.app.model.Posicionamento;
 import br.gov.mj.sislegis.app.model.PosicionamentoProposicao;
 import br.gov.mj.sislegis.app.model.ProcessoSei;
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.ResultadoCongresso;
 import br.gov.mj.sislegis.app.model.Reuniao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicao;
 import br.gov.mj.sislegis.app.model.ReuniaoProposicaoPK;
@@ -312,6 +313,13 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		Date inseridaApos = getDateFromSTR(inseridaAposStr);
 		Date foiDespachadaApos = getDateFromSTR((String) filtros.get("foiDespachadaApos"));
 		Date foiDespachadaAte = getDateFromSTR((String) filtros.get("foiDespachadaAte"));
+		if (foiDespachadaAte != null) {
+			Calendar c = Calendar.getInstance();
+			c.setTime(foiDespachadaAte);
+			c.add(Calendar.DAY_OF_YEAR, 1);
+			c.add(Calendar.SECOND, -1);
+			foiDespachadaAte = c.getTime();
+		}
 		if (Objects.nonNull(foiDespachadaApos) || Objects.nonNull(foiDespachadaAte)) {
 			estado = EstadoProposicao.DESPACHADA.name();
 		}
@@ -371,8 +379,10 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	}
 
 	private void setParams(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, String estado, Long idResponsavel, Long idEquipe, Long idPosicionamento, String relator, Date inseridaApos, Date foiDespachadaApos, Date foiDespachadaAte, String macrotema, Boolean somentePautadas, Integer[] idProposicoes, TypedQuery findByIdQuery) {
+		StringBuilder sb = new StringBuilder("Filtro aplicado: ");
 		if (Objects.nonNull(sigla) && !sigla.equals("")) {
 			findByIdQuery.setParameter("sigla", "%" + sigla + "%");
+			sb.append("sigla ").append(sigla).append("|");
 		}
 		if (Objects.nonNull(somentePautadas) && Boolean.TRUE.equals(somentePautadas)) {
 			Calendar c = Calendar.getInstance();
@@ -382,52 +392,67 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 				c.add(Calendar.WEEK_OF_YEAR, -1);
 			}
 			findByIdQuery.setParameter("dataReuniao", c.getTime());
+			sb.append("somentePautadas ").append(c.getTime()).append("|");
 		}
 		if (Objects.nonNull(comissao) && !comissao.equals("")) {
 			findByIdQuery.setParameter("comissao", comissao + "%");
+			sb.append("comissao ").append(comissao).append("|");
 		}
 
 		if (Objects.nonNull(inseridaApos)) {
 			findByIdQuery.setParameter("inseridaApos", inseridaApos);
+			sb.append("inseridaApos ").append(inseridaApos).append("|");
 		}
 		if (Objects.nonNull(foiDespachadaApos)) {
 			findByIdQuery.setParameter("foiDespachadaApos", foiDespachadaApos.getTime());
+			sb.append("foiDespachadaApos ").append(foiDespachadaApos).append("|");
 		}
 		if (Objects.nonNull(foiDespachadaAte)) {
 			findByIdQuery.setParameter("foiDespachadaAte", foiDespachadaAte.getTime());
+			sb.append("foiDespachadaAte ").append(foiDespachadaAte).append("|");
 		}
 		if (Objects.nonNull(ementa) && !ementa.equals("")) {
 			findByIdQuery.setParameter("ementa", "%" + ementa + "%");
+			sb.append("ementa ").append(ementa).append("|");
 		}
 		if (Objects.nonNull(autor) && !autor.equals("")) {
 			findByIdQuery.setParameter("autor", "%" + autor + "%");
+			sb.append("autor ").append(autor).append("|");
 		}
 		if (Objects.nonNull(relator) && !relator.isEmpty()) {
 			findByIdQuery.setParameter("relator", "%" + relator + "%");
+			sb.append("relator ").append(relator).append("|");
 		}
 		if (Objects.nonNull(origem) && !origem.equals("")) {
 			findByIdQuery.setParameter("origem", Origem.valueOf(origem));
+			sb.append("origem ").append(origem).append("|");
 		}
 		if (Objects.nonNull(isFavorita) && !isFavorita.equals("")) {
 			findByIdQuery.setParameter("isFavorita", new Boolean(isFavorita));
+			sb.append("isFavorita ").append(isFavorita).append("|");
 		}
 		if (Objects.nonNull(idPosicionamento) && idPosicionamento != -1) {
 			findByIdQuery.setParameter("idPosicionamento", idPosicionamento);
+			sb.append("idPosicionamento ").append(idPosicionamento).append("|");
 		}
 		if (Objects.nonNull(idResponsavel) && idResponsavel > 0) {
 
 			findByIdQuery.setParameter("idResponsavel", idResponsavel);
+			sb.append("idResponsavel ").append(idResponsavel).append("|");
 		}
 		if (Objects.nonNull(macrotema)) {
 
 			findByIdQuery.setParameter("tag", macrotema);
+			sb.append("macrotema ").append(macrotema).append("|");
 		}
 		if (Objects.nonNull(idEquipe) && idEquipe > 0) {
 
 			findByIdQuery.setParameter("idEquipe", idEquipe);
+			sb.append("idEquipe ").append(idEquipe).append("|");
 		}
 		if (Objects.nonNull(estado) && !estado.isEmpty()) {
 			findByIdQuery.setParameter("estado", EstadoProposicao.valueOf(estado));
+			sb.append("estado ").append(estado).append("|");
 		}
 
 		if (Objects.nonNull(idProposicoes) && idProposicoes.length > 0) {
@@ -437,6 +462,7 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 			}
 			findByIdQuery.setParameter("idProposicao", idProps);
 		}
+		Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.FINE, sb.toString());
 	}
 
 	private StringBuilder createWhereClause(String sigla, String comissao, String autor, String ementa, String origem, String isFavorita, Long idResponsavel, Long idPosicionamento, Integer[] idProposicao) {
@@ -950,111 +976,84 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 	public Proposicao save(Proposicao instanciaNova, Usuario user) {
 		if (user != null) {
 			if (instanciaNova.getId() != null) {
-				Proposicao proposicao = findById(instanciaNova.getId());
-				if (instanciaNova.getResponsavel() != null) {
-					if (proposicao.getResponsavel() == null || proposicao.getResponsavel().getId() != instanciaNova.getResponsavel().getId()) {
-						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Setando atribuicao");
-						instanciaNova.setFoiAtribuida(System.currentTimeMillis());
-					}
-				} else {
-					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Removando atribuicao");
-					instanciaNova.setFoiAtribuida(null);
-				}
+				Proposicao proposicaoExistenteNoDB = findById(instanciaNova.getId());
+				checkSeTrocouResponsavel(instanciaNova, proposicaoExistenteNoDB);
+
+				checkSeMudouResultadoCongresso(instanciaNova, proposicaoExistenteNoDB);
 
 				// checa mudanca de estado:
-				if (!instanciaNova.getEstado().equals(proposicao.getEstado())) {
-					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Alterando estado de " + instanciaNova.getSigla() + " de " + proposicao.getEstado().name() + " para " + instanciaNova.getEstado().name());
-					switch (instanciaNova.getEstado()) {
+				checkSeTrocouDeEstado(instanciaNova, proposicaoExistenteNoDB);
 
-					case EMANALISE:
-						if (instanciaNova.getFoiAtribuida() == null && instanciaNova.getResponsavel() != null) {
-							Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Setando atribuicao dado estado");
-							instanciaNova.setFoiAtribuida(System.currentTimeMillis());
-						}
-						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Limpando horario de analisada");
-
-						instanciaNova.setFoiAnalisada(null);
-					case ANALISADA:
-						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Limpando horario de Revisao");
-						instanciaNova.setFoiRevisada(null);
-					case ADESPACHAR:
-					case ADESPACHAR_PRESENCA:
-						Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Limpando horario de despacho");
-						instanciaNova.setFoiDespachada(null);
-					case DESPACHADA:
-
-						break;
-
-					default:
-						break;
-					}
-					switch (instanciaNova.getEstado()) {
-					case EMANALISE:
-						instanciaNova.setFoiEncaminhada(System.currentTimeMillis());
-						break;
-					case ANALISADA:
-						instanciaNova.setFoiAnalisada(System.currentTimeMillis());
-						break;
-					case ADESPACHAR:
-						instanciaNova.setFoiRevisada(System.currentTimeMillis());
-						break;
-					case DESPACHADA:
-						instanciaNova.setFoiDespachada(System.currentTimeMillis());
-						break;
-
-					default:
-						break;
-					}
-				}
 				if (instanciaNova.getPosicionamentoAtual() == null || instanciaNova.getPosicionamentoAtual().getPosicionamento() == null) {
-
 					instanciaNova.setPosicionamentoAtual(null);
 				} else if//@formatter:off 
 				
 				(
-					(instanciaNova.getPosicionamentoAtual() != null && proposicao.getPosicionamentoAtual() == null)
-					|| (
-							(instanciaNova.getPosicionamentoAtual() != null	&& proposicao.getPosicionamentoAtual() != null) 
+					(instanciaNova.getPosicionamentoAtual() != null && proposicaoExistenteNoDB.getPosicionamentoAtual() == null)
+					|| 
+						(
+							(instanciaNova.getPosicionamentoAtual() != null	&& proposicaoExistenteNoDB.getPosicionamentoAtual() != null) 
 							&& 
 							(
-								(proposicao.getPosicionamentoAtual().getPosicionamento()==null && instanciaNova.getPosicionamentoAtual().getPosicionamento()!=null)
+								(proposicaoExistenteNoDB.getPosicionamentoAtual().getPosicionamento()==null && instanciaNova.getPosicionamentoAtual().getPosicionamento()!=null)
 								||
 								(
-										proposicao.getPosicionamentoAtual().getPosicionamento()!=null && instanciaNova.getPosicionamentoAtual().getPosicionamento()!=null &&
+										proposicaoExistenteNoDB.getPosicionamentoAtual().getPosicionamento()!=null && instanciaNova.getPosicionamentoAtual().getPosicionamento()!=null &&
 									
-									!proposicao.getPosicionamentoAtual().equals(instanciaNova.getPosicionamentoAtual().getPosicionamento())
+									!proposicaoExistenteNoDB.getPosicionamentoAtual().equals(instanciaNova.getPosicionamentoAtual())
 									
 									)
 							)
 						)
-				){
+				)
 				//@formatter:on
-
+				{
 					PosicionamentoProposicao posicionamentoProposicao = new PosicionamentoProposicao();
 					posicionamentoProposicao.setPosicionamento(instanciaNova.getPosicionamentoAtual().getPosicionamento());
-					posicionamentoProposicao.setProposicao(proposicao);
+					posicionamentoProposicao.setProposicao(proposicaoExistenteNoDB);
 					posicionamentoProposicao.setPreliminar(instanciaNova.getPosicionamentoAtual().isPreliminar());
 					posicionamentoProposicao.setUsuario(user);
 					em.persist(posicionamentoProposicao);
 					instanciaNova.setPosicionamentoAtual(posicionamentoProposicao);
-					if (user.getPapeis().contains(Papel.SECRETARIO)) {
-						Equipe equipe = null;
-						if (instanciaNova.getEquipe() != null) {
-							equipe = instanciaNova.getEquipe();
-						} else if (instanciaNova.getResponsavel() != null) {
-							equipe = instanciaNova.getResponsavel().getEquipe();
-						}
-						if (equipe != null) {
-							Set<Usuario> diretores = usuarioService.listUsuariosPorPapelDeEquipe(Papel.DIRETOR, equipe);
-							for (Iterator<Usuario> iterator = diretores.iterator(); iterator.hasNext();) {
-								Usuario usuario = (Usuario) iterator.next();
-								encaminhamentoProposicaoService.salvarEncaminhamentoProposicaoAutomatico("Posicionamento alterado pelo Secretário", instanciaNova, usuario);
-							}
-						}
 
-					} else if (user.getPapeis().contains(Papel.DIRETOR)) {
-						if (instanciaNova.getResponsavel() != null) {
-							encaminhamentoProposicaoService.salvarEncaminhamentoProposicaoAutomatico("Posicionamento alterado pelo Diretor", instanciaNova, instanciaNova.getResponsavel());
+					if//@formatter:off
+					(
+							(proposicaoExistenteNoDB.getPosicionamentoAtual()==null && instanciaNova.getPosicionamentoAtual()!=null) ||
+							(proposicaoExistenteNoDB.getPosicionamentoAtual()!=null && instanciaNova.getPosicionamentoAtual()==null) ||
+							(
+									(proposicaoExistenteNoDB.getPosicionamentoAtual()!=null && instanciaNova.getPosicionamentoAtual()!=null) &&
+									(!proposicaoExistenteNoDB.getPosicionamentoAtual().getPosicionamento().equals(instanciaNova.getPosicionamentoAtual().getPosicionamento())) 
+							)
+				    )
+					//@formatter:on
+					{
+
+						if (user.getPapeis().contains(Papel.SECRETARIO)) {
+							Equipe equipe = null;
+							if (instanciaNova.getEquipe() != null) {
+								equipe = instanciaNova.getEquipe();
+							} else if (instanciaNova.getResponsavel() != null) {
+								equipe = instanciaNova.getResponsavel().getEquipe();
+							}
+							if (equipe != null) {
+								String descricao = "Posicionamento alterado pelo Secretário. ";
+								descricao += getExplicacao(instanciaNova, proposicaoExistenteNoDB);
+								Set<Usuario> diretores = usuarioService.listUsuariosPorPapelDeEquipe(Papel.DIRETOR, equipe);
+								for (Iterator<Usuario> iterator = diretores.iterator(); iterator.hasNext();) {
+									Usuario usuario = (Usuario) iterator.next();
+									Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine(descricao + "' para " + usuario.getNome());
+									encaminhamentoProposicaoService.salvarEncaminhamentoProposicaoAutomatico(descricao, instanciaNova, usuario);
+								}
+							}
+
+						} else if (user.getPapeis().contains(Papel.DIRETOR)) {
+							if (instanciaNova.getResponsavel() != null && !instanciaNova.getResponsavel().getId().equals(user.getId())) {
+								String descricao = "Posicionamento alterado pelo Diretor " + user.getNome() + ". ";
+								descricao += getExplicacao(instanciaNova, proposicaoExistenteNoDB);
+								Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine(descricao + "' para " + instanciaNova.getResponsavel().getNome());
+
+								encaminhamentoProposicaoService.salvarEncaminhamentoProposicaoAutomatico(descricao, instanciaNova, instanciaNova.getResponsavel());
+							}
 						}
 					}
 				}
@@ -1062,6 +1061,97 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 
 		return super.save(instanciaNova);
+	}
+
+	private void checkSeTrocouDeEstado(Proposicao instanciaNova, Proposicao proposicaoExistenteNoDB) {
+		if (!instanciaNova.getEstado().equals(proposicaoExistenteNoDB.getEstado())) {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).info("Alterando estado de " + instanciaNova.getSigla() + " de " + proposicaoExistenteNoDB.getEstado().name() + " para " + instanciaNova.getEstado().name());
+			switch (instanciaNova.getEstado()) {
+
+			case EMANALISE:
+				if (instanciaNova.getFoiAtribuida() == null && instanciaNova.getResponsavel() != null) {
+					Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Setando atribuicao dado estado");
+					instanciaNova.setFoiAtribuida(System.currentTimeMillis());
+				}
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Limpando horario de analisada");
+
+				instanciaNova.setFoiAnalisada(null);
+			case ANALISADA:
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Limpando horario de Revisao");
+				instanciaNova.setFoiRevisada(null);
+			case ADESPACHAR:
+			case ADESPACHAR_PRESENCA:
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Limpando horario de despacho");
+				instanciaNova.setFoiDespachada(null);
+			case DESPACHADA:
+
+				break;
+
+			default:
+				break;
+			}
+			switch (instanciaNova.getEstado()) {
+			case EMANALISE:
+				instanciaNova.setFoiEncaminhada(System.currentTimeMillis());
+				break;
+			case ANALISADA:
+				instanciaNova.setFoiAnalisada(System.currentTimeMillis());
+				break;
+			case ADESPACHAR:
+				instanciaNova.setFoiRevisada(System.currentTimeMillis());
+				break;
+			case DESPACHADA:
+				instanciaNova.setFoiDespachada(System.currentTimeMillis());
+				break;
+
+			default:
+				break;
+			}
+		}
+	}
+
+	private void checkSeMudouResultadoCongresso(Proposicao instanciaNova, Proposicao proposicaoExistenteNoDB) {
+		if (instanciaNova.getResultadoCongresso() != null && !(ResultadoCongresso.EM_TRAMITACAO.equals(instanciaNova.getResultadoCongresso()))) {
+			if (proposicaoExistenteNoDB.getResultadoCongresso() == null || !proposicaoExistenteNoDB.getResultadoCongresso().equals(instanciaNova.getResultadoCongresso())) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Setando resultado");
+				instanciaNova.setTeveResultado(System.currentTimeMillis());
+			}
+		} else {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Removando resultado");
+			instanciaNova.setTeveResultado(null);
+		}
+	}
+
+	private void checkSeTrocouResponsavel(Proposicao instanciaNova, Proposicao proposicaoExistenteNoDB) {
+		if (instanciaNova.getResponsavel() != null) {
+			if (proposicaoExistenteNoDB.getResponsavel() == null || !proposicaoExistenteNoDB.getResponsavel().getId().equals(instanciaNova.getResponsavel().getId())) {
+				Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Setando atribuicao");
+				instanciaNova.setFoiAtribuida(System.currentTimeMillis());
+			}
+			if (proposicaoExistenteNoDB.getEquipe() == null && instanciaNova.getEquipe() == null) {
+				instanciaNova.setEquipe(instanciaNova.getResponsavel().getEquipe());
+			}
+
+		} else {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Removando atribuicao");
+			instanciaNova.setFoiAtribuida(null);
+		}
+	}
+
+	private String getExplicacao(Proposicao instanciaNova, Proposicao proposicaoExistenteNoDB) {
+		String descricao = "";
+		if (proposicaoExistenteNoDB.getPosicionamentoAtual() != null && proposicaoExistenteNoDB.getPosicionamentoAtual().getPosicionamento() != null) {
+			descricao += " De '" + proposicaoExistenteNoDB.getPosicionamentoAtual().getPosicionamento().getNome() + "' ";
+		} else {
+			descricao += " De nenhum posicionamento ";
+		}
+		descricao += " para ";
+		if (instanciaNova.getPosicionamentoAtual() != null && instanciaNova.getPosicionamentoAtual().getPosicionamento() != null) {
+			descricao += "'" + instanciaNova.getPosicionamentoAtual().getPosicionamento().getNome() + "'";
+		} else {
+			descricao += " nenhum posicionamento.";
+		}
+		return descricao;
 	}
 
 	@Override

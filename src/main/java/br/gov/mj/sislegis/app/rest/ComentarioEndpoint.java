@@ -65,6 +65,7 @@ public class ComentarioEndpoint {
 
 		try {
 			Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+			
 			if (user.getPapeis().contains(Papel.ADMIN)) {
 				comentarioService.deleteById(id);
 			} else {

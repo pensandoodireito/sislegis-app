@@ -1,7 +1,5 @@
 package br.gov.mj.sislegis.app.model.documentos;
 
-import java.util.Date;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,8 +14,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 import br.gov.mj.sislegis.app.model.AbstractEntity;
 import br.gov.mj.sislegis.app.model.Documento;

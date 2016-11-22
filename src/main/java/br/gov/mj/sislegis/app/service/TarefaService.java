@@ -20,4 +20,8 @@ public interface TarefaService extends Service<Tarefa> {
 
 	void updateTarefa(EncaminhamentoProposicao savedEntity);
 
+	Tarefa getTarefaDeComentario(Long id);
+
+	void refreshTarefa(EncaminhamentoProposicao savedEntity, String newText);
+
 }

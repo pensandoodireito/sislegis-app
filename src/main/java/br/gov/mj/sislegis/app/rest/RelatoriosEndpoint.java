@@ -28,10 +28,12 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import br.gov.mj.sislegis.app.model.Comissao;
+import br.gov.mj.sislegis.app.model.EfetividadeSAL;
 import br.gov.mj.sislegis.app.model.Equipe;
 import br.gov.mj.sislegis.app.model.EstadoProposicao;
 import br.gov.mj.sislegis.app.model.Posicionamento;
 import br.gov.mj.sislegis.app.model.Proposicao;
+import br.gov.mj.sislegis.app.model.ResultadoCongresso;
 import br.gov.mj.sislegis.app.model.Usuario;
 import br.gov.mj.sislegis.app.model.documentos.Briefing;
 import br.gov.mj.sislegis.app.model.documentos.Emenda;
@@ -42,7 +44,6 @@ import br.gov.mj.sislegis.app.service.EquipeService;
 import br.gov.mj.sislegis.app.service.PosicionamentoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.UsuarioService;
-import br.gov.mj.sislegis.app.service.ejbs.EJBUnitTestable;
 
 /**
  * 
@@ -126,7 +127,7 @@ public class RelatoriosEndpoint {
 		dashInfo.put("equipes", equipesArr);
 		List<Equipe> equipes = equipeService.listAll();
 		long totalEquipes = 0;
-		for (Iterator iterator = equipes.iterator(); iterator.hasNext();) {
+		for (Iterator<Equipe> iterator = equipes.iterator(); iterator.hasNext();) {
 			Equipe equipe = (Equipe) iterator.next();
 			if (equipe.getNome().contains("ASPAR")) {
 				continue;
@@ -142,11 +143,12 @@ public class RelatoriosEndpoint {
 				porResponsavel.put("id", responsavel.getId());
 				porResponsavel.put("nome", responsavel.getNome());
 
-				BigInteger totalAnalisado = (BigInteger) em.createNativeQuery("select count(id) from proposicao where responsavel_id=:userId and foiatribuida>:s and foiatribuida<=:e and foianalisada<=:e and estado<>:estado").setParameter("estado", EstadoProposicao.EMANALISE.name()).setParameter("userId", responsavel.getId()).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime()).getSingleResult();
+				BigInteger totalAnalisado = (BigInteger) em.createNativeQuery("select count(id) from proposicao where responsavel_id=:userId and foiatribuida>:s and foiatribuida<=:e and foianalisada<=:e  and foianalisada is not null and estado<>:estado").setParameter("estado", EstadoProposicao.EMANALISE.name()).setParameter("userId", responsavel.getId()).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime()).getSingleResult();
 				porResponsavel.put("analisados", totalAnalisado);
 
 				JSONObject tempo = new JSONObject();
-				java.math.BigDecimal tempoMedioAnalise = (java.math.BigDecimal) (BigDecimal) em.createNativeQuery("select avg(foianalisada-foiencaminhada) from proposicao  where responsavel_id=:userId and foiatribuida>:s and foiatribuida<=:e and foianalisada<=:e").setParameter("userId", responsavel.getId()).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime()).getSingleResult();
+				java.math.BigDecimal tempoMedioAnalise = (java.math.BigDecimal) (BigDecimal) em.createNativeQuery("select avg(foianalisada-foiencaminhada) from proposicao  where responsavel_id=:userId and foiatribuida>:s and foiatribuida<=:e and foianalisada<=:e and foianalisada is not null and estado<>:estado").setParameter("estado", EstadoProposicao.EMANALISE.name()).setParameter("userId", responsavel.getId()).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime())
+						.getSingleResult();
 
 				tempo.put("analise", tempoMedioAnalise);
 
@@ -160,7 +162,7 @@ public class RelatoriosEndpoint {
 				porResponsavel.put("tempo", tempo);
 
 				JSONArray posicionamentosArray = new JSONArray();
-				List<Object> list = em.createNamedQuery("contadorPosicionamentosPorResponavel").setParameter("responsavel", responsavel).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime()).getResultList();
+				List<Object> list = em.createNamedQuery("contadorPosicionamentosPorResponavel").setParameter("estado", EstadoProposicao.EMANALISE).setParameter("responsavel", responsavel).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime()).getResultList();
 				for (Iterator iterator2 = list.iterator(); iterator2.hasNext();) {
 					Object[] object = (Object[]) iterator2.next();
 					JSONObject p = new JSONObject();
@@ -299,6 +301,113 @@ public class RelatoriosEndpoint {
 
 		return Response.ok(dashInfo.toString()).build();
 
+	}
+
+	@GET
+	@Path("efetividadeCongresso")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getEfetividade(@HeaderParam("Authorization") String authorization, @QueryParam("i") String iniciostr, @QueryParam("f") String fimstr) throws IOException, ParseException {
+		Usuario user = controleUsuarioAutenticado.carregaUsuarioAutenticado(authorization);
+		Date inicio = new SimpleDateFormat("dd-MM-yyyy").parse(iniciostr);
+		Date fim = new SimpleDateFormat("dd-MM-yyyy").parse(fimstr);
+
+		JSONObject dashInfo = new JSONObject();
+		List<Posicionamento> posicionamentos = posicionamentoService.listAll();
+		JSONArray posicionamentosArray = new JSONArray();
+
+		for (Iterator<Posicionamento> iterator = posicionamentos.iterator(); iterator.hasNext();) {
+			Posicionamento posicionamento = (Posicionamento) iterator.next();
+			JSONObject posicionamentoJson = new JSONObject();
+			posicionamentoJson.put("id", posicionamento.getId());
+			posicionamentoJson.put("nome", posicionamento.getNome());
+
+			List<Proposicao> props = em.createNamedQuery("getAllProposicaoPosicionadaComResultado", Proposicao.class).setParameter("emTramitacao", ResultadoCongresso.EM_TRAMITACAO).setParameter("e", fim.getTime()).setParameter("s", inicio.getTime()).setParameter("posicionamento", posicionamento).getResultList();
+			JSONArray propsArray = new JSONArray();
+
+			int totalAprovada = 0;
+			int totalNaoAprovada = 0;
+			int totalNaoAvancou = 0;
+			for (Iterator<Proposicao> iterator2 = props.iterator(); iterator2.hasNext();) {
+				Proposicao proposicao = (Proposicao) iterator2.next();
+
+				JSONObject propJson = new JSONObject();
+				propJson.put("id", proposicao.getId());
+				propJson.put("sigla", proposicao.getSigla());
+				propJson.put("tema", proposicao.getExplicacao());
+				propJson.put("ementa", proposicao.getEmenta());
+				propJson.put("efetividade", proposicao.getEfetividade().name());
+				propJson.put("equipe", proposicao.getEquipe() != null ? proposicao.getEquipe().getNome() : "Não definida");
+				propJson.put("responsavel", proposicao.getEquipe() != null ? proposicao.getResponsavel().getNome() : "Não definido");
+
+				propJson.put("resultadoCongresso", proposicao.getResultadoCongresso().name());
+
+				propJson.put("comissao", proposicao.getEmenta());
+
+				String comissaoPorExtenso = proposicao.getComissao();
+				Comissao comissao = null;
+				try {
+					comissao = comissaoService.getComissao(proposicao.getOrigem(), proposicao.getComissao());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if (comissao != null) {
+					comissaoPorExtenso = comissao.getNome();
+				}
+				propJson.put("comissaoPorExtenso", comissaoPorExtenso);
+				propJson.put("origem", proposicao.getOrigem().name());
+				switch (proposicao.getResultadoCongresso()) {
+				case APROVADA:
+					totalAprovada++;
+					break;
+				case NAO_APROVADA:
+					totalNaoAprovada++;
+					break;
+				case NAO_AVANCOU:
+					totalNaoAvancou++;
+					break;
+
+				default:
+					break;
+				}
+				propsArray.put(propJson);
+
+			}
+			posicionamentoJson.put("proposicoes", propsArray);
+			posicionamentoJson.put(ResultadoCongresso.APROVADA.name(), totalAprovada);
+			posicionamentoJson.put(ResultadoCongresso.NAO_APROVADA.name(), totalNaoAprovada);
+			posicionamentoJson.put(ResultadoCongresso.NAO_AVANCOU.name(), totalNaoAvancou);
+			posicionamentoJson.put("total", props.size());
+			posicionamentosArray.put(posicionamentoJson);
+
+		}
+		dashInfo.put("posicionamentos", posicionamentosArray);
+
+		Long totalContrarioNaoAprovado = (Long) em.createNamedQuery("contadorResultadoCongressoPorPosicionamento").setParameter("posicionamento", posicionamentoService.getByName("Contrário")).setParameter("resultadoCongresso", ResultadoCongresso.NAO_APROVADA).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime()).getSingleResult();
+		Long totalContrarioNaoAvancou = (Long) em.createNamedQuery("contadorResultadoCongressoPorPosicionamento").setParameter("posicionamento", posicionamentoService.getByName("Contrário")).setParameter("resultadoCongresso", ResultadoCongresso.NAO_AVANCOU).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime()).getSingleResult();
+		Long totalContrarioAprovados = (Long) em.createNamedQuery("contadorResultadoCongressoPorPosicionamento").setParameter("posicionamento", posicionamentoService.getByName("Contrário")).setParameter("resultadoCongresso", ResultadoCongresso.APROVADA).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime()).getSingleResult();
+		Long totalFavoravelAprovados = (Long) em.createNamedQuery("contadorResultadoCongressoPorPosicionamento").setParameter("posicionamento", posicionamentoService.getByName("Favorável")).setParameter("resultadoCongresso", ResultadoCongresso.APROVADA).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime()).getSingleResult();
+		Long totalFavoravelNaoAprovados = (Long) em.createNamedQuery("contadorResultadoCongressoPorPosicionamento").setParameter("posicionamento", posicionamentoService.getByName("Favorável")).setParameter("resultadoCongresso", ResultadoCongresso.NAO_APROVADA).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime()).getSingleResult();
+		Long totalFavoravelNaoAvancou = (Long) em.createNamedQuery("contadorResultadoCongressoPorPosicionamento").setParameter("posicionamento", posicionamentoService.getByName("Favorável")).setParameter("resultadoCongresso", ResultadoCongresso.NAO_AVANCOU).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime()).getSingleResult();
+
+		dashInfo.put("totalContrarioNaoAprovado", totalContrarioNaoAprovado);
+		dashInfo.put("totalContrarioAprovados", totalContrarioAprovados);
+		dashInfo.put("totalContrarioNaoAvancou", totalContrarioNaoAvancou);
+
+		dashInfo.put("totalFavoravelNaoAprovados", totalFavoravelNaoAprovados);
+		dashInfo.put("totalFavoravelAprovados", totalFavoravelAprovados);
+		dashInfo.put("totalFavoravelNaoAvancou", totalFavoravelNaoAvancou);
+
+		Long totalComResultados = (Long) em.createNamedQuery("contadorComResultado").setParameter("resultadoCongresso", ResultadoCongresso.EM_TRAMITACAO).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime()).getSingleResult();
+
+		Long totalEmendasAcatadas = (Long) em.createNamedQuery("contadorEmendasComResultado").setParameter("resultadoCongresso", ResultadoCongresso.EM_TRAMITACAO).setParameter("emendas", EfetividadeSAL.ACATADA).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime()).getSingleResult();
+		Long totalEmendasPontosImportantes = (Long) em.createNamedQuery("contadorEmendasComResultado").setParameter("resultadoCongresso", ResultadoCongresso.EM_TRAMITACAO).setParameter("emendas", EfetividadeSAL.ACATADA_PONTOS_IMPORTANTES).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime()).getSingleResult();
+		dashInfo.put("totalEmendasAcatadas", totalEmendasAcatadas);
+		dashInfo.put("totalEmendasPontosImportantes", totalEmendasPontosImportantes);
+
+		dashInfo.put("totalComResultados", totalComResultados);
+
+		return Response.ok(dashInfo.toString()).build();
 	}
 
 	@GET

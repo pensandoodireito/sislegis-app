@@ -17,9 +17,10 @@ public interface EncaminhamentoProposicaoService extends Service<EncaminhamentoP
 
 	Integer totalByProposicao(Long idProposicao);
 
-	void finalizar(Long idEncaminhamentoProposicao, String descricaoComentario);
+	void finalizar(Long idEncaminhamentoProposicao, String descricaoComentario, Usuario autor);
 
 	EncaminhamentoProposicao salvarEncaminhamentoProposicaoAutomatico(String detalhe, Proposicao p, Usuario responsavel);
 
-	
+	EncaminhamentoProposicao getByComentarioFinalizacao(Long id);
+
 }
