@@ -89,6 +89,7 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 	public Usuario findOrCreateByEmail(String name, String email) {
 		Usuario user = findByEmail(email);
 		if (user == null) {
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).log(Level.INFO, "Usuário novo, criando " + email + " no sislegis");
 			user = new Usuario();
 			user.setEmail(email);
 			user.setNome(name);
@@ -286,14 +287,13 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 			em.remove(emenda);
 		}
 
-		
 		List<Proposicao> listaProposicaoPosicionada = getEntityManager().createNamedQuery("getAllProposicaoPosicionada4Usuario", Proposicao.class).setParameter("userId", id).getResultList();
 		for (Iterator iterator = listaProposicaoPosicionada.iterator(); iterator.hasNext();) {
 			Proposicao proposicao = (Proposicao) iterator.next();
 			PosicionamentoProposicao posicionamentoProposicao = proposicao.getPosicionamentoAtual();
 			em.remove(posicionamentoProposicao);
 			proposicao.setPosicionamentoAtual(null);
-			
+
 			propSvc.save(proposicao, null);
 		}
 		List<PosicionamentoProposicao> listaPosicionamentoProposicao = getEntityManager().createNamedQuery("getAllPosicionamentoProposicao4Usuario", PosicionamentoProposicao.class).setParameter("userId", id).getResultList();
@@ -301,7 +301,7 @@ public class UsuarioServiceEjb extends AbstractPersistence<Usuario, Long> implem
 			PosicionamentoProposicao posicionamentoProposicao = (PosicionamentoProposicao) iterator.next();
 			em.remove(posicionamentoProposicao);
 		}
-		
+
 		List<Proposicao> listaProposicao = getEntityManager().createNamedQuery("getAllProposicao4Usuario", Proposicao.class).setParameter("userId", id).getResultList();
 		for (Iterator iterator = listaProposicao.iterator(); iterator.hasNext();) {
 			Proposicao proposicao = (Proposicao) iterator.next();

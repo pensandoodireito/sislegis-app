@@ -26,7 +26,11 @@ import br.gov.mj.sislegis.app.enumerated.TipoTarefa;
 @Entity
 @Table(name = "tarefa")
 @NamedQueries({ 
-	@NamedQuery(name = "getAllTarefa4Usuario", query = "select c from Tarefa c where c.usuario.id=:userId")
+	@NamedQuery(name = "getAllTarefa4Usuario", query = "select c from Tarefa c where c.usuario.id=:userId"),
+	@NamedQuery(name = "getTarefa4Comentario", query = "select c from Tarefa c where c.comentarioFinalizacao.id=:comentarioId"),
+	@NamedQuery(name = "getAllTarefa", query = "select c from Tarefa c where c.usuario=:user and c.encaminhamentoProposicao=:enc and c.tipoTarefa=:tipo")
+
+	
 
 })
 @XmlRootElement

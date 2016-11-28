@@ -2,7 +2,9 @@ package br.gov.mj.sislegis.app.service.ejbs;
 
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -11,6 +13,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
+import br.gov.mj.sislegis.app.enumerated.TipoTarefa;
 import br.gov.mj.sislegis.app.model.Comentario;
 import br.gov.mj.sislegis.app.model.EncaminhamentoProposicao;
 import br.gov.mj.sislegis.app.model.EstadoProposicao;
@@ -23,6 +26,7 @@ import br.gov.mj.sislegis.app.service.EncaminhamentoProposicaoService;
 import br.gov.mj.sislegis.app.service.ProposicaoService;
 import br.gov.mj.sislegis.app.service.TarefaService;
 import br.gov.mj.sislegis.app.service.TipoEncaminhamentoService;
+import br.gov.mj.sislegis.app.util.SislegisUtil;
 
 @Stateless
 public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<EncaminhamentoProposicao, Long> implements EncaminhamentoProposicaoService, EJBUnitTestable {
@@ -61,9 +65,21 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 
 	@Override
 	public EncaminhamentoProposicao salvarEncaminhamentoProposicaoAutomatico(String detalhe, Proposicao p, Usuario responsavel) {
+
+		TipoEncaminhamento tipo = tipoEncSvc.buscarTipoEncaminhamentoAlteracaoProposicao();
+		List<EncaminhamentoProposicao> encs = em.createNamedQuery("getAllEncaminhamentoProposicao", EncaminhamentoProposicao.class).setParameter("proposicao", p).setParameter("responsavel", responsavel).setParameter("tipo", tipo).getResultList();
+		for (Iterator iterator = encs.iterator(); iterator.hasNext();) {
+			EncaminhamentoProposicao encaminhamentoProposicao = (EncaminhamentoProposicao) iterator.next();
+			Logger.getLogger(SislegisUtil.SISLEGIS_LOGGER).fine("Apagando Encaminhamento " + encaminhamentoProposicao.getId() + " para " + encaminhamentoProposicao.getResponsavel() + " " + encaminhamentoProposicao.getProposicao().getSigla());
+			List<Tarefa> t = em.createNamedQuery("getAllTarefa", Tarefa.class).setParameter("user", responsavel).setParameter("enc", encaminhamentoProposicao).setParameter("tipo", TipoTarefa.ENCAMINHAMENTO).getResultList();
+			for (Iterator iterator2 = t.iterator(); iterator2.hasNext();) {
+				Tarefa tarefa = (Tarefa) iterator2.next();
+				int deleted = em.createQuery("delete Notificacao t where  t.identificacaoEntidade = :identificacaoEntidade and t.categoria=:categoria").setParameter("identificacaoEntidade", tarefa.getId().toString()).setParameter("categoria", "TAREFAS").executeUpdate();
+			}
+			deleteById(encaminhamentoProposicao.getId());
+		}
 		EncaminhamentoProposicao eprop = new EncaminhamentoProposicao();
 		eprop.setDetalhes(detalhe);
-		TipoEncaminhamento tipo = tipoEncSvc.buscarTipoEncaminhamentoAlteracaoProposicao();
 		eprop.setTipoEncaminhamento(tipo);
 		eprop.setProposicao(p);
 		eprop.setResponsavel(responsavel);
@@ -101,23 +117,28 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 	}
 
 	@Override
-	public void finalizar(Long idEncaminhamentoProposicao, String descricaoComentario) {
+	public void finalizar(Long idEncaminhamentoProposicao, String descricaoComentario, Usuario autor) {
 		EncaminhamentoProposicao encaminhamento = findById(idEncaminhamentoProposicao);
 
 		encaminhamento.setFinalizado(true);
+		Comentario comentario = null;
+		if (descricaoComentario != null && !descricaoComentario.isEmpty()) {
 
-		Comentario comentario = new Comentario();
-		comentario.setAutor(encaminhamento.getResponsavel());
-		comentario.setDataCriacao(new Date());
-		comentario.setDescricao(descricaoComentario);
-		comentario.setProposicao(encaminhamento.getProposicao());
+			comentario = new Comentario();
+			comentario.setAutor(autor);
+			comentario.setDataCriacao(new Date());
+			comentario.setDescricao(descricaoComentario);
+			comentario.setProposicao(encaminhamento.getProposicao());
 
-		encaminhamento.setComentarioFinalizacao(comentario);
+			encaminhamento.setComentarioFinalizacao(comentario);
+		}
 
 		Tarefa tarefa = tarefaService.buscarPorEncaminhamentoProposicaoId(idEncaminhamentoProposicao);
 		if (tarefa != null) {
 			tarefa.setFinalizada(true);
-			tarefa.setComentarioFinalizacao(comentario);
+			if (comentario != null) {
+				tarefa.setComentarioFinalizacao(comentario);
+			}
 			tarefaService.save(tarefa); // tarefa salva tambem o encaminhamento
 										// (cascade)
 		} else {
@@ -137,6 +158,17 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 		this.em = (EntityManager) injections[0];
 		this.tarefaService = (TarefaService) injections[1];
 
+	}
+
+	@Override
+	public EncaminhamentoProposicao getByComentarioFinalizacao(Long id) {
+		try {
+			return em.createNamedQuery("getEnc4Comentario", EncaminhamentoProposicao.class).setParameter("comentarioId", id).getSingleResult();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }
