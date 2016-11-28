@@ -96,18 +96,6 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 		return results;
 	}
 
-	// Por algum motivo esse metodo não está usando JPA, e está fazendo join na
-	// mao...
-
-	@Deprecated
-	public List<EncaminhamentoProposicao> findByProposicao2(Long idProposicao) {
-		TypedQuery<EncaminhamentoProposicao> findByIdQuery = em.createQuery("SELECT c FROM EncaminhamentoProposicao c " + "INNER JOIN FETCH c.responsavel res " + "INNER JOIN FETCH c.comentario com " + "INNER JOIN FETCH c.tipoEncaminhamento enc " + "INNER JOIN FETCH c.proposicao p WHERE p.id = :entityId", EncaminhamentoProposicao.class);
-		findByIdQuery.setParameter("entityId", idProposicao);
-		final List<EncaminhamentoProposicao> results = findByIdQuery.getResultList();
-
-		return results;
-	}
-
 	@Override
 	public Integer totalByProposicao(Long idProposicao) {
 		Query query = em.createNativeQuery("SELECT COUNT(1) FROM encaminhamentoproposicao WHERE proposicao_id = :idProposicao");
@@ -121,23 +109,23 @@ public class EncaminhamentoProposicaoServiceEjb extends AbstractPersistence<Enca
 		EncaminhamentoProposicao encaminhamento = findById(idEncaminhamentoProposicao);
 
 		encaminhamento.setFinalizado(true);
-		Comentario comentario = null;
+		Comentario comentarioFinalizaca = null;
 		if (descricaoComentario != null && !descricaoComentario.isEmpty()) {
 
-			comentario = new Comentario();
-			comentario.setAutor(autor);
-			comentario.setDataCriacao(new Date());
-			comentario.setDescricao(descricaoComentario);
-			comentario.setProposicao(encaminhamento.getProposicao());
+			comentarioFinalizaca = new Comentario();
+			comentarioFinalizaca.setAutor(autor);
+			comentarioFinalizaca.setDataCriacao(new Date());
+			comentarioFinalizaca.setDescricao(descricaoComentario);
+			comentarioFinalizaca.setProposicao(encaminhamento.getProposicao());
 
-			encaminhamento.setComentarioFinalizacao(comentario);
+			encaminhamento.setComentarioFinalizacao(comentarioFinalizaca);
 		}
 
 		Tarefa tarefa = tarefaService.buscarPorEncaminhamentoProposicaoId(idEncaminhamentoProposicao);
 		if (tarefa != null) {
 			tarefa.setFinalizada(true);
-			if (comentario != null) {
-				tarefa.setComentarioFinalizacao(comentario);
+			if (comentarioFinalizaca != null) {
+				tarefa.setComentarioFinalizacao(comentarioFinalizaca);
 			}
 			tarefaService.save(tarefa); // tarefa salva tambem o encaminhamento
 										// (cascade)
