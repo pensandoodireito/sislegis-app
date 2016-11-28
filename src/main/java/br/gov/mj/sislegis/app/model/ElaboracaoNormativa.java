@@ -14,6 +14,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -45,17 +47,11 @@ public class ElaboracaoNormativa extends AbstractEntity {
 	public ElaboracaoNormativa() {
 	}
 
-	public ElaboracaoNormativa(Long id, ElaboracaoNormativaTipo tipo, ElaboracaoNormativaSubTipo subTipo,
-			ElaboracaoNormativaSituacao elaboracaoNormativaSituacao, ElaboracaoNormativaNorma elaboracaoNormativaNorma,
-			Integer ano, String numero, String origemDescricao, String coAutores, String ementa, String statusSidof,
-			ElaboracaoNormativaObjeto identificacao, String equipe, String parecerista, String nup,
-			Date dataInclusaoSIDOF, Date dataAssinaturaSIDOF, String ementaManifestacao, Date dataManifestacao,
-			Integer normaGeradaAno, String normaGeradaNumero) {
+	public ElaboracaoNormativa(Long id, ElaboracaoNormativaTipo tipo, ElaboracaoNormativaSubTipo subTipo, ElaboracaoNormativaSituacao elaboracaoNormativaSituacao, ElaboracaoNormativaNorma elaboracaoNormativaNorma, Integer ano, String numero, String origemDescricao, String coAutores, String ementa, String statusSidof, ElaboracaoNormativaObjeto identificacao, String equipe, String parecerista, String nup, Date dataInclusaoSIDOF, Date dataAssinaturaSIDOF, String ementaManifestacao,
+			Date dataManifestacao, Integer normaGeradaAno, String normaGeradaNumero) {
 		this.id = id;
-		this.valueTipoSubTipo = Objects.isNull(tipo) ? "" : tipo.getValue() + " "
-				+ (Objects.isNull(subTipo) ? "" : subTipo.getValue());
-		this.situacaoDescricao = Objects.isNull(elaboracaoNormativaSituacao) ? "" : elaboracaoNormativaSituacao
-				.getValue();
+		this.valueTipoSubTipo = Objects.isNull(tipo) ? "" : tipo.getValue() + " " + (Objects.isNull(subTipo) ? "" : subTipo.getValue());
+		this.situacaoDescricao = Objects.isNull(elaboracaoNormativaSituacao) ? "" : elaboracaoNormativaSituacao.getValue();
 		this.tipoNormaDescricao = Objects.isNull(elaboracaoNormativaNorma) ? "" : elaboracaoNormativaNorma.getValue();
 		this.ano = ano;
 		this.numero = numero;
@@ -68,13 +64,10 @@ public class ElaboracaoNormativa extends AbstractEntity {
 		this.equipeDescricao = equipe;
 		this.pareceristaDescricao = parecerista;
 		this.nup = nup;
-		this.dataInclusaoSIDOFFormatada = Objects.isNull(dataInclusaoSIDOF) ? "" : Conversores
-				.dateToString(dataInclusaoSIDOF);
-		this.dataAssinaturaSIDOFFormatada = Objects.isNull(dataAssinaturaSIDOF) ? "" : Conversores
-				.dateToString(dataAssinaturaSIDOF);
+		this.dataInclusaoSIDOFFormatada = Objects.isNull(dataInclusaoSIDOF) ? "" : Conversores.dateToString(dataInclusaoSIDOF);
+		this.dataAssinaturaSIDOFFormatada = Objects.isNull(dataAssinaturaSIDOF) ? "" : Conversores.dateToString(dataAssinaturaSIDOF);
 		this.ementaManifestacao = ementaManifestacao;
-		this.dataMinifestacaoFormatada = Objects.isNull(dataManifestacao) ? "" : Conversores
-				.dateToString(dataManifestacao);
+		this.dataMinifestacaoFormatada = Objects.isNull(dataManifestacao) ? "" : Conversores.dateToString(dataManifestacao);
 		this.normaGeradaAno = normaGeradaAno;
 		this.normaGeradaNumero = normaGeradaNumero;
 	}
@@ -152,6 +145,7 @@ public class ElaboracaoNormativa extends AbstractEntity {
 	private List<ElaboracaoNormativaCoAutores> listaElaboracaoNormativaCoAutor;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinTable(name = "elaboracao_normativa_comentario", joinColumns = { @JoinColumn(name = "elaboracao_normativa_id") })
 	private List<Comentario> listaComentario;
 
 	@JsonIgnore
@@ -565,8 +559,7 @@ public class ElaboracaoNormativa extends AbstractEntity {
 		return listaElaboracaoNormativaTiposMarcados;
 	}
 
-	public void setListaElaboracaoNormativaTiposMarcados(
-			List<ElaboracaoNormativaTiposMarcados> listaElaboracaoNormativaTiposMarcados) {
+	public void setListaElaboracaoNormativaTiposMarcados(List<ElaboracaoNormativaTiposMarcados> listaElaboracaoNormativaTiposMarcados) {
 		this.listaElaboracaoNormativaTiposMarcados = listaElaboracaoNormativaTiposMarcados;
 	}
 
@@ -590,8 +583,7 @@ public class ElaboracaoNormativa extends AbstractEntity {
 		return listaCoAutoresSelecionadosDropdown;
 	}
 
-	public void setListaCoAutoresSelecionadosDropdown(
-			List<DropdownMultiselectSelecionadosJSON> listaCoAutoresSelecionadosDropdown) {
+	public void setListaCoAutoresSelecionadosDropdown(List<DropdownMultiselectSelecionadosJSON> listaCoAutoresSelecionadosDropdown) {
 		this.listaCoAutoresSelecionadosDropdown = listaCoAutoresSelecionadosDropdown;
 	}
 

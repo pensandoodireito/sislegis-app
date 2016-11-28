@@ -326,6 +326,11 @@ public class ReportDownloadServlet extends HttpServlet {
 					} else if ("comAtencaoEspecial".equals(k)) {
 						filtros.put(k, Boolean.TRUE);
 					} else {
+						if (req.getCharacterEncoding() != null) {
+							valor = new String(valor.getBytes(req.getCharacterEncoding()));
+						} else {
+							valor = new String(valor.getBytes("iso-8859-1"));
+						}
 						filtros.put(k, valor);
 					}
 				}

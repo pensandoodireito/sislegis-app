@@ -2,6 +2,7 @@ package br.gov.mj.sislegis.app.model;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -20,6 +21,7 @@ import javax.persistence.Table;
 public class RoadmapComissao implements Serializable {
 
 	@Id
+	@Column(name = "proposicao_id")
 	private Long proposicaoId;
 
 	@Id
