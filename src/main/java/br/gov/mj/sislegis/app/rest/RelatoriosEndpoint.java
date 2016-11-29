@@ -142,13 +142,27 @@ public class RelatoriosEndpoint {
 				JSONObject porResponsavel = new JSONObject();
 				porResponsavel.put("id", responsavel.getId());
 				porResponsavel.put("nome", responsavel.getNome());
-
-				BigInteger totalAnalisado = (BigInteger) em.createNativeQuery("select count(id) from proposicao where responsavel_id=:userId and foiatribuida>:s and foiatribuida<=:e and foianalisada<=:e  and foianalisada is not null and estado<>:estado").setParameter("estado", EstadoProposicao.EMANALISE.name()).setParameter("userId", responsavel.getId()).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime()).getSingleResult();
+				//@formatter:off
+				BigInteger totalAnalisado = (BigInteger) em.createNativeQuery
+						("select count(id) from proposicao where responsavel_id=:userId and foiatribuida>:s and foiatribuida<=:e and foianalisada<=:e  and foianalisada is not null and estado<>:estado")
+						.setParameter("estado", EstadoProposicao.EMANALISE.name())
+						.setParameter("userId", responsavel.getId())
+						.setParameter("s", inicio.getTime())
+						.setParameter("e", fim.getTime())
+						.getSingleResult();
+				
+				//@formatter:on
 				porResponsavel.put("analisados", totalAnalisado);
 
 				JSONObject tempo = new JSONObject();
-				java.math.BigDecimal tempoMedioAnalise = (java.math.BigDecimal) (BigDecimal) em.createNativeQuery("select avg(foianalisada-foiencaminhada) from proposicao  where responsavel_id=:userId and foiatribuida>:s and foiatribuida<=:e and foianalisada<=:e and foianalisada is not null and estado<>:estado").setParameter("estado", EstadoProposicao.EMANALISE.name()).setParameter("userId", responsavel.getId()).setParameter("s", inicio.getTime()).setParameter("e", fim.getTime())
+				//@formatter:off
+				java.math.BigDecimal tempoMedioAnalise = (java.math.BigDecimal) (BigDecimal) em.createNativeQuery(
+						"select avg(foianalisada-foiatribuida) from proposicao  where responsavel_id=:userId and foiatribuida>:s and foiatribuida<=:e and foianalisada<=:e and foianalisada is not null and estado<>:estado")
+						.setParameter("estado", EstadoProposicao.EMANALISE.name())
+						.setParameter("userId", responsavel.getId())
+						.setParameter("s", inicio.getTime()).setParameter("e", fim.getTime())
 						.getSingleResult();
+				//@formatter:on
 
 				tempo.put("analise", tempoMedioAnalise);
 
@@ -178,7 +192,6 @@ public class RelatoriosEndpoint {
 			equipesArr.put(equipeJson);
 
 		}
-
 		return Response.ok(dashInfo.toString()).build();
 
 	}
@@ -201,8 +214,16 @@ public class RelatoriosEndpoint {
 			JSONObject posicionamentoJson = new JSONObject();
 			posicionamentoJson.put("id", posicionamento.getId());
 			posicionamentoJson.put("nome", posicionamento.getNome());
-
-			List<Proposicao> props = em.createNamedQuery("getAllProposicaoPosicionada4UsuarioPeriodo", Proposicao.class).setParameter("userId", idReponsavel).setParameter("e", fim.getTime()).setParameter("s", inicio.getTime()).setParameter("posicionamento", posicionamento).getResultList();
+			//@formatter:off
+			List<Proposicao> props = em.createQuery					
+					("select p from Proposicao p where p.responsavel.id=:userId and p.foiAtribuida>:s  and  p.foiAtribuida<=:e and p.foiAnalisada<=:e and p.foiAnalisada is not null and p.posicionamentoAtual.posicionamento=:posicionamento", Proposicao.class)
+					//select p from Proposicao p where p.posicionamentoAtual.usuario.id=:userId and p.foiAtribuida>:s  and p.foiAtribuida<=:e and p.foiAnalisada<=:e and p.foiAnalisada is not null and p.posicionamentoAtual.posicionamento=:posicionamento
+					.setParameter("userId", idReponsavel)
+					.setParameter("e", fim.getTime())
+					.setParameter("s", inicio.getTime())
+					.setParameter("posicionamento", posicionamento)
+					.getResultList();
+			//@formatter:on
 			posicionamentoJson.put("total", props.size());
 			JSONArray propsArray = new JSONArray();
 			Double tempoTotalGasto = 0d;

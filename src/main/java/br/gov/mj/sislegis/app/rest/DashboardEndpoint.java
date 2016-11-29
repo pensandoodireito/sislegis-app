@@ -84,7 +84,7 @@ public class DashboardEndpoint {
 			Long totalProposicoesADespachar = (Long) em.createQuery("select count(p.id) from Proposicao p where p.estado=:estado").setParameter("estado", EstadoProposicao.ADESPACHAR).getSingleResult();
 			dashInfo.put("totalProposicoesADespachar", totalProposicoesADespachar);
 
-		} else if (user.getPapeis().contains(Papel.DIRETOR)) {
+		} else if (user.getPapeis().contains(Papel.DIRETOR) || user.getPapeis().contains(Papel.EQUIPE)) {
 			if (user.getEquipe() == null) {
 				dashInfo.put("error", "Não foi possível identificar equipe do diretor.");
 			} else {
@@ -106,11 +106,8 @@ public class DashboardEndpoint {
 					porResponsavelArr.put(porResponsavel);
 				}
 
-				Query q1 = em.createNativeQuery("select eq.id as idEquipe,eq.nome as nomeEquipe,u.nome as nomeUsuario,u.email,u.id,count(p.id) from Usuario u left join (select id,responsavel_id from Proposicao where (estado<>:estado1 and estado<>:estado2) and idequipe=:idEquipe and updated>:data) p on p.responsavel_id=u.id, Equipe eq where eq.id=u.idequipe and eq.id=:idEquipe group by eq.id,eq.nome,u.id,u.nome,u.email")
-						.setParameter("idEquipe", equipe.getId())
-						.setParameter("data", inicioMes.getTime())
-						.setParameter("estado1", EstadoProposicao.INCLUIDO.name())
-						.setParameter("estado2", EstadoProposicao.EMANALISE.name());
+				Query q1 = em.createNativeQuery("select eq.id as idEquipe,eq.nome as nomeEquipe,u.nome as nomeUsuario,u.email,u.id,count(p.id) from Usuario u left join (select id,responsavel_id from Proposicao where (estado<>:estado1 and estado<>:estado2) and idequipe=:idEquipe and updated>:data) p on p.responsavel_id=u.id, Equipe eq where eq.id=u.idequipe and eq.id=:idEquipe group by eq.id,eq.nome,u.id,u.nome,u.email").setParameter("idEquipe", equipe.getId())
+						.setParameter("data", inicioMes.getTime()).setParameter("estado1", EstadoProposicao.INCLUIDO.name()).setParameter("estado2", EstadoProposicao.EMANALISE.name());
 				List<Object[]> resultadoAnalisadasPorMembro = q1.getResultList();
 				long totalProcessadas = 0;
 				for (Iterator iterator = resultadoAnalisadasPorMembro.iterator(); iterator.hasNext();) {
@@ -137,12 +134,15 @@ public class DashboardEndpoint {
 				dashInfo.put("minhaEquipe", minhaEquipe);
 			}
 		}
-		
-		Long totalProposicoesEmAnaliseParaMim = (Long) em.createQuery("select count(p.id) from Proposicao p where p.estado=:estado and p.responsavel=:responsavel")
-				.setParameter("responsavel",user)
-				.setParameter("estado", EstadoProposicao.EMANALISE).getSingleResult();
-				dashInfo.put("totalProposicoesEmAnaliseParaMim", totalProposicoesEmAnaliseParaMim);
-		
+
+		Long totalProposicoesEmAnaliseParaMim = (Long) em.createQuery("select count(p.id) from Proposicao p where p.estado=:estado and p.responsavel=:responsavel").setParameter("responsavel", user).setParameter("estado", EstadoProposicao.EMANALISE).getSingleResult();
+		dashInfo.put("totalProposicoesEmAnaliseParaMim", totalProposicoesEmAnaliseParaMim);
+
+		Long totalMinhasProposicoesEmRevisao = (Long) em.createQuery("select count(p.id) from Proposicao p where p.estado=:estado and p.responsavel=:responsavel").setParameter("responsavel", user).setParameter("estado", EstadoProposicao.ANALISADA).getSingleResult();
+		dashInfo.put("totalMinhasProposicoesEmRevisao", totalMinhasProposicoesEmRevisao);
+		Long totalMinhasProposicoesEmDespacho = (Long) em.createQuery("select count(p.id) from Proposicao p where p.estado=:estado and p.responsavel=:responsavel").setParameter("responsavel", user).setParameter("estado", EstadoProposicao.ADESPACHAR).getSingleResult();
+		dashInfo.put("totalMinhasProposicoesEmDespacho", totalMinhasProposicoesEmDespacho);
+
 		List<Equipe> equipes = equipeService.listAll();
 		JSONArray equipesArr = new JSONArray();
 		for (Iterator<Equipe> iterator = equipes.iterator(); iterator.hasNext();) {
@@ -153,15 +153,10 @@ public class DashboardEndpoint {
 			JSONObject porEquipe = new JSONObject();
 			porEquipe.put("e", equipe.toJson());
 
-			Long totalEmTrabalhoDaEquip = (Long) em.createQuery("select count(p.id) from Proposicao p where (p.estado=:estado1 or p.estado=:estado2) and  p.equipe.id=:idEquipe")
-					.setParameter("idEquipe", equipe.getId())
+			Long totalEmTrabalhoDaEquip = (Long) em.createQuery("select count(p.id) from Proposicao p where (p.estado=:estado1 or p.estado=:estado2) and  p.equipe.id=:idEquipe").setParameter("idEquipe", equipe.getId())
 
-					.setParameter("estado1", EstadoProposicao.ANALISADA)
-					.setParameter("estado2", EstadoProposicao.EMANALISE).getSingleResult();
-			Long totalProcessadaPelaEquipe = (Long) em.createQuery("select count(p.id) from Proposicao p where (p.estado<>:estado1 and p.estado<>:estado2) and p.updated>:data and p.equipe.id=:idEquipe")
-					.setParameter("idEquipe", equipe.getId()).setParameter("data", inicioMes.getTime())
-					.setParameter("estado1", EstadoProposicao.INCLUIDO)
-					.setParameter("estado2", EstadoProposicao.EMANALISE).getSingleResult();
+			.setParameter("estado1", EstadoProposicao.ANALISADA).setParameter("estado2", EstadoProposicao.EMANALISE).getSingleResult();
+			Long totalProcessadaPelaEquipe = (Long) em.createQuery("select count(p.id) from Proposicao p where (p.estado<>:estado1 and p.estado<>:estado2) and p.updated>:data and p.equipe.id=:idEquipe").setParameter("idEquipe", equipe.getId()).setParameter("data", inicioMes.getTime()).setParameter("estado1", EstadoProposicao.INCLUIDO).setParameter("estado2", EstadoProposicao.EMANALISE).getSingleResult();
 
 			porEquipe.put("totalEmAnalise", totalEmTrabalhoDaEquip);
 			porEquipe.put("totalProcessada", totalProcessadaPelaEquipe);
