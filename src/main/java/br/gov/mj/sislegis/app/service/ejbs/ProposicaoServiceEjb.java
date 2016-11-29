@@ -453,6 +453,9 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		if (Objects.nonNull(estado) && !estado.isEmpty()) {
 			findByIdQuery.setParameter("estado", EstadoProposicao.valueOf(estado));
 			sb.append("estado ").append(estado).append("|");
+		} else {
+			findByIdQuery.setParameter("foracompetencia", EstadoProposicao.FORADECOMPETENCIA);
+			sb.append("removidas as fora de competência").append("|");
 		}
 
 		if (Objects.nonNull(idProposicoes) && idProposicoes.length > 0) {
@@ -500,6 +503,8 @@ public class ProposicaoServiceEjb extends AbstractPersistence<Proposicao, Long> 
 		}
 		if (Objects.nonNull(estado) && !estado.isEmpty()) {
 			query.append(" AND p.estado = :estado");
+		} else {
+			query.append(" AND p.estado <> :foracompetencia");
 		}
 		if (Objects.nonNull(isFavorita) && !isFavorita.equals("")) {
 			query.append(" AND p.isFavorita = :isFavorita");
